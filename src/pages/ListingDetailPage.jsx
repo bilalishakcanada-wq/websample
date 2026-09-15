@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Flag, MapPin, MessageCircle, ShieldCheck, Send, Star, Tag, UserRound, Users, XCircle } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Flag, MapPin, MessageCircle, ShieldCheck, Send, Sparkles, Star, Tag, UserRound, Users, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import MobileNav from '../components/MobileNav'
 import ListingCard from '../components/ListingCard'
@@ -8,6 +8,7 @@ import { listingService } from '../services/listingService'
 import { reportService } from '../services/reportService'
 import { profileService } from '../services/profileService'
 import { reviewService } from '../services/reviewService'
+import { matchService } from '../services/matchService'
 import { useAuth } from '../context/AuthContext'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { findProhibitedTerm } from '../utils/moderation'
@@ -37,6 +38,7 @@ function ListingDetailPage() {
   const [bidError, setBidError] = useState('')
   const [message, setMessage] = useState('')
   const [poster, setPoster] = useState(null)
+  const [suggested, setSuggested] = useState([])
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
   const [submittingReview, setSubmittingReview] = useState(false)
 
@@ -59,6 +61,13 @@ function ListingDetailPage() {
   }, [id])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+
+  useEffect(() => {
+    if (!isOwner || !id) return undefined
+    let active = true
+    matchService.providersForListing(id, 4).then((rows) => active && setSuggested(rows))
+    return () => { active = false }
+  }, [isOwner, id])
   const myBid = useMemo(() => bids.find((bid) => bid.bidder_id === user?.id), [bids, user])
   const acceptedBid = useMemo(() => bids.find((bid) => bid.status === 'accepted'), [bids])
   const tags = useMemo(() => (listing?.listing_tags || []).map((item) => item.tags?.name).filter(Boolean), [listing])
@@ -232,6 +241,39 @@ function ListingDetailPage() {
             </div>
           )}
         </section>
+
+        {isOwner && suggested.length > 0 && (
+          <section className="detail-section">
+            <div className="rec-heading">
+              <h2>Predloženi izvođači</h2>
+              <p>Odabrani prema kategoriji, gradu i dosadašnjem radu na platformi.</p>
+            </div>
+            <div className="rec-grid">
+              {suggested.map((provider) => (
+                <Link className="rec-card" key={provider.user_id} to={`/korisnik/${provider.user_id}`}>
+                  <div className="rec-card-top">
+                    {provider.avatar_url
+                      ? <img src={provider.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                      : <div className="poster-avatar"><UserRound size={18} /></div>}
+                    <span className="rec-score" title="Koliko izvođač odgovara ovom poslu">
+                      <Sparkles size={13} /> {Math.round(provider.match_score)}
+                    </span>
+                  </div>
+                  <h3>{provider.full_name || 'Korisnik Poso.ba'}</h3>
+                  <div className="rec-card-meta">
+                    <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
+                    {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
+                  </div>
+                  {provider.reasons?.length > 0 && (
+                    <ul className="rec-reasons">
+                      {provider.reasons.slice(0, 3).map((reason) => <li key={reason}>{reason}</li>)}
+                    </ul>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="detail-section"><h2>Pitanja i odgovori</h2><p className="muted-text">Postavljanje pitanja biće dostupno nakon prijave.</p></section>
         {related.length > 0 && <section className="detail-section"><h2>Slični oglasi</h2><div className="listing-grid">{related.map((item) => <ListingCard key={item.id} listing={{ ...item, price: formatPrice(item.price, item.currency), time: formatDate(item.created_at) }} />)}</div></section>}

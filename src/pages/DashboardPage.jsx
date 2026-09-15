@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
+import { matchService } from '../services/matchService'
 import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -23,6 +24,8 @@ function DashboardPage() {
   const [deletingId, setDeletingId] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [recommended, setRecommended] = useState([])
+  const [recommendedLoading, setRecommendedLoading] = useState(true)
 
   const loadListings = () => {
     setLoading(true)
@@ -34,6 +37,14 @@ function DashboardPage() {
   }
 
   useEffect(() => { loadListings() }, [])
+
+  useEffect(() => {
+    let active = true
+    matchService.recommendedListings(6)
+      .then((rows) => active && setRecommended(rows))
+      .finally(() => active && setRecommendedLoading(false))
+    return () => { active = false }
+  }, [])
 
   const deleteListing = async (listing) => {
     if (!window.confirm(`Obrisati oglas "${listing.title}"?`)) return
@@ -85,6 +96,37 @@ function DashboardPage() {
 
         {message && <div className="form-success">{message}</div>}
         {error && <div className="form-error">{error}</div>}
+
+        {!recommendedLoading && recommended.length > 0 && (
+          <section className="dashboard-section">
+            <div className="rec-heading">
+              <h2>Preporučeno za tebe</h2>
+              <p>Poslovi odabrani prema tvom gradu, iskustvu i konkurenciji.</p>
+            </div>
+            <div className="rec-grid">
+              {recommended.map((item) => (
+                <Link className="rec-card" key={item.id} to={`/listings/${item.id}`}>
+                  <div className="rec-card-top">
+                    <span className="tag">{item.category}</span>
+                    <span className="rec-score" title="Koliko posao odgovara tebi">
+                      <Sparkles size={13} /> {Math.round(item.match_score)}
+                    </span>
+                  </div>
+                  <h3>{item.title}</h3>
+                  <div className="rec-card-meta">
+                    <span><MapPin size={14} /> {item.location || 'Bez lokacije'}</span>
+                    <strong>{item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('bs-BA')} KM`}</strong>
+                  </div>
+                  {item.reasons?.length > 0 && (
+                    <ul className="rec-reasons">
+                      {item.reasons.slice(0, 3).map((reason) => <li key={reason}>{reason}</li>)}
+                    </ul>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="dashboard-section">
           <h2>Moji oglasi</h2>

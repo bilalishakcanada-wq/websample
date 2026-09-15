@@ -4881,3 +4881,169 @@ button:disabled {
   height: 1px;
   background: var(--stroke);
 }
+
+/* ---------- Auth pages (clean, single-column) ---------- */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--surface);
+  padding: 28px 20px 40px;
+}
+
+.auth-logo {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8vh;
+}
+
+.auth-logo .brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+}
+
+.auth-shell .auth-card {
+  width: min(100%, 420px);
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.auth-shell .auth-card h1 {
+  margin: 0 0 26px;
+  text-align: center;
+  font-size: clamp(1.7rem, 3.4vw, 2.2rem);
+  letter-spacing: -0.04em;
+}
+
+.auth-subtitle {
+  margin: -16px 0 24px;
+  text-align: center;
+  color: var(--text-soft);
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+/* Floating label fields */
+.field {
+  position: relative;
+}
+
+.field input {
+  width: 100%;
+  padding: 1.35rem 1rem 0.6rem;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.field label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-soft);
+  font-weight: 600;
+  pointer-events: none;
+  transition: transform 0.16s ease, font-size 0.16s ease, color 0.16s ease;
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  transform: translateY(-136%);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.02em;
+}
+
+.field small {
+  display: block;
+  margin: 6px 2px 0;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.auth-submit {
+  width: 100%;
+  border-radius: 999px;
+  padding: 1rem 1.2rem;
+  font-size: 1rem;
+}
+
+.auth-switch {
+  margin: 18px 0 0;
+  text-align: center;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.auth-switch a {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-shell .google-button {
+  border-radius: 999px;
+  padding: 0.95rem 1.2rem;
+}
+
+.auth-shell .auth-divider {
+  margin: 22px 0;
+  justify-content: center;
+}
+
+.auth-legal {
+  margin: 40px 0 0;
+  max-width: 420px;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.auth-legal a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.auth-legal a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .auth-logo {
+    margin-bottom: 5vh;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
 import GoogleAuthButton from '../components/GoogleAuthButton'
+import AuthLayout from '../components/AuthLayout'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -41,39 +42,38 @@ function LoginPage() {
   }
 
   return (
-    <div className="auth-shell">
-      <div className="auth-card">
-        <h1>Prijava</h1>
-        <p>Pristupite svom korisničkom profilu.</p>
-        {verificationPending && (
-          <div className="form-success">
-            Nalog je napravljen! Provjerite email (i spam folder) i kliknite na link za potvrdu prije prijave.
-          </div>
-        )}
-        <GoogleAuthButton label="Prijavi se sa Google računom" onError={setError} />
-        <div className="auth-divider"><span>ili</span></div>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label>
-            Email
-            <input name="email" type="email" value={form.email} onChange={handleChange} required />
-          </label>
-          {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
-          <label>
-            Lozinka
-            <input name="password" type="password" value={form.password} onChange={handleChange} required />
-          </label>
-          {error && <div className="form-error">{error}</div>}
-          <button type="submit" className="primary-button" disabled={loading}>
-            {loading ? 'Prijava...' : 'Prijavi se'}
-          </button>
-        </form>
-        <div className="auth-links">
-          <Link to="/forgot-password">Zaboravljena lozinka?</Link>
-          <Link to="/register">Napravi račun</Link>
-          <Link to="/">Nazad na početnu</Link>
+    <AuthLayout title="Prijavi se na svoj račun">
+      {verificationPending && (
+        <div className="form-success">
+          Nalog je napravljen! Provjeri email (i spam folder) i klikni na link za potvrdu prije prijave.
         </div>
-      </div>
-    </div>
+      )}
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="field">
+          <input id="email" name="email" type="email" placeholder=" " value={form.email} onChange={handleChange} required />
+          <label htmlFor="email">Email adresa</label>
+        </div>
+        <div className="field">
+          <input id="password" name="password" type="password" placeholder=" " value={form.password} onChange={handleChange} required />
+          <label htmlFor="password">Lozinka</label>
+        </div>
+        {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
+        {error && <div className="form-error">{error}</div>}
+        <button type="submit" className="primary-button auth-submit" disabled={loading}>
+          {loading ? 'Prijava...' : 'Nastavi'}
+        </button>
+      </form>
+
+      <p className="auth-switch">
+        Nemaš račun? <Link to="/register">Registruj se</Link>
+      </p>
+
+      <GoogleAuthButton label="Nastavi sa Google računom" onError={setError} />
+
+      <p className="auth-switch">
+        <Link to="/forgot-password">Zaboravljena lozinka?</Link>
+      </p>
+    </AuthLayout>
   )
 }
 

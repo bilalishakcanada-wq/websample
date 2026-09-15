@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authService } from '../services/authService'
+import AuthLayout from '../components/AuthLayout'
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -24,18 +25,18 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <div className="auth-shell">
-      <div className="auth-card">
-        <h1>Zaboravljena lozinka</h1>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
-          {error && <div className="form-error">{error}</div>}
-          {message && <div className="form-success">{message}</div>}
-          <button type="submit" className="primary-button" disabled={loading}>{loading ? 'Šaljem...' : 'Pošalji link'}</button>
-        </form>
-        <div className="auth-links"><Link to="/login">Nazad na prijavu</Link><Link to="/">Početna</Link></div>
-      </div>
-    </div>
+    <AuthLayout title="Zaboravljena lozinka" subtitle="Poslat ćemo ti link za postavljanje nove lozinke.">
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="field">
+          <input id="email" type="email" placeholder=" " value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <label htmlFor="email">Email adresa</label>
+        </div>
+        {error && <div className="form-error">{error}</div>}
+        {message && <div className="form-success">{message}</div>}
+        <button type="submit" className="primary-button auth-submit" disabled={loading}>{loading ? 'Šaljem...' : 'Pošalji link'}</button>
+      </form>
+      <p className="auth-switch"><Link to="/login">Nazad na prijavu</Link></p>
+    </AuthLayout>
   )
 }
 

@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase'
 import { isStrongPassword, isValidEmail, publicError, sanitizeText } from '../utils/validation'
 
+let enabledProvidersPromise = null
+
 export const authService = {
   async signUp({ fullName, email, password, city, phone, captchaToken }) {
     const cleanedName = sanitizeText(fullName)
@@ -57,6 +59,24 @@ export const authService = {
       throw publicError()
     }
     return data
+  },
+
+  // Supabase publishes which OAuth providers are turned on, so the UI can hide
+  // a provider button instead of bouncing the user to a raw JSON error page.
+  async isProviderEnabled(provider) {
+    const url = import.meta.env.VITE_SUPABASE_URL
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+    if (!url || !key) return false
+
+    if (!enabledProvidersPromise) {
+      enabledProvidersPromise = fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((settings) => settings?.external || {})
+        .catch(() => ({}))
+    }
+
+    const providers = await enabledProvidersPromise
+    return providers[provider] === true
   },
 
   async signInWithGoogle() {

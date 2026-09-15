@@ -59,6 +59,22 @@ export const authService = {
     return data
   },
 
+  async signInWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+
+    if (error) {
+      console.error('Supabase Google sign-in failed', { message: error.message, code: error.code, status: error.status })
+      if (error.message?.includes('provider is not enabled')) {
+        throw new Error('Prijava preko Googlea još nije aktivirana. Pokušajte emailom i lozinkom.')
+      }
+      throw publicError()
+    }
+    return data
+  },
+
   async signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) throw publicError()

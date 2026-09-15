@@ -64,6 +64,11 @@ export function AuthProvider({ children }) {
     return result
   }
 
+  const loginWithGoogle = async () => {
+    setError('')
+    return authService.signInWithGoogle()
+  }
+
   const logout = async () => {
     setError('')
     await authService.signOut()
@@ -86,7 +91,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, isAdmin, loading, error, login, register, logout, refreshSession, updateProfile, deleteAccount }),
+    () => ({ user, isAdmin, loading, error, login, loginWithGoogle, register, logout, refreshSession, updateProfile, deleteAccount }),
     [user, isAdmin, loading, error],
   )
 

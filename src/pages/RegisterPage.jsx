@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -40,6 +41,8 @@ function RegisterPage() {
       <div className="auth-card">
         <h1>Registracija</h1>
         <p>Napravite račun i počnite koristiti aplikaciju.</p>
+        <GoogleAuthButton label="Registruj se sa Google računom" onError={setError} />
+        <div className="auth-divider"><span>ili</span></div>
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
             Ime i prezime

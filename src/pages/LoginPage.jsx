@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -49,6 +50,8 @@ function LoginPage() {
             Nalog je napravljen! Provjerite email (i spam folder) i kliknite na link za potvrdu prije prijave.
           </div>
         )}
+        <GoogleAuthButton label="Prijavi se sa Google računom" onError={setError} />
+        <div className="auth-divider"><span>ili</span></div>
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
             Email

@@ -3729,12 +3729,8 @@ select {
 }
 
 @media (max-width: 640px) {
-  body {
-    padding-bottom: 74px;
-  }
-
   .marketplace-shell {
-    padding-bottom: 88px;
+    padding-bottom: 24px;
   }
 
   .topbar {
@@ -3801,20 +3797,15 @@ select {
   }
 
   .mobile-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 25;
+    position: relative;
+    margin-top: 32px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: end;
     min-height: 66px;
     padding: 8px 10px max(8px, env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--surface);
     border-top: 1px solid var(--stroke);
-    box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.1);
-    backdrop-filter: blur(16px);
   }
 
   .mobile-nav-item {
@@ -3897,14 +3888,14 @@ select {
 
 @media (max-width: 640px) {
   .detail-page {
-    padding-bottom: 130px;
+    padding-bottom: 24px;
   }
 
   .sticky-offer-button {
     position: fixed;
     left: 16px;
     right: 16px;
-    bottom: 78px;
+    bottom: 16px;
     z-index: 24;
     display: inline-flex;
     align-items: center;
@@ -4849,4 +4840,44 @@ button:disabled {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 16px;
   }
+}
+
+/* ---------- Google sign-in ---------- */
+.google-button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0.85rem 1.2rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  color: var(--text);
+  font-weight: 700;
+  transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.2s ease;
+}
+
+.google-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(13, 42, 82, 0.1);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--stroke);
 }

@@ -70,7 +70,7 @@ export const listingService = {
 
     const safeSearch = sanitizeText(search).slice(0, 80).replace(/[%_(),]/g, '')
     if (safeSearch) {
-      query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%`)
+      query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%,category.ilike.%${safeSearch}%`)
     }
     if (ownerId) query = query.eq('user_id', ownerId)
     if (city) query = query.ilike('location', `%${sanitizeText(city).slice(0, 60)}%`)

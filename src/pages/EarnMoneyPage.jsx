@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Banknote, Bell, ChevronDown, MessageCircle, ShieldCheck, Sparkles, Star, TrendingUp, Wallet } from 'lucide-react'
 import BackHome from '../components/BackHome'
 import MobileNav from '../components/MobileNav'
+import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 
 const FAQS = [
   { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Poso.ba je traži.' },
@@ -15,6 +16,8 @@ const FAQS = [
 function EarnMoneyPage() {
   const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState(null)
+
+  useRevealOnScroll()
 
   return (
     <div className="app-shell page-with-mobile-nav">

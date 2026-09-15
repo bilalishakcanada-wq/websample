@@ -30,6 +30,7 @@ export const authService = {
       if (error.code === 'user_already_exists') throw new Error('Nalog sa ovim emailom već postoji. Pokušajte se prijaviti.')
       if (error.code === 'weak_password') throw new Error('Lozinka je preslaba. Koristite najmanje 8 znakova, veliko i malo slovo i broj.')
       if (error.code === 'over_email_send_rate_limit') throw new Error('Previše pokušaja u kratkom periodu. Sačekajte par minuta i pokušajte ponovo.')
+      if (error.code === 'email_address_invalid') throw new Error('Ova email adresa nije prihvaćena. Provjerite da li je ispravno unesena.')
       throw publicError()
     }
     return data

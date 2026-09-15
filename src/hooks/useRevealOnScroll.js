@@ -2,11 +2,8 @@ import { useEffect } from 'react'
 
 export function useRevealOnScroll(selector = '.reveal') {
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll(selector))
-    if (elements.length === 0) return undefined
-
     if (!('IntersectionObserver' in window)) {
-      elements.forEach((el) => el.classList.add('reveal-visible'))
+      document.querySelectorAll(selector).forEach((el) => el.classList.add('reveal-visible'))
       return undefined
     }
 
@@ -22,7 +19,22 @@ export function useRevealOnScroll(selector = '.reveal') {
       { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
     )
 
-    elements.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+    // Elements behind an async fetch (e.g. a section that only mounts once
+    // listings finish loading) don't exist yet on the first pass, so keep
+    // watching the DOM for newly-added .reveal nodes too.
+    const observeAll = () => {
+      document.querySelectorAll(selector).forEach((el) => {
+        if (!el.classList.contains('reveal-visible')) observer.observe(el)
+      })
+    }
+
+    observeAll()
+    const mutationObserver = new MutationObserver(observeAll)
+    mutationObserver.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      observer.disconnect()
+      mutationObserver.disconnect()
+    }
   }, [selector])
 }

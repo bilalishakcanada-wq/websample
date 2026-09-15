@@ -7,6 +7,7 @@ import {
   BriefcaseBusiness,
   CalendarClock,
   Check,
+  ChevronDown,
   ChevronRight,
   CreditCard,
   Hammer,
@@ -14,6 +15,7 @@ import {
   Laptop,
   Leaf,
   MapPin,
+  MessageCircle,
   MonitorPlay,
   Paintbrush,
   Search,
@@ -27,6 +29,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories, mockTasks } from '../data/mockData'
+import { serviceCategories } from '../data/categories'
 import MobileNav from '../components/MobileNav'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
@@ -60,6 +63,8 @@ function HomePage() {
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [savedTasks, setSavedTasks] = useLocalStorage('poso-saved-tasks', [])
   const [notice, setNotice] = useState('')
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const [navMode, setNavMode] = useState('client')
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
   const filteredTasks = useMemo(() => {
@@ -67,6 +72,39 @@ function HomePage() {
     if (!query) return allTasks
     return allTasks.filter((task) => `${task.title} ${task.category} ${task.tag} ${task.location}`.toLowerCase().includes(query))
   }, [searchTerm, allTasks])
+
+  const featuredProvider = useMemo(() => {
+    if (hasLiveProviders && providers.length > 0) {
+      const top = providers[0]
+      return {
+        isLive: true,
+        userId: top.user_id,
+        name: top.full_name || 'Korisnik Poso.ba',
+        photo: top.avatar_url,
+        rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '—',
+        reviewLabel: top.review_count > 0 ? `${top.review_count} ${top.review_count === 1 ? 'ocjena' : 'ocjena'}` : 'Nova na platformi',
+        jobsLabel: `${top.active_listings} ${top.active_listings === 1 ? 'aktivan oglas' : 'aktivnih oglasa'}`,
+        city: top.city,
+        specialties: null,
+        badges: [top.is_verified ? 'Verifikovan' : null, top.badge_count > 0 ? `${top.badge_count} znački` : null].filter(Boolean),
+        quote: null,
+      }
+    }
+    const demo = mockProfessionals[0]
+    return {
+      isLive: false,
+      userId: null,
+      name: demo.name,
+      photo: demo.photo,
+      rating: demo.rating,
+      reviewLabel: `${demo.jobs} ocjena`,
+      jobsLabel: `${demo.jobs} završenih poslova`,
+      city: 'Sarajevo',
+      specialties: demo.role,
+      badges: [demo.badge, 'Verifikovan'],
+      quote: 'Brz, profesionalan i tačno onako kako smo se dogovorili. Preporučujem svima.',
+    }
+  }, [hasLiveProviders, providers])
 
   useRevealOnScroll()
 
@@ -87,8 +125,56 @@ function HomePage() {
         </div>
 
         <nav className="main-nav" aria-label="Glavna navigacija">
+          <div
+            className="nav-mega"
+            onMouseEnter={() => setCategoriesOpen(true)}
+            onMouseLeave={() => setCategoriesOpen(false)}
+          >
+            <button type="button" className="nav-mega-trigger" onClick={() => setCategoriesOpen(true)}>
+              Kategorije <ChevronDown size={14} className={categoriesOpen ? 'rotated' : ''} />
+            </button>
+            {categoriesOpen && (
+              <div className="nav-mega-panel">
+                <div className="nav-mega-side">
+                  <h4>Šta vam treba?</h4>
+                  <p>Izaberite kategoriju da vidite ponudu.</p>
+                  <button
+                    type="button"
+                    className={`nav-mega-mode ${navMode === 'client' ? 'active' : ''}`}
+                    onClick={() => setNavMode('client')}
+                  >
+                    <span>KAO KLIJENT</span>
+                    Tražim izvođača za...
+                  </button>
+                  <button
+                    type="button"
+                    className={`nav-mega-mode ${navMode === 'provider' ? 'active' : ''}`}
+                    onClick={() => setNavMode('provider')}
+                  >
+                    <span>KAO IZVOĐAČ</span>
+                    Tražim posao u...
+                  </button>
+                </div>
+                <div className="nav-mega-grid">
+                  {serviceCategories.map(({ id, name, icon: Icon }) => (
+                    <a
+                      key={id}
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        setCategoriesOpen(false)
+                        navigate(navMode === 'provider' ? '/zaradi' : `/search?category=${encodeURIComponent(name)}`)
+                      }}
+                    >
+                      <Icon size={15} /> {name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <a href="#poslovi">Poslovi</a>
-          <a href="#kategorije">Kategorije</a>
+          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/zaradi') }}>Zaradi</a>
           <a href="#cijene">Cijene</a>
           <a href="#" onClick={(event) => { event.preventDefault(); navigate('/login') }}>Prijava</a>
         </nav>
@@ -217,6 +303,38 @@ function HomePage() {
           </div>
         </section>
 
+        {!listingsLoading && allTasks.length > 0 && (
+          <section className="ticker-section reveal">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow small-eyebrow">Uživo</span>
+                <h2>Pogledajte šta se radi upravo sada</h2>
+              </div>
+            </div>
+            <div className="ticker-track-wrap">
+              <div className="ticker-track">
+                {[...allTasks, ...allTasks].map((task, index) => (
+                  <div
+                    key={`${task.id}-${index}`}
+                    className="ticker-card"
+                    onClick={() => task.isLive && navigate(`/listings/${task.id}`)}
+                  >
+                    <div className="ticker-card-top">
+                      <div className="ticker-avatar">{(task.freelance || task.tag || 'P').charAt(0)}</div>
+                      <span className="ticker-tag">{task.tag}</span>
+                    </div>
+                    <strong>{task.title}</strong>
+                    <div className="ticker-foot">
+                      <span className="rating-box"><Star size={12} fill="currentColor" /> {task.rating ?? '5.0'}</span>
+                      <span className="ticker-price">{task.price}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="categories-section reveal" id="kategorije">
           <div className="section-heading">
             <div>
@@ -306,6 +424,103 @@ function HomePage() {
           </div>
         </section>
 
+        <section className="trust-section reveal">
+          <div className="trust-visual">
+            <img src="/images/categories/home.jpg" alt="Zadovoljan korisnik Poso.ba" loading="lazy" />
+            <div className="float-card float-card-payment">
+              <BadgeCheck size={16} />
+              <div>
+                <strong>Posao završen!</strong>
+                <span>Ocjena data · 5.0</span>
+              </div>
+            </div>
+            <div className="float-pill float-pill-alert">
+              <ShieldCheck size={13} /> Profil verifikovan
+            </div>
+          </div>
+          <div>
+            <span className="eyebrow small-eyebrow">Sigurnost i povjerenje</span>
+            <h2>Zaštita koja vam donosi mir</h2>
+            <div className="trust-list">
+              <div className="trust-item">
+                <div className="trust-item-icon"><MessageCircle size={20} /></div>
+                <div>
+                  <strong>Zaštićena komunikacija</strong>
+                  <p>Kontakt podaci ostaju sakriveni dok zvanično ne prihvatite ponudu — bez neželjenih poziva.</p>
+                </div>
+              </div>
+              <div className="trust-item">
+                <div className="trust-item-icon"><Star size={20} /></div>
+                <div>
+                  <strong>Provjerene ocjene i recenzije</strong>
+                  <p>Svaka ocjena dolazi od stvarno završenog posla, tako da birate na osnovu pravog iskustva.</p>
+                </div>
+              </div>
+              <div className="trust-item">
+                <div className="trust-item-icon"><ShieldCheck size={20} /></div>
+                <div>
+                  <strong>Moderacija i podrška 7 dana sedmično</strong>
+                  <p>Naš tim i AI podrška prate platformu i tu su za svako pitanje ili prijavu problema.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="featured-tasker reveal">
+          <div className="section-heading centered">
+            <div>
+              <span className="eyebrow small-eyebrow">Zajednica</span>
+              <h2>{featuredProvider.isLive ? 'Naši izvođači već grade svoj posao ovdje' : 'Pridružite se izvođačima koji zarađuju na Poso.ba'}</h2>
+            </div>
+          </div>
+          <div className="featured-tasker-card">
+            <div className="featured-tasker-photo-wrap">
+              {featuredProvider.photo
+                ? <img src={featuredProvider.photo} alt={featuredProvider.name} loading="lazy" />
+                : <div className="provider-photo-fallback featured-tasker-photo-fallback"><UserRound size={40} /></div>}
+              <div className="featured-tasker-rating-card">
+                <Star size={18} fill="currentColor" color="var(--accent-strong)" />
+                <div>
+                  <strong>{featuredProvider.rating}</strong>
+                  <span>{featuredProvider.reviewLabel}</span>
+                </div>
+              </div>
+            </div>
+            <div className="featured-tasker-info">
+              <h3>{featuredProvider.name}</h3>
+              <div className="featured-tasker-stats">
+                <div>
+                  <strong>{featuredProvider.jobsLabel}</strong>
+                  <span>Aktivnost</span>
+                </div>
+                {featuredProvider.city && (
+                  <div>
+                    <strong>{featuredProvider.city}</strong>
+                    <span>Lokacija</span>
+                  </div>
+                )}
+              </div>
+              {featuredProvider.specialties && (
+                <p className="featured-tasker-specialties"><b>Specijalnosti: </b>{featuredProvider.specialties}</p>
+              )}
+              <div className="featured-tasker-badges">
+                {featuredProvider.badges.map((badge) => (
+                  <span key={badge} className="badge-pill badge-verified">{badge}</span>
+                ))}
+              </div>
+              {featuredProvider.quote && <blockquote className="featured-tasker-quote">"{featuredProvider.quote}"</blockquote>}
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={() => featuredProvider.isLive ? navigate(`/korisnik/${featuredProvider.userId}`) : navigate('/register')}
+              >
+                {featuredProvider.isLive ? 'Pogledaj profil' : 'Postani izvođač'}
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section className="providers-section reveal" id="pruzatelji">
           <div className="section-heading">
             <div>
@@ -377,6 +592,38 @@ function HomePage() {
               <div className="step-number">3</div>
               <h3>Platite sigurno</h3>
               <p>Odaberite najbolju uslugu i plaćajte bez stresnog administriranja.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="boss-band reveal">
+          <div className="boss-band-copy">
+            <span className="eyebrow small-eyebrow">Zarada</span>
+            <h2>Budi svoj šef.</h2>
+            <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Poso.ba.</p>
+            <ul className="boss-checklist">
+              <li><Check size={16} /> Besplatan pristup hiljadama poslova</li>
+              <li><Check size={16} /> Bez pretplate za osnovno korištenje</li>
+              <li><Check size={16} /> Zaradi dodatni prihod po svom rasporedu</li>
+              <li><Check size={16} /> Izgradi svoj biznis i bazu klijenata</li>
+            </ul>
+            <button type="button" className="boss-band-button" onClick={() => navigate('/zaradi')}>
+              Zaradi sa Poso.ba <ArrowRight size={16} />
+            </button>
+          </div>
+          <div className="boss-band-visual">
+            <div className="boss-band-visual-image">
+              <img src="/images/categories/construction.jpg" alt="Izvođač na poslu" loading="lazy" />
+            </div>
+            <div className="float-card float-card-payment">
+              <Wallet size={16} />
+              <div>
+                <strong>Isplata primljena!</strong>
+                <span>Krečenje stana · 220 KM</span>
+              </div>
+            </div>
+            <div className="float-pill float-pill-alert">
+              <Bell size={13} /> Novi posao!
             </div>
           </div>
         </section>

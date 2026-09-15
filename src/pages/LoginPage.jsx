@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
 
 function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { user, login } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
+  const verificationPending = searchParams.get('verification') === 'pending'
 
   if (user) {
     const destination = location.state?.from?.pathname || '/dashboard'
@@ -42,6 +44,11 @@ function LoginPage() {
       <div className="auth-card">
         <h1>Prijava</h1>
         <p>Pristupite svom korisničkom profilu.</p>
+        {verificationPending && (
+          <div className="form-success">
+            Nalog je napravljen! Provjerite email (i spam folder) i kliknite na link za potvrdu prije prijave.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
             Email

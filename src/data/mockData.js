@@ -1,13 +1,13 @@
 export const mockServiceCategories = [
-  { id: 'handyman', name: 'Majstor za sve', icon: 'home', count: 1280, image: '/images/categories/home.jpg' },
-  { id: 'cleaning', name: 'Čišćenje', icon: 'sparkles', count: 690, image: '/images/categories/cleaning.jpg' },
-  { id: 'it-support', name: 'IT podrška', icon: 'laptop', count: 960, image: '/images/categories/it.jpg' },
-  { id: 'design', name: 'Dizajn i kreativne usluge', icon: 'palette', count: 730, image: '/images/categories/design.jpg' },
-  { id: 'renovation', name: 'Renoviranje i građevinski radovi', icon: 'hammer', count: 840, image: '/images/categories/construction.jpg' },
-  { id: 'electrician', name: 'Električar', icon: 'zap', count: 510, image: '/images/categories/electrician.jpg' },
-  { id: 'moving-transport', name: 'Selidbe i transport', icon: 'truck', count: 380, image: '/images/categories/moving.jpg' },
-  { id: 'gardening', name: 'Baštovanstvo', icon: 'leaf', count: 320, image: '/images/categories/gardening.jpg' },
-  { id: 'marketing', name: 'Marketing i digitalne usluge', icon: 'monitor', count: 560, image: '/images/categories/marketing.jpg' },
+  { id: 'handyman', name: 'Majstor za sve', icon: 'home', count: 1280, image: '/images/categories/home.jpg', description: 'Sitne popravke i održavanje doma' },
+  { id: 'cleaning', name: 'Čišćenje', icon: 'sparkles', count: 690, image: '/images/categories/cleaning.jpg', description: 'Stan, kuća i poslovni prostor' },
+  { id: 'it-support', name: 'IT podrška', icon: 'laptop', count: 960, image: '/images/categories/it.jpg', description: 'Računari, mreže i tehnička pomoć' },
+  { id: 'design', name: 'Dizajn i kreativne usluge', icon: 'palette', count: 730, image: '/images/categories/design.jpg', description: 'Logo, grafika i web dizajn' },
+  { id: 'renovation', name: 'Renoviranje i građevinski radovi', icon: 'hammer', count: 840, image: '/images/categories/construction.jpg', description: 'Adaptacije, zidanje i završni radovi' },
+  { id: 'electrician', name: 'Električar', icon: 'zap', count: 510, image: '/images/categories/electrician.jpg', description: 'Instalacije, rasvjeta i popravke' },
+  { id: 'moving-transport', name: 'Selidbe i transport', icon: 'truck', count: 380, image: '/images/categories/moving.jpg', description: 'Pakovanje, prevoz i selidbe' },
+  { id: 'gardening', name: 'Baštovanstvo', icon: 'leaf', count: 320, image: '/images/categories/gardening.jpg', description: 'Uređenje dvorišta i zelenila' },
+  { id: 'marketing', name: 'Marketing i digitalne usluge', icon: 'monitor', count: 560, image: '/images/categories/marketing.jpg', description: 'Društvene mreže, oglasi i sadržaj' },
 ]
 
 export const mockTasks = [

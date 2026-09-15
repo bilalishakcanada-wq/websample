@@ -10,25 +10,18 @@ import {
   ChevronDown,
   ChevronRight,
   CreditCard,
-  Hammer,
-  Home,
-  Laptop,
-  Leaf,
   MapPin,
   MessageCircle,
-  MonitorPlay,
-  Paintbrush,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
-  Truck,
   UserRound,
   Users,
   Wallet,
   Zap,
 } from 'lucide-react'
-import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories, mockTasks } from '../data/mockData'
+import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../data/mockData'
 import { serviceCategories } from '../data/categories'
 import MobileNav from '../components/MobileNav'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -38,21 +31,19 @@ import CitySlideshow from '../components/CitySlideshow'
 import CityPicker from '../components/CityPicker'
 import { useRankedProviders } from '../hooks/useRankedProviders'
 
-const categories = mockServiceCategories.map((category) => ({
-  ...category,
-  icon: {
-    home: Home,
-    laptop: Laptop,
-    palette: Paintbrush,
-    hammer: Hammer,
-    monitor: MonitorPlay,
-    users: Users,
-    sparkles: Sparkles,
-    zap: Zap,
-    truck: Truck,
-    leaf: Leaf,
-  }[category.icon],
-}))
+const categoryCards = [
+  ...mockServiceCategories.map((category) => ({
+    ...category,
+    target: `/search?category=${encodeURIComponent(category.name)}`,
+  })),
+  {
+    id: 'something-else',
+    name: 'Nešto drugo',
+    description: 'Opiši svojim riječima šta ti treba',
+    image: '/images/categories/profile.jpg',
+    target: '/objavi',
+  },
+]
 
 function HomePage() {
   const navigate = useNavigate()
@@ -335,28 +326,37 @@ function HomePage() {
           </section>
         )}
 
-        <section className="categories-section reveal" id="kategorije">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow small-eyebrow">Popularne kategorije</span>
-              <h2>Pronađite uslugu koja vam treba</h2>
-            </div>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Pregledaj sve <ArrowRight size={16} /></a>
+        <section className="post-task-section reveal" id="kategorije">
+          <div className="post-task-copy">
+            <span className="eyebrow small-eyebrow">Počni odmah</span>
+            <h2>Objavi svoj posao<br />za par sekundi</h2>
+            <p>Uštedi sate traženja i završi svoju listu obaveza.</p>
+            <ol className="post-task-steps">
+              <li><span>1</span> Opiši šta ti treba</li>
+              <li><span>2</span> Postavi svoj budžet</li>
+              <li><span>3</span> Primi ponude i izaberi najboljeg</li>
+            </ol>
+            <button type="button" className="primary-button large-button" onClick={() => navigate('/objavi')}>
+              Objavi posao
+            </button>
+            <a className="post-task-learn" href="#kako-radi">
+              Pogledaj kako Poso.ba radi <ArrowRight size={15} />
+            </a>
           </div>
 
-          <div className="category-scroll reveal-stagger reveal">
-            {categories.map(({ id, name, icon: Icon, image }) => (
+          <div className="post-task-categories">
+            {categoryCards.map(({ id, name, image, description, target }) => (
               <button
                 key={id}
                 type="button"
-                className="category-card"
-                onClick={() => navigate(`/search?category=${encodeURIComponent(name)}`)}
+                className="post-cat-card"
+                onClick={() => navigate(target)}
               >
                 <img src={image} alt="" loading="lazy" />
-                <div className="category-icon">
-                  <Icon size={17} />
+                <div>
+                  <strong>{name}</strong>
+                  <span>{description}</span>
                 </div>
-                <span>{name}</span>
               </button>
             ))}
           </div>
@@ -745,36 +745,84 @@ function HomePage() {
             Registruj se sada
           </button>
         </section>
+
+        <section className="top-categories reveal">
+          <div className="top-categories-intro">
+            <h2>Sve kategorije</h2>
+            <p>Pogledajte usluge dostupne u vašem gradu.</p>
+          </div>
+          <div className="top-categories-list">
+            {serviceCategories.map(({ id, name }) => (
+              <a
+                key={id}
+                href="#"
+                onClick={(event) => { event.preventDefault(); navigate(`/search?category=${encodeURIComponent(name)}`) }}
+              >
+                {name}
+              </a>
+            ))}
+          </div>
+        </section>
       </main>
 
       {notice && <div className="form-success homepage-notice" role="status">{notice}</div>}
       {cityPickerOpen && <CityPicker value={city} onChange={setCity} onClose={() => setCityPickerOpen(false)} />}
 
       <footer className="site-footer">
-        <div className="brand-wrap">
-          <div className="brand-mark">P</div>
-          <div>
-            <div className="brand-name">Poso.ba</div>
-            <div className="brand-subtitle">Usluge za Bosnu i Hercegovinu</div>
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <div className="brand-wrap">
+              <div className="brand-mark">P</div>
+              <div>
+                <div className="brand-name">Poso.ba</div>
+                <div className="brand-subtitle">Usluge za Bosnu i Hercegovinu</div>
+              </div>
+            </div>
+            <p>Marketplace koji povezuje klijente i provjerene izvođače širom BiH.</p>
+            <div className="footer-meta">
+              <span><BriefcaseBusiness size={15} /> Moderirani oglasi</span>
+              <span><CreditCard size={15} /> Zaštićena komunikacija</span>
+            </div>
+          </div>
+
+          <div className="footer-col">
+            <h4>Otkrij</h4>
+            <a href="#kako-radi">Kako radi</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Pretraži poslove</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/zaradi') }}>Zaradi kao izvođač</a>
+            <a href="#cijene">Planovi i cijene</a>
+          </div>
+
+          <div className="footer-col">
+            <h4>Kompanija</h4>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/o-nama') }}>O nama</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/pravila') }}>Pravila i uslovi</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/privatnost') }}>Privatnost</a>
+          </div>
+
+          <div className="footer-col">
+            <h4>Za korisnike</h4>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/objavi') }}>Objavi posao</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/login') }}>Prijava</a>
+            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/register') }}>Registracija</a>
+          </div>
+
+          <div className="footer-col">
+            <h4>Popularni gradovi</h4>
+            {['Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Zenica', 'Bijeljina'].map((cityName) => (
+              <a
+                key={cityName}
+                href="#"
+                onClick={(event) => { event.preventDefault(); navigate(`/search?city=${encodeURIComponent(cityName)}`) }}
+              >
+                {cityName}
+              </a>
+            ))}
           </div>
         </div>
 
-        <div className="footer-links">
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/o-nama') }}>O nama</a>
-          <a href="#kako-radi">Kako radi</a>
-          <a href="#cijene">Cijene</a>
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/pravila') }}>Pravila i uslovi</a>
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/privatnost') }}>Privatnost</a>
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/zaradi') }}>Postani pružalac</a>
-        </div>
-
-        <div className="footer-meta">
-          <span>
-            <BriefcaseBusiness size={15} /> 100% sigurno plaćanje
-          </span>
-          <span>
-            <CreditCard size={15} /> Plaćanje karticom ili kreditima
-          </span>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} Poso.ba — Sva prava zadržana.</span>
         </div>
       </footer>
       <MobileNav />

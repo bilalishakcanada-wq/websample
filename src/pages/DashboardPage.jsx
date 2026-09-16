@@ -4,6 +4,7 @@ import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
+import { profileService } from '../services/profileService'
 import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -37,6 +38,14 @@ function DashboardPage() {
   }
 
   useEffect(() => { loadListings() }, [])
+
+  useEffect(() => {
+    let active = true
+    profileService.getProfile(user.id).then((profile) => {
+      if (active && profile && !profile.onboarding_completed) navigate('/profile?setup=1', { replace: true })
+    }).catch(() => {})
+    return () => { active = false }
+  }, [user.id, navigate])
 
   useEffect(() => {
     let active = true

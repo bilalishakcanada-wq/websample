@@ -61,6 +61,10 @@ export const profileService = {
       phone: profile.phone || '',
       bio: profile.bio || '',
     })
+    const accountType = ['client', 'provider', 'both'].includes(profile.account_type) ? profile.account_type : 'client'
+    const trades = Array.isArray(profile.trades)
+      ? profile.trades.slice(0, 10).map((trade) => sanitizeText(trade)).filter(Boolean)
+      : []
     const payload = {
       user_id: profile.user_id,
       full_name: input.fullName,
@@ -69,6 +73,9 @@ export const profileService = {
       city: input.city,
       bio: input.bio,
       avatar_url: sanitizeText(profile.avatar_url || profile.avatarUrl),
+      account_type: accountType,
+      trades: accountType === 'client' ? [] : trades,
+      onboarding_completed: true,
     }
 
     if (appConfig.apiBaseUrl) return apiRequest('/api/profile', { method: 'PATCH', body: payload })

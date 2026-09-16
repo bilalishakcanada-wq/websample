@@ -1,15 +1,13 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
   BadgeCheck,
   Bell,
-  BriefcaseBusiness,
   CalendarClock,
   Check,
   ChevronDown,
   ChevronRight,
-  CreditCard,
   MapPin,
   MessageCircle,
   Search,
@@ -55,6 +53,8 @@ function HomePage() {
   const [savedTasks, setSavedTasks] = useLocalStorage('poso-saved-tasks', [])
   const [notice, setNotice] = useState('')
   const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const megaMenuRef = useRef(null)
+  const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
   const [navMode, setNavMode] = useState('client')
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
@@ -99,6 +99,20 @@ function HomePage() {
 
   useRevealOnScroll()
 
+  useEffect(() => {
+    if (!categoriesOpen) return undefined
+    const close = (event) => {
+      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target)) setCategoriesOpen(false)
+    }
+    const onKey = (event) => event.key === 'Escape' && setCategoriesOpen(false)
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [categoriesOpen])
+
   const showNotice = (message) => {
     setNotice(message)
     window.setTimeout(() => setNotice(''), 3000)
@@ -118,10 +132,11 @@ function HomePage() {
         <nav className="main-nav" aria-label="Glavna navigacija">
           <div
             className="nav-mega"
-            onMouseEnter={() => setCategoriesOpen(true)}
-            onMouseLeave={() => setCategoriesOpen(false)}
+            ref={megaMenuRef}
+            onMouseEnter={() => !isTouch && setCategoriesOpen(true)}
+            onMouseLeave={() => !isTouch && setCategoriesOpen(false)}
           >
-            <button type="button" className="nav-mega-trigger" onClick={() => setCategoriesOpen(true)}>
+            <button type="button" className="nav-mega-trigger" onClick={() => setCategoriesOpen((open) => isTouch ? !open : true)} aria-expanded={categoriesOpen}>
               Kategorije <ChevronDown size={14} className={categoriesOpen ? 'rotated' : ''} />
             </button>
             {categoriesOpen && (
@@ -304,7 +319,7 @@ function HomePage() {
             </div>
             <div className="ticker-track-wrap">
               <div className="ticker-track">
-                {[...allTasks, ...allTasks].map((task, index) => (
+                {(isTouch ? allTasks : [...allTasks, ...allTasks]).map((task, index) => (
                   <div
                     key={`${task.id}-${index}`}
                     className="ticker-card"
@@ -769,6 +784,17 @@ function HomePage() {
       {cityPickerOpen && <CityPicker value={city} onChange={setCity} onClose={() => setCityPickerOpen(false)} />}
 
       <footer className="site-footer">
+        <div className="footer-cta">
+          <div>
+            <strong>Spreman/na da počneš?</strong>
+            <span>Objavi posao besplatno ili se registruj kao izvođač — traje minutu.</span>
+          </div>
+          <div className="footer-cta-actions">
+            <Link to="/objavi" className="primary-button">Objavi posao</Link>
+            <Link to="/zaradi" className="ghost-button">Zaradi kao izvođač</Link>
+          </div>
+        </div>
+
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="brand-wrap">
@@ -780,49 +806,49 @@ function HomePage() {
             </div>
             <p>Marketplace koji povezuje klijente i provjerene izvođače širom BiH.</p>
             <div className="footer-meta">
-              <span><BriefcaseBusiness size={15} /> Moderirani oglasi</span>
-              <span><CreditCard size={15} /> Zaštićena komunikacija</span>
+              <span><ShieldCheck size={15} /> Moderirani oglasi</span>
+              <span><MessageCircle size={15} /> Zaštićena komunikacija</span>
             </div>
           </div>
 
           <div className="footer-col">
             <h4>Otkrij</h4>
             <a href="#kako-radi">Kako radi</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Pretraži poslove</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/zaradi') }}>Zaradi kao izvođač</a>
+            <Link to="/search">Pretraži poslove</Link>
+            <Link to="/zaradi">Zaradi kao izvođač</Link>
             <a href="#cijene">Planovi i cijene</a>
           </div>
 
           <div className="footer-col">
             <h4>Kompanija</h4>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/o-nama') }}>O nama</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/pravila') }}>Pravila i uslovi</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/privatnost') }}>Privatnost</a>
+            <Link to="/o-nama">O nama</Link>
+            <Link to="/pravila">Pravila i uslovi</Link>
+            <Link to="/privatnost">Privatnost</Link>
           </div>
 
           <div className="footer-col">
             <h4>Za korisnike</h4>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/objavi') }}>Objavi posao</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/login') }}>Prijava</a>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/register') }}>Registracija</a>
+            <Link to="/objavi">Objavi posao</Link>
+            <Link to="/login">Prijava</Link>
+            <Link to="/register">Registracija</Link>
+            <Link to="/messages">Poruke</Link>
           </div>
 
           <div className="footer-col">
             <h4>Popularni gradovi</h4>
             {['Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Zenica', 'Bijeljina'].map((cityName) => (
-              <a
-                key={cityName}
-                href="#"
-                onClick={(event) => { event.preventDefault(); navigate(`/search?city=${encodeURIComponent(cityName)}`) }}
-              >
-                {cityName}
-              </a>
+              <Link key={cityName} to={`/search?city=${encodeURIComponent(cityName)}`}>{cityName}</Link>
             ))}
           </div>
         </div>
 
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} Poso.ba — Sva prava zadržana.</span>
+          <span className="footer-bottom-links">
+            <Link to="/pravila">Uslovi</Link>
+            <Link to="/privatnost">Privatnost</Link>
+            <a href="mailto:podrska@poso.ba">podrska@poso.ba</a>
+          </span>
         </div>
       </footer>
       <MobileNav />

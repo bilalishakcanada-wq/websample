@@ -55,3 +55,6 @@ create table if not exists public.moderation_settings (key text primary key, val
 
 -- member_registry (append-only register of every account: member_id, user_id, email, name, created/deleted),
 -- maintained by register_member() triggers on profiles; admin_lookup_member(term) searches it (admin only).
+
+-- profiles.education / work_experience / specialties / transportation (text[]), exposed via public_profiles;
+-- moderate_content() scans text[] columns element by element (profiles trigger covers them).

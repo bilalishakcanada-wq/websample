@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Briefcase, CheckCircle2, ClipboardList, Flag, MapPin, MessageSquareQuote, Percent, Play, ShieldCheck, Star, UserRound } from 'lucide-react'
+import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Sparkles, Star, UserRound } from 'lucide-react'
 import { profileService } from '../services/profileService'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
+import AvatarWithBadges from '../components/AvatarWithBadges'
 import BadgeChip from '../components/BadgeChip'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
@@ -13,25 +14,48 @@ const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' :
 
 const firstNameOf = (displayName) => (displayName || '').trim().split(/\s+/)[0] || 'korisnik'
 
-function Stars({ value }) {
+const TIER_HINT = {
+  top: 'Verifikovan, 10+ recenzija sa prosjekom 4.8+. Najviši nivo povjerenja.',
+  trusted: 'Verifikovan i dokazano pouzdan kroz recenzije.',
+  verified: 'Identitet i struka provjereni od strane Poso.ba tima.',
+  new: 'Novi korisnik — još nema dovoljno istorije za ocjenu.',
+  unverified: 'Struka još nije provjerena. Traži recenzije i portfolio prije dogovora.',
+}
+
+function Stars({ value, size = 14 }) {
   const rounded = Math.round(Number(value) || 0)
   return (
     <span className="stars" aria-label={`${value} od 5`}>
-      {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={14} fill={n <= rounded ? 'currentColor' : 'none'} />)}
+      {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={size} fill={n <= rounded ? 'currentColor' : 'none'} />)}
     </span>
   )
 }
 
-function SuccessRing({ value, label, hint }) {
-  const pct = value == null ? 0 : Math.round(Number(value))
+function SectionList({ icon: Icon, title, items, emptyHint, editHref }) {
+  if ((!items || items.length === 0) && !editHref) return null
   return (
-    <div className={`success-ring ${value == null ? 'empty' : pct >= 90 ? 'great' : pct >= 70 ? 'good' : 'low'}`} style={{ '--pct': `${pct}%` }}>
-      <div className="success-ring-dial"><span>{value == null ? '—' : `${pct}%`}</span></div>
-      <div>
-        <strong>{label}</strong>
-        <small>{hint}</small>
-      </div>
-    </div>
+    <section className="pp-section">
+      <h3>{title}</h3>
+      {items?.length > 0 ? (
+        <ul className="pp-list">
+          {items.map((item) => <li key={item}><span className="pp-list-icon"><Icon size={16} /></span><span>{item}</span></li>)}
+        </ul>
+      ) : (
+        <Link to={editHref} className="pp-empty-link">{emptyHint}</Link>
+      )}
+    </section>
+  )
+}
+
+function SectionChips({ title, items, emptyHint, editHref }) {
+  if ((!items || items.length === 0) && !editHref) return null
+  return (
+    <section className="pp-section">
+      <h3>{title}</h3>
+      {items?.length > 0
+        ? <div className="pp-chips">{items.map((item) => <span key={item} className="pp-chip">{item}</span>)}</div>
+        : <Link to={editHref} className="pp-empty-link">{emptyHint}</Link>}
+    </section>
   )
 }
 
@@ -83,6 +107,8 @@ function PublicProfilePage() {
   const firstName = firstNameOf(profile.display_name)
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3)
   const jobsDecided = (trust?.completed_jobs || 0) + (trust?.failed_jobs || 0)
+  const editHref = isOwnProfile ? '/profile?tab=iskustvo' : null
+  const tier = isProvider ? (trust?.tier || 'unverified') : 'client'
 
   const reportProfile = async () => {
     const reason = window.prompt('Zašto prijavljuješ ovaj profil? (npr. dijeli broj telefona, lažni identitet, prevara)')
@@ -101,43 +127,47 @@ function PublicProfilePage() {
 
       <main className="content-container public-profile-layout">
         <aside className="meet-card">
-          <span className="meet-label">{isProvider ? 'Upoznaj izvođača' : 'Upoznaj klijenta'}</span>
+          <span className="meet-label">Upoznaj</span>
           <div className="meet-card-top">
             <div>
               <h1>{profile.display_name}</h1>
               <LastSeen value={profile.last_seen_at} />
             </div>
-            {profile.avatar_url
-              ? <img className="meet-avatar" src={profile.avatar_url} alt="" />
-              : <div className="meet-avatar meet-avatar-fallback"><UserRound size={44} /></div>}
+            <AvatarWithBadges src={profile.avatar_url} tier={tier} badges={badges} size={120} />
           </div>
-
-          {isProvider && trust && (
-            <div className="meet-trust">
-              <TrustBadge tier={trust.tier} label={trust.label} trade={trust.verified_trade} size="lg" />
-              <div className="trust-meter" style={{ '--score': `${trust.score}%` }}>
-                <div className="trust-meter-bar"><span /></div>
-                <small>Povjerenje {trust.score}/100</small>
-              </div>
-              {trust.reasons?.length > 0 && (
-                <ul className="trust-reasons">
-                  {trust.reasons.map((reason) => <li key={reason}>{reason}</li>)}
-                </ul>
-              )}
-            </div>
-          )}
-
-          {!isProvider && (
-            <div className="meet-client-note">
-              <ShieldCheck size={15} />
-              <span>Klijent — objavljuje poslove i bira izvođače. Kontakt se otvara tek kad prihvati ponudu.</span>
-            </div>
-          )}
 
           <div className="meet-meta">
             {profile.city && <span><MapPin size={15} /> {profile.city}</span>}
             <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
           </div>
+
+          <div className="meet-stats">
+            <div className="meet-stat">
+              <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'} <Star size={18} fill="currentColor" /></strong>
+              <span>Ukupna ocjena <Info size={13} title="Prosjek svih recenzija koje su ostavili klijenti nakon posla." /></span>
+              <small>{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</small>
+            </div>
+            {isProvider ? (
+              <div className="meet-stat">
+                <strong>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}</strong>
+                <span>Uspješnost <Info size={13} title="Udio prihvaćenih poslova koji su završeni, bez otkazivanja od strane izvođača." /></span>
+                <small>{trust?.completed_jobs || 0} {trust?.completed_jobs === 1 ? 'posao' : 'poslova'}{jobsDecided === 0 ? ' — još nema završenih' : ''}</small>
+              </div>
+            ) : (
+              <div className="meet-stat">
+                <strong>{trust?.client_completion_rate == null ? '—' : `${Math.round(trust.client_completion_rate)}%`}</strong>
+                <span>Dovršeni poslovi <Info size={13} title="Udio objavljenih poslova sa prihvaćenom ponudom koji su dovršeni." /></span>
+                <small>{trust?.jobs_posted || 0} objavljenih</small>
+              </div>
+            )}
+          </div>
+
+          {isProvider && trust && (
+            <div className="meet-trust-line" title={TIER_HINT[trust.tier]}>
+              <TrustBadge tier={trust.tier} label={trust.label} trade={trust.verified_trade} />
+              <small>{TIER_HINT[trust.tier]}</small>
+            </div>
+          )}
 
           {isProvider && profile.trades?.length > 0 && (
             <div className="trade-list">
@@ -150,18 +180,13 @@ function PublicProfilePage() {
           )}
 
           {badges.length > 0 && (
-            <div className="badge-showcase">
-              <span className="badge-showcase-title">Značke</span>
-              <div className="badge-row">
-                {badges.map((badge) => <BadgeChip key={badge.code} badge={badge} size="lg" />)}
-              </div>
+            <details className="badge-legend-box">
+              <summary><Sparkles size={14} /> Šta znače značke na slici ({badges.length})</summary>
               <ul className="badge-legend">
-                {badges.map((badge) => <li key={badge.code}><strong>{badge.label}</strong> — {badge.description}</li>)}
+                {badges.map((badge) => <li key={badge.code}><BadgeChip badge={badge} /><span>{badge.description}</span></li>)}
               </ul>
-            </div>
+            </details>
           )}
-
-          {profile.bio && <p className="meet-bio">{profile.bio}</p>}
 
           {!isOwnProfile && user && (
             <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
@@ -169,60 +194,17 @@ function PublicProfilePage() {
           {notice && <small className="meet-notice">{notice}</small>}
         </aside>
 
-        <section className="public-profile-main">
-          {isProvider ? (
-            <div className="profile-kpis">
-              <SuccessRing
-                value={trust?.success_rate}
-                label="Uspješnost poslova"
-                hint={jobsDecided === 0 ? 'Još nema završenih poslova' : `${trust.completed_jobs} završeno${trust.failed_jobs ? `, ${trust.failed_jobs} otkazano` : ''}`}
-              />
-              <div className="kpi-tile">
-                <Briefcase size={18} />
-                <strong>{trust?.completed_jobs || 0}</strong>
-                <span>završenih poslova</span>
-              </div>
-              <div className="kpi-tile">
-                <Star size={18} />
-                <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'}</strong>
-                <span>{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
-              </div>
-              <div className="kpi-tile">
-                <Percent size={18} />
-                <strong>{trust?.accepted_bids || 0}</strong>
-                <span>prihvaćenih ponuda</span>
-              </div>
-            </div>
-          ) : (
-            <div className="profile-kpis">
-              <SuccessRing
-                value={trust?.client_completion_rate}
-                label="Dovršeni poslovi"
-                hint={trust?.jobs_completed_as_client ? `${trust.jobs_completed_as_client} dovršeno` : 'Još nema dovršenih poslova'}
-              />
-              <div className="kpi-tile">
-                <ClipboardList size={18} />
-                <strong>{trust?.jobs_posted || 0}</strong>
-                <span>objavljenih poslova</span>
-              </div>
-              <div className="kpi-tile">
-                <Star size={18} />
-                <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'}</strong>
-                <span>ocjena izvođača</span>
-              </div>
-            </div>
-          )}
+        <section className="public-profile-main pp-card">
+          <section className="pp-section">
+            <h3>O meni</h3>
+            {profile.bio
+              ? <p className="pp-about">{profile.bio}</p>
+              : isOwnProfile ? <Link to="/profile" className="pp-empty-link">Dodaj kratak opis o sebi →</Link> : <p className="muted-text">{firstName} još nije dodao/la opis.</p>}
+          </section>
 
-          <div className="review-summary-card">
-            <div className="review-summary-head">
-              <div>
-                <h2>
-                  Ukupna ocjena {reviewCount > 0 ? <strong>{Number(trust.avg_rating).toFixed(1)}</strong> : <strong>—</strong>}
-                  <Star size={20} fill="currentColor" className="review-summary-star" />
-                </h2>
-                <span className="muted-text">{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
-              </div>
-            </div>
+          <section className="pp-section">
+            <h3>Ukupna ocjena {reviewCount > 0 ? <strong>{Number(trust.avg_rating).toFixed(1)}</strong> : <strong>—</strong>} <Star size={18} fill="currentColor" className="review-summary-star" /></h3>
+            <span className="muted-text">{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
 
             {reviews.length === 0 ? (
               <div className="review-empty">
@@ -252,12 +234,36 @@ function PublicProfilePage() {
                 </div>
                 {reviews.length > 3 && (
                   <button type="button" className="ghost-button review-see-all" onClick={() => setShowAllReviews((open) => !open)}>
-                    {showAllReviews ? 'Prikaži manje' : `Pogledaj sve ${reviews.length} recenzije`}
+                    {showAllReviews ? 'Prikaži manje' : `Pogledaj svih ${reviews.length} recenzija`}
                   </button>
                 )}
               </>
             )}
-          </div>
+          </section>
+
+          {isProvider && (
+            <>
+              <SectionList icon={GraduationCap} title="Obrazovanje" items={profile.education} emptyHint="Dodaj obrazovanje →" editHref={editHref} />
+              <SectionList icon={Briefcase} title="Radno iskustvo" items={profile.work_experience} emptyHint="Dodaj radno iskustvo →" editHref={editHref} />
+              <SectionChips title="Specijalnosti" items={profile.specialties} emptyHint="Dodaj specijalnosti →" editHref={editHref} />
+              <SectionChips title="Prevoz" items={profile.transportation} emptyHint="Označi kako dolaziš do klijenta →" editHref={editHref} />
+            </>
+          )}
+
+          {isProvider && portfolio.length > 0 && (
+            <section className="pp-section">
+              <h3>Portfolio radova</h3>
+              <div className="portfolio-grid">
+                {portfolio.map((item) => (
+                  <div className="portfolio-item" key={item.id}>
+                    {item.media_type === 'video'
+                      ? <div className="portfolio-video-thumb"><Play size={22} /></div>
+                      : <img src={item.media_url} alt={item.caption || ''} loading="lazy" />}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {listings.length > 0 && (
             <div className="looking-card">
@@ -276,24 +282,9 @@ function PublicProfilePage() {
             </div>
           )}
 
-          {isProvider && portfolio.length > 0 && (
-            <div className="portfolio-card">
-              <h2>Portfolio radova</h2>
-              <div className="portfolio-grid">
-                {portfolio.map((item) => (
-                  <div className="portfolio-item" key={item.id}>
-                    {item.media_type === 'video'
-                      ? <div className="portfolio-video-thumb"><Play size={22} /></div>
-                      : <img src={item.media_url} alt={item.caption || ''} loading="lazy" />}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {listings.length > 0 && (
-            <div className="profile-listings-card" id="aktivni-oglasi">
-              <h2>Aktivni oglasi ({listings.length})</h2>
+            <section className="pp-section" id="aktivni-oglasi">
+              <h3>Aktivni oglasi ({listings.length})</h3>
               <div className="profile-listing-list">
                 {listings.map((listing) => (
                   <Link className="profile-listing-row" key={listing.id} to={`/listings/${listing.id}`}>
@@ -306,7 +297,7 @@ function PublicProfilePage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </section>
       </main>

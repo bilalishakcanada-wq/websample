@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Briefcase, Camera, Check, ChevronDown, Copy, Eye, EyeOff, Hammer, IdCard, Images, LogOut, MapPin, OctagonAlert, Play, Repeat,
-  Settings, ShieldAlert, ShieldBan, ShieldCheck, Sparkles, Star, Trash2, UserRound, Wrench,
+  GraduationCap, Plus, Settings, ShieldAlert, ShieldBan, ShieldCheck, Sparkles, Star, Trash2, UserRound, Wrench, X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { isValidFullName, profileService } from '../services/profileService'
@@ -21,10 +21,13 @@ const ALL_TABS = {
   podaci: { id: 'podaci', label: 'Podaci', icon: IdCard },
   usluge: { id: 'usluge', label: 'Usluge', icon: Wrench },
   tip: { id: 'usluge', label: 'Tip naloga', icon: Briefcase },
+  iskustvo: { id: 'iskustvo', label: 'Iskustvo', icon: GraduationCap },
   portfolio: { id: 'portfolio', label: 'Portfolio', icon: Images },
   verifikacija: { id: 'verifikacija', label: 'Verifikacija', icon: ShieldCheck },
   racun: { id: 'racun', label: 'Račun', icon: Settings },
 }
+
+const TRANSPORT_OPTIONS = ['Online', 'Pješke', 'Bicikl', 'Javni prevoz', 'Auto', 'Kombi', 'Kamion']
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove', icon: Briefcase },
@@ -62,11 +65,13 @@ function ProfilePage() {
   const portfolioInputRef = useRef(null)
   const verificationInputRef = useRef(null)
 
-  const [tab, setTab] = useState(['podaci', 'usluge', 'portfolio', 'verifikacija', 'racun'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'podaci')
+  const [tab, setTab] = useState(['podaci', 'usluge', 'iskustvo', 'portfolio', 'verifikacija', 'racun'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'podaci')
   const [form, setForm] = useState({ firstName: '', lastName: '', city: '', phone: '', bio: '' })
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [accountType, setAccountType] = useState('client')
   const [trades, setTrades] = useState([])
+  const [sections, setSections] = useState({ education: [], work_experience: [], specialties: [], transportation: [] })
+  const [drafts, setDrafts] = useState({ education: '', work_experience: '', specialties: '' })
   const [account, setAccount] = useState(null) // system fields: member_id, account_status, verified_trade, …
   const [avatarUrl, setAvatarUrl] = useState('')
   const [portfolio, setPortfolio] = useState([])
@@ -108,6 +113,12 @@ function ProfilePage() {
     setAvatarUrl(profile.avatar_url || '')
     setAccountType(profile.account_type || 'client')
     setTrades(profile.trades || [])
+    setSections({
+      education: profile.education || [],
+      work_experience: profile.work_experience || [],
+      specialties: profile.specialties || [],
+      transportation: profile.transportation || [],
+    })
     setAccount(profile)
     setPortfolio(bundle.portfolio || [])
     setBadges(bundle.badges || [])
@@ -128,7 +139,7 @@ function ProfilePage() {
 
   const tabs = useMemo(() => (
     offersServices
-      ? [ALL_TABS.podaci, ALL_TABS.usluge, ALL_TABS.portfolio, ALL_TABS.verifikacija, ALL_TABS.racun]
+      ? [ALL_TABS.podaci, ALL_TABS.usluge, ALL_TABS.iskustvo, ALL_TABS.portfolio, ALL_TABS.verifikacija, ALL_TABS.racun]
       : [ALL_TABS.podaci, ALL_TABS.tip, ALL_TABS.racun]
   ), [offersServices])
 
@@ -144,10 +155,11 @@ function ProfilePage() {
     return [
       ...base,
       { id: 'trades', label: 'Odabrana struka', done: trades.length > 0, tab: 'usluge' },
+      { id: 'experience', label: 'Iskustvo ili obrazovanje', done: sections.work_experience.length > 0 || sections.education.length > 0, tab: 'iskustvo' },
       { id: 'portfolio', label: 'Bar jedan rad u portfoliju', done: portfolio.length > 0, tab: 'portfolio' },
       { id: 'verified', label: 'Verifikacija struke', done: verificationStatus?.status === 'approved', tab: 'verifikacija' },
     ]
-  }, [form, fullName, avatarUrl, offersServices, trades, portfolio, verificationStatus])
+  }, [form, fullName, avatarUrl, offersServices, trades, sections, portfolio, verificationStatus])
 
   const completion = Math.round((checklist.filter((item) => item.done).length / checklist.length) * 100)
   const missing = checklist.filter((item) => !item.done)
@@ -177,6 +189,19 @@ function ProfilePage() {
     setTrades((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name])
   }
 
+  const addItem = (key) => {
+    const value = drafts[key].trim()
+    if (!value || sections[key].includes(value)) return
+    setSections((current) => ({ ...current, [key]: [...current[key], value].slice(0, key === 'specialties' ? 15 : 10) }))
+    setDrafts((current) => ({ ...current, [key]: '' }))
+  }
+  const removeItem = (key, value) => setSections((current) => ({ ...current, [key]: current[key].filter((item) => item !== value) }))
+  const toggleTransport = (value) => setSections((current) => ({
+    ...current,
+    transportation: current.transportation.includes(value) ? current.transportation.filter((item) => item !== value) : [...current.transportation, value],
+  }))
+  const sectionScan = useMemo(() => scanContactInfo(...sections.education, ...sections.work_experience, ...sections.specialties, drafts.education, drafts.work_experience, drafts.specialties), [sections, drafts])
+
   const persist = async (overrides = {}) => {
     const profile = await profileService.upsertProfile({
       ...form,
@@ -186,6 +211,7 @@ function ProfilePage() {
       avatar_url: avatarUrl,
       account_type: accountType,
       trades,
+      ...sections,
       ...overrides,
     })
     updateProfile({ user_metadata: { ...user.user_metadata, full_name: profile.full_name, city: profile.city, phone: profile.phone } })
@@ -526,6 +552,52 @@ function ProfilePage() {
                 <p className="muted-text">Klijentski profil je jednostavniji: bez struka, portfolija i verifikacije. Ako želiš i nuditi usluge, izaberi "Pružam usluge" ili "Oboje".</p>
               )}
               <button type="submit" className="primary-button auth-submit" disabled={saving}>{saving ? 'Čuvam...' : 'Sačuvaj'}</button>
+            </form>
+          )}
+
+          {tab === 'iskustvo' && (
+            <form onSubmit={handleSubmit} className="auth-form experience-form">
+              <p className="muted-text">Ovo klijenti vide na tvom javnom profilu — kao na Airtaskeru: obrazovanje, radno iskustvo, specijalnosti i kako dolaziš do posla.</p>
+
+              {[
+                ['education', 'Obrazovanje', 'npr. Elektrotehnička škola Sarajevo, 2015'],
+                ['work_experience', 'Radno iskustvo', 'npr. Električar — Elektroprivreda BiH, 5 godina'],
+                ['specialties', 'Specijalnosti', 'npr. Rasvjeta, Solarni sistemi'],
+              ].map(([key, title, placeholder]) => (
+                <div className="list-editor" key={key}>
+                  <span className="trade-picker-label">{title} <small>({sections[key].length}/{key === 'specialties' ? 15 : 10})</small></span>
+                  {sections[key].length > 0 && (
+                    <ul className="list-editor-items">
+                      {sections[key].map((item) => (
+                        <li key={item}><span>{item}</span><button type="button" onClick={() => removeItem(key, item)} aria-label="Ukloni"><X size={14} /></button></li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="list-editor-add">
+                    <input
+                      value={drafts[key]}
+                      placeholder={placeholder}
+                      maxLength={key === 'specialties' ? 60 : 120}
+                      onChange={(event) => setDrafts((current) => ({ ...current, [key]: event.target.value }))}
+                      onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addItem(key) } }}
+                    />
+                    <button type="button" className="ghost-button" onClick={() => addItem(key)}><Plus size={14} /> Dodaj</button>
+                  </div>
+                </div>
+              ))}
+
+              <div className="list-editor">
+                <span className="trade-picker-label">Prevoz <small>(kako dolaziš do klijenta)</small></span>
+                <div className="trade-chips">
+                  {TRANSPORT_OPTIONS.map((option) => (
+                    <button key={option} type="button" className={`trade-chip ${sections.transportation.includes(option) ? 'active' : ''}`} onClick={() => toggleTransport(option)} aria-pressed={sections.transportation.includes(option)}>{option}</button>
+                  ))}
+                </div>
+              </div>
+
+              {!sectionScan.clean && <div className="form-error">{contactInfoMessage(sectionScan, 'iskustvo')}</div>}
+              <RuleOneNotice compact />
+              <button type="submit" className="primary-button auth-submit" disabled={saving || !sectionScan.clean}>{saving ? 'Čuvam...' : 'Sačuvaj iskustvo'}</button>
             </form>
           )}
 

@@ -8517,3 +8517,324 @@ body:has(.profile-cta-bar) .support-chat {
   font-size: 0.72rem;
   color: var(--text-soft);
 }
+
+/* experience editor */
+.list-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.list-editor-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.list-editor-items li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  font-weight: 600;
+}
+
+.list-editor-items li span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.list-editor-items li button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--text-soft);
+}
+
+.list-editor-items li button:hover {
+  color: #b93c3c;
+}
+
+.list-editor-add {
+  display: flex;
+  gap: 8px;
+}
+
+.list-editor-add input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.list-editor-add input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.list-editor-add .ghost-button {
+  white-space: nowrap;
+}
+
+/* ---------- Public profile v3 (Airtasker-style) ---------- */
+.pp-card {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  padding: 8px 28px 28px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 8px;
+}
+
+.pp-section {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--stroke);
+  display: grid;
+  gap: 12px;
+}
+
+.pp-section:last-child {
+  border-bottom: none;
+}
+
+.pp-section h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pp-section h3 strong {
+  color: var(--primary-strong);
+}
+
+.pp-about {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.pp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.pp-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pp-list-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+}
+
+.pp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pp-chip {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.pp-empty-link {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.meet-stats {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+
+.meet-stat {
+  display: grid;
+  gap: 2px;
+}
+
+.meet-stat strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+  color: var(--primary-strong);
+}
+
+.meet-stat strong svg {
+  color: var(--accent-strong);
+}
+
+.meet-stat span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.meet-stat span svg {
+  color: var(--text-soft);
+  cursor: help;
+}
+
+.meet-stat small {
+  color: var(--text-soft);
+}
+
+.meet-trust-line {
+  display: grid;
+  gap: 6px;
+}
+
+.meet-trust-line small {
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.badge-legend-box {
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.badge-legend-box summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--primary);
+  list-style: none;
+}
+
+.badge-legend-box summary::-webkit-details-marker {
+  display: none;
+}
+
+.badge-legend-box .badge-legend {
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.badge-legend-box .badge-legend li {
+  display: grid;
+  gap: 4px;
+}
+
+/* avatar with tier ring + badge medallions */
+.avatar-badged {
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  flex-shrink: 0;
+  --ring: rgba(13, 42, 82, 0.12);
+}
+
+.avatar-badged.tier-verified { --ring: #2f9e5f; }
+.avatar-badged.tier-trusted { --ring: var(--primary); }
+.avatar-badged.tier-top { --ring: var(--accent); }
+.avatar-badged.tier-new { --ring: #7fb3ff; }
+.avatar-badged.tier-client { --ring: var(--primary-soft); }
+
+.avatar-badged-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(from 200deg, var(--ring), color-mix(in srgb, var(--ring) 55%, white), var(--ring));
+}
+
+.avatar-badged-ring img,
+.avatar-badged-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface);
+  background: var(--surface-soft);
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+}
+
+.avatar-medal {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--surface);
+  box-shadow: 0 6px 14px rgba(13, 42, 82, 0.2);
+  cursor: help;
+}
+
+.avatar-medal.badge-verified { background: #2f9e5f; color: white; }
+.avatar-medal.badge-top_rated { background: var(--accent); color: var(--primary-strong); }
+.avatar-medal.badge-founder { background: var(--primary-strong); color: var(--accent); }
+.avatar-medal.badge-flawless { background: #7c3aed; color: white; }
+.avatar-medal.badge-veteran { background: #b45309; color: white; }
+.avatar-medal.badge-local_hero { background: #0ea5e9; color: white; }
+.avatar-medal.badge-reliable { background: #1d4f8f; color: white; }
+.avatar-medal.badge-fast_responder { background: #f59e0b; color: white; }
+.avatar-medal.badge-rising_talent { background: #ec4899; color: white; }
+.avatar-medal.badge-trusted_client { background: #0f766e; color: white; }
+
+.avatar-medal.medal-0 { right: -4px; bottom: 6px; }
+.avatar-medal.medal-1 { right: -8px; top: 34%; }
+.avatar-medal.medal-2 { right: 6px; top: -2px; }
+.avatar-medal.medal-3 { left: -4px; bottom: 6px; }
+
+.is-provider .meet-card-top h1,
+.is-client .meet-card-top h1 {
+  font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+}
+
+@media (max-width: 760px) {
+  .pp-card {
+    padding: 4px 18px 18px;
+  }
+
+  .avatar-badged {
+    --size: 96px !important;
+  }
+}

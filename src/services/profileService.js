@@ -110,6 +110,18 @@ export const profileService = {
     const trades = Array.isArray(profile.trades)
       ? profile.trades.slice(0, 10).map((trade) => sanitizeText(trade)).filter(Boolean)
       : []
+    const list = (value, max, maxLength = 120) => (Array.isArray(value) ? value : [])
+      .map((item) => sanitizeText(item).slice(0, maxLength))
+      .filter(Boolean)
+      .slice(0, max)
+    const sections = {
+      education: list(profile.education, 10),
+      work_experience: list(profile.work_experience, 10),
+      specialties: list(profile.specialties, 15, 60),
+      transportation: list(profile.transportation, 8, 30),
+    }
+    const sectionScan = scanContactInfo(...sections.education, ...sections.work_experience, ...sections.specialties)
+    if (!sectionScan.clean) throw new Error(contactInfoMessage(sectionScan, 'profil'))
     const payload = {
       user_id: profile.user_id,
       full_name: input.fullName,
@@ -120,6 +132,7 @@ export const profileService = {
       avatar_url: sanitizeText(profile.avatar_url || profile.avatarUrl),
       account_type: accountType,
       trades: accountType === 'client' ? [] : trades,
+      ...sections,
       onboarding_completed: true,
     }
 

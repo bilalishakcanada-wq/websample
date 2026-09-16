@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -6,7 +6,6 @@ import {
   Bell,
   CalendarClock,
   Check,
-  ChevronDown,
   ChevronRight,
   MapPin,
   MessageCircle,
@@ -51,12 +50,7 @@ function HomePage() {
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [savedTasks, setSavedTasks] = useLocalStorage('poso-saved-tasks', [])
   const [notice, setNotice] = useState('')
-  const [categoriesOpen, setCategoriesOpen] = useState(false)
-  const megaMenuRef = useRef(null)
-  const closeTimerRef = useRef(null)
-  const [menuPinned, setMenuPinned] = useState(false)
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
-  const [navMode, setNavMode] = useState('client')
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
   const filteredTasks = useMemo(() => {
@@ -100,21 +94,6 @@ function HomePage() {
 
   useRevealOnScroll()
 
-  useEffect(() => {
-    if (!categoriesOpen) return undefined
-    const closeMenu = () => { setCategoriesOpen(false); setMenuPinned(false) }
-    const close = (event) => {
-      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target)) closeMenu()
-    }
-    const onKey = (event) => event.key === 'Escape' && closeMenu()
-    document.addEventListener('pointerdown', close)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('pointerdown', close)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [categoriesOpen])
-
   const showNotice = (message) => {
     setNotice(message)
     window.setTimeout(() => setNotice(''), 3000)
@@ -122,102 +101,6 @@ function HomePage() {
 
   return (
     <div className="marketplace-shell">
-      <header className="topbar">
-        <div className="brand-wrap">
-          <div className="brand-mark">P</div>
-          <div>
-            <div className="brand-name">Poso.ba</div>
-            <div className="brand-subtitle">Marketplace za usluge</div>
-          </div>
-        </div>
-
-        <nav className="main-nav" aria-label="Glavna navigacija">
-          <div
-            className="nav-mega"
-            ref={megaMenuRef}
-            onMouseEnter={() => {
-              if (isTouch) return
-              window.clearTimeout(closeTimerRef.current)
-              setCategoriesOpen(true)
-            }}
-            onMouseLeave={() => {
-              if (isTouch || menuPinned) return
-              window.clearTimeout(closeTimerRef.current)
-              closeTimerRef.current = window.setTimeout(() => setCategoriesOpen(false), 220)
-            }}
-          >
-            <button
-              type="button"
-              className="nav-mega-trigger"
-              aria-expanded={categoriesOpen}
-              onClick={() => {
-                window.clearTimeout(closeTimerRef.current)
-                const next = !(categoriesOpen && menuPinned)
-                setCategoriesOpen(next)
-                setMenuPinned(next)
-              }}
-            >
-              Kategorije <ChevronDown size={14} className={categoriesOpen ? 'rotated' : ''} />
-            </button>
-            {categoriesOpen && (
-              <div className="nav-mega-panel">
-                <div className="nav-mega-side">
-                  <h4>Šta vam treba?</h4>
-                  <p>Izaberite kategoriju da vidite ponudu.</p>
-                  <button
-                    type="button"
-                    className={`nav-mega-mode ${navMode === 'client' ? 'active' : ''}`}
-                    onClick={() => setNavMode('client')}
-                  >
-                    <span>KAO KLIJENT</span>
-                    Tražim izvođača za...
-                  </button>
-                  <button
-                    type="button"
-                    className={`nav-mega-mode ${navMode === 'provider' ? 'active' : ''}`}
-                    onClick={() => setNavMode('provider')}
-                  >
-                    <span>KAO IZVOĐAČ</span>
-                    Tražim posao u...
-                  </button>
-                </div>
-                <div className="nav-mega-grid">
-                  {serviceCategories.map(({ id, name, icon: Icon }) => (
-                    <a
-                      key={id}
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault()
-                        setCategoriesOpen(false)
-                        setMenuPinned(false)
-                        navigate(navMode === 'provider' ? '/zaradi' : `/search?category=${encodeURIComponent(name)}`)
-                      }}
-                    >
-                      <Icon size={15} /> {name}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <a href="#poslovi">Poslovi</a>
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/zaradi') }}>Zaradi</a>
-          <a href="#cijene">Cijene</a>
-          <a href="#" onClick={(event) => { event.preventDefault(); navigate('/login') }}>Prijava</a>
-        </nav>
-
-        <div className="header-actions">
-          <button type="button" className="icon-button" aria-label="Obavijesti" onClick={() => showNotice('Obavijesti će biti dostupne nakon prijave.')}>
-            <Bell size={18} />
-          </button>
-          <button type="button" className="ghost-button" onClick={() => navigate('/login')}>
-            Uloguj se
-          </button>
-          <button type="button" className="primary-button" onClick={() => navigate('/objavi')}>
-            Postavi posao
-          </button>
-        </div>
-      </header>
 
       <main>
         <section className="hero-band" id="pocetna">

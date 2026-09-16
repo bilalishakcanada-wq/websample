@@ -28,6 +28,7 @@ import ContactPage from './pages/ContactPage'
 import PricingPage from './pages/PricingPage'
 import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage'
 import ProviderPrinciplesPage from './pages/ProviderPrinciplesPage'
+import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import MobileNav from './components/MobileNav'
 import SupportChat from './components/SupportChat'
@@ -35,6 +36,7 @@ import SupportChat from './components/SupportChat'
 function App() {
   return (
     <BrowserRouter>
+      <SiteHeader />
       <SupportChat />
       <Routes>
         <Route path="/" element={<HomePage />} />

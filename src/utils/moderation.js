@@ -2,7 +2,8 @@ const PROHIBITED_TERMS = [
   'oružje', 'oruzje', 'pištolj', 'pistolj', 'puška', 'puska', 'municija', 'granata', 'eksploziv',
   'gun', 'firearm', 'pistol', 'rifle', 'ammunition', 'explosive',
   'droga', 'drogu', 'drogom', 'kokain', 'heroin', 'marihuana', 'marijuana', 'kanabis', 'canabis',
-  'ecstasy', 'amfetamin', 'metamfetamin', 'cocaine',
+  'ecstasy', 'ekstazi', 'amfetamin', 'metamfetamin', 'cocaine',
+  'falsifikat', 'falsifikovan', 'lazna licna', 'lazni pasos', 'prostitucij', 'escort', 'seksualne usluge',
 ]
 
 const normalize = (value) => String(value || '')
@@ -62,6 +63,7 @@ export const CONTACT_KIND_LABEL = {
   handle: 'korisničko ime (@)',
   member_id: 'privatni ID',
   image_contact: 'kontakt na slici',
+  prohibited: 'zabranjen sadržaj (oružje, droga, falsifikati…)',
 }
 
 /** Scan one or more texts. Returns { clean, kinds } — kinds are the rule names that matched. */
@@ -82,6 +84,14 @@ export const contactInfoMessage = (scan, context = 'tekst') => {
   const what = scan.kinds.map((kind) => CONTACT_KIND_LABEL[kind] || kind)
   const list = what.length === 1 ? what[0] : `${what.slice(0, -1).join(', ')} i ${what[what.length - 1]}`
   return `Pravilo #1: izgleda da ${context} sadrži ${list}. Kontakti i društvene mreže nisu dozvoljeni na Poso.ba — sva komunikacija ide kroz platformu. Ukloni to pa pokušaj ponovo.`
+}
+
+/** Chat-specific check: contacts only before acceptance, illegal content always. */
+export const scanChatMessage = (text, contactsAllowed) => {
+  const prohibited = findProhibitedTerm(text)
+  if (prohibited) return { clean: false, kinds: ['prohibited'], term: prohibited }
+  if (contactsAllowed) return { clean: true, kinds: [] }
+  return scanContactInfo(text)
 }
 
 export const RULE_ONE_TEXT = 'Pravilo #1: bez brojeva telefona, emaila, linkova i društvenih mreža — u tekstu i na slikama. Kontakt se razmjenjuje tek nakon prihvaćene ponude, kroz poruke.'

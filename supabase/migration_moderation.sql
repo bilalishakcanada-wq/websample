@@ -70,3 +70,9 @@ create table if not exists public.moderation_settings (key text primary key, val
 --   on_support_message_notify(): user message -> notifications row per admin + pg_net POST to notify-admin (Telegram/email);
 --   admin reply -> notification for the user. on_moderation_event_notify(): suspended/flagged -> admins.
 --   admin_conversations(limit) and admin_support_threads() for the admin console. moderation_settings.notify_admin_external.
+
+-- Messaging (migration messaging_inbox_and_prohibited_content):
+--   conversation_prefs (saved/archived per user), my_inbox() one-call inbox with unread counts,
+--   mark_conversation_read(uuid); moderation_scan() gains kind 'prohibited' (weapons, drugs,
+--   counterfeit documents, sexual services) which is masked + strike everywhere, even in
+--   accepted-bid conversations where contact details are otherwise allowed.

@@ -27,10 +27,44 @@ export const messageService = {
     }).sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt))
   },
 
+  /** Inbox for the signed-in user: conversations with the other person, unread count, saved/archived flags — one call. */
+  async inbox() {
+    const { data, error } = await supabase.rpc('my_inbox')
+    if (error) {
+      console.error('Supabase inbox fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async markRead(conversationId) {
+    const { error } = await supabase.rpc('mark_conversation_read', { p_conversation_id: conversationId })
+    if (error) console.error('Supabase mark read failed', { message: error.message, code: error.code })
+  },
+
+  async setPref(userId, conversationId, changes) {
+    const { error } = await supabase
+      .from('conversation_prefs')
+      .upsert({ user_id: userId, conversation_id: conversationId, ...changes, updated_at: new Date().toISOString() }, { onConflict: 'user_id,conversation_id' })
+    if (error) {
+      console.error('Supabase conversation pref failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  /** Any message sent to me, in any conversation — used to keep the inbox live. */
+  subscribeToMine(userId, onInsert) {
+    const channel = supabase
+      .channel(`inbox-${userId}-${Math.random().toString(36).slice(2, 8)}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${userId}` }, (payload) => onInsert(payload.new))
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  },
+
   async listMessages(conversationId) {
     const { data, error } = await supabase
       .from('messages')
-      .select('id, sender_id, receiver_id, content, created_at')
+      .select('id, sender_id, receiver_id, content, created_at, read_at')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
 
@@ -67,7 +101,7 @@ export const messageService = {
 
   subscribeToConversation(conversationId, onInsert) {
     const channel = supabase
-      .channel(`conversation-${conversationId}`)
+      .channel(`conversation-${conversationId}-${Math.random().toString(36).slice(2, 8)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) => onInsert(payload.new))
       .subscribe()
     return () => supabase.removeChannel(channel)

@@ -1,6 +1,5 @@
 import { Lock } from 'lucide-react'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 
 function PrivacyPage() {
   return (
@@ -66,7 +65,6 @@ function PrivacyPage() {
           </p>
         </section>
       </main>
-      <MobileNav />
     </div>
   )
 }

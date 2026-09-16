@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
 import { profileService } from '../services/profileService'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 
 function MessagesPage() {
   const { user } = useAuth()
@@ -121,7 +120,6 @@ function MessagesPage() {
           </div>
         )}
       </main>
-      <MobileNav />
     </div>
   )
 }

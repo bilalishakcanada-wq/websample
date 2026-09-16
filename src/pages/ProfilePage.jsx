@@ -9,7 +9,6 @@ import { profileService } from '../services/profileService'
 import { portfolioService } from '../services/portfolioService'
 import { badgeService } from '../services/badgeService'
 import { serviceCategories } from '../data/categories'
-import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 
 const TABS = [
@@ -234,7 +233,6 @@ function ProfilePage() {
     return (
       <div className="page-shell page-with-mobile-nav">
         <div className="profile-shell"><div className="skeleton-card" /><div className="skeleton-card" /></div>
-        <MobileNav />
       </div>
     )
   }
@@ -459,7 +457,6 @@ function ProfilePage() {
           )}
         </section>
       </div>
-      <MobileNav />
     </div>
   )
 }

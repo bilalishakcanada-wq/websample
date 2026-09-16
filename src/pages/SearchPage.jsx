@@ -4,7 +4,6 @@ import {
   ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, Laptop, List, MapPin,
   Map as MapIcon, Search as SearchIcon, SlidersHorizontal, UserRound, Users, X,
 } from 'lucide-react'
-import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 import TaskMap from '../components/TaskMap'
 import { serviceCategories } from '../data/categories'
@@ -338,7 +337,6 @@ function SearchPage() {
           <TaskMap listings={listings} activeId={activeId} onSelect={selectFromMap} focus={mapFocus} />
         </aside>
       </main>
-      <MobileNav />
     </div>
   )
 }

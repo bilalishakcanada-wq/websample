@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
   BadgeCheck,
@@ -21,7 +21,6 @@ import {
 } from 'lucide-react'
 import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../data/mockData'
 import { serviceCategories } from '../data/categories'
-import MobileNav from '../components/MobileNav'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import { useLiveListings } from '../hooks/useLiveListings'
@@ -805,75 +804,6 @@ function HomePage() {
       {notice && <div className="form-success homepage-notice" role="status">{notice}</div>}
       {cityPickerOpen && <CityPicker value={city} onChange={setCity} onClose={() => setCityPickerOpen(false)} />}
 
-      <footer className="site-footer">
-        <div className="footer-cta">
-          <div>
-            <strong>Spreman/na da počneš?</strong>
-            <span>Objavi posao besplatno ili se registruj kao izvođač — traje minutu.</span>
-          </div>
-          <div className="footer-cta-actions">
-            <Link to="/objavi" className="primary-button">Objavi posao</Link>
-            <Link to="/zaradi" className="ghost-button">Zaradi kao izvođač</Link>
-          </div>
-        </div>
-
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <div className="brand-wrap">
-              <div className="brand-mark">P</div>
-              <div>
-                <div className="brand-name">Poso.ba</div>
-                <div className="brand-subtitle">Usluge za Bosnu i Hercegovinu</div>
-              </div>
-            </div>
-            <p>Marketplace koji povezuje klijente i provjerene izvođače širom BiH.</p>
-            <div className="footer-meta">
-              <span><ShieldCheck size={15} /> Moderirani oglasi</span>
-              <span><MessageCircle size={15} /> Zaštićena komunikacija</span>
-            </div>
-          </div>
-
-          <div className="footer-col">
-            <h4>Otkrij</h4>
-            <a href="#kako-radi">Kako radi</a>
-            <Link to="/search">Pretraži poslove</Link>
-            <Link to="/zaradi">Zaradi kao izvođač</Link>
-            <a href="#cijene">Planovi i cijene</a>
-          </div>
-
-          <div className="footer-col">
-            <h4>Kompanija</h4>
-            <Link to="/o-nama">O nama</Link>
-            <Link to="/pravila">Pravila i uslovi</Link>
-            <Link to="/privatnost">Privatnost</Link>
-          </div>
-
-          <div className="footer-col">
-            <h4>Za korisnike</h4>
-            <Link to="/objavi">Objavi posao</Link>
-            <Link to="/login">Prijava</Link>
-            <Link to="/register">Registracija</Link>
-            <Link to="/messages">Poruke</Link>
-          </div>
-
-          <div className="footer-col">
-            <h4>Popularni gradovi</h4>
-            {['Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Zenica', 'Bijeljina'].map((cityName) => (
-              <Link key={cityName} to={`/search?city=${encodeURIComponent(cityName)}`}>{cityName}</Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Poso.ba — Sva prava zadržana.</span>
-          <span className="footer-bottom-links">
-            <Link to="/pravila">Uslovi</Link>
-            <Link to="/privatnost">Privatnost</Link>
-            <a href="mailto:podrska@poso.ba">podrska@poso.ba</a>
-          </span>
-        </div>
-      </footer>
-      <MobileNav />
     </div>
   )
 }

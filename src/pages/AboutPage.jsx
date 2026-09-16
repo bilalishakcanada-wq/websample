@@ -1,6 +1,5 @@
 import { HeartHandshake, MapPin, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 
 function AboutPage() {
   return (
@@ -67,7 +66,6 @@ function AboutPage() {
           </p>
         </section>
       </main>
-      <MobileNav />
     </div>
   )
 }

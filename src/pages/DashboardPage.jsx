@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
 import { profileService } from '../services/profileService'
-import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate } from '../utils/dateFormat'
 
@@ -175,7 +174,6 @@ function DashboardPage() {
           ))}
         </section>
       </main>
-      <MobileNav />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Flag, MapPin, MessageCircle, ShieldCheck, Send, Sparkles, Star, Tag, UserRound, Users, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import MobileNav from '../components/MobileNav'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
 import { listingService } from '../services/listingService'
@@ -142,8 +141,8 @@ function ListingDetailPage() {
     }
   }
 
-  if (loading) return <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main><MobileNav /></div>
-  if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main><MobileNav /></div>
+  if (loading) return <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
+  if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
   return (
     <div className="app-shell page-with-mobile-nav">
@@ -296,7 +295,6 @@ function ListingDetailPage() {
           </section>
         </div>
       )}
-      <MobileNav />
     </div>
   )
 }

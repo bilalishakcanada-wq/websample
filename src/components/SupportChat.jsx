@@ -7,6 +7,12 @@ import { supportService } from '../services/supportService'
 function SupportChat() {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const show = () => setOpen(true)
+    window.addEventListener('poso:open-support', show)
+    return () => window.removeEventListener('poso:open-support', show)
+  }, [])
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(false)

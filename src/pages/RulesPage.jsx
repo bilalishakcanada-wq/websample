@@ -1,6 +1,5 @@
 import { ShieldAlert } from 'lucide-react'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 
 function RulesPage() {
   return (
@@ -65,7 +64,6 @@ function RulesPage() {
           </p>
         </section>
       </main>
-      <MobileNav />
     </div>
   )
 }

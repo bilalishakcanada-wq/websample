@@ -9,7 +9,6 @@ import { trustService } from '../services/trustService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 
 const BADGE_META = {
@@ -80,7 +79,6 @@ function PublicProfilePage() {
     return (
       <div className="app-shell page-with-mobile-nav">
         <main className="content-container"><div className="skeleton-card" /><div className="skeleton-card" /></main>
-        <MobileNav />
       </div>
     )
   }
@@ -93,7 +91,6 @@ function PublicProfilePage() {
           <h2>Profil nije pronađen</h2>
           <p>{error || 'Ovaj profil ne postoji ili trenutno nije javan.'}</p>
         </main>
-        <MobileNav />
       </div>
     )
   }
@@ -278,7 +275,6 @@ function PublicProfilePage() {
           </button>
         </div>
       )}
-      <MobileNav />
     </div>
   )
 }

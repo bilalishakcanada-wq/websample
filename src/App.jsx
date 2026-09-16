@@ -20,6 +20,12 @@ import AboutPage from './pages/AboutPage'
 import PrivacyPage from './pages/PrivacyPage'
 import PostTaskPage from './pages/PostTaskPage'
 import EarnMoneyPage from './pages/EarnMoneyPage'
+import HowItWorksPage from './pages/HowItWorksPage'
+import HelpPage from './pages/HelpPage'
+import GuidesPage from './pages/GuidesPage'
+import BusinessPage from './pages/BusinessPage'
+import SiteFooter from './components/SiteFooter'
+import MobileNav from './components/MobileNav'
 import SupportChat from './components/SupportChat'
 
 function App() {
@@ -43,11 +49,17 @@ function App() {
         <Route path="/pravila" element={<RulesPage />} />
         <Route path="/o-nama" element={<AboutPage />} />
         <Route path="/zaradi" element={<EarnMoneyPage />} />
+        <Route path="/kako-radi" element={<HowItWorksPage />} />
+        <Route path="/pomoc" element={<HelpPage />} />
+        <Route path="/vodici" element={<GuidesPage />} />
+        <Route path="/za-biznis" element={<BusinessPage />} />
         <Route path="/privatnost" element={<PrivacyPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
+      <SiteFooter />
+      <MobileNav />
     </BrowserRouter>
   )
 }

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Banknote, Bell, ChevronDown, MessageCircle, ShieldCheck, Sparkles, Star, TrendingUp, Wallet } from 'lucide-react'
 import BackHome from '../components/BackHome'
-import MobileNav from '../components/MobileNav'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 
 const FAQS = [
@@ -120,7 +119,7 @@ function EarnMoneyPage() {
           </div>
         </section>
 
-        <section className="earn-trust reveal">
+        <section className="earn-trust reveal" id="principi">
           <div className="section-heading centered">
             <div>
               <span className="eyebrow small-eyebrow">Sigurnost i podrška</span>
@@ -182,7 +181,6 @@ function EarnMoneyPage() {
           </button>
         </section>
       </main>
-      <MobileNav />
     </div>
   )
 }

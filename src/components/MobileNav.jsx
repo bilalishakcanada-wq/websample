@@ -1,5 +1,5 @@
 import { Home, MessageCircle, Plus, Search, UserRound } from 'lucide-react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 
 const tabs = [
   ['/', 'Početna', Home],
@@ -9,8 +9,12 @@ const tabs = [
   ['/profile', 'Profil', UserRound],
 ]
 
+const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']
+
 function MobileNav() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  if (HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))) return null
 
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">

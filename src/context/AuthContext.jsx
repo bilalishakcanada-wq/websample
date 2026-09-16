@@ -29,8 +29,8 @@ export function AuthProvider({ children }) {
 
     const initSession = async () => {
       try {
-        const { data } = await authService.getSession()
-        const sessionUser = data.session?.user || null
+        const data = await authService.getSession()
+        const sessionUser = data?.session?.user || null
         setUser(sessionUser)
         await refreshAdminStatus(sessionUser)
       } catch (sessionError) {
@@ -45,8 +45,8 @@ export function AuthProvider({ children }) {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       const sessionUser = session?.user || null
       setUser(sessionUser)
-      refreshAdminStatus(sessionUser)
-      setLoading(false)
+      // resolve the admin role before letting guarded routes decide
+      refreshAdminStatus(sessionUser).finally(() => setLoading(false))
     })
 
     return () => listener.subscription.unsubscribe()

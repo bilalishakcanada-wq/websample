@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp, IdCard, LifeBuoy, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Bot, ChevronDown, ChevronUp, IdCard, LifeBuoy, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
 import BackHome from '../components/BackHome'
 import { adminService } from '../services/adminService'
 import { supportService } from '../services/supportService'
 import { formatBosnianDate } from '../utils/dateFormat'
 
 const TABS = [
+  { id: 'oversight', label: 'Nadzor', icon: Radar },
   { id: 'support', label: 'Podrška', icon: LifeBuoy },
   { id: 'verification', label: 'Verifikacija', icon: ShieldCheck },
   { id: 'reports', label: 'Prijave', icon: ShieldAlert },
@@ -14,6 +15,120 @@ const TABS = [
   { id: 'moderation', label: 'Moderacija', icon: ScanEye },
   { id: 'registry', label: 'ID registar', icon: IdCard },
 ]
+
+const FEED_KINDS = [
+  ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
+  ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'],
+]
+const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '⭐', profile: '👤', moderation: '🛡️', report: '🚩' }
+
+/** Compact AI verdict for one account. */
+function AiVerdict({ assessment, assessedAt, onRun, busy }) {
+  if (!assessment) {
+    return <button type="button" className="ghost-button" onClick={onRun} disabled={busy}><Bot size={14} /> {busy ? 'AI analizira...' : 'AI procjena'}</button>
+  }
+  return (
+    <div className={`ai-verdict risk-${assessment.risk_level}`}>
+      <div className="ai-verdict-head">
+        <Bot size={14} />
+        <strong>{assessment.trust_score}/100</strong>
+        <span className="tag">{assessment.risk_level === 'high' ? 'Visok rizik' : assessment.risk_level === 'medium' ? 'Srednji rizik' : 'Nizak rizik'}</span>
+        {assessment.recommended_action !== 'none' && <span className="tag tag-flagged">{{ watch: 'Pratiti', review: 'Pregledati', suspend: 'Predlaže suspenziju' }[assessment.recommended_action]}</span>}
+        <button type="button" className="ghost-button" onClick={onRun} disabled={busy}>{busy ? '...' : 'Osvježi'}</button>
+      </div>
+      <p>{assessment.summary}</p>
+      {assessment.signals?.length > 0 && <ul>{assessment.signals.map((signal) => <li key={signal}>{signal}</li>)}</ul>}
+      {assessedAt && <small>{formatBosnianDate(assessedAt)} · {assessment.model}</small>}
+    </div>
+  )
+}
+
+function OversightTab() {
+  const [kind, setKind] = useState('')
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [live, setLive] = useState(0)
+  const [busyId, setBusyId] = useState('')
+  const [assessments, setAssessments] = useState({})
+  const kindRef = useRef(kind)
+  useEffect(() => { kindRef.current = kind }, [kind])
+
+  const load = (nextKind = kindRef.current) => {
+    setLoading(true)
+    adminService.activityFeed({ kind: nextKind || null, limit: 150 }).then(setRows).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load('') }, [])
+
+  // anything new anywhere on the platform refreshes the feed
+  useEffect(() => adminService.subscribeFeed(() => { setLive((count) => count + 1); load() }), [])
+
+  const act = async (fn) => {
+    setError('')
+    try { await fn(); load() } catch (requestError) { setError(requestError.message) }
+  }
+
+  const runAgent = async (userId) => {
+    setBusyId(userId)
+    setError('')
+    try {
+      const outcome = await adminService.runTrustAgent(userId)
+      if (outcome?.configured === false) setError('AI agent čeka ANTHROPIC_API_KEY (Supabase → Edge Functions → Secrets).')
+      const fresh = await adminService.getAssessment(userId)
+      setAssessments((current) => ({ ...current, [userId]: fresh }))
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setBusyId('')
+    }
+  }
+
+  return (
+    <div className="admin-table">
+      <div className="admin-live-row">
+        <span className="admin-live-dot" /> Uživo — svaka nova poruka, oglas, ponuda, recenzija, nalog i kršenje pravila pojavljuje se ovdje čim nastane.{live > 0 && ` (${live} novih od otvaranja)`}
+      </div>
+      <div className="admin-subtabs">
+        {FEED_KINDS.map(([value, label]) => (
+          <button key={value} type="button" className={kind === value ? 'active' : ''} onClick={() => { setKind(value); load(value) }}>{label}</button>
+        ))}
+      </div>
+      {error && <div className="form-error">{error}</div>}
+      {loading && rows.length === 0 ? <div className="page-state">Učitavanje...</div> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
+        <div key={`${row.kind}-${row.id}`} className={`admin-row feed-${row.kind}`}>
+          <div className="admin-feed-main">
+            <span className="admin-feed-kind">{KIND_ICON[row.kind] || '•'}</span>
+            <div>
+              <strong>{row.title}</strong>
+              {row.status && <span className={`tag tag-${row.status}`}>{row.status}</span>}
+              <p className="muted-text">
+                {row.full_name || 'Nepoznat'} {row.member_id && <span className="uid-chip">{row.member_id}</span>} · {formatBosnianDate(row.created_at)}
+                {row.account_status === 'suspended' && <span className="tag tag-suspended">suspendovan</span>}
+              </p>
+              {row.body && <p className="admin-snippet">{row.body}</p>}
+              {assessments[row.user_id] && <AiVerdict assessment={assessments[row.user_id].ai_assessment} assessedAt={assessments[row.user_id].ai_assessed_at} onRun={() => runAgent(row.user_id)} busy={busyId === row.user_id} />}
+            </div>
+          </div>
+          <div className="admin-row-actions">
+            {['message', 'bid', 'review', 'listing'].includes(row.kind) && (
+              <button type="button" className="ghost-button" onClick={() => { const note = window.prompt('Razlog uklanjanja (vidi ga korisnik u istoriji):', 'Kršenje pravila zajednice'); if (note != null) act(() => adminService.redact(row.kind, row.id, note)) }}>Ukloni</button>
+            )}
+            {row.kind === 'listing' && <a className="ghost-button" href={`/listings/${row.ref_id}`} target="_blank" rel="noreferrer">Otvori</a>}
+            {row.user_id && <a className="ghost-button" href={`/korisnik/${row.user_id}`} target="_blank" rel="noreferrer">Profil</a>}
+            {row.user_id && !assessments[row.user_id] && <button type="button" className="ghost-button" onClick={() => runAgent(row.user_id)} disabled={busyId === row.user_id}><Bot size={14} /> {busyId === row.user_id ? '...' : 'AI'}</button>}
+            {row.user_id && row.account_status !== 'suspended' && (
+              <button type="button" className="ghost-button danger" onClick={() => { const days = window.prompt('Suspenzija — broj dana (prazno = trajno):', '7'); if (days == null) return; const reason = window.prompt('Razlog:', 'Kršenje pravila zajednice') || null; act(() => adminService.suspend(row.user_id, days.trim() === '' ? null : Number(days), reason)) }}>Suspenduj</button>
+            )}
+            {row.user_id && row.account_status === 'suspended' && (
+              <button type="button" className="ghost-button" onClick={() => act(() => adminService.liftSuspension(row.user_id))}>Ukini suspenziju</button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function RegistryTab() {
   const [term, setTerm] = useState('')
@@ -424,10 +539,25 @@ function UsersTab() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState('')
+  const [busyId, setBusyId] = useState('')
 
   const load = () => {
     setLoading(true)
     adminService.listProfiles().then(setProfiles).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
+  }
+
+  const runAgent = async (userId) => {
+    setBusyId(userId)
+    setError('')
+    try {
+      const outcome = await adminService.runTrustAgent(userId)
+      if (outcome?.configured === false) setError('AI agent čeka ANTHROPIC_API_KEY (Supabase → Edge Functions → Secrets).')
+      load()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setBusyId('')
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -463,6 +593,7 @@ function UsersTab() {
               {profile.account_status === 'suspended' && <button type="button" className="ghost-button" onClick={async () => { try { await adminService.liftSuspension(profile.user_id); load() } catch (requestError) { setError(requestError.message) } }}>Aktiviraj</button>}
             </div>
           </div>
+          <div className="admin-user-ai"><AiVerdict assessment={profile.ai_assessment} assessedAt={profile.ai_assessed_at} onRun={() => runAgent(profile.user_id)} busy={busyId === profile.user_id} /></div>
           {expandedId === profile.user_id && <UserDetail userId={profile.user_id} />}
         </div>
       ))}
@@ -471,7 +602,7 @@ function UsersTab() {
 }
 
 function AdminPage() {
-  const [tab, setTab] = useState('support')
+  const [tab, setTab] = useState('oversight')
 
   return (
     <div className="page-shell admin-shell">
@@ -491,6 +622,7 @@ function AdminPage() {
         {tab === 'reports' && <ReportsTab />}
         {tab === 'listings' && <ListingsTab />}
         {tab === 'users' && <UsersTab />}
+        {tab === 'oversight' && <OversightTab />}
         {tab === 'moderation' && <ModerationTab />}
         {tab === 'registry' && <RegistryTab />}
       </div>

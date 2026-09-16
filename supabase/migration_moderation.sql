@@ -58,3 +58,10 @@ create table if not exists public.moderation_settings (key text primary key, val
 
 -- profiles.education / work_experience / specialties / transportation (text[]), exposed via public_profiles;
 -- moderate_content() scans text[] columns element by element (profiles trigger covers them).
+
+-- Admin oversight console (migration admin_oversight_console):
+--   admin RLS on messages/conversations/reviews; listings/reviews/moderation_events in the realtime publication;
+--   profiles.ai_assessment / ai_assessed_at (admin-only, protected); moderation_settings.ai_auto_suspend (default false);
+--   admin_activity_feed(limit, kind, user) — unified feed; admin_suspend(user, days, reason); admin_redact(kind, id, note);
+--   trust_agent_dossier(user) + trust_agent_queue(limit) for the trust-agent Edge Function; cron trust-agent-sweep (*/30).
+-- user_roles: FKs to roles(id) and auth.users(id) on delete cascade; is_admin_user(uuid) helper.

@@ -49,7 +49,7 @@ export const adminService = {
   async listProfiles() {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, user_id, full_name, email, city, subscription_status, account_status, suspended_until, suspension_reason, created_at, member_id')
+      .select('id, user_id, full_name, email, city, subscription_status, account_status, suspended_until, suspension_reason, created_at, member_id, ai_assessment, ai_assessed_at')
       .order('created_at', { ascending: false })
       .limit(100)
 
@@ -155,6 +155,55 @@ export const adminService = {
       throw publicError()
     }
     return data || []
+  },
+
+  /** Everything happening on the platform, newest first (listings, bids, messages, reviews, accounts, Rule #1, reports). */
+  async activityFeed({ limit = 150, kind = null, userId = null } = {}) {
+    const { data, error } = await supabase.rpc('admin_activity_feed', { p_limit: limit, p_kind: kind, p_user: userId })
+    if (error) {
+      console.error('Admin activity feed failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  /** Realtime: call `onChange` whenever a row is inserted in any watched table. Returns an unsubscribe function. */
+  subscribeFeed(onChange) {
+    const channel = supabase.channel('admin-oversight')
+    for (const table of ['listings', 'bids', 'messages', 'reviews', 'moderation_events']) {
+      channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table }, (payload) => onChange(table, payload.new))
+    }
+    channel.subscribe()
+    return () => supabase.removeChannel(channel)
+  },
+
+  async suspend(userId, days = null, reason = null) {
+    const { error } = await supabase.rpc('admin_suspend', { p_user_id: userId, p_days: days, p_reason: reason })
+    if (error) {
+      console.error('Admin suspend failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  /** Remove content without losing history: message/bid text is replaced, reviews deleted, listings archived. */
+  async redact(kind, id, note = null) {
+    const { error } = await supabase.rpc('admin_redact', { p_kind: kind, p_id: id, p_note: note })
+    if (error) {
+      console.error('Admin redact failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  /** Ask the AI trust agent to (re)assess one account now. */
+  async runTrustAgent(userId) {
+    const { data, error } = await supabase.functions.invoke('trust-agent', { body: { user_id: userId } })
+    if (error) throw new Error('AI agent trenutno nije dostupan.')
+    return data
+  },
+
+  async getAssessment(userId) {
+    const { data } = await supabase.from('profiles').select('ai_assessment, ai_assessed_at').eq('user_id', userId).maybeSingle()
+    return data || null
   },
 
   async setVerificationStatus(id, status) {

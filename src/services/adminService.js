@@ -86,7 +86,7 @@ export const adminService = {
   async listVerificationRequests() {
     const { data, error } = await supabase
       .from('verification_requests')
-      .select('id, user_id, document_url, note, trade, status, created_at')
+      .select('id, user_id, document_url, note, trade, kind, licence_type, status, created_at')
       .order('created_at', { ascending: false })
       .limit(100)
 

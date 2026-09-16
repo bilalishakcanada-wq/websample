@@ -42,9 +42,9 @@ function NotificationBell() {
       await notificationService.markRead([item.id])
       setItems((current) => current.map((row) => (row.id === item.id ? { ...row, read_at: new Date().toISOString() } : row)))
     }
-    if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/profile')
+    if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
     else if (item.type === 'support_reply') window.dispatchEvent(new CustomEvent('poso:open-support'))
-    else navigate('/dashboard')
+    else navigate('/account/obavijesti')
   }
 
   const markAll = async () => {

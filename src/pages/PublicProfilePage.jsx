@@ -107,7 +107,7 @@ function PublicProfilePage() {
   const firstName = firstNameOf(profile.display_name)
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3)
   const jobsDecided = (trust?.completed_jobs || 0) + (trust?.failed_jobs || 0)
-  const editHref = isOwnProfile ? '/profile?tab=iskustvo' : null
+  const editHref = isOwnProfile ? '/account/vjestine' : null
   const tier = isProvider ? (trust?.tier || 'unverified') : 'client'
 
   const reportProfile = async () => {
@@ -199,7 +199,7 @@ function PublicProfilePage() {
             <h3>O meni</h3>
             {profile.bio
               ? <p className="pp-about">{profile.bio}</p>
-              : isOwnProfile ? <Link to="/profile" className="pp-empty-link">Dodaj kratak opis o sebi →</Link> : <p className="muted-text">{firstName} još nije dodao/la opis.</p>}
+              : isOwnProfile ? <Link to="/account/profil" className="pp-empty-link">Dodaj kratak opis o sebi →</Link> : <p className="muted-text">{firstName} još nije dodao/la opis.</p>}
           </section>
 
           <section className="pp-section">

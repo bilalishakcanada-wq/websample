@@ -76,3 +76,12 @@ create table if not exists public.moderation_settings (key text primary key, val
 --   mark_conversation_read(uuid); moderation_scan() gains kind 'prohibited' (weapons, drugs,
 --   counterfeit documents, sexual services) which is masked + strike everywhere, even in
 --   accepted-bid conversations where contact details are otherwise allowed.
+
+-- Account panel (migration account_panel_tiers_badges_payouts):
+--   profiles.birth_date / tax_id (JMBG/JIB, private) / languages / phone_verified_at / notify_email / notify_push
+--   badges: mobile_verified, id_verified, police_check, payment_verified, licence_{electrician,plumber,gas,hvac,construction,driver}
+--   verification_requests.kind (trade|identity|licence|police_check) + licence_type; handle_verification_approved() awards the matching badge
+--   payout_accounts (private; RLS own + admin read) -> payment_verified badge via trigger
+--   on_auth_phone_confirmed(): trigger on auth.users -> profiles.phone_verified_at + mobile_verified badge
+--   fee_tiers (bronze 0/15%, silver 500/13%, gold 1500/11%, platinum 3000/9% — editable), provider_earnings_30d(),
+--   my_tier_dashboard(), my_payment_history(), my_verification_progress()

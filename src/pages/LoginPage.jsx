@@ -17,7 +17,7 @@ function LoginPage() {
   const verificationPending = searchParams.get('verification') === 'pending'
 
   if (user) {
-    const destination = location.state?.from?.pathname || '/dashboard'
+    const destination = location.state?.from?.pathname || '/account'
     return <Navigate to={destination} replace />
   }
 
@@ -33,7 +33,7 @@ function LoginPage() {
 
     try {
       await login({ ...form, captchaToken })
-      navigate('/dashboard')
+      navigate('/account')
     } catch (err) {
       setError(err.message)
     } finally {

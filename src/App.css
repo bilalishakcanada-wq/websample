@@ -10006,3 +10006,966 @@ body:has(.profile-cta-bar) .support-chat {
     max-width: 86%;
   }
 }
+
+/* ---------- Account panel (sidebar + sections) ---------- */
+.account-page {
+  padding-top: 16px;
+}
+
+.account-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 0 20px 60px;
+}
+
+.account-sidebar {
+  position: sticky;
+  top: calc(var(--header-h) + 16px);
+  background: var(--surface-soft);
+  border-radius: 28px;
+  padding: 32px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.account-avatar {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  padding: 0;
+  border: 3px solid var(--primary);
+  background: #eaf1fb;
+  display: grid;
+  place-items: center;
+  color: #a9bbd6;
+  overflow: visible;
+}
+
+.account-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account-avatar-edit {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--primary-strong);
+  border: 2px solid var(--surface);
+}
+
+.account-name {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-size: 1.35rem;
+  color: var(--primary-strong);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.account-type {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.account-avatar-notice {
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.account-nav {
+  width: 100%;
+  margin-top: 14px;
+  display: grid;
+  gap: 2px;
+}
+
+.account-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.account-nav a svg:first-child {
+  color: var(--text-soft);
+}
+
+.account-nav a:hover {
+  background: rgba(13, 42, 82, 0.06);
+}
+
+.account-nav a.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 6px 16px rgba(13, 42, 82, 0.08);
+}
+
+.account-nav a.active svg:first-child {
+  color: var(--accent-strong);
+}
+
+.account-nav-chevron {
+  margin-left: auto;
+}
+
+.account-main {
+  min-width: 0;
+}
+
+.account-section {
+  display: grid;
+  gap: 14px;
+  padding: 8px 0 0;
+}
+
+.account-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.account-section-head h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3.4vw, 2.7rem);
+  font-stretch: 78%;
+  font-weight: 900;
+}
+
+.account-sub {
+  margin: 18px 0 2px;
+  font-size: 1.05rem;
+  font-stretch: 100%;
+  font-weight: 700;
+}
+
+.account-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-top: 8px;
+}
+
+.verif-meter {
+  display: grid;
+  gap: 6px;
+  min-width: 240px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.verif-meter-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(13, 42, 82, 0.1);
+  overflow: hidden;
+}
+
+.verif-meter-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f9e5f, #7fe0a4);
+  transition: width 0.4s ease;
+}
+
+.account-avatar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.account-avatar-mini {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+  overflow: hidden;
+}
+
+.account-avatar-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-public-link {
+  margin-left: auto;
+}
+
+.account-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  max-width: 760px;
+  margin-top: 8px;
+}
+
+.account-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.account-field > span {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.account-field > span small {
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.account-field input:not([type='checkbox']),
+.account-field textarea,
+.account-field select,
+.account-secret input,
+.account-date input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: var(--surface-soft);
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.account-field input:focus,
+.account-field textarea:focus,
+.account-secret input:focus,
+.account-date input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+  background: var(--surface);
+}
+
+.account-field input.is-readonly {
+  background: #e9edf4;
+  color: var(--text-soft);
+}
+
+.account-field small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.account-field small.is-error {
+  color: #b93c3c;
+}
+
+.account-field-wide {
+  grid-column: 1 / -1;
+}
+
+.account-field .city-field input {
+  padding-left: 2.6rem;
+}
+
+.account-field .city-field label {
+  display: none;
+}
+
+.account-date {
+  display: flex;
+  gap: 10px;
+}
+
+.account-date input {
+  width: 92px;
+  text-align: center;
+}
+
+.account-secret {
+  position: relative;
+}
+
+.account-secret button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--text-soft);
+}
+
+.goal-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.goal-card {
+  min-width: 170px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 22px 18px 16px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  color: var(--text);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.goal-card span {
+  font-weight: 800;
+}
+
+.goal-card small {
+  color: var(--text-soft);
+}
+
+.goal-card.active {
+  background: var(--primary-strong);
+  color: white;
+}
+
+.goal-card.active small {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.goal-card.active svg {
+  color: var(--accent);
+}
+
+.account-id-card {
+  max-width: 760px;
+  margin-top: 8px;
+}
+
+.account-danger {
+  margin-top: 18px;
+}
+
+.account-danger .danger-button {
+  padding: 0.85rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.55rem 0.9rem;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check-pill input {
+  accent-color: var(--primary);
+}
+
+.check-pill.active {
+  background: rgba(13, 42, 82, 0.1);
+  color: var(--primary);
+}
+
+/* badges */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 40px;
+  margin-top: 6px;
+}
+
+.badge-row-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.badge-row-icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.state-done .badge-row-icon {
+  background: #e3f6e9;
+  color: #1d6b3a;
+}
+
+.badge-row-tick {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  background: #2f9e5f;
+  color: white;
+  border-radius: 50%;
+  padding: 1px;
+  border: 2px solid var(--surface);
+  width: 16px;
+  height: 16px;
+}
+
+.badge-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.badge-row-text strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.badge-row-text p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+
+.badge-row-action {
+  flex-shrink: 0;
+}
+
+.badge-add {
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  background: rgba(13, 42, 82, 0.08);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.badge-add:hover {
+  background: rgba(13, 42, 82, 0.14);
+}
+
+.badge-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.badge-state.done { background: #e3f6e9; color: #1d6b3a; }
+.badge-state.pending { background: #fff6db; color: #6b4b00; }
+
+.phone-verify {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.phone-verify input {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.phone-verify .primary-button {
+  padding: 0.6rem 1rem;
+}
+
+.account-inline-count {
+  margin-left: 12px;
+}
+
+.portfolio-empty-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+}
+
+/* tier dashboard */
+.tier-current {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 0 22px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.tier-current strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+}
+
+.tier-current span {
+  color: var(--text-soft);
+}
+
+.tier-next {
+  border-bottom: none;
+}
+
+.tier-medal.locked {
+  filter: grayscale(0.4) opacity(0.85);
+}
+
+.tier-bar {
+  height: 34px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.tier-bar-fill {
+  height: 100%;
+  min-width: 70px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  display: flex;
+  align-items: center;
+  padding-left: 14px;
+  font-weight: 800;
+  color: var(--primary-strong);
+  transition: width 0.5s ease;
+}
+
+.tier-bar-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  margin-top: 6px;
+}
+
+.tier-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.tier-table {
+  display: grid;
+  gap: 18px;
+}
+
+.tier-table-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.tier-table-row > div {
+  flex: 1;
+  display: grid;
+}
+
+.tier-table-row span {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.tier-table-row b {
+  color: var(--primary);
+}
+
+.tier-table-row b.best {
+  color: #1d6b3a;
+}
+
+/* payments */
+.pay-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pay-summary div {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  display: grid;
+  gap: 2px;
+}
+
+.pay-summary span {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.pay-summary strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--primary-strong);
+}
+
+.pay-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.pay-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.pay-list li > div:first-of-type {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.pay-list small {
+  color: var(--text-soft);
+}
+
+.pay-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pay-icon.earned { background: #e3f6e9; color: #1d6b3a; }
+.pay-icon.paid { background: var(--surface-soft); color: var(--text-soft); }
+
+.pay-amount {
+  text-align: right;
+  display: grid;
+}
+
+.account-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.account-tabs button {
+  padding: 10px 2px;
+  background: none;
+  color: var(--text);
+  font-weight: 700;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+
+.account-tabs button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.account-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.account-link-button svg {
+  color: var(--primary);
+}
+
+.credits-balance {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--primary);
+}
+
+.privacy-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.privacy-note div {
+  display: grid;
+  gap: 2px;
+}
+
+.privacy-note span {
+  font-size: 0.86rem;
+  color: var(--text-soft);
+}
+
+.payout-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.payout-card > div:first-of-type {
+  flex: 1;
+  display: grid;
+}
+
+.payout-card small,
+.payout-card span {
+  color: var(--text-soft);
+}
+
+.payout-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.payout-card-actions .danger {
+  color: #b93c3c;
+}
+
+/* notifications + empty states */
+.account-empty {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.account-empty p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.account-empty-art {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.account-empty-art.notif-art {
+  width: auto;
+  height: auto;
+  background: none;
+}
+
+.account-empty-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.notif-list li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.notif-list li.unread {
+  background: rgba(245, 180, 0, 0.1);
+}
+
+.notif-list-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.notif-list li > div {
+  display: grid;
+  gap: 2px;
+}
+
+.notif-list p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.notif-list time {
+  font-size: 0.74rem;
+  color: var(--text-soft);
+}
+
+/* settings */
+.settings-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+}
+
+.settings-row > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.settings-row > div span {
+  font-size: 0.86rem;
+  color: var(--text-soft);
+}
+
+.settings-row input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+}
+
+.settings-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-inline input {
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--stroke);
+  background: var(--surface-soft);
+}
+
+.account-home .dashboard-topline h1 {
+  font-stretch: 80%;
+}
+
+@media (max-width: 960px) {
+  .account-shell {
+    grid-template-columns: 1fr;
+    padding: 0 16px 40px;
+  }
+
+  .account-sidebar {
+    position: static;
+    padding: 22px 16px 12px;
+  }
+
+  .account-avatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  .account-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+
+  .account-nav a {
+    white-space: nowrap;
+    padding: 10px 12px;
+  }
+
+  .account-nav-chevron {
+    display: none;
+  }
+
+  .account-form,
+  .badge-grid,
+  .pay-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .account-public-link {
+    margin-left: 0;
+  }
+}

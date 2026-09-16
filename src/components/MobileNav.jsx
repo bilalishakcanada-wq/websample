@@ -6,7 +6,7 @@ const tabs = [
   ['/search', 'Pretraga', Search],
   ['/objavi', 'Objavi', Plus],
   ['/messages', 'Poruke', MessageCircle],
-  ['/profile', 'Profil', UserRound],
+  ['/account', 'Nalog', UserRound],
 ]
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']

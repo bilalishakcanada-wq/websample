@@ -6,7 +6,7 @@ function PrivacyPage() {
       eyebrow="Pravna obavještenja"
       title="Politika privatnosti"
       lead="Koje podatke čuvamo, zašto i koliko dugo — i kako ih možeš vidjeti, izmijeniti ili obrisati."
-      cta={{ eyebrow: 'Tvoji podaci', text: 'Želiš izvoz ili brisanje podataka? Sve ide iz postavki profila.', to: '/profile?tab=racun', label: 'Postavke naloga' }}
+      cta={{ eyebrow: 'Tvoji podaci', text: 'Želiš izvoz ili brisanje podataka? Sve ide iz postavki profila.', to: '/account/postavke', label: 'Postavke naloga' }}
     >
         <section className="info-section reveal">
           <p className="muted-text">

@@ -8,6 +8,8 @@ export default defineConfig({
     // maplibre-gl ships its own worker bundle; pre-bundling breaks it.
     exclude: ['maplibre-gl'],
   },
+  // the desktop app may assign a port via PORT when 5173 is already taken
+  server: { port: Number(process.env.PORT) || 5173 },
   plugins: [
     react(),
     VitePWA({

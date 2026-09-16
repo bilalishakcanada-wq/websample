@@ -122,9 +122,17 @@ export const profileService = {
     }
     const sectionScan = scanContactInfo(...sections.education, ...sections.work_experience, ...sections.specialties)
     if (!sectionScan.clean) throw new Error(contactInfoMessage(sectionScan, 'profil'))
+    const birthDate = /^\d{4}-\d{2}-\d{2}$/.test(profile.birth_date || '') ? profile.birth_date : null
+    const taxId = sanitizeText(profile.tax_id || '').replace(/\s+/g, '').slice(0, 13)
+    if (taxId && !/^\d{13}$/.test(taxId)) throw new Error('JMBG / JIB ima 13 cifara.')
     const payload = {
       user_id: profile.user_id,
       full_name: input.fullName,
+      birth_date: birthDate,
+      tax_id: taxId || null,
+      languages: list(profile.languages, 8, 40),
+      notify_email: profile.notify_email !== false,
+      notify_push: profile.notify_push !== false,
       email: sanitizeText((profile.email || '').toLowerCase()),
       phone: input.phone,
       city: input.city,

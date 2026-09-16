@@ -473,7 +473,7 @@ function VerificationTab() {
           <div>
             <strong>Korisnik {request.user_id.slice(0, 8)}</strong>
             <p className="muted-text">
-              {request.trade ? `Struka: ${request.trade}` : 'Struka nije navedena'} · {formatBosnianDate(request.created_at)}
+              {({ identity: 'Lična karta / pasoš', police_check: 'Uvjerenje o nekažnjavanju', licence: `Licenca: ${{ electrician: 'električar', plumber: 'vodoinstalater', gas: 'plin', hvac: 'klimatizacija i grijanje', construction: 'građevina', driver: 'vozačka' }[request.licence_type] || request.licence_type}` }[request.kind]) || (request.trade ? `Struka: ${request.trade}` : 'Struka nije navedena')} · {formatBosnianDate(request.created_at)}
             </p>
             <a href={request.document_url} target="_blank" rel="noreferrer" className="text-link">Pogledaj dokument</a>
           </div>

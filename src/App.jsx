@@ -1,11 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
-import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ForbiddenPage from './pages/ForbiddenPage'
@@ -28,6 +27,25 @@ import ContactPage from './pages/ContactPage'
 import PricingPage from './pages/PricingPage'
 import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage'
 import ProviderPrinciplesPage from './pages/ProviderPrinciplesPage'
+import TiersInfoPage from './pages/TiersInfoPage'
+import AccountLayout from './pages/account/AccountLayout'
+import ProfileSettingsPage from './pages/account/ProfileSettingsPage'
+import SkillsPage from './pages/account/SkillsPage'
+import BadgesPage from './pages/account/BadgesPage'
+import PortfolioPage from './pages/account/PortfolioPage'
+import TierDashboardPage from './pages/account/TierDashboardPage'
+import PaymentHistoryPage from './pages/account/PaymentHistoryPage'
+import PaymentMethodsPage from './pages/account/PaymentMethodsPage'
+import NotificationsPage from './pages/account/NotificationsPage'
+import SettingsPage from './pages/account/SettingsPage'
+
+// Old links keep working: /profile?tab=... -> the matching account section.
+function LegacyProfileRedirect() {
+  const [params] = useSearchParams()
+  const tab = params.get('tab')
+  const target = { usluge: '/account/vjestine', iskustvo: '/account/vjestine', portfolio: '/account/portfolio', verifikacija: '/account/znacke', racun: '/account/postavke' }[tab] || '/account/profil'
+  return <Navigate to={params.get('setup') === '1' ? `${target}?setup=1` : target} replace />
+}
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import MobileNav from './components/MobileNav'
@@ -49,8 +67,21 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/objavi" element={<ProtectedRoute><PostTaskPage /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<Navigate to="/account" replace />} />
+        <Route path="/profile" element={<LegacyProfileRedirect />} />
+        <Route path="/nivoi" element={<TiersInfoPage />} />
+        <Route path="/account" element={<ProtectedRoute><AccountLayout /></ProtectedRoute>}>
+          <Route index element={<DashboardPage />} />
+          <Route path="ploca" element={<TierDashboardPage />} />
+          <Route path="placanja" element={<PaymentHistoryPage />} />
+          <Route path="nacini-placanja" element={<PaymentMethodsPage />} />
+          <Route path="obavijesti" element={<NotificationsPage />} />
+          <Route path="profil" element={<ProfileSettingsPage />} />
+          <Route path="vjestine" element={<SkillsPage />} />
+          <Route path="znacke" element={<BadgesPage />} />
+          <Route path="portfolio" element={<PortfolioPage />} />
+          <Route path="postavke" element={<SettingsPage />} />
+        </Route>
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage /></ProtectedRoute>} />
         <Route path="/pravila" element={<RulesPage />} />
         <Route path="/o-nama" element={<AboutPage />} />

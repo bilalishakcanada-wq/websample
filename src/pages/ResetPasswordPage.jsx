@@ -15,7 +15,7 @@ function ResetPasswordPage() {
     setError('')
     try {
       await authService.updatePassword(password)
-      navigate('/dashboard', { replace: true })
+      navigate('/account', { replace: true })
     } catch (requestError) {
       setError(requestError.message)
     } finally {

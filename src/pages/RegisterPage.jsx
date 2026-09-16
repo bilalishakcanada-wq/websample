@@ -31,7 +31,7 @@ function RegisterPage() {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/account" replace />
   }
 
   const handleChange = (event) => {
@@ -51,7 +51,7 @@ function RegisterPage() {
         accountType,
         trades: offersServices ? trades : [],
       })
-      navigate(result.session ? '/dashboard' : '/login?verification=pending')
+      navigate(result.session ? '/account/profil?setup=1' : '/login?verification=pending')
     } catch (err) {
       setError(err.message)
     } finally {

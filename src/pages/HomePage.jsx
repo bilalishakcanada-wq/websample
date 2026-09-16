@@ -54,6 +54,8 @@ function HomePage() {
   const [notice, setNotice] = useState('')
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const megaMenuRef = useRef(null)
+  const closeTimerRef = useRef(null)
+  const [menuPinned, setMenuPinned] = useState(false)
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
   const [navMode, setNavMode] = useState('client')
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
@@ -101,10 +103,11 @@ function HomePage() {
 
   useEffect(() => {
     if (!categoriesOpen) return undefined
+    const closeMenu = () => { setCategoriesOpen(false); setMenuPinned(false) }
     const close = (event) => {
-      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target)) setCategoriesOpen(false)
+      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target)) closeMenu()
     }
-    const onKey = (event) => event.key === 'Escape' && setCategoriesOpen(false)
+    const onKey = (event) => event.key === 'Escape' && closeMenu()
     document.addEventListener('pointerdown', close)
     document.addEventListener('keydown', onKey)
     return () => {
@@ -133,10 +136,28 @@ function HomePage() {
           <div
             className="nav-mega"
             ref={megaMenuRef}
-            onMouseEnter={() => !isTouch && setCategoriesOpen(true)}
-            onMouseLeave={() => !isTouch && setCategoriesOpen(false)}
+            onMouseEnter={() => {
+              if (isTouch) return
+              window.clearTimeout(closeTimerRef.current)
+              setCategoriesOpen(true)
+            }}
+            onMouseLeave={() => {
+              if (isTouch || menuPinned) return
+              window.clearTimeout(closeTimerRef.current)
+              closeTimerRef.current = window.setTimeout(() => setCategoriesOpen(false), 220)
+            }}
           >
-            <button type="button" className="nav-mega-trigger" onClick={() => setCategoriesOpen((open) => isTouch ? !open : true)} aria-expanded={categoriesOpen}>
+            <button
+              type="button"
+              className="nav-mega-trigger"
+              aria-expanded={categoriesOpen}
+              onClick={() => {
+                window.clearTimeout(closeTimerRef.current)
+                const next = !(categoriesOpen && menuPinned)
+                setCategoriesOpen(next)
+                setMenuPinned(next)
+              }}
+            >
               Kategorije <ChevronDown size={14} className={categoriesOpen ? 'rotated' : ''} />
             </button>
             {categoriesOpen && (
@@ -169,6 +190,7 @@ function HomePage() {
                       onClick={(event) => {
                         event.preventDefault()
                         setCategoriesOpen(false)
+                        setMenuPinned(false)
                         navigate(navMode === 'provider' ? '/zaradi' : `/search?category=${encodeURIComponent(name)}`)
                       }}
                     >

@@ -3924,6 +3924,18 @@ select {
   position: relative;
 }
 
+/* Invisible bridge across the gap between the trigger and the panel, so the
+   pointer never "leaves" the menu on the way down to an item. Only present
+   while open so it doesn't block clicks on neighbouring nav links. */
+.nav-mega:has(.nav-mega-panel)::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 100%;
+  width: min(720px, 82vw);
+  height: 20px;
+}
+
 .nav-mega-trigger {
   display: inline-flex;
   align-items: center;

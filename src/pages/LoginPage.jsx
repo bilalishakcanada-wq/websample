@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
-import GoogleAuthButton from '../components/GoogleAuthButton'
+import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 
 function LoginPage() {
@@ -68,7 +68,7 @@ function LoginPage() {
         Nemaš račun? <Link to="/register">Registruj se</Link>
       </p>
 
-      <GoogleAuthButton label="Nastavi sa Google računom" onError={setError} />
+      <OAuthButtons verb="Prijavi se" onError={setError} />
 
       <p className="auth-switch">
         <Link to="/forgot-password">Zaboravljena lozinka?</Link>

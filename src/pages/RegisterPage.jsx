@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Briefcase, Hammer, Repeat } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
-import GoogleAuthButton from '../components/GoogleAuthButton'
+import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import { serviceCategories } from '../data/categories'
 
@@ -135,7 +135,7 @@ function RegisterPage() {
         Već imaš račun? <Link to="/login">Prijavi se</Link>
       </p>
 
-      <GoogleAuthButton label="Nastavi sa Google računom" onError={setError} />
+      <OAuthButtons verb="Registruj se" onError={setError} />
     </AuthLayout>
   )
 }

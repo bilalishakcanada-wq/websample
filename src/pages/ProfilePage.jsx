@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Briefcase, Camera, Check, Copy, Eye, EyeOff, Hammer, IdCard, Images, LogOut, OctagonAlert, Play, Repeat,
+  Briefcase, Camera, Check, ChevronDown, Copy, Eye, EyeOff, Hammer, IdCard, Images, LogOut, MapPin, OctagonAlert, Play, Repeat,
   Settings, ShieldAlert, ShieldBan, ShieldCheck, Sparkles, Star, Trash2, UserRound, Wrench,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -12,6 +12,8 @@ import { serviceCategories } from '../data/categories'
 import { contactInfoMessage, scanContactInfo } from '../utils/moderation'
 import { formatBosnianDate } from '../utils/dateFormat'
 import BackHome from '../components/BackHome'
+import CityPicker from '../components/CityPicker'
+import { formatBosnianPhone, isValidBosnianPhone } from '../utils/phone'
 import BadgeChip from '../components/BadgeChip'
 import RuleOneNotice from '../components/RuleOneNotice'
 
@@ -61,7 +63,8 @@ function ProfilePage() {
   const verificationInputRef = useRef(null)
 
   const [tab, setTab] = useState(['podaci', 'usluge', 'portfolio', 'verifikacija', 'racun'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'podaci')
-  const [form, setForm] = useState({ fullName: '', city: '', phone: '', bio: '' })
+  const [form, setForm] = useState({ firstName: '', lastName: '', city: '', phone: '', bio: '' })
+  const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [accountType, setAccountType] = useState('client')
   const [trades, setTrades] = useState([])
   const [account, setAccount] = useState(null) // system fields: member_id, account_status, verified_trade, …
@@ -84,6 +87,7 @@ function ProfilePage() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
+  const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim()
   const offersServices = accountType !== 'client'
   const onboardingCompleted = Boolean(account?.onboarding_completed)
   const isSetup = searchParams.get('setup') === '1' || (account && !onboardingCompleted)
@@ -93,7 +97,14 @@ function ProfilePage() {
     const bundle = await profileService.getMyBundle()
     const profile = bundle?.profile
     if (!profile) return
-    setForm({ fullName: profile.full_name || '', city: profile.city || '', phone: profile.phone || '', bio: profile.bio || '' })
+    const nameParts = String(profile.full_name || '').trim().split(/\s+/).filter(Boolean)
+    setForm({
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' '),
+      city: profile.city || '',
+      phone: formatBosnianPhone(profile.phone || ''),
+      bio: profile.bio || '',
+    })
     setAvatarUrl(profile.avatar_url || '')
     setAccountType(profile.account_type || 'client')
     setTrades(profile.trades || [])
@@ -123,8 +134,9 @@ function ProfilePage() {
 
   const checklist = useMemo(() => {
     const base = [
-      { id: 'name', label: 'Pravo ime i prezime', done: isValidFullName(form.fullName), tab: 'podaci' },
+      { id: 'name', label: 'Pravo ime i prezime', done: isValidFullName(fullName), tab: 'podaci' },
       { id: 'city', label: 'Grad', done: form.city.trim().length > 1, tab: 'podaci' },
+      { id: 'phone', label: 'Broj telefona', done: form.phone.trim().length > 6 && isValidBosnianPhone(form.phone), tab: 'podaci' },
       { id: 'avatar', label: 'Profilna slika', done: Boolean(avatarUrl), tab: 'podaci' },
       { id: 'bio', label: 'Kratki opis o sebi', done: form.bio.trim().length >= 20, tab: 'podaci' },
     ]
@@ -135,14 +147,15 @@ function ProfilePage() {
       { id: 'portfolio', label: 'Bar jedan rad u portfoliju', done: portfolio.length > 0, tab: 'portfolio' },
       { id: 'verified', label: 'Verifikacija struke', done: verificationStatus?.status === 'approved', tab: 'verifikacija' },
     ]
-  }, [form, avatarUrl, offersServices, trades, portfolio, verificationStatus])
+  }, [form, fullName, avatarUrl, offersServices, trades, portfolio, verificationStatus])
 
   const completion = Math.round((checklist.filter((item) => item.done).length / checklist.length) * 100)
   const missing = checklist.filter((item) => !item.done)
 
-  const nameOk = form.fullName.trim() === '' || isValidFullName(form.fullName)
+  const nameOk = fullName === '' || isValidFullName(fullName)
+  const phoneOk = isValidBosnianPhone(form.phone)
   const bioScan = useMemo(() => scanContactInfo(form.bio), [form.bio])
-  const nameScan = useMemo(() => scanContactInfo(form.fullName), [form.fullName])
+  const nameScan = useMemo(() => scanContactInfo(fullName), [fullName])
 
   const openTab = (id) => {
     setTab(id)
@@ -157,7 +170,7 @@ function ProfilePage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
+    setForm((current) => ({ ...current, [name]: name === 'phone' ? formatBosnianPhone(value) : value }))
   }
 
   const toggleTrade = (name) => {
@@ -167,6 +180,7 @@ function ProfilePage() {
   const persist = async (overrides = {}) => {
     const profile = await profileService.upsertProfile({
       ...form,
+      fullName,
       user_id: user.id,
       email: user.email,
       avatar_url: avatarUrl,
@@ -177,7 +191,13 @@ function ProfilePage() {
     updateProfile({ user_metadata: { ...user.user_metadata, full_name: profile.full_name, city: profile.city, phone: profile.phone } })
     setAccount((current) => ({ ...(current || {}), ...profile }))
     // the server may have masked something — reflect it
-    setForm((current) => ({ ...current, fullName: profile.full_name || current.fullName, bio: profile.bio ?? current.bio }))
+    const savedParts = String(profile.full_name || '').trim().split(/\s+/).filter(Boolean)
+    setForm((current) => ({
+      ...current,
+      firstName: savedParts[0] || current.firstName,
+      lastName: savedParts.length > 1 ? savedParts.slice(1).join(' ') : current.lastName,
+      bio: profile.bio ?? current.bio,
+    }))
     return profile
   }
 
@@ -348,8 +368,8 @@ function ProfilePage() {
           <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleAvatarChange} />
 
           <div className="profile-hero-info">
-            <h1>{form.fullName.trim() || 'Tvoj profil'}</h1>
-            <p className="profile-public-name">Javno te drugi vide kao <strong>{displayNameOf(form.fullName)}</strong> — prezime ostaje samo tebi.</p>
+            <h1>{fullName || 'Tvoj profil'}</h1>
+            <p className="profile-public-name">Javno te drugi vide kao <strong>{displayNameOf(fullName)}</strong> — prezime ostaje samo tebi.</p>
             <div className="profile-hero-chips">
               <span className="profile-type-chip">{offersServices ? (accountType === 'both' ? 'Klijent + izvođač' : 'Izvođač') : 'Klijent'}</span>
               {offersServices && (
@@ -440,20 +460,32 @@ function ProfilePage() {
         <section className="profile-panel" key={tab}>
           {tab === 'podaci' && (
             <form onSubmit={handleSubmit} className="auth-form">
-              <div className={`field ${!nameOk || !nameScan.clean ? 'field-invalid' : ''}`}>
-                <input id="fullName" name="fullName" placeholder=" " value={form.fullName} onChange={handleChange} required autoComplete="name" />
-                <label htmlFor="fullName">Ime i prezime</label>
-                <small>{!nameOk ? 'Pravo ime i prezime, samo slova — npr. "Bilal Ishak".' : 'Javno se prikazuje samo ime i inicijal prezimena.'}</small>
+              <div className="field-row">
+                <div className={`field ${!nameOk || !nameScan.clean ? 'field-invalid' : ''}`}>
+                  <input id="firstName" name="firstName" placeholder=" " value={form.firstName} onChange={handleChange} required autoComplete="given-name" />
+                  <label htmlFor="firstName">Ime</label>
+                </div>
+                <div className={`field ${!nameOk || !nameScan.clean ? 'field-invalid' : ''}`}>
+                  <input id="lastName" name="lastName" placeholder=" " value={form.lastName} onChange={handleChange} required autoComplete="family-name" />
+                  <label htmlFor="lastName">Prezime</label>
+                </div>
               </div>
+              <p className={`field-hint ${!nameOk ? 'is-error' : ''}`}>
+                {!nameOk ? 'Pravo ime i prezime, samo slova — npr. Bilal / Ishak.' : <>Javno se prikazuje samo ime i inicijal prezimena: <strong>{displayNameOf(fullName)}</strong>.</>}
+              </p>
               <div className="field-row">
                 <div className="field">
-                  <input id="city" name="city" placeholder=" " value={form.city} onChange={handleChange} autoComplete="address-level2" />
-                  <label htmlFor="city">Grad</label>
+                  <button type="button" className={`field-select ${form.city ? 'has-value' : ''}`} onClick={() => setCityPickerOpen(true)}>
+                    <MapPin size={16} />
+                    <span>{form.city || 'Izaberi grad'}</span>
+                    <ChevronDown size={16} />
+                  </button>
+                  <label className={form.city ? 'floated' : ''}>Grad</label>
                 </div>
-                <div className="field">
-                  <input id="phone" name="phone" placeholder=" " value={form.phone} onChange={handleChange} autoComplete="tel" />
+                <div className={`field ${!phoneOk ? 'field-invalid' : ''}`}>
+                  <input id="phone" name="phone" type="tel" inputMode="tel" placeholder=" " value={form.phone} onChange={handleChange} autoComplete="tel" maxLength={20} />
                   <label htmlFor="phone">Telefon (privatno)</label>
-                  <small>Nikad se ne prikazuje javno; dijeli se samo kroz poruke nakon prihvaćene ponude.</small>
+                  <small>{!phoneOk ? 'Unesi broj u obliku 061 234 567 ili +387 61 234 567.' : 'Nikad se ne prikazuje javno; dijeli se samo kroz poruke nakon prihvaćene ponude.'}</small>
                 </div>
               </div>
               <div className={`field field-textarea ${!bioScan.clean ? 'field-invalid' : ''}`}>
@@ -462,7 +494,7 @@ function ProfilePage() {
                 <small>{!bioScan.clean ? contactInfoMessage(bioScan, 'opis') : `${form.bio.length}/1000 — reci drugima ko si i šta radiš.`}</small>
               </div>
               <RuleOneNotice compact />
-              <button type="submit" className="primary-button auth-submit" disabled={saving || !nameOk || !bioScan.clean || !nameScan.clean}>{saving ? 'Čuvam...' : 'Sačuvaj podatke'}</button>
+              <button type="submit" className="primary-button auth-submit" disabled={saving || !nameOk || !phoneOk || !bioScan.clean || !nameScan.clean}>{saving ? 'Čuvam...' : 'Sačuvaj podatke'}</button>
             </form>
           )}
 
@@ -610,6 +642,7 @@ function ProfilePage() {
           )}
         </section>
       </div>
+      {cityPickerOpen && <CityPicker value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} onClose={() => setCityPickerOpen(false)} />}
     </div>
   )
 }

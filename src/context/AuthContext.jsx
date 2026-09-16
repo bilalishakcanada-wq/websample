@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { authService } from '../services/authService'
+import { trustService } from '../services/trustService'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
@@ -17,6 +18,7 @@ export function AuthProvider({ children }) {
     }
     const { data, error: rpcError } = await supabase.rpc('is_admin')
     setIsAdmin(!rpcError && data === true)
+    trustService.touchLastSeen()
   }
 
   useEffect(() => {

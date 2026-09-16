@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Banknote, Bell, ChevronDown, MessageCircle, ShieldCheck, Sparkles, Star, TrendingUp, Wallet } from 'lucide-react'
-import BackHome from '../components/BackHome'
+import { ArrowRight, Banknote, ChevronDown, MessageCircle, ShieldCheck, Star, Wallet } from 'lucide-react'
+import { contactService } from '../services/contactService'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
+
+const formatKM = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 const FAQS = [
   { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Poso.ba je traži.' },
@@ -15,66 +17,89 @@ const FAQS = [
 function EarnMoneyPage() {
   const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState(null)
+  const [stats, setStats] = useState([])
+  const [calcCategory, setCalcCategory] = useState('')
+  const [jobsPerWeek, setJobsPerWeek] = useState(4)
+
+  useEffect(() => {
+    let active = true
+    contactService.categoryPriceStats().then((rows) => {
+      if (!active) return
+      const priced = rows.filter((row) => Number(row.priced_count) > 0).sort((a, b) => Number(b.listing_count) - Number(a.listing_count))
+      setStats(priced)
+      setCalcCategory((current) => current || priced[0]?.category || '')
+    })
+    return () => { active = false }
+  }, [])
+
+  // platform-wide average job price, weighted by how many priced listings each category has
+  const avgPrice = useMemo(() => {
+    const totals = stats.reduce((acc, row) => ({ sum: acc.sum + Number(row.avg_price) * Number(row.priced_count), n: acc.n + Number(row.priced_count) }), { sum: 0, n: 0 })
+    return totals.n ? Math.round(totals.sum / totals.n) : 0
+  }, [stats])
+  const monthlyPotential = avgPrice ? Math.round((avgPrice * 20) / 100) * 100 : 0
+  const selectedAvg = Math.round(Number(stats.find((row) => row.category === calcCategory)?.avg_price || 0))
 
   useRevealOnScroll()
 
   return (
     <div className="app-shell page-with-mobile-nav">
-      <section className="hero-band earn-hero">
-        <div className="hero-section earn-hero-section">
-          <div className="hero-copy">
-            <BackHome label="Nazad" />
-            <div className="eyebrow">
-              <Sparkles size={14} />
-              Postani izvođač
-            </div>
-            <h1 className="hero-headline">
-              Budi svoj<br />
-              <span className="hero-headline-accent">šef.</span>
-            </h1>
-            <p>
-              Pronađi poslove koji odgovaraju tvojim vještinama i rasporedu. Besplatna registracija,
-              bez pretplate za osnovno korištenje — samo ti i klijenti koji te trebaju.
-            </p>
-            <div className="earn-hero-actions">
-              <button type="button" className="primary-button large-button" onClick={() => navigate('/register')}>
-                Pridruži se besplatno
-              </button>
-              <button type="button" className="ghost-button large-button" onClick={() => navigate('/search')}>
-                Pregledaj poslove
-              </button>
-            </div>
-          </div>
-
-          <div className="hero-card">
-            <div className="hero-image-wrap earn-hero-image">
-              <img src="/images/categories/home.jpg" alt="Izvođač na poslu" loading="eager" />
-            </div>
-            <div className="float-card float-card-payment">
-              <Wallet size={16} />
-              <div>
-                <strong>Isplata primljena!</strong>
-                <span>Krečenje stana · 220 KM</span>
-              </div>
-            </div>
-            <div className="float-card float-card-earnings">
-              <div className="float-card-earnings-top">
-                <span>Ukupna zarada</span>
-                <span className="float-card-trend"><TrendingUp size={12} /> 20%</span>
-              </div>
-              <strong>3.140 KM</strong>
-              <svg viewBox="0 0 100 28" className="float-card-sparkline" preserveAspectRatio="none">
-                <polyline points="0,22 15,18 30,20 45,10 60,14 75,4 90,8 100,2" />
-              </svg>
-            </div>
-            <div className="float-pill float-pill-alert">
-              <Bell size={13} /> Novi posao!
-            </div>
-          </div>
+      <section className="earn-stage">
+        <div className="earn-stage-copy">
+          <h1>Budi svoj šef</h1>
+          <p className="earn-stage-sub">
+            {monthlyPotential ? <>Zaradi do <strong>{formatKM(monthlyPotential)} KM</strong> mjesečno na Poso.ba*</> : <>Ti biraš poslove, termine i cijenu.</>}
+          </p>
+          <button type="button" className="earn-stage-cta" onClick={() => navigate('/register')}>
+            Pridruži se Poso.ba <ArrowRight size={18} />
+          </button>
+          <small>
+            {monthlyPotential
+              ? `*Primjer: 20 poslova mjesečno po prosječnoj cijeni oglasa na platformi (${avgPrice} KM). Zarada zavisi od tebe.`
+              : 'Besplatna registracija, bez provizije na dogovorenu cijenu.'}
+          </small>
+        </div>
+        <div className="earn-stage-photo">
+          <img src="/images/categories/home.jpg" alt="Majstor na poslu" loading="eager" />
+          <svg className="earn-stage-doodle" viewBox="0 0 120 80" aria-hidden="true">
+            <path d="M8 60 C 30 20, 50 20, 60 50 S 95 70, 112 18" fill="none" stroke="#f5b400" strokeWidth="4" strokeLinecap="round" />
+            <path d="M96 14 l6 -8 l4 9" fill="none" stroke="#f5b400" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="earn-stage-pill"><Wallet size={15} /> Isplata primljena · Krečenje stana · 220 KM</div>
         </div>
       </section>
 
       <main className="content-container">
+        <section className="earn-example reveal">
+          <div className="earn-example-copy">
+            <span className="eyebrow small-eyebrow">Primjer iz prakse</span>
+            <h2>Koliko možeš zaraditi?</h2>
+            <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Poso.ba — ne izmišljene brojke.</p>
+            <ul className="check-list">
+              <li>Ti šalješ ponudu sa svojom cijenom — klijent bira.</li>
+              <li>Nema provizije na dogovorenu cijenu.</li>
+              <li>Kontakt i dogovor idu kroz poruke tek kad klijent prihvati ponudu.</li>
+            </ul>
+          </div>
+          <div className="earn-calc">
+            <label>
+              Struka
+              <select value={calcCategory} onChange={(event) => setCalcCategory(event.target.value)}>
+                {stats.map((row) => <option key={row.category} value={row.category}>{row.category} — ~{Math.round(Number(row.avg_price))} KM po poslu</option>)}
+              </select>
+            </label>
+            <label>
+              Poslova sedmično: <strong>{jobsPerWeek}</strong>
+              <input type="range" min="1" max="10" value={jobsPerWeek} onChange={(event) => setJobsPerWeek(Number(event.target.value))} />
+            </label>
+            <div className="earn-calc-result">
+              <span>Procjena mjesečno</span>
+              <strong>{selectedAvg ? formatKM(Math.round(selectedAvg * jobsPerWeek * 4.3 / 10) * 10) : '—'} KM</strong>
+              <small>{selectedAvg ? `${jobsPerWeek} × ~${selectedAvg} KM × 4,3 sedmice` : 'Još nema oglasa u ovoj kategoriji'}</small>
+            </div>
+          </div>
+        </section>
+
         <section className="earn-benefits reveal">
           <div className="earn-benefit-card">
             <Banknote size={22} />

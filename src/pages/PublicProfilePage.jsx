@@ -1,27 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Award, Briefcase, CheckCircle2, MapPin, MessageSquareQuote, Play, Star, UserRound, Zap } from 'lucide-react'
+import { Briefcase, CheckCircle2, ClipboardList, Flag, MapPin, MessageSquareQuote, Percent, Play, ShieldCheck, Star, UserRound } from 'lucide-react'
 import { profileService } from '../services/profileService'
-import { reviewService } from '../services/reviewService'
-import { listingService } from '../services/listingService'
-import { portfolioService } from '../services/portfolioService'
-import { trustService } from '../services/trustService'
+import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
+import BadgeChip from '../components/BadgeChip'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 
-const BADGE_META = {
-  verified: { label: 'Verifikovan', icon: CheckCircle2 },
-  top_rated: { label: 'Top ocjene', icon: Award },
-  rising_talent: { label: 'Talenat u usponu', icon: Zap },
-  reliable: { label: 'Pouzdan', icon: CheckCircle2 },
-  fast_responder: { label: 'Brz odgovor', icon: Zap },
-}
-
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
-const firstNameOf = (fullName) => (fullName || '').trim().split(/\s+/)[0] || 'korisnik'
+const firstNameOf = (displayName) => (displayName || '').trim().split(/\s+/)[0] || 'korisnik'
 
 function Stars({ value }) {
   const rounded = Math.round(Number(value) || 0)
@@ -32,48 +22,39 @@ function Stars({ value }) {
   )
 }
 
+function SuccessRing({ value, label, hint }) {
+  const pct = value == null ? 0 : Math.round(Number(value))
+  return (
+    <div className={`success-ring ${value == null ? 'empty' : pct >= 90 ? 'great' : pct >= 70 ? 'good' : 'low'}`} style={{ '--pct': `${pct}%` }}>
+      <div className="success-ring-dial"><span>{value == null ? '—' : `${pct}%`}</span></div>
+      <div>
+        <strong>{label}</strong>
+        <small>{hint}</small>
+      </div>
+    </div>
+  )
+}
+
 function PublicProfilePage() {
   const { userId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [profile, setProfile] = useState(null)
-  const [trust, setTrust] = useState(null)
-  const [reviews, setReviews] = useState([])
-  const [listings, setListings] = useState([])
-  const [portfolio, setPortfolio] = useState([])
+  const [bundle, setBundle] = useState(null)
   const [showAllReviews, setShowAllReviews] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   useEffect(() => {
     let active = true
     setLoading(true)
     setError('')
-    Promise.all([
-      profileService.getPublicProfile(userId),
-      trustService.getSummary(userId),
-      reviewService.listForUser(userId),
-      listingService.listAll({ status: 'published', ownerId: userId, pageSize: 6 }),
-      portfolioService.listForUser(userId),
-    ])
-      .then(([profileData, trustData, reviewsData, listingsData, portfolioData]) => {
-        if (!active) return
-        setProfile(profileData)
-        setTrust(trustData)
-        setReviews(reviewsData)
-        setListings(listingsData.data || [])
-        setPortfolio(portfolioData)
-      })
+    profileService.getPublicBundle(userId)
+      .then((data) => active && setBundle(data))
       .catch((requestError) => active && setError(requestError.message))
       .finally(() => active && setLoading(false))
     return () => { active = false }
   }, [userId])
-
-  const isOwnProfile = user?.id === userId
-  const firstName = useMemo(() => firstNameOf(profile?.full_name), [profile])
-  const offersServices = profile?.account_type && profile.account_type !== 'client'
-  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3)
-  const badgeChips = (trust?.badges || []).filter((code) => BADGE_META[code])
 
   if (loading) {
     return (
@@ -83,7 +64,7 @@ function PublicProfilePage() {
     )
   }
 
-  if (error || !profile) {
+  if (error || !bundle?.profile) {
     return (
       <div className="app-shell page-with-mobile-nav">
         <main className="content-container empty-state">
@@ -95,16 +76,35 @@ function PublicProfilePage() {
     )
   }
 
+  const { profile, trust, badges = [], reviews = [], listings = [], portfolio = [] } = bundle
+  const reviewCount = bundle.review_count ?? reviews.length
+  const isOwnProfile = user?.id === userId
+  const isProvider = profile.account_type && profile.account_type !== 'client'
+  const firstName = firstNameOf(profile.display_name)
+  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 3)
+  const jobsDecided = (trust?.completed_jobs || 0) + (trust?.failed_jobs || 0)
+
+  const reportProfile = async () => {
+    const reason = window.prompt('Zašto prijavljuješ ovaj profil? (npr. dijeli broj telefona, lažni identitet, prevara)')
+    if (!reason) return
+    try {
+      await reportService.createReport({ reporterId: user.id, targetType: 'profile', targetId: userId, reason })
+      setNotice('Hvala — prijava je poslana našem timu.')
+    } catch (requestError) {
+      setNotice(requestError.message)
+    }
+  }
+
   return (
-    <div className="app-shell page-with-mobile-nav public-profile-page">
+    <div className={`app-shell page-with-mobile-nav public-profile-page ${isProvider ? 'is-provider' : 'is-client'}`}>
       <header className="app-page-header"><BackHome /></header>
 
       <main className="content-container public-profile-layout">
         <aside className="meet-card">
-          <span className="meet-label">Upoznaj</span>
+          <span className="meet-label">{isProvider ? 'Upoznaj izvođača' : 'Upoznaj klijenta'}</span>
           <div className="meet-card-top">
             <div>
-              <h1>{profile.full_name || 'Korisnik Poso.ba'}</h1>
+              <h1>{profile.display_name}</h1>
               <LastSeen value={profile.last_seen_at} />
             </div>
             {profile.avatar_url
@@ -112,7 +112,7 @@ function PublicProfilePage() {
               : <div className="meet-avatar meet-avatar-fallback"><UserRound size={44} /></div>}
           </div>
 
-          {trust && (
+          {isProvider && trust && (
             <div className="meet-trust">
               <TrustBadge tier={trust.tier} label={trust.label} trade={trust.verified_trade} size="lg" />
               <div className="trust-meter" style={{ '--score': `${trust.score}%` }}>
@@ -127,13 +127,19 @@ function PublicProfilePage() {
             </div>
           )}
 
+          {!isProvider && (
+            <div className="meet-client-note">
+              <ShieldCheck size={15} />
+              <span>Klijent — objavljuje poslove i bira izvođače. Kontakt se otvara tek kad prihvati ponudu.</span>
+            </div>
+          )}
+
           <div className="meet-meta">
             {profile.city && <span><MapPin size={15} /> {profile.city}</span>}
             <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
-            {profile.display_uid && <span className="uid-chip">{profile.display_uid}</span>}
           </div>
 
-          {profile.trades?.length > 0 && (
+          {isProvider && profile.trades?.length > 0 && (
             <div className="trade-list">
               {profile.trades.map((trade) => (
                 <span className="trade-tag" key={trade}>
@@ -143,34 +149,79 @@ function PublicProfilePage() {
             </div>
           )}
 
-          {badgeChips.length > 0 && (
-            <div className="badge-row">
-              {badgeChips.map((code) => {
-                const Icon = BADGE_META[code].icon
-                return <span key={code} className={`badge-pill badge-${code}`}><Icon size={13} /> {BADGE_META[code].label}</span>
-              })}
+          {badges.length > 0 && (
+            <div className="badge-showcase">
+              <span className="badge-showcase-title">Značke</span>
+              <div className="badge-row">
+                {badges.map((badge) => <BadgeChip key={badge.code} badge={badge} size="lg" />)}
+              </div>
+              <ul className="badge-legend">
+                {badges.map((badge) => <li key={badge.code}><strong>{badge.label}</strong> — {badge.description}</li>)}
+              </ul>
             </div>
           )}
 
           {profile.bio && <p className="meet-bio">{profile.bio}</p>}
+
+          {!isOwnProfile && user && (
+            <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
+          )}
+          {notice && <small className="meet-notice">{notice}</small>}
         </aside>
 
         <section className="public-profile-main">
+          {isProvider ? (
+            <div className="profile-kpis">
+              <SuccessRing
+                value={trust?.success_rate}
+                label="Uspješnost poslova"
+                hint={jobsDecided === 0 ? 'Još nema završenih poslova' : `${trust.completed_jobs} završeno${trust.failed_jobs ? `, ${trust.failed_jobs} otkazano` : ''}`}
+              />
+              <div className="kpi-tile">
+                <Briefcase size={18} />
+                <strong>{trust?.completed_jobs || 0}</strong>
+                <span>završenih poslova</span>
+              </div>
+              <div className="kpi-tile">
+                <Star size={18} />
+                <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'}</strong>
+                <span>{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
+              </div>
+              <div className="kpi-tile">
+                <Percent size={18} />
+                <strong>{trust?.accepted_bids || 0}</strong>
+                <span>prihvaćenih ponuda</span>
+              </div>
+            </div>
+          ) : (
+            <div className="profile-kpis">
+              <SuccessRing
+                value={trust?.client_completion_rate}
+                label="Dovršeni poslovi"
+                hint={trust?.jobs_completed_as_client ? `${trust.jobs_completed_as_client} dovršeno` : 'Još nema dovršenih poslova'}
+              />
+              <div className="kpi-tile">
+                <ClipboardList size={18} />
+                <strong>{trust?.jobs_posted || 0}</strong>
+                <span>objavljenih poslova</span>
+              </div>
+              <div className="kpi-tile">
+                <Star size={18} />
+                <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'}</strong>
+                <span>ocjena izvođača</span>
+              </div>
+            </div>
+          )}
+
           <div className="review-summary-card">
             <div className="review-summary-head">
               <div>
                 <h2>
-                  Ukupna ocjena {trust?.review_count > 0 ? <strong>{Number(trust.avg_rating).toFixed(1)}</strong> : <strong>—</strong>}
+                  Ukupna ocjena {reviewCount > 0 ? <strong>{Number(trust.avg_rating).toFixed(1)}</strong> : <strong>—</strong>}
                   <Star size={20} fill="currentColor" className="review-summary-star" />
                 </h2>
-                <span className="muted-text">{reviews.length} {reviews.length === 1 ? 'recenzija' : 'recenzija'}</span>
+                <span className="muted-text">{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
               </div>
-              {trust?.completed_jobs > 0 && (
-                <div className="review-summary-stat">
-                  <strong>{trust.completed_jobs}</strong>
-                  <span>prihvaćenih poslova</span>
-                </div>
-              )}
             </div>
 
             {reviews.length === 0 ? (
@@ -188,7 +239,7 @@ function PublicProfilePage() {
                           ? <img src={review.reviewer.avatar_url} alt="" className="review-avatar" />
                           : <div className="review-avatar review-avatar-fallback"><UserRound size={16} /></div>}
                         <div>
-                          <strong>{review.reviewer?.full_name || 'Korisnik Poso.ba'}</strong>
+                          <strong>{review.reviewer?.display_name || 'Korisnik Poso.ba'}</strong>
                           <div className="review-card-rating">
                             <Stars value={review.rating} />
                             <span>{formatBosnianDate(review.created_at)}</span>
@@ -225,7 +276,7 @@ function PublicProfilePage() {
             </div>
           )}
 
-          {portfolio.length > 0 && (
+          {isProvider && portfolio.length > 0 && (
             <div className="portfolio-card">
               <h2>Portfolio radova</h2>
               <div className="portfolio-grid">
@@ -263,15 +314,15 @@ function PublicProfilePage() {
       {!isOwnProfile && (
         <div className="profile-cta-bar">
           <div>
-            <strong>{offersServices ? `Želiš raditi sa ${firstName}?` : `Želiš pomoći ${firstName}?`}</strong>
-            <span>{offersServices ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+            <strong>{isProvider ? `Želiš raditi sa ${firstName}?` : `Želiš pomoći ${firstName}?`}</strong>
+            <span>{isProvider ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
           </div>
           <button
             type="button"
             className="primary-button"
-            onClick={() => navigate(offersServices || listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
+            onClick={() => navigate(isProvider || listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
           >
-            {offersServices || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'}
+            {isProvider || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'}
           </button>
         </div>
       )}

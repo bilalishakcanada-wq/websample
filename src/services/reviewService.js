@@ -5,7 +5,7 @@ export const reviewService = {
   async listForUser(userId) {
     const { data, error } = await supabase
       .from('reviews')
-      .select('id, rating, comment, created_at, listing_id, reviewer_id, reviewer:public_profiles!reviews_reviewer_id_fkey(full_name, avatar_url)')
+      .select('id, rating, comment, created_at, listing_id, reviewer_id, reviewer:public_profiles!reviews_reviewer_id_fkey(display_name, avatar_url)')
       .eq('reviewee_id', userId)
       .order('created_at', { ascending: false })
 
@@ -29,7 +29,7 @@ export const reviewService = {
 
     const { data: reviewers } = await supabase
       .from('public_profiles')
-      .select('user_id, full_name, avatar_url')
+      .select('user_id, display_name, avatar_url')
       .in('user_id', reviewerIds)
 
     const byId = new Map((reviewers || []).map((reviewer) => [reviewer.user_id, reviewer]))

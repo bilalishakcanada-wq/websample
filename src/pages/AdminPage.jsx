@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp, LifeBuoy, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, LifeBuoy, ScanEye, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
 import BackHome from '../components/BackHome'
 import { adminService } from '../services/adminService'
 import { supportService } from '../services/supportService'
@@ -11,7 +11,116 @@ const TABS = [
   { id: 'reports', label: 'Prijave', icon: ShieldAlert },
   { id: 'listings', label: 'Oglasi', icon: Tag },
   { id: 'users', label: 'Korisnici', icon: Users },
+  { id: 'moderation', label: 'Moderacija', icon: ScanEye },
 ]
+
+const KIND_LABEL = { phone: 'telefon', email: 'email', url: 'link', social: 'društvena mreža', handle: '@handle', member_id: 'privatni ID', image_contact: 'kontakt na slici' }
+const ACTION_LABEL = { masked: 'Maskirano', removed: 'Slika uklonjena', flagged: 'Označeno', suspended: 'Suspendovan', lifted: 'Suspenzija ukinuta' }
+const QUEUE_LABEL = { pending: 'Čeka AI pregled', clean: 'Čisto', flagged: 'Uklonjeno', error: 'Greška', unconfigured: 'Čeka API ključ' }
+
+function ModerationTab() {
+  const [events, setEvents] = useState([])
+  const [queue, setQueue] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [view, setView] = useState('events')
+
+  const load = () => {
+    setLoading(true)
+    Promise.all([adminService.listModerationEvents(), adminService.listModerationQueue()])
+      .then(([eventRows, queueRows]) => { setEvents(eventRows); setQueue(queueRows) })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load() }, [])
+
+  const run = async (action) => {
+    setError('')
+    try {
+      await action()
+      load()
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
+  const suspended = events.filter((event) => event.profiles?.account_status === 'suspended').reduce((map, event) => map.set(event.user_id, event.profiles), new Map())
+  const pendingQueue = queue.filter((item) => ['pending', 'unconfigured'].includes(item.status))
+
+  if (loading) return <div className="page-state">Učitavanje moderacije...</div>
+
+  return (
+    <div className="admin-table">
+      {error && <div className="form-error">{error}</div>}
+      <div className="admin-mod-summary">
+        <div><strong>{events.filter((event) => event.action === 'masked' || event.action === 'removed').length}</strong><span>kršenja Pravila #1</span></div>
+        <div><strong>{suspended.size}</strong><span>suspendovanih</span></div>
+        <div><strong>{pendingQueue.length}</strong><span>slika čeka AI</span></div>
+        <div><strong>{queue.filter((item) => item.status === 'flagged').length}</strong><span>slika uklonjeno</span></div>
+      </div>
+      {pendingQueue.some((item) => item.status === 'unconfigured') && (
+        <div className="form-error">AI pregled slika nije aktivan: dodaj <code>ANTHROPIC_API_KEY</code> u Supabase → Edge Functions → Secrets. Slike u redu čekaju i biće pregledane automatski čim ključ bude dodan.</div>
+      )}
+      <div className="admin-subtabs">
+        <button type="button" className={view === 'events' ? 'active' : ''} onClick={() => setView('events')}>Događaji ({events.length})</button>
+        <button type="button" className={view === 'queue' ? 'active' : ''} onClick={() => setView('queue')}>Slike ({queue.length})</button>
+        <button type="button" className={view === 'suspended' ? 'active' : ''} onClick={() => setView('suspended')}>Suspendovani ({suspended.size})</button>
+      </div>
+
+      {view === 'events' && events.map((event) => (
+        <div key={event.id} className={`admin-row ${event.dismissed ? 'is-dismissed' : ''}`}>
+          <div>
+            <strong>{event.profiles?.full_name || event.profiles?.email || event.user_id}</strong>
+            {event.profiles?.member_id && <span className="uid-chip">{event.profiles.member_id}</span>}
+            <p className="muted-text">
+              {ACTION_LABEL[event.action] || event.action} · {event.source_table}{event.fields?.length ? ` (${event.fields.join(', ')})` : ''}
+              {event.kinds?.length ? ` · ${event.kinds.map((kind) => KIND_LABEL[kind] || kind).join(', ')}` : ''} · {formatBosnianDate(event.created_at)}
+            </p>
+            {event.snippet && <p className="admin-snippet">{event.snippet}</p>}
+          </div>
+          <span className={`tag tag-${event.action}`}>{event.dismissed ? 'Odbačeno' : ACTION_LABEL[event.action] || event.action}</span>
+          <div className="admin-row-actions">
+            {(event.action === 'masked' || event.action === 'removed') && (
+              <button type="button" className="ghost-button" onClick={() => run(() => adminService.dismissModerationEvent(event.id, !event.dismissed))}>
+                {event.dismissed ? 'Vrati kao kršenje' : 'Lažna uzbuna'}
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+      {view === 'events' && events.length === 0 && <p className="muted-text">Nema događaja — niko još nije prekršio Pravilo #1.</p>}
+
+      {view === 'queue' && queue.map((item) => (
+        <div key={item.id} className="admin-row">
+          <div className="admin-queue-item">
+            <a href={item.media_url} target="_blank" rel="noreferrer"><img src={item.media_url} alt="" /></a>
+            <div>
+              <strong>{item.kind === 'avatar' ? 'Profilna slika' : 'Portfolio'}</strong>
+              <p className="muted-text">{formatBosnianDate(item.created_at)} · pokušaja: {item.attempts}{item.result?.reason ? ` · ${item.result.reason}` : ''}</p>
+            </div>
+          </div>
+          <span className={`tag tag-${item.status}`}>{QUEUE_LABEL[item.status] || item.status}</span>
+        </div>
+      ))}
+      {view === 'queue' && queue.length === 0 && <p className="muted-text">Nema slika u redu.</p>}
+
+      {view === 'suspended' && [...suspended.entries()].map(([userId, profile]) => (
+        <div key={userId} className="admin-row">
+          <div>
+            <strong>{profile.full_name || profile.email}</strong> {profile.member_id && <span className="uid-chip">{profile.member_id}</span>}
+            <p className="muted-text">{profile.email}</p>
+          </div>
+          <span className="tag tag-suspended">Suspendovan</span>
+          <div className="admin-row-actions">
+            <button type="button" className="ghost-button" onClick={() => run(() => adminService.liftSuspension(userId))}>Ukini suspenziju</button>
+          </div>
+        </div>
+      ))}
+      {view === 'suspended' && suspended.size === 0 && <p className="muted-text">Trenutno nema suspendovanih naloga.</p>}
+    </div>
+  )
+}
 
 function SupportTab() {
   const [threads, setThreads] = useState([])
@@ -297,8 +406,8 @@ function UsersTab() {
         <div key={profile.id} className="admin-user-block">
           <div className="admin-row">
             <div>
-              <strong>{profile.full_name || profile.email}</strong> {profile.display_uid && <span className="uid-chip">{profile.display_uid}</span>}
-              <p className="muted-text">{profile.email} · {profile.city || 'Grad nije naveden'}</p>
+              <strong>{profile.full_name || profile.email}</strong> {profile.member_id && <span className="uid-chip">{profile.member_id}</span>}
+              <p className="muted-text">{profile.email} · {profile.city || 'Grad nije naveden'}{profile.account_status === 'suspended' && profile.suspension_reason ? ` · ${profile.suspension_reason}` : ''}</p>
             </div>
             <span className="tag">{profile.account_status}</span>
             <div className="admin-row-actions">
@@ -306,7 +415,7 @@ function UsersTab() {
                 {expandedId === profile.user_id ? <ChevronUp size={15} /> : <ChevronDown size={15} />} Detalji
               </button>
               {profile.account_status !== 'suspended' && <button type="button" className="ghost-button" onClick={() => act(profile.user_id, 'suspended')}>Suspenduj</button>}
-              {profile.account_status === 'suspended' && <button type="button" className="ghost-button" onClick={() => act(profile.user_id, 'active')}>Aktiviraj</button>}
+              {profile.account_status === 'suspended' && <button type="button" className="ghost-button" onClick={async () => { try { await adminService.liftSuspension(profile.user_id); load() } catch (requestError) { setError(requestError.message) } }}>Aktiviraj</button>}
             </div>
           </div>
           {expandedId === profile.user_id && <UserDetail userId={profile.user_id} />}
@@ -337,6 +446,7 @@ function AdminPage() {
         {tab === 'reports' && <ReportsTab />}
         {tab === 'listings' && <ListingsTab />}
         {tab === 'users' && <UsersTab />}
+        {tab === 'moderation' && <ModerationTab />}
       </div>
     </div>
   )

@@ -49,7 +49,7 @@ export const adminService = {
   async listProfiles() {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, user_id, full_name, email, city, subscription_status, account_status, created_at, display_uid')
+      .select('id, user_id, full_name, email, city, subscription_status, account_status, suspended_until, suspension_reason, created_at, member_id')
       .order('created_at', { ascending: false })
       .limit(100)
 
@@ -101,6 +101,48 @@ export const adminService = {
     const { error } = await supabase.rpc('refresh_provider_badges')
     if (error) {
       console.error('Admin badge refresh failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  async listModerationEvents() {
+    const { data, error } = await supabase
+      .from('moderation_events')
+      .select('id, user_id, source_table, source_id, fields, kinds, snippet, action, dismissed, created_at, profiles!moderation_events_user_id_fkey(full_name, email, member_id, account_status)')
+      .order('created_at', { ascending: false })
+      .limit(200)
+    if (error) {
+      console.error('Admin moderation events fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async listModerationQueue() {
+    const { data, error } = await supabase
+      .from('moderation_queue')
+      .select('id, user_id, kind, media_url, status, attempts, result, created_at, processed_at')
+      .order('created_at', { ascending: false })
+      .limit(100)
+    if (error) {
+      console.error('Admin moderation queue fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async dismissModerationEvent(id, dismissed = true) {
+    const { error } = await supabase.from('moderation_events').update({ dismissed, reviewed_at: new Date().toISOString() }).eq('id', id)
+    if (error) {
+      console.error('Admin moderation dismiss failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  async liftSuspension(userId) {
+    const { error } = await supabase.rpc('admin_lift_suspension', { p_user_id: userId })
+    if (error) {
+      console.error('Admin lift suspension failed', { message: error.message, code: error.code })
       throw publicError()
     }
   },

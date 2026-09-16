@@ -1,4 +1,4 @@
-import { Ban, Handshake, ShieldCheck, Star, UserCheck, MessageCircle } from 'lucide-react'
+import { Ban, Handshake, ScanEye, ShieldBan, ShieldCheck, Star, UserCheck, MessageCircle } from 'lucide-react'
 import InfoLayout from '../components/InfoLayout'
 
 const RULES = [
@@ -18,6 +18,35 @@ function CommunityGuidelinesPage() {
       lead="Ovo su pravila koja svaki korisnik prihvata pri registraciji. Nisu tu da ograniče — tu su da svako ko uđe zna šta može očekivati od drugih."
       cta={{ eyebrow: 'Primijetio si kršenje?', text: 'Prijavi oglas ili korisnika — gledamo svaku prijavu.', to: '/kontakt?tema=report', label: 'Prijavi zloupotrebu' }}
     >
+      <section className="rule-one-card reveal" id="pravilo-1">
+        <div className="rule-one-head">
+          <span className="rule-one-number"><ShieldBan size={18} /> Pravilo #1</span>
+          <h2>Bez kontakata i društvenih mreža na platformi</h2>
+        </div>
+        <p>
+          Na Poso.ba se <strong>nikad</strong> ne dijeli broj telefona, email, link, Instagram, Facebook, Viber, WhatsApp, TikTok ni bilo koji drugi
+          način kontakta van platforme — ni u oglasu, ni u ponudi, ni u opisu profila, ni u recenziji, <strong>ni na slici</strong>
+          (profilna slika sa brojem, vizitka, natpis na kombiju). Jedini izuzetak: kad klijent prihvati ponudu, u porukama se kontakt može razmijeniti.
+        </p>
+        <div className="rule-one-how">
+          <div>
+            <ScanEye size={18} />
+            <strong>Kako se provjerava</strong>
+            <span>Svaki tekst se automatski skenira pri objavi (brojevi u svim oblicima, i "nula šest jedan…", i "o6l 387…"), a svaku sliku pregleda AI moderator. Provjera se ponavlja i naknadno, svaki dan.</span>
+          </div>
+          <div>
+            <Ban size={18} />
+            <strong>Šta se dešava</strong>
+            <span>Kontakt se odmah uklanja iz teksta, slika se briše i bilježi se kršenje. 3 kršenja u 30 dana = suspenzija 7 dana, 5 = 30 dana, 7 = trajno.</span>
+          </div>
+          <div>
+            <ShieldCheck size={18} />
+            <strong>Zašto</strong>
+            <span>Tako niko ne dobija neželjene pozive, ocjene ostaju vezane za stvarne poslove, a nikome se ne može ukrasti klijent ni identitet.</span>
+          </div>
+        </div>
+      </section>
+
       <section className="info-grid reveal-stagger reveal">
         {RULES.map(({ icon: Icon, title, text }) => (
           <div className="info-card" key={title}><Icon size={20} /><strong>{title}</strong><p>{text}</p></div>

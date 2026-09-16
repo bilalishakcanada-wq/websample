@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Building2, CalendarDays, Check, Laptop, MapPin, Wallet } from 'lucide-react'
+import { ArrowLeft, Building2, CalendarDays, Check, Laptop, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { tagService } from '../services/tagService'
 import { bosniaCities } from '../data/cities'
 import { serviceCategories } from '../data/categories'
-import { findProhibitedTerm } from '../utils/moderation'
+import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
+import RuleOneNotice from '../components/RuleOneNotice'
 
 const STEPS = [
   { id: 'basics', label: 'Naslov i rok' },
@@ -88,6 +89,11 @@ function PostTaskPage() {
     const hit = findProhibitedTerm(form.title, form.description)
     if (hit) {
       setError('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
+      return
+    }
+    const contactScan = scanContactInfo(form.title, form.description)
+    if (!contactScan.clean) {
+      setError(contactInfoMessage(contactScan, 'oglas'))
       return
     }
 
@@ -215,6 +221,7 @@ function PostTaskPage() {
                 rows={6}
                 maxLength={5000}
               />
+              <RuleOneNotice compact />
             </label>
             <label className="wizard-field">
               <span>Tagovi (opciono)</span>

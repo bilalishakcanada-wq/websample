@@ -52,13 +52,17 @@ export const messageService = {
       .single()
 
     if (error) {
-      if (error.message?.includes('CONTACT_INFO_BLOCKED')) {
-        throw new Error('Kontakt podaci (broj telefona, email) mogu se dijeliti tek nakon prihvaćene ponude.')
-      }
       console.error('Supabase message insert failed', { message: error.message, code: error.code })
       throw publicError()
     }
     return data
+  },
+
+  /** True once a bid is accepted in this conversation — contact details may then be shared. */
+  async contactsAllowed(conversationId) {
+    const { data, error } = await supabase.rpc('conversation_contacts_allowed', { p_conversation_id: conversationId })
+    if (error) return false
+    return Boolean(data)
   },
 
   subscribeToConversation(conversationId, onInsert) {

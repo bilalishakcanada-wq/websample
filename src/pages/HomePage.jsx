@@ -65,7 +65,7 @@ function HomePage() {
       return {
         isLive: true,
         userId: top.user_id,
-        name: top.full_name || 'Korisnik Poso.ba',
+        name: top.display_name || 'Korisnik Poso.ba',
         photo: top.avatar_url,
         rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '—',
         reviewLabel: top.review_count > 0 ? `${top.review_count} ${top.review_count === 1 ? 'ocjena' : 'ocjena'}` : 'Nova na platformi',
@@ -410,7 +410,7 @@ function HomePage() {
             {providers.map((provider) => {
               const isLive = !provider.isDemo
               const key = isLive ? provider.user_id : provider.name
-              const name = isLive ? (provider.full_name || 'Korisnik Poso.ba') : provider.name
+              const name = isLive ? (provider.display_name || 'Korisnik Poso.ba') : provider.name
               const photo = isLive ? provider.avatar_url : provider.photo
               const badgeLabel = isLive
                 ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? `${provider.badge_count} znački` : 'Aktivan'))
@@ -428,7 +428,6 @@ function HomePage() {
                     <div className={`provider-badge ${isLive && provider.is_verified ? 'provider-badge-verified' : ''}`}>{badgeLabel}</div>
                   </div>
                   <h3>{name}</h3>
-                  {isLive && provider.display_uid && <span className="uid-chip">{provider.display_uid}</span>}
                   {!isLive && <p>{provider.role}</p>}
                   {isLive && <p>{provider.city || 'Bosna i Hercegovina'}</p>}
                   <div className="provider-stats">

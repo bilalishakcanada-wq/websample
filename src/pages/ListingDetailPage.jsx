@@ -10,7 +10,8 @@ import { reviewService } from '../services/reviewService'
 import { matchService } from '../services/matchService'
 import { useAuth } from '../context/AuthContext'
 import { formatBosnianDate } from '../utils/dateFormat'
-import { findProhibitedTerm } from '../utils/moderation'
+import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
+import RuleOneNotice from '../components/RuleOneNotice'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -87,6 +88,11 @@ function ListingDetailPage() {
       setBidError('Poruka sadrži sadržaj koji krši Pravila korištenja.')
       return
     }
+    const contactScan = scanContactInfo(bidForm.message)
+    if (!contactScan.clean) {
+      setBidError(contactInfoMessage(contactScan, 'ponuda'))
+      return
+    }
     setSending(true)
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
@@ -118,6 +124,11 @@ function ListingDetailPage() {
 
   const submitReview = async (event) => {
     event.preventDefault()
+    const contactScan = scanContactInfo(reviewForm.comment)
+    if (!contactScan.clean) {
+      setMessage(contactInfoMessage(contactScan, 'recenzija'))
+      return
+    }
     setSubmittingReview(true)
     setMessage('')
     try {
@@ -128,6 +139,28 @@ function ListingDetailPage() {
       setMessage(requestError.message)
     } finally {
       setSubmittingReview(false)
+    }
+  }
+
+  const [outcomeBusy, setOutcomeBusy] = useState(false)
+  const setOutcome = async (status) => {
+    let reason = null
+    if (status === 'cancelled') {
+      const answer = window.prompt('Zašto se posao otkazuje?\n1 — izvođač nije došao / odustao\n2 — ja sam odustao\n3 — nešto drugo', '1')
+      if (answer == null) return
+      reason = answer.trim() === '1' ? 'provider' : answer.trim() === '2' ? 'client' : 'other'
+    } else if (!window.confirm('Potvrdi da je posao završen. Nakon toga možeš ostaviti recenziju izvođaču.')) {
+      return
+    }
+    setOutcomeBusy(true)
+    try {
+      const updated = await listingService.setOutcome(id, status, reason)
+      setListing((current) => ({ ...current, ...updated }))
+      setMessage(status === 'completed' ? 'Posao je označen kao završen. Hvala — ovo se računa u uspješnost izvođača.' : 'Posao je otkazan.')
+    } catch (requestError) {
+      setMessage(requestError.message)
+    } finally {
+      setOutcomeBusy(false)
     }
   }
 
@@ -169,6 +202,14 @@ function ListingDetailPage() {
             {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
               <Link to="/messages" className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
             )}
+            {isOwner && acceptedBid && listing.status === 'published' && (
+              <div className="outcome-actions">
+                <button type="button" className="primary-button full-width" onClick={() => setOutcome('completed')} disabled={outcomeBusy}><CheckCircle2 size={16} /> Posao završen</button>
+                <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
+              </div>
+            )}
+            {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
+            {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
           </aside>
         </div>
 
@@ -179,11 +220,10 @@ function ListingDetailPage() {
           <h2>O korisniku</h2>
           <Link to={`/korisnik/${listing.user_id}`} className="poster-row poster-row-link">
             {poster?.avatar_url
-              ? <img src={poster.avatar_url} alt={poster.full_name} className="poster-avatar poster-avatar-photo" />
+              ? <img src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
               : <div className="poster-avatar"><UserRound size={22} /></div>}
             <div>
-              <strong>{poster?.full_name || 'Korisnik Poso.ba'}</strong>
-              {poster?.display_uid && <span className="uid-chip">{poster.display_uid}</span>}
+              <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
               <p>{poster?.city || 'Objavljuje zadatke na platformi'}</p>
             </div>
           </Link>
@@ -221,8 +261,7 @@ function ListingDetailPage() {
                     ? <img src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                     : <div className="poster-avatar"><UserRound size={18} /></div>}
                   <div>
-                    <strong>{bid.bidder?.full_name || 'Korisnik Poso.ba'}</strong>
-                    {bid.bidder?.display_uid && <span className="uid-chip">{bid.bidder.display_uid}</span>}
+                    <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
                     <p>{bid.message}</p>
                     <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
                   </div>
@@ -258,10 +297,11 @@ function ListingDetailPage() {
                       <Sparkles size={13} /> {Math.round(provider.match_score)}
                     </span>
                   </div>
-                  <h3>{provider.full_name || 'Korisnik Poso.ba'}</h3>
+                  <h3>{provider.display_name || 'Korisnik Poso.ba'}</h3>
                   <div className="rec-card-meta">
                     <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
                     {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
+                    {provider.success_rate != null && <strong>{Math.round(provider.success_rate)}% uspješnost</strong>}
                   </div>
                   {provider.reasons?.length > 0 && (
                     <ul className="rec-reasons">
@@ -288,6 +328,7 @@ function ListingDetailPage() {
             <form className="auth-form" onSubmit={submitBid}>
               <label>Vaša ponuda (KM)<input type="number" min="0" step="0.01" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
               <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napišite zašto ste prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
+              <RuleOneNotice compact />
               {bidError && <div className="form-error">{bidError}</div>}
               <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>

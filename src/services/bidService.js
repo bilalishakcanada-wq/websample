@@ -7,7 +7,7 @@ export const bidService = {
 
     const { data, error } = await supabase
       .from('bids')
-      .select('id, listing_id, bidder_id, amount, message, status, created_at, bidder:public_profiles!bids_bidder_id_fkey(full_name, avatar_url, display_uid)')
+      .select('id, listing_id, bidder_id, amount, message, status, created_at, bidder:public_profiles!bids_bidder_id_fkey(display_name, avatar_url)')
       .eq('listing_id', listingId)
       .order('created_at', { ascending: false })
 
@@ -27,7 +27,7 @@ export const bidService = {
     const bidderIds = [...new Set((bids || []).map((bid) => bid.bidder_id))]
     if (bidderIds.length === 0) return bids || []
 
-    const { data: bidders } = await supabase.from('public_profiles').select('user_id, full_name, avatar_url, display_uid').in('user_id', bidderIds)
+    const { data: bidders } = await supabase.from('public_profiles').select('user_id, display_name, avatar_url').in('user_id', bidderIds)
     const byId = new Map((bidders || []).map((bidder) => [bidder.user_id, bidder]))
     return (bids || []).map((bid) => ({ ...bid, bidder: byId.get(bid.bidder_id) || null }))
   },

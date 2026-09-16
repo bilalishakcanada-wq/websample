@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { MessageCircle, Send, ShieldCheck } from 'lucide-react'
+import { MessageCircle, Send, ShieldCheck, Unlock } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
 import { profileService } from '../services/profileService'
 import BackHome from '../components/BackHome'
+import { contactInfoMessage, scanContactInfo } from '../utils/moderation'
 
 function MessagesPage() {
   const { user } = useAuth()
@@ -14,6 +15,7 @@ function MessagesPage() {
   const [otherProfiles, setOtherProfiles] = useState({})
   const [thread, setThread] = useState([])
   const [draft, setDraft] = useState('')
+  const [contactsAllowed, setContactsAllowed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const listRef = useRef(null)
@@ -37,6 +39,7 @@ function MessagesPage() {
   useEffect(() => {
     if (!activeId) return undefined
     messageService.listMessages(activeId).then(setThread).catch((requestError) => setError(requestError.message))
+    messageService.contactsAllowed(activeId).then(setContactsAllowed)
     return messageService.subscribeToConversation(activeId, (row) => {
       setThread((current) => (current.some((item) => item.id === row.id) ? current : [...current, row]))
     })
@@ -52,6 +55,13 @@ function MessagesPage() {
     event.preventDefault()
     if (!draft.trim() || !activeConversation) return
     setError('')
+    if (!contactsAllowed) {
+      const scan = scanContactInfo(draft)
+      if (!scan.clean) {
+        setError(contactInfoMessage(scan, 'poruka') + ' Kontakt možete razmijeniti čim ponuda bude prihvaćena.')
+        return
+      }
+    }
     try {
       const created = await messageService.send({
         conversationId: activeId,
@@ -60,6 +70,7 @@ function MessagesPage() {
         content: draft.trim(),
       })
       setThread((current) => [...current, created])
+      if (created.content !== draft.trim()) setError('Pravilo #1: kontakt podaci su uklonjeni iz poruke prije slanja.')
       setDraft('')
     } catch (requestError) {
       setError(requestError.message)
@@ -90,7 +101,7 @@ function MessagesPage() {
                   className={`messages-thread-item ${activeId === conversation.id ? 'active' : ''}`}
                   onClick={() => setActiveId(conversation.id)}
                 >
-                  <strong>{otherProfiles[conversation.otherUserId]?.full_name || 'Korisnik Poso.ba'}</strong>
+                  <strong>{otherProfiles[conversation.otherUserId]?.display_name || 'Korisnik Poso.ba'}</strong>
                   <span className="muted-text">{conversation.listingTitle}</span>
                   {conversation.lastMessage && <span className="messages-preview">{conversation.lastMessage.slice(0, 44)}</span>}
                 </button>
@@ -101,8 +112,10 @@ function MessagesPage() {
               {activeConversation && (
                 <>
                   <div className="messages-thread-header">
-                    <strong>{otherProfiles[activeConversation.otherUserId]?.full_name || 'Korisnik Poso.ba'}</strong>
-                    <span className="contact-protection-note small"><ShieldCheck size={13} /> Kontakt podaci su zaštićeni prije prihvaćene ponude</span>
+                    <strong>{otherProfiles[activeConversation.otherUserId]?.display_name || 'Korisnik Poso.ba'}</strong>
+                    {contactsAllowed
+                      ? <span className="contact-protection-note small unlocked"><Unlock size={13} /> Ponuda prihvaćena — možete razmijeniti kontakt</span>
+                      : <span className="contact-protection-note small"><ShieldCheck size={13} /> Kontakt podaci su zaštićeni prije prihvaćene ponude</span>}
                   </div>
                   <div className="support-chat-messages messages-body" ref={listRef}>
                     {thread.map((item) => (

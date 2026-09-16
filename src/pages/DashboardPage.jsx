@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
+import { Eye, MapPin, Pencil, Plus, ShieldBan, Sparkles, Trash2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
@@ -26,6 +26,7 @@ function DashboardPage() {
   const [message, setMessage] = useState('')
   const [recommended, setRecommended] = useState([])
   const [recommendedLoading, setRecommendedLoading] = useState(true)
+  const [suspension, setSuspension] = useState(null)
 
   const loadListings = () => {
     setLoading(true)
@@ -41,7 +42,9 @@ function DashboardPage() {
   useEffect(() => {
     let active = true
     profileService.getProfile(user.id).then((profile) => {
-      if (active && profile && !profile.onboarding_completed) navigate('/profile?setup=1', { replace: true })
+      if (!active || !profile) return
+      if (!profile.onboarding_completed) navigate('/profile?setup=1', { replace: true })
+      setSuspension(profile.account_status === 'suspended' ? { reason: profile.suspension_reason, until: profile.suspended_until } : null)
     }).catch(() => {})
     return () => { active = false }
   }, [user.id, navigate])
@@ -95,6 +98,15 @@ function DashboardPage() {
             <Plus size={18} /> Objavi posao
           </button>
         </div>
+        {suspension && (
+          <div className="profile-suspended-banner">
+            <ShieldBan size={20} />
+            <div>
+              <strong>Nalog je suspendovan — objave, ponude i poruke su privremeno onemogućene.</strong>
+              <span>{suspension.reason || 'Prekršeno je Pravilo #1.'} {suspension.until ? `Ponovo aktivan od ${formatBosnianDate(suspension.until)}.` : 'Javi se podršci ako misliš da je greška.'}</span>
+            </div>
+          </div>
+        )}
 
         <div className="dashboard-grid">
           <div className="stat-card"><strong>{listings.length}</strong><span>Objavljeni poslovi</span></div>

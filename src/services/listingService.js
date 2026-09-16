@@ -6,6 +6,17 @@ import { listingInputSchema, parseInput } from '../utils/inputSchemas'
 import { coordsForLocation } from '../data/cityCoordinates'
 
 export const listingService = {
+  /** Owner marks a job done or cancelled. `reason` (provider|client|other) only matters for cancellations. */
+  async setOutcome(id, status, reason = null) {
+    const payload = status === 'cancelled' ? { status, cancel_reason: reason || 'other' } : { status }
+    const { data, error } = await supabase.from('listings').update(payload).eq('id', id).select('id, status, completed_at, cancelled_at, cancel_reason').single()
+    if (error) {
+      console.error('Supabase listing outcome update failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data
+  },
+
   async getById(id) {
     if (!/^[0-9a-f-]{36}$/i.test(id)) return null
 

@@ -52,3 +52,6 @@ create table if not exists public.moderation_settings (key text primary key, val
 --   display_name_of / is_valid_full_name / moderation_scan pin search_path = public.
 --   handle_verification_approved(): EXECUTE revoked from anon/authenticated (trigger-only).
 --   match_providers_for_listing / conversation_contacts_allowed: authenticated only.
+
+-- member_registry (append-only register of every account: member_id, user_id, email, name, created/deleted),
+-- maintained by register_member() triggers on profiles; admin_lookup_member(term) searches it (admin only).

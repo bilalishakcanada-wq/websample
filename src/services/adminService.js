@@ -147,6 +147,16 @@ export const adminService = {
     }
   },
 
+  /** Search the member register by private ID, email, name or user id (deleted accounts included). */
+  async lookupMember(term) {
+    const { data, error } = await supabase.rpc('admin_lookup_member', { p_term: term || '' })
+    if (error) {
+      console.error('Admin member lookup failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
   async setVerificationStatus(id, status) {
     const { error } = await supabase.from('verification_requests').update({ status }).eq('id', id)
     if (error) {

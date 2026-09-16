@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, ChevronUp, LifeBuoy, ScanEye, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
+import { ChevronDown, ChevronUp, IdCard, LifeBuoy, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
 import BackHome from '../components/BackHome'
 import { adminService } from '../services/adminService'
 import { supportService } from '../services/supportService'
@@ -12,7 +12,52 @@ const TABS = [
   { id: 'listings', label: 'Oglasi', icon: Tag },
   { id: 'users', label: 'Korisnici', icon: Users },
   { id: 'moderation', label: 'Moderacija', icon: ScanEye },
+  { id: 'registry', label: 'ID registar', icon: IdCard },
 ]
+
+function RegistryTab() {
+  const [term, setTerm] = useState('')
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const search = (value) => {
+    setLoading(true)
+    setError('')
+    adminService.lookupMember(value).then(setRows).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
+  }
+
+  useEffect(() => { search('') }, [])
+
+  return (
+    <div className="admin-table">
+      <p className="muted-text">Svaki nalog dobija privatni ID pri registraciji. Registar čuva ID, vlasnika i datum — i nakon brisanja naloga — pa se svaki događaj može vezati za tačan nalog.</p>
+      <form className="admin-search" onSubmit={(event) => { event.preventDefault(); search(term) }}>
+        <Search size={16} />
+        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="PB-XXXX-XXXX, email, ime ili user id" />
+        <button type="submit" className="primary-button">Traži</button>
+      </form>
+      {error && <div className="form-error">{error}</div>}
+      {loading ? <div className="page-state">Pretražujem...</div> : rows.length === 0 ? <p className="muted-text">Nema rezultata.</p> : rows.map((row) => (
+        <div key={row.member_id} className={`admin-row ${row.deleted_at ? 'is-dismissed' : ''}`}>
+          <div>
+            <strong>{row.full_name || row.email}</strong> <span className="uid-chip">{row.member_id}</span>
+            <p className="muted-text">
+              {row.email} · {row.account_type || 'client'} · registrovan {formatBosnianDate(row.created_at)}
+              {row.deleted_at ? ` · obrisan ${formatBosnianDate(row.deleted_at)}` : ''}
+            </p>
+            <p className="muted-text">
+              {row.listings} oglasa · {row.bids} ponuda · {row.messages} poruka · {row.reviews_received} recenzija · {row.strikes} kršenja
+              {row.suspension_reason ? ` · ${row.suspension_reason}` : ''}
+            </p>
+            <code className="admin-userid">{row.user_id}</code>
+          </div>
+          <span className={`tag ${row.deleted_at ? '' : `tag-${row.account_status === 'suspended' ? 'suspended' : 'clean'}`}`}>{row.deleted_at ? 'Obrisan' : row.account_status}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const KIND_LABEL = { phone: 'telefon', email: 'email', url: 'link', social: 'društvena mreža', handle: '@handle', member_id: 'privatni ID', image_contact: 'kontakt na slici' }
 const ACTION_LABEL = { masked: 'Maskirano', removed: 'Slika uklonjena', flagged: 'Označeno', suspended: 'Suspendovan', lifted: 'Suspenzija ukinuta' }
@@ -447,6 +492,7 @@ function AdminPage() {
         {tab === 'listings' && <ListingsTab />}
         {tab === 'users' && <UsersTab />}
         {tab === 'moderation' && <ModerationTab />}
+        {tab === 'registry' && <RegistryTab />}
       </div>
     </div>
   )

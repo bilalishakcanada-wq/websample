@@ -1,17 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
   BadgeCheck,
   Bell,
-  CalendarClock,
   Check,
-  ChevronRight,
   MapPin,
   MessageCircle,
   Search,
   ShieldCheck,
-  Sparkles,
   Star,
   UserRound,
   Users,
@@ -23,9 +20,11 @@ import { serviceCategories } from '../data/categories'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import { useLiveListings } from '../hooks/useLiveListings'
-import CitySlideshow from '../components/CitySlideshow'
 import CityPicker from '../components/CityPicker'
 import { useRankedProviders } from '../hooks/useRankedProviders'
+import { usePlatformStats } from '../hooks/usePlatformStats'
+import { ArcHeadline, HeroStars, LadderArt, SwingArt } from '../components/HeroArt'
+import { POPULAR_CITIES } from '../data/siteMap'
 
 const categoryCards = [
   ...mockServiceCategories.map((category) => ({
@@ -53,6 +52,7 @@ function HomePage() {
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
+  const { proof, rating, loading: statsLoading } = usePlatformStats()
   const filteredTasks = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
     if (!query) return allTasks
@@ -103,113 +103,70 @@ function HomePage() {
     <div className="marketplace-shell">
 
       <main>
-        <section className="hero-band" id="pocetna">
-          <div className="hero-section">
-            <div className="hero-copy">
-              <div className="eyebrow">
-                <Sparkles size={14} />
-                Najbrži način za pronaći pomoć u BiH
-              </div>
-              <h1 className="hero-headline">
-                Uradi bilo šta.<br />
-                <span className="hero-headline-accent">Odmah.</span>
-              </h1>
-              <p>
-                Povezujemo vas sa provjerenim stručnjacima za kućne poslove, IT, dizajn,
-                popravke i još mnogo toga. Sve u jednom mjestu, na bosanskom jeziku.
-              </p>
+        <section className="hero-stage" id="pocetna">
+          <HeroStars />
+          <LadderArt />
+          <SwingArt />
 
-              <form
-                className="search-panel"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  const params = new URLSearchParams()
-                  if (searchTerm.trim()) params.set('q', searchTerm.trim())
-                  if (city.trim()) params.set('city', city.trim())
-                  navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`)
-                }}
-              >
-                <div className="search-field">
-                  <Search size={18} />
-                  <input type="text" value={searchTerm} placeholder="Popravka kuće, web dizajn, IT podrška" onChange={(event) => setSearchTerm(event.target.value)} />
-                </div>
-                <button type="button" className="search-field location-field city-picker-trigger" onClick={() => setCityPickerOpen(true)}>
-                  <MapPin size={18} />
-                  <span>{city || 'Svi gradovi'}</span>
-                </button>
-                <button type="submit" className="primary-button large-button">
-                  Pretraži
-                </button>
-              </form>
+          <div className="hero-stage-inner">
+            <ArcHeadline />
+            <p className="hero-stage-tagline">Objavi posao. Izaberi najboljeg. Riješeno.</p>
 
-              <div className="hero-stats">
-                <div>
-                  <strong><Users size={16} /> 18k+</strong>
-                  <span>aktivnih pružalaca</span>
-                </div>
-                <div>
-                  <strong><Star size={16} /> 4.9/5</strong>
-                  <span>prosječna ocjena</span>
-                </div>
-                <div>
-                  <strong><CalendarClock size={16} /> 2h</strong>
-                  <span>prosječno vrijeme odgovora</span>
-                </div>
-              </div>
+            <div className="hero-stage-actions">
+              <Link to="/objavi" className="hero-btn hero-btn-primary">Objavi posao besplatno <ArrowRight size={18} /></Link>
+              <Link to="/zaradi" className="hero-btn hero-btn-light">Zaradi kao izvođač</Link>
             </div>
 
-            <div className="hero-card">
-              <div className="hero-image-wrap">
-                <CitySlideshow onSelectCity={(selected) => navigate(`/search?city=${encodeURIComponent(selected)}`)} />
+            <form
+              className="search-panel hero-search"
+              onSubmit={(event) => {
+                event.preventDefault()
+                const params = new URLSearchParams()
+                if (searchTerm.trim()) params.set('q', searchTerm.trim())
+                if (city.trim()) params.set('city', city.trim())
+                navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`)
+              }}
+            >
+              <div className="search-field">
+                <Search size={18} />
+                <input type="text" value={searchTerm} placeholder="Popravka kuće, web dizajn, IT podrška" onChange={(event) => setSearchTerm(event.target.value)} />
               </div>
+              <button type="button" className="search-field location-field city-picker-trigger" onClick={() => setCityPickerOpen(true)}>
+                <MapPin size={18} />
+                <span>{city || 'Svi gradovi'}</span>
+              </button>
+              <button type="submit" className="primary-button large-button">
+                Pretraži
+              </button>
+            </form>
 
-              <div className="float-card float-card-payment">
-                <Wallet size={16} />
-                <div>
-                  <strong>Isplata primljena!</strong>
-                  <span>Montaža namještaja · 180 KM</span>
-                </div>
-              </div>
-
-              <div className="float-card float-card-earnings">
-                <div className="float-card-earnings-top">
-                  <span>Ukupna zarada</span>
-                  <span className="float-card-trend"><ChevronRight size={12} style={{ transform: 'rotate(-90deg)' }} /> 18%</span>
-                </div>
-                <strong>2.450 KM</strong>
-                <svg viewBox="0 0 100 28" className="float-card-sparkline" preserveAspectRatio="none">
-                  <polyline points="0,22 15,18 30,20 45,10 60,14 75,4 90,8 100,2" />
-                </svg>
-              </div>
-
-              <div className="float-pill float-pill-alert">
-                <Bell size={13} /> Nova ponuda!
-              </div>
-
-              <div className="mini-panel">
-                <div className="status-badge">
-                  <BadgeCheck size={16} />
-                  Usluga potvrđena
-                </div>
-                <h3>"IT pomoć za naš ured"</h3>
-                <div className="mini-metrics">
-                  <span>
-                    <Users size={14} /> 28 aplikacija
-                  </span>
-                  <span>
-                    <CalendarClock size={14} /> 1-3 dana
-                  </span>
-                </div>
-                <div className="provider-row">
-                  <div className="avatar avatar-one">A</div>
-                  <div className="avatar avatar-two">N</div>
-                  <div className="avatar avatar-three">L</div>
-                </div>
-                <button type="button" className="secondary-button" onClick={() => document.getElementById('poslovi')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Pogledaj ponude <ChevronRight size={16} />
-                </button>
-              </div>
+            <div className="hero-cities">
+              <span>Popularni gradovi:</span>
+              {POPULAR_CITIES.map((name) => (
+                <Link key={name} to={`/search?city=${encodeURIComponent(name)}`}>{name}</Link>
+              ))}
             </div>
+
+            <div className={`hero-proof ${statsLoading ? 'is-loading' : ''}`}>
+              {proof.map(({ key, icon: Icon, value, label }) => (
+                <span key={key}><Icon size={17} /> <strong>{value}</strong> {label}</span>
+              ))}
+            </div>
+
+            {rating ? (
+              <div className="hero-rating">
+                <span className="hero-rating-stars" aria-label={`${rating.value} od 5`}>
+                  {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={14} className={n <= rating.stars ? 'lit' : ''} />)}
+                </span>
+                <strong>{rating.value}</strong> ‘{rating.word}’ <span className="hero-rating-count">({rating.count} {rating.count === 1 ? 'ocjena' : 'ocjena'})</span>
+              </div>
+            ) : (
+              <div className="hero-rating hero-rating-trust">
+                <span><BadgeCheck size={14} /> Verifikovana struka</span>
+                <span><ShieldCheck size={14} /> Zaštićeni kontakti</span>
+                <span><Wallet size={14} /> Bez provizije</span>
+              </div>
+            )}
           </div>
         </section>
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Archivo:wdth,wght@75..100,600..900&display=swap');
 
 :root {
   --bg: #f6f4ee;
@@ -18,7 +18,7 @@
   --warning: #ffb703;
   --danger: #ef4444;
   --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-  --font-display: 'Sora', 'Manrope', sans-serif;
+  --font-display: 'Archivo', 'Manrope', sans-serif;
   --header-h: 72px;
 }
 
@@ -40,6 +40,13 @@ body {
 h1, h2, h3,
 .brand-name {
   font-family: var(--font-display);
+  font-stretch: 88%;     /* Archivo's width axis — the condensed grotesk look */
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-stretch: 80%;
 }
 
 a {
@@ -7253,7 +7260,8 @@ body:has(.profile-cta-bar) .support-chat {
 
 .site-logo-text {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-stretch: 80%;
+  font-weight: 900;
   font-size: 1.35rem;
   letter-spacing: -0.04em;
   color: var(--primary-strong);
@@ -7549,7 +7557,8 @@ body:has(.profile-cta-bar) .support-chat {
 
 .hero-arc-line {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-stretch: 75%;
+  font-weight: 900;
   font-size: 150px;
   fill: white;
   letter-spacing: -0.02em;
@@ -8826,7 +8835,10 @@ body:has(.profile-cta-bar) .support-chat {
 
 .is-provider .meet-card-top h1,
 .is-client .meet-card-top h1 {
-  font-size: clamp(1.7rem, 2.8vw, 2.4rem);
+  font-size: clamp(2rem, 3.2vw, 2.9rem);
+  font-stretch: 75%;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
 @media (max-width: 760px) {

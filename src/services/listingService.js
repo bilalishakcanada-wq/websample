@@ -3,6 +3,7 @@ import { publicError, sanitizeText } from '../utils/validation'
 import { apiRequest } from './api'
 import { appConfig } from '../config/appConfig'
 import { listingInputSchema, parseInput } from '../utils/inputSchemas'
+import { coordsForLocation } from '../data/cityCoordinates'
 
 export const listingService = {
   async getById(id) {
@@ -56,17 +57,29 @@ export const listingService = {
     return data || []
   },
 
-  async listAll({ search = '', status = 'published', sort = 'created_at', page = 1, pageSize = 10, ownerId = '', city = '', category = '', maxPrice = '' } = {}) {
+  async listAll({
+    search = '', status = 'published', sort = 'newest', page = 1, pageSize = 10,
+    ownerId = '', city = '', category = '', minPrice = '', maxPrice = '',
+    remoteOnly = false, hasBudget = false,
+  } = {}) {
     if (appConfig.apiBaseUrl && !ownerId) return apiRequest(`/api/listings?page=${page}&pageSize=${pageSize}`)
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
+
+    const ORDER = {
+      newest: ['created_at', false],
+      oldest: ['created_at', true],
+      price_asc: ['price', true],
+      price_desc: ['price', false],
+    }
+    const [orderColumn, ascending] = ORDER[sort] || ORDER.newest
 
     let query = supabase
       .from('listings')
       .select('*, listing_tags(tag_id, tags(name)), bids(count)', { count: 'exact' })
       .eq('status', status)
       .range(from, to)
-      .order(sort, { ascending: false })
+      .order(orderColumn, { ascending, nullsFirst: false })
 
     const safeSearch = sanitizeText(search).slice(0, 80).replace(/[%_(),]/g, '')
     if (safeSearch) {
@@ -75,7 +88,10 @@ export const listingService = {
     if (ownerId) query = query.eq('user_id', ownerId)
     if (city) query = query.ilike('location', `%${sanitizeText(city).slice(0, 60)}%`)
     if (category) query = query.eq('category', category)
-    if (maxPrice) query = query.lte('price', Number(maxPrice))
+    if (minPrice !== '' && minPrice != null) query = query.gte('price', Number(minPrice))
+    if (maxPrice !== '' && maxPrice != null) query = query.lte('price', Number(maxPrice))
+    if (remoteOnly) query = query.ilike('location', '%online%')
+    if (hasBudget) query = query.not('price', 'is', null)
 
     const { data, error, count } = await query
 
@@ -114,6 +130,7 @@ export const listingService = {
         price: cleanPayload.price,
         currency: payload.currency || 'BAM',
         status: payload.status || 'draft',
+        ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
       })
       .select()
       .single()
@@ -149,6 +166,7 @@ export const listingService = {
       price: input.price === '' ? null : input.price,
       currency: 'BAM',
       status: payload.status || 'published',
+      ...(coordsForLocation(input.location) || { lat: null, lng: null }),
     }
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'PATCH', body: cleanPayload })
 

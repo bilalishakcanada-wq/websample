@@ -21,6 +21,7 @@
     "file-type": "^21.3.4",
     "helmet": "^8.0.0",
     "lucide-react": "^1.46.0",
+    "maplibre-gl": "^6.10.0",
     "morgan": "^1.10.0",
     "multer": "^2.4.0",
     "react": "^19.2.8",

@@ -4,6 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    // maplibre-gl ships its own worker bundle; pre-bundling breaks it.
+    exclude: ['maplibre-gl'],
+  },
   plugins: [
     react(),
     VitePWA({

@@ -1,46 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
+import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']
 
-const POPULAR_CATEGORIES = ['Majstor za sve', 'Čišćenje', 'Prevoz i dostava', 'Selidbe i transport', 'Baštovanstvo', 'Električar', 'Montaža namještaja']
-const POPULAR_CITIES = ['Sarajevo', 'Banja Luka', 'Tuzla', 'Zenica', 'Mostar', 'Bijeljina', 'Brčko']
-
 const COLUMNS = [
-  {
-    title: 'Otkrij',
+  ...FOOTER_GROUPS.map((group) => ({
+    title: group.title,
     links: [
-      ['Kako radi', '/kako-radi'],
-      ['Poso.ba za firme', '/za-biznis'],
-      ['Zaradi novac', '/zaradi'],
-      ['Pretraži poslove', '/search'],
-      ['Vodiči za cijene', '/vodici'],
-      ['Često postavljena pitanja', '/pomoc'],
-      ['Planovi i cijene', '/#cijene'],
+      ...SITE_PAGES.filter((page) => page.group === group.id).map((page) => [page.title, page.path]),
+      ...(group.extra || []),
     ],
-  },
-  {
-    title: 'Kompanija',
-    links: [
-      ['O nama', '/o-nama'],
-      ['Pravila zajednice', '/pravila'],
-      ['Principi izvođača', '/zaradi#principi'],
-      ['Uslovi korištenja', '/pravila'],
-      ['Politika privatnosti', '/privatnost'],
-      ['Kontakt', '/pomoc#kontakt'],
-    ],
-  },
-  {
-    title: 'Postojeći korisnici',
-    links: [
-      ['Objavi posao', '/objavi'],
-      ['Pretraži poslove', '/search'],
-      ['Prijava', '/login'],
-      ['Nadzorna ploča', '/dashboard'],
-      ['Poruke', '/messages'],
-      ['Centar za pomoć', '/pomoc'],
-    ],
-  },
+  })),
   {
     title: 'Popularne kategorije',
     links: [

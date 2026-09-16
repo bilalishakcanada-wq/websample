@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
 import { Building2, ClipboardList, Clock, ShieldCheck, Users } from 'lucide-react'
-import BackHome from '../components/BackHome'
-import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
+import InfoLayout from '../components/InfoLayout'
 
 function BusinessPage() {
-  useRevealOnScroll()
   return (
-    <div className="app-shell page-with-mobile-nav info-page">
-      <header className="app-page-header"><div><BackHome /><span className="eyebrow small-eyebrow">Poso.ba za firme</span><h1>Radna snaga na zahtjev, bez zapošljavanja</h1></div></header>
-      <main className="content-container">
-        <p className="info-lead">Kancelarija, lokal, magacin ili više lokacija — objavi šta treba i dobij ponude provjerenih izvođača iz grada u kom radiš. Isti nalog, isti proces, samo više poslova.</p>
+    <InfoLayout
+      eyebrow="Poso.ba za firme"
+      title="Radna snaga na zahtjev, bez zapošljavanja"
+      lead="Kancelarija, lokal, magacin ili više lokacija — objavi šta treba i dobij ponude provjerenih izvođača iz grada u kom radiš. Isti nalog, isti proces, samo više poslova."
+      cta={{ eyebrow: 'Veći obim?', text: 'Za redovne potrebe u više gradova dogovaramo direktnu podršku.', to: '/kontakt?tema=business', label: 'Kontaktiraj nas' }}
+    >
 
         <section className="info-grid reveal">
           <div className="info-card"><Clock size={20} /><strong>Brzo popunjavanje</strong><p>Selidba kancelarije, montaža, čišćenje nakon renoviranja — ponude stižu isti dan.</p></div>
@@ -27,11 +27,10 @@ function BusinessPage() {
           </ol>
           <div className="looking-card-actions">
             <Link to="/register" className="primary-button">Napravi nalog</Link>
-            <Link to="/pomoc?tema=business#kontakt" className="ghost-button">Kontaktiraj nas</Link>
+            <Link to="/kontakt?tema=business" className="ghost-button">Kontaktiraj nas</Link>
           </div>
         </section>
-      </main>
-    </div>
+    </InfoLayout>
   )
 }
 

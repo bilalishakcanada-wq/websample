@@ -1,19 +1,14 @@
-import { Lock } from 'lucide-react'
-import BackHome from '../components/BackHome'
+import InfoLayout from '../components/InfoLayout'
 
 function PrivacyPage() {
   return (
-    <div className="app-shell page-with-mobile-nav">
-      <header className="app-page-header">
-        <div>
-          <BackHome />
-          <span className="eyebrow small-eyebrow">Pravna obavještenja</span>
-          <h1>Politika privatnosti</h1>
-        </div>
-        <Lock size={22} />
-      </header>
-      <main className="content-container">
-        <section className="detail-section">
+    <InfoLayout
+      eyebrow="Pravna obavještenja"
+      title="Politika privatnosti"
+      lead="Koje podatke čuvamo, zašto i koliko dugo — i kako ih možeš vidjeti, izmijeniti ili obrisati."
+      cta={{ eyebrow: 'Tvoji podaci', text: 'Želiš izvoz ili brisanje podataka? Sve ide iz postavki profila.', to: '/profile?tab=racun', label: 'Postavke naloga' }}
+    >
+        <section className="info-section reveal">
           <p className="muted-text">
             Ovaj dokument je pripremljen kao standardna polazna osnova u skladu sa Zakonom o zaštiti
             ličnih podataka Bosne i Hercegovine. Prije stvarnog lansiranja platforme preporučuje se
@@ -22,7 +17,7 @@ function PrivacyPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>1. Koje podatke prikupljamo</h2>
           <ul className="rules-list">
             <li>Osnovni podaci naloga: ime i prezime, email, telefon, grad,</li>
@@ -31,7 +26,7 @@ function PrivacyPage() {
           </ul>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>2. Kako koristimo podatke</h2>
           <p>
             Podatke koristimo isključivo za pružanje usluge: prikazivanje oglasa, omogućavanje
@@ -40,7 +35,7 @@ function PrivacyPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>3. Vaša prava</h2>
           <p>
             U skladu sa važećim propisima, imate pravo na pristup, ispravku i brisanje svojih ličnih
@@ -49,7 +44,7 @@ function PrivacyPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>4. Kolačići (cookies)</h2>
           <p>
             Koristimo osnovne kolačiće neophodne za rad platforme (npr. održavanje prijave). Ne
@@ -57,15 +52,14 @@ function PrivacyPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>5. Kontakt</h2>
           <p>
             Za pitanja o privatnosti i ličnim podacima, kontaktirajte nas putem chat podrške u donjem
             desnom uglu stranice.
           </p>
         </section>
-      </main>
-    </div>
+    </InfoLayout>
   )
 }
 

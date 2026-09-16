@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown, LifeBuoy, Mail, MessageCircle, Search } from 'lucide-react'
-import BackHome from '../components/BackHome'
-import { useAuth } from '../context/AuthContext'
-import { contactService } from '../services/contactService'
+import InfoLayout from '../components/InfoLayout'
+import ContactForm from '../components/ContactForm'
 
 const FAQ = [
   { group: 'Za klijente', items: [
@@ -25,25 +24,10 @@ const FAQ = [
   ] },
 ]
 
-const TOPICS = [
-  { value: 'account', label: 'Nalog i prijava' },
-  { value: 'listing', label: 'Oglas ili ponuda' },
-  { value: 'payment', label: 'Plaćanje i pretplata' },
-  { value: 'report', label: 'Prijava zloupotrebe' },
-  { value: 'business', label: 'Saradnja / firme' },
-  { value: 'other', label: 'Nešto drugo' },
-]
-
 function HelpPage() {
-  const { user } = useAuth()
   const [searchParams] = useSearchParams()
-  const initialTopic = TOPICS.some((topic) => topic.value === searchParams.get('tema')) ? searchParams.get('tema') : 'other'
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(null)
-  const [form, setForm] = useState({ name: user?.user_metadata?.full_name || '', email: user?.email || '', topic: initialTopic, message: '' })
-  const [sending, setSending] = useState(false)
-  const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
 
   const needle = query.trim().toLowerCase()
   const groups = FAQ.map((group) => ({
@@ -51,25 +35,12 @@ function HelpPage() {
     items: group.items.filter((item) => !needle || `${item.q} ${item.a}`.toLowerCase().includes(needle)),
   })).filter((group) => group.items.length > 0)
 
-  const submit = async (event) => {
-    event.preventDefault()
-    setSending(true)
-    setError('')
-    try {
-      await contactService.send({ userId: user?.id || null, ...form })
-      setSent(true)
-      setForm((current) => ({ ...current, message: '' }))
-    } catch (requestError) {
-      setError(requestError.message)
-    } finally {
-      setSending(false)
-    }
-  }
-
   return (
-    <div className="app-shell page-with-mobile-nav info-page">
-      <header className="app-page-header"><div><BackHome /><span className="eyebrow small-eyebrow">Centar za pomoć</span><h1>Kako ti možemo pomoći?</h1></div></header>
-      <main className="content-container">
+    <InfoLayout
+      eyebrow="Centar za pomoć"
+      title="Kako ti možemo pomoći?"
+      lead="Pretraži odgovore, otvori live chat ili nam pošalji poruku — birat ćeš ono što ti je najbrže."
+    >
         <label className="help-search">
           <Search size={18} />
           <input placeholder="Pretraži pitanja: verifikacija, kontakt, brisanje naloga..." value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -108,31 +79,9 @@ function HelpPage() {
             <h2>Piši nam</h2>
             <p className="muted-text">Nisi našao odgovor? Opiši problem i javit ćemo se na email.</p>
           </div>
-          {sent ? (
-            <div className="form-success">Hvala! Poruka je primljena — javljamo se u roku 24 sata.</div>
-          ) : (
-            <form onSubmit={submit} className="auth-form contact-form">
-              <div className="field-row">
-                <div className="field"><input id="c-name" placeholder=" " value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /><label htmlFor="c-name">Ime</label></div>
-                <div className="field"><input id="c-email" type="email" placeholder=" " value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required /><label htmlFor="c-email">Email</label></div>
-              </div>
-              <label className="verify-trade-select">
-                Tema
-                <select value={form.topic} onChange={(event) => setForm({ ...form, topic: event.target.value })}>
-                  {TOPICS.map((topic) => <option key={topic.value} value={topic.value}>{topic.label}</option>)}
-                </select>
-              </label>
-              <div className="field field-textarea">
-                <textarea id="c-msg" placeholder=" " rows={5} value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} required />
-                <label htmlFor="c-msg">Poruka</label>
-              </div>
-              {error && <div className="form-error">{error}</div>}
-              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji poruku'}</button>
-            </form>
-          )}
+          <ContactForm initialTopic={searchParams.get('tema') || 'other'} />
         </section>
-      </main>
-    </div>
+    </InfoLayout>
   )
 }
 

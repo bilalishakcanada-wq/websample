@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart3, Info } from 'lucide-react'
-import BackHome from '../components/BackHome'
+import InfoLayout from '../components/InfoLayout'
 import { serviceCategories } from '../data/categories'
 import { contactService } from '../services/contactService'
 
@@ -24,12 +24,13 @@ function GuidesPage() {
   const withoutData = serviceCategories.filter((category) => !byCategory.get(category.name)?.priced_count)
 
   return (
-    <div className="app-shell page-with-mobile-nav info-page">
-      <header className="app-page-header"><div><BackHome /><span className="eyebrow small-eyebrow">Vodiči za cijene</span><h1>Koliko košta posao u BiH?</h1></div></header>
-      <main className="content-container">
-        <p className="info-lead">
-          Rasponi ispod se računaju iz <strong>stvarnih objavljenih oglasa</strong> na Poso.ba — ne iz procjena. Što više oglasa, to je slika tačnija.
-        </p>
+    <InfoLayout
+      eyebrow="Vodiči za cijene"
+      title="Koliko košta posao u BiH?"
+      lead="Rasponi ispod se računaju iz stvarnih objavljenih oglasa na Poso.ba — ne iz procjena. Što više oglasa, to je slika tačnija."
+      cta={{ eyebrow: 'Imaš posao?', text: 'Objavi ga i dobij ponude umjesto nagađanja.', to: '/objavi', label: 'Objavi posao' }}
+      wide
+    >
         <div className="info-note"><Info size={16} /> Medijan je "tipična" cijena: pola oglasa je ispod, pola iznad. Manje ga pomjeraju ekstremi nego prosjek.</div>
 
         {loading && <div className="skeleton-list">{[1, 2, 3].map((item) => <div className="skeleton-card" key={item} />)}</div>}
@@ -67,12 +68,7 @@ function GuidesPage() {
           </section>
         )}
 
-        <section className="cta-strip">
-          <div><span className="eyebrow small-eyebrow">Imaš posao?</span><h2>Objavi ga i dobij ponude umjesto nagađanja.</h2></div>
-          <Link to="/objavi" className="primary-button">Objavi posao</Link>
-        </section>
-      </main>
-    </div>
+    </InfoLayout>
   )
 }
 

@@ -24,6 +24,10 @@ import HowItWorksPage from './pages/HowItWorksPage'
 import HelpPage from './pages/HelpPage'
 import GuidesPage from './pages/GuidesPage'
 import BusinessPage from './pages/BusinessPage'
+import ContactPage from './pages/ContactPage'
+import PricingPage from './pages/PricingPage'
+import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage'
+import ProviderPrinciplesPage from './pages/ProviderPrinciplesPage'
 import SiteFooter from './components/SiteFooter'
 import MobileNav from './components/MobileNav'
 import SupportChat from './components/SupportChat'
@@ -53,6 +57,10 @@ function App() {
         <Route path="/pomoc" element={<HelpPage />} />
         <Route path="/vodici" element={<GuidesPage />} />
         <Route path="/za-biznis" element={<BusinessPage />} />
+        <Route path="/kontakt" element={<ContactPage />} />
+        <Route path="/cijene" element={<PricingPage />} />
+        <Route path="/pravila-zajednice" element={<CommunityGuidelinesPage />} />
+        <Route path="/principi-izvodjaca" element={<ProviderPrinciplesPage />} />
         <Route path="/privatnost" element={<PrivacyPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route path="/404" element={<NotFoundPage />} />

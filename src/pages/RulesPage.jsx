@@ -1,19 +1,14 @@
-import { ShieldAlert } from 'lucide-react'
-import BackHome from '../components/BackHome'
+import InfoLayout from '../components/InfoLayout'
 
 function RulesPage() {
   return (
-    <div className="app-shell page-with-mobile-nav">
-      <header className="app-page-header">
-        <div>
-          <BackHome />
-          <span className="eyebrow small-eyebrow">Pravna obavještenja</span>
-          <h1>Pravila i uslovi korištenja</h1>
-        </div>
-        <ShieldAlert size={22} />
-      </header>
-      <main className="content-container">
-        <section className="detail-section">
+    <InfoLayout
+      eyebrow="Pravna obavještenja"
+      title="Uslovi korištenja"
+      lead="Pravila po kojima radi Poso.ba. Kratko, jasno i bez sitnih slova — ako nešto nije jasno, piši nam."
+      cta={{ eyebrow: 'Pitanje?', text: 'Nejasan ti je neki uslov? Objasnit ćemo.', to: '/kontakt?tema=account', label: 'Kontakt' }}
+    >
+        <section className="info-section reveal">
           <h2>1. Opšta pravila</h2>
           <p>
             Poso.ba je platforma koja povezuje korisnike koji traže usluge sa lokalnim izvođačima
@@ -22,7 +17,7 @@ function RulesPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>2. Zabranjen sadržaj</h2>
           <p>Strogo je zabranjeno objavljivanje oglasa, poruka ili profila koji sadrže ili promovišu:</p>
           <ul className="rules-list">
@@ -39,7 +34,7 @@ function RulesPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>3. Prijava neprimjerenog sadržaja</h2>
           <p>
             Ako naiđete na oglas ili korisnika koji krši ova pravila, molimo prijavite ga putem dugmeta
@@ -47,7 +42,7 @@ function RulesPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>4. Plaćanja</h2>
           <p>
             Sistem pretplata i kredita je pripremljen za buduću integraciju sa provajderom plaćanja.
@@ -56,15 +51,14 @@ function RulesPage() {
           </p>
         </section>
 
-        <section className="detail-section">
+        <section className="info-section reveal">
           <h2>5. Brisanje naloga</h2>
           <p>
             Svoj nalog možete obrisati u bilo kojem trenutku iz postavki profila. Brisanjem naloga
             uklanjaju se vaši lični podaci u skladu sa važećim propisima o zaštiti podataka.
           </p>
         </section>
-      </main>
-    </div>
+    </InfoLayout>
   )
 }
 

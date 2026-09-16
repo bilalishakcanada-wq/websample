@@ -65,3 +65,8 @@ create table if not exists public.moderation_settings (key text primary key, val
 --   admin_activity_feed(limit, kind, user) — unified feed; admin_suspend(user, days, reason); admin_redact(kind, id, note);
 --   trust_agent_dossier(user) + trust_agent_queue(limit) for the trust-agent Edge Function; cron trust-agent-sweep (*/30).
 -- user_roles: FKs to roles(id) and auth.users(id) on delete cascade; is_admin_user(uuid) helper.
+
+-- Support notifications (migration support_notifications):
+--   on_support_message_notify(): user message -> notifications row per admin + pg_net POST to notify-admin (Telegram/email);
+--   admin reply -> notification for the user. on_moderation_event_notify(): suspended/flagged -> admins.
+--   admin_conversations(limit) and admin_support_threads() for the admin console. moderation_settings.notify_admin_external.

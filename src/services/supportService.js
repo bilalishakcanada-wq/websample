@@ -42,24 +42,30 @@ export const supportService = {
   },
 
   async listThreadsForAdmin() {
-    const { data, error } = await supabase
-      .from('support_messages')
-      .select('id, user_id, sender, message, created_at, read_at')
-      .order('created_at', { ascending: false })
-
+    const { data, error } = await supabase.rpc('admin_support_threads')
     if (error) {
       console.error('Supabase admin support threads fetch failed', { message: error.message, code: error.code })
       throw publicError()
     }
+    return (data || []).map((row) => ({
+      userId: row.user_id,
+      fullName: row.full_name,
+      memberId: row.member_id,
+      email: row.email,
+      lastMessage: row.last_message || '',
+      lastSender: row.last_sender,
+      lastAt: row.last_at,
+      unread: Number(row.unread) || 0,
+    }))
+  },
 
-    const byUser = new Map()
-    for (const row of data || []) {
-      if (!byUser.has(row.user_id)) {
-        byUser.set(row.user_id, { userId: row.user_id, lastMessage: row.message, lastSender: row.sender, lastAt: row.created_at, unread: 0 })
-      }
-      if (row.sender === 'user' && !row.read_at) byUser.get(row.user_id).unread += 1
-    }
-    return Array.from(byUser.values())
+  /** Admin: every new support message on the platform, live. */
+  subscribeAll(onInsert) {
+    const channel = supabase
+      .channel(`support-admin-${Math.random().toString(36).slice(2, 8)}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => onInsert(payload.new))
+      .subscribe()
+    return () => supabase.removeChannel(channel)
   },
 
   async markThreadRead(userId) {

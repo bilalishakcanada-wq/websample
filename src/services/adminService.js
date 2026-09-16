@@ -169,7 +169,7 @@ export const adminService = {
 
   /** Realtime: call `onChange` whenever a row is inserted in any watched table. Returns an unsubscribe function. */
   subscribeFeed(onChange) {
-    const channel = supabase.channel('admin-oversight')
+    const channel = supabase.channel(`admin-oversight-${Math.random().toString(36).slice(2, 8)}`)
     for (const table of ['listings', 'bids', 'messages', 'reviews', 'moderation_events']) {
       channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table }, (payload) => onChange(table, payload.new))
     }
@@ -204,6 +204,29 @@ export const adminService = {
   async getAssessment(userId) {
     const { data } = await supabase.from('profiles').select('ai_assessment, ai_assessed_at').eq('user_id', userId).maybeSingle()
     return data || null
+  },
+
+  /** All conversations on the platform with both participants. */
+  async listConversations(limit = 100) {
+    const { data, error } = await supabase.rpc('admin_conversations', { p_limit: limit })
+    if (error) {
+      console.error('Admin conversations fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async conversationMessages(conversationId) {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id, sender_id, receiver_id, content, created_at')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+    if (error) {
+      console.error('Admin conversation messages fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
   },
 
   async setVerificationStatus(id, status) {

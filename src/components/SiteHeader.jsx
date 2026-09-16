@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, UserRound, X } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
+import NotificationBell from './NotificationBell'
 
-const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']
+const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password']
 
 const NAV_LINKS = [
   ['/search', 'Pretraži poslove'],
@@ -17,7 +18,7 @@ const firstNameOf = (user) => (user?.user_metadata?.full_name || user?.email || 
 function SiteHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [menuPinned, setMenuPinned] = useState(false)
   const [navMode, setNavMode] = useState('client')
@@ -134,6 +135,8 @@ function SiteHeader() {
               <>
                 <NavLink to="/messages" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><MessageCircle size={16} /> Poruke</NavLink>
                 <NavLink to="/dashboard" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><LayoutDashboard size={16} /> Ploča</NavLink>
+                {isAdmin && <NavLink to="/admin" className={({ isActive }) => `site-nav-link site-nav-admin ${isActive ? 'active' : ''}`}><ShieldCheck size={16} /> Admin</NavLink>}
+                <NotificationBell />
                 <Link to="/profile" className="site-user-chip"><span className="site-user-avatar"><UserRound size={15} /></span>{firstNameOf(user)}</Link>
               </>
             ) : (
@@ -145,6 +148,7 @@ function SiteHeader() {
             <Link to="/zaradi" className="site-header-secondary">Postani izvođač</Link>
           </div>
 
+          {user && <div className="site-mobile-bell"><NotificationBell /></div>}
           <button type="button" className="site-burger" aria-label="Meni" aria-expanded={mobileOpen} onClick={() => setMobileOpen((open) => !open)}>
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
@@ -164,6 +168,7 @@ function SiteHeader() {
                 <Link to="/dashboard"><LayoutDashboard size={16} /> Nadzorna ploča</Link>
                 <Link to="/messages"><MessageCircle size={16} /> Poruke</Link>
                 <Link to="/profile"><UserRound size={16} /> Moj profil</Link>
+                {isAdmin && <Link to="/admin"><ShieldCheck size={16} /> Admin panel</Link>}
                 <button type="button" onClick={async () => { await logout(); navigate('/') }}><LogOut size={16} /> Odjava</button>
               </>
             ) : (

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bot, ChevronDown, ChevronUp, IdCard, LifeBuoy, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { desktopNotify, playPing } from '../services/notificationService'
+import { BellRing, Bot, ChevronDown, ChevronUp, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, Users } from 'lucide-react'
 import BackHome from '../components/BackHome'
 import { adminService } from '../services/adminService'
 import { supportService } from '../services/supportService'
@@ -8,6 +10,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 const TABS = [
   { id: 'oversight', label: 'Nadzor', icon: Radar },
   { id: 'support', label: 'Podrška', icon: LifeBuoy },
+  { id: 'messages', label: 'Poruke', icon: MessageSquare },
   { id: 'verification', label: 'Verifikacija', icon: ShieldCheck },
   { id: 'reports', label: 'Prijave', icon: ShieldAlert },
   { id: 'listings', label: 'Oglasi', icon: Tag },
@@ -126,6 +129,75 @@ function OversightTab() {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function MessagesTab() {
+  const [conversations, setConversations] = useState([])
+  const [activeId, setActiveId] = useState('')
+  const [thread, setThread] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const load = () => {
+    setLoading(true)
+    adminService.listConversations(150).then(setConversations).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
+  }
+  useEffect(() => { load() }, [])
+  useEffect(() => adminService.subscribeFeed((table, row) => {
+    if (table !== 'messages') return
+    load()
+    if (row.conversation_id === activeId) setThread((current) => current.some((item) => item.id === row.id) ? current : [...current, row])
+  }), [activeId])
+
+  const open = async (conversation) => {
+    setActiveId(conversation.id)
+    setError('')
+    try { setThread(await adminService.conversationMessages(conversation.id)) } catch (requestError) { setError(requestError.message) }
+  }
+
+  const active = conversations.find((item) => item.id === activeId)
+  const nameOf = (userId) => (active ? (userId === active.one_id ? active.one_name : active.two_name) : null) || 'Korisnik'
+
+  if (loading && conversations.length === 0) return <div className="page-state">Učitavanje poruka...</div>
+
+  return (
+    <div className="admin-support-layout">
+      <div className="admin-thread-list">
+        <p className="muted-text">Svi razgovori na platformi ({conversations.length}). Uživo.</p>
+        {conversations.length === 0 && <p className="muted-text">Još nema razgovora.</p>}
+        {conversations.map((conversation) => (
+          <button key={conversation.id} type="button" className={`admin-thread-item ${activeId === conversation.id ? 'active' : ''}`} onClick={() => open(conversation)}>
+            <span className="admin-thread-id">{conversation.one_name || 'Korisnik'} ↔ {conversation.two_name || 'Korisnik'}</span>
+            <span className="muted-text">{conversation.listing_title ? `${conversation.listing_title} · ` : ''}{conversation.message_count} poruka</span>
+            <span className="muted-text">{(conversation.last_message || '').slice(0, 48)}</span>
+          </button>
+        ))}
+      </div>
+      <div className="admin-thread-detail">
+        {!active && <p className="muted-text">Odaberite razgovor sa lijeve strane.</p>}
+        {active && (
+          <>
+            <div className="admin-conv-head">
+              <span><strong>{active.one_name}</strong> <span className="uid-chip">{active.one_member}</span></span>
+              <span>↔</span>
+              <span><strong>{active.two_name}</strong> <span className="uid-chip">{active.two_member}</span></span>
+              {active.listing_id && <a className="ghost-button" href={`/listings/${active.listing_id}`} target="_blank" rel="noreferrer">Oglas</a>}
+            </div>
+            <div className="support-chat-messages admin-messages">
+              {thread.map((item) => (
+                <div key={item.id} className={`support-bubble ${item.sender_id === active.one_id ? 'from-admin' : 'from-user'}`}>
+                  <small>{nameOf(item.sender_id)} · {formatBosnianDate(item.created_at)}</small>
+                  {item.content}
+                  <button type="button" className="bubble-remove" title="Ukloni poruku" onClick={async () => { try { await adminService.redact('message', item.id, 'Uklonio administrator'); setThread(await adminService.conversationMessages(active.id)) } catch (requestError) { setError(requestError.message) } }}>×</button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {error && <div className="form-error">{error}</div>}
+      </div>
     </div>
   )
 }
@@ -300,6 +372,15 @@ function SupportTab() {
 
   useEffect(() => { loadThreads() }, [])
 
+  // live: new support messages refresh the list and the open thread, and ping the admin
+  const activeRef = useRef('')
+  useEffect(() => { activeRef.current = activeUser }, [activeUser])
+  useEffect(() => supportService.subscribeAll((row) => {
+    loadThreads()
+    if (row.user_id === activeRef.current) setMessages((current) => current.some((item) => item.id === row.id) ? current : [...current, row])
+    if (row.sender === 'user') { playPing(); desktopNotify('Nova poruka podrške', row.message) }
+  }), [])
+
   const openThread = async (userId) => {
     setActiveUser(userId)
     setError('')
@@ -333,8 +414,8 @@ function SupportTab() {
         {threads.length === 0 && <p className="muted-text">Još nema poruka podrške.</p>}
         {threads.map((thread) => (
           <button key={thread.userId} type="button" className={`admin-thread-item ${activeUser === thread.userId ? 'active' : ''}`} onClick={() => openThread(thread.userId)}>
-            <span className="admin-thread-id">Korisnik {thread.userId.slice(0, 8)}</span>
-            <span className="muted-text">{thread.lastMessage.slice(0, 40)}</span>
+            <span className="admin-thread-id">{thread.fullName || thread.email || `Korisnik ${thread.userId.slice(0, 8)}`} {thread.memberId && <span className="uid-chip">{thread.memberId}</span>}</span>
+            <span className="muted-text">{thread.lastSender === 'admin' ? 'Vi: ' : ''}{thread.lastMessage.slice(0, 40)}</span>
             {thread.unread > 0 && <span className="tag">{thread.unread} novo</span>}
           </button>
         ))}
@@ -602,7 +683,15 @@ function UsersTab() {
 }
 
 function AdminPage() {
-  const [tab, setTab] = useState('oversight')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState(TABS.some((item) => item.id === searchParams.get('tab')) ? searchParams.get('tab') : 'oversight')
+  const [notifState, setNotifState] = useState(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission)
+  const enableDesktop = async () => {
+    if (typeof Notification === 'undefined') return
+    const result = await Notification.requestPermission()
+    setNotifState(result)
+    if (result === 'granted') desktopNotify('Poso.ba obavijesti uključene', 'Dobit ćeš obavijest za svaku poruku podrške i suspenziju.')
+  }
 
   return (
     <div className="page-shell admin-shell">
@@ -610,6 +699,9 @@ function AdminPage() {
         <BackHome />
         <h1>Admin panel</h1>
         <p>Upravljanje korisnicima, oglasima, prijavama i podrškom.</p>
+        {notifState !== 'granted' && notifState !== 'unsupported' && (
+          <button type="button" className="ghost-button admin-notif-enable" onClick={enableDesktop}><BellRing size={15} /> Uključi obavijesti na računaru (poruke podrške, suspenzije)</button>
+        )}
         <div className="admin-tabs">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button key={id} type="button" className={`admin-tab ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>
@@ -618,6 +710,7 @@ function AdminPage() {
           ))}
         </div>
         {tab === 'support' && <SupportTab />}
+        {tab === 'messages' && <MessagesTab />}
         {tab === 'verification' && <VerificationTab />}
         {tab === 'reports' && <ReportsTab />}
         {tab === 'listings' && <ListingsTab />}

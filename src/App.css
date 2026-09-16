@@ -8940,3 +8940,303 @@ body:has(.profile-cta-bar) .support-chat {
 .admin-user-ai {
   padding: 0 0 10px;
 }
+
+/* notification bell */
+.notif-wrap {
+  position: relative;
+}
+
+.notif-button {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.notif-button.has-unread {
+  color: var(--primary);
+}
+
+.notif-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #e05b5b;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--surface);
+}
+
+.notif-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(360px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  box-shadow: 0 24px 50px rgba(13, 42, 82, 0.18);
+  padding: 12px;
+  z-index: 90;
+  animation: panel-in 0.18s ease both;
+}
+
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 10px;
+}
+
+.notif-head button {
+  background: none;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.notif-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 380px;
+  overflow-y: auto;
+  display: grid;
+  gap: 4px;
+}
+
+.notif-panel li button {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  border-radius: 12px;
+  background: none;
+  text-align: left;
+  color: var(--text);
+}
+
+.notif-panel li button:hover {
+  background: var(--surface-soft);
+}
+
+.notif-panel li button.unread {
+  background: rgba(245, 180, 0, 0.12);
+}
+
+.notif-panel li button > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--primary);
+}
+
+.notif-panel li button span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notif-panel li button strong {
+  font-size: 0.88rem;
+}
+
+.notif-panel li button small {
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
+}
+
+.notif-panel li button time {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+}
+
+.site-nav-admin {
+  color: var(--primary);
+}
+
+.site-mobile-bell {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .site-mobile-bell {
+    display: block;
+    margin-left: auto;
+  }
+
+  .site-mobile-bell + .site-burger {
+    margin-left: 8px;
+  }
+}
+
+.admin-conv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--stroke);
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.admin-conv-head .ghost-button {
+  margin-left: auto;
+  padding: 0.35rem 0.8rem;
+}
+
+.admin-messages .support-bubble {
+  position: relative;
+  display: grid;
+  gap: 2px;
+}
+
+.admin-messages .support-bubble small {
+  opacity: 0.7;
+  font-size: 0.7rem;
+}
+
+.bubble-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: #b93c3c;
+  border: 1px solid var(--stroke);
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.admin-messages .support-bubble:hover .bubble-remove {
+  opacity: 1;
+}
+
+.admin-notif-enable {
+  margin: 4px 0 14px;
+}
+
+/* inline city field */
+.city-field {
+  position: relative;
+}
+
+.city-field input {
+  padding-left: 2.6rem;
+}
+
+.city-field label {
+  left: 2.6rem;
+}
+
+.city-field-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  pointer-events: none;
+  display: grid;
+}
+
+.city-field:has(small) .city-field-icon {
+  top: 1.75rem;
+}
+
+.city-field-clear {
+  position: absolute;
+  right: 0.7rem;
+  top: 1rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+}
+
+.city-field-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(13, 42, 82, 0.16);
+  max-height: 280px;
+  overflow-y: auto;
+  animation: panel-in 0.14s ease both;
+}
+
+.city-field-hint {
+  padding: 6px 10px 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.city-field-list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font-weight: 600;
+  text-align: left;
+}
+
+.city-field-list button.active,
+.city-field-list button:hover {
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.wizard-field .city-field input {
+  border-radius: 12px;
+}
+
+/* country strip (replaces the old all-categories block) */
+.country-strip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 20px;
+  margin: 8px 0 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.country-flag {
+  display: inline-flex;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(13, 42, 82, 0.2);
+}

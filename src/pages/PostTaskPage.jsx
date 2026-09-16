@@ -4,10 +4,10 @@ import { ArrowLeft, Building2, CalendarDays, Check, Laptop, Wallet } from 'lucid
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { tagService } from '../services/tagService'
-import { bosniaCities } from '../data/cities'
 import { serviceCategories } from '../data/categories'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
+import CityField from '../components/CityField'
 
 const STEPS = [
   { id: 'basics', label: 'Naslov i rok' },
@@ -190,13 +190,10 @@ function PostTaskPage() {
               </button>
             </div>
             {form.mode === 'in-person' && (
-              <label className="wizard-field">
+              <div className="wizard-field">
                 <span>Grad</span>
-                <select value={form.location} onChange={(event) => update({ location: event.target.value })}>
-                  <option value="">Odaberi grad</option>
-                  {bosniaCities.map((cityName) => <option key={cityName}>{cityName}</option>)}
-                </select>
-              </label>
+                <CityField id="task-city" value={form.location} onChange={(city) => update({ location: city })} />
+              </div>
             )}
           </section>
         )}

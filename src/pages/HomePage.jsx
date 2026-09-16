@@ -16,7 +16,6 @@ import {
   Zap,
 } from 'lucide-react'
 import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../data/mockData'
-import { serviceCategories } from '../data/categories'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import { useLiveListings } from '../hooks/useLiveListings'
@@ -621,22 +620,19 @@ function HomePage() {
           </button>
         </section>
 
-        <section className="top-categories reveal">
-          <div className="top-categories-intro">
-            <h2>Sve kategorije</h2>
-            <p>Pogledajte usluge dostupne u vašem gradu.</p>
-          </div>
-          <div className="top-categories-list">
-            {serviceCategories.map(({ id, name }) => (
-              <a
-                key={id}
-                href="#"
-                onClick={(event) => { event.preventDefault(); navigate(`/search?category=${encodeURIComponent(name)}`) }}
-              >
-                {name}
-              </a>
-            ))}
-          </div>
+        <section className="country-strip reveal" aria-label="Regija">
+          <span className="country-flag" aria-hidden="true">
+            <svg viewBox="0 0 40 20" width="40" height="20">
+              <rect width="40" height="20" fill="#002395" />
+              <polygon points="10,0 30,0 30,20" fill="#FECB00" />
+              {[0, 1, 2, 3, 4, 5, 6].map((n) => {
+                const x = 9.5 + n * 3.2
+                const y = 1.4 + n * 3.2
+                return <text key={n} x={x} y={y} fontSize="3.2" fill="white" textAnchor="middle" dominantBaseline="middle">★</text>
+              })}
+            </svg>
+          </span>
+          <span>Poso.ba Bosna i Hercegovina</span>
         </section>
       </main>
 

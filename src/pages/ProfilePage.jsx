@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Briefcase, Camera, Check, ChevronDown, Copy, Eye, EyeOff, Hammer, IdCard, Images, LogOut, MapPin, OctagonAlert, Play, Repeat,
+  Briefcase, Camera, Check, Copy, Eye, EyeOff, Hammer, IdCard, Images, LogOut, OctagonAlert, Play, Repeat,
   GraduationCap, Plus, Settings, ShieldAlert, ShieldBan, ShieldCheck, Sparkles, Star, Trash2, UserRound, Wrench, X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -12,7 +12,7 @@ import { serviceCategories } from '../data/categories'
 import { contactInfoMessage, scanContactInfo } from '../utils/moderation'
 import { formatBosnianDate } from '../utils/dateFormat'
 import BackHome from '../components/BackHome'
-import CityPicker from '../components/CityPicker'
+import CityField from '../components/CityField'
 import { formatBosnianPhone, isValidBosnianPhone } from '../utils/phone'
 import BadgeChip from '../components/BadgeChip'
 import RuleOneNotice from '../components/RuleOneNotice'
@@ -67,7 +67,6 @@ function ProfilePage() {
 
   const [tab, setTab] = useState(['podaci', 'usluge', 'iskustvo', 'portfolio', 'verifikacija', 'racun'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'podaci')
   const [form, setForm] = useState({ firstName: '', lastName: '', city: '', phone: '', bio: '' })
-  const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [accountType, setAccountType] = useState('client')
   const [trades, setTrades] = useState([])
   const [sections, setSections] = useState({ education: [], work_experience: [], specialties: [], transportation: [] })
@@ -500,14 +499,7 @@ function ProfilePage() {
                 {!nameOk ? 'Pravo ime i prezime, samo slova — npr. Bilal / Ishak.' : <>Javno se prikazuje samo ime i inicijal prezimena: <strong>{displayNameOf(fullName)}</strong>.</>}
               </p>
               <div className="field-row">
-                <div className="field">
-                  <button type="button" className={`field-select ${form.city ? 'has-value' : ''}`} onClick={() => setCityPickerOpen(true)}>
-                    <MapPin size={16} />
-                    <span>{form.city || 'Izaberi grad'}</span>
-                    <ChevronDown size={16} />
-                  </button>
-                  <label className={form.city ? 'floated' : ''}>Grad</label>
-                </div>
+                <CityField value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} />
                 <div className={`field ${!phoneOk ? 'field-invalid' : ''}`}>
                   <input id="phone" name="phone" type="tel" inputMode="tel" placeholder=" " value={form.phone} onChange={handleChange} autoComplete="tel" maxLength={20} />
                   <label htmlFor="phone">Telefon (privatno)</label>
@@ -714,7 +706,6 @@ function ProfilePage() {
           )}
         </section>
       </div>
-      {cityPickerOpen && <CityPicker value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} onClose={() => setCityPickerOpen(false)} />}
     </div>
   )
 }

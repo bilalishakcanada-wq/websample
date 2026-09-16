@@ -8,7 +8,7 @@ export const profileService = {
   async getPublicProfile(userId) {
     const { data, error } = await supabase
       .from('public_profiles')
-      .select('user_id, full_name, city, bio, avatar_url, created_at, display_uid')
+      .select('user_id, full_name, city, bio, avatar_url, created_at, display_uid, account_type, trades, verified_trade')
       .eq('user_id', userId)
       .maybeSingle()
 

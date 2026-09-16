@@ -5151,3 +5151,175 @@ button:disabled {
   font-size: 0.7rem;
   font-weight: 700;
 }
+
+/* ---------- Account type + trades (signup, profile) ---------- */
+.account-type-picker {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-type-picker legend {
+  padding: 0 0 10px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.account-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 12px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.18s ease;
+}
+
+.account-type-card svg {
+  color: var(--primary);
+}
+
+.account-type-card strong {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.account-type-card span {
+  font-size: 0.74rem;
+  color: var(--text-soft);
+  line-height: 1.3;
+}
+
+.account-type-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.account-type-card.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.trade-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.trade-picker-label {
+  font-weight: 700;
+}
+
+.trade-picker-label small {
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.trade-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-height: 168px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.trade-chip {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.trade-chip:hover {
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.trade-chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.trade-picker-note {
+  color: var(--text-soft);
+  font-size: 0.76rem;
+}
+
+/* Verification banner on a public profile */
+.verify-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 4px;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.verify-banner.verified {
+  background: rgba(25, 179, 123, 0.12);
+  color: #0f7a56;
+}
+
+.verify-banner.unverified {
+  background: rgba(255, 183, 3, 0.14);
+  color: #8a5b00;
+}
+
+.trade-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.trade-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.trade-tag svg {
+  color: #0f7a56;
+}
+
+.verify-trade-select {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.verify-trade-select select {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .account-type-picker {
+    grid-template-columns: 1fr;
+  }
+}

@@ -122,7 +122,9 @@ function VerificationTab() {
         <div className="admin-row" key={request.id}>
           <div>
             <strong>Korisnik {request.user_id.slice(0, 8)}</strong>
-            <p className="muted-text">{formatBosnianDate(request.created_at)}</p>
+            <p className="muted-text">
+              {request.trade ? `Struka: ${request.trade}` : 'Struka nije navedena'} · {formatBosnianDate(request.created_at)}
+            </p>
             <a href={request.document_url} target="_blank" rel="noreferrer" className="text-link">Pogledaj dokument</a>
           </div>
           <span className={`tag status-tag-${request.status}`}>{request.status}</span>

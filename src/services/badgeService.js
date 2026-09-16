@@ -33,10 +33,10 @@ export const badgeService = {
     return (data || []).map((row) => row.badges).filter(Boolean)
   },
 
-  async requestVerification({ userId, documentUrl, note }) {
+  async requestVerification({ userId, documentUrl, note, trade }) {
     const { data, error } = await supabase
       .from('verification_requests')
-      .insert({ user_id: userId, document_url: documentUrl, note })
+      .insert({ user_id: userId, document_url: documentUrl, note, trade })
       .select('id, status')
       .single()
 

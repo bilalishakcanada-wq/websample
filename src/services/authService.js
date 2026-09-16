@@ -4,7 +4,7 @@ import { isStrongPassword, isValidEmail, publicError, sanitizeText } from '../ut
 let enabledProvidersPromise = null
 
 export const authService = {
-  async signUp({ fullName, email, password, city, phone, captchaToken }) {
+  async signUp({ fullName, email, password, city, phone, captchaToken, accountType = 'client', trades = [] }) {
     const cleanedName = sanitizeText(fullName)
     const cleanedEmail = sanitizeText(email).toLowerCase()
 
@@ -23,6 +23,8 @@ export const authService = {
           city: sanitizeText(city),
           phone: sanitizeText(phone),
           role: 'USER',
+          account_type: ['client', 'provider', 'both'].includes(accountType) ? accountType : 'client',
+          trades: Array.isArray(trades) ? trades.slice(0, 10).map((trade) => sanitizeText(trade)).filter(Boolean) : [],
         },
       },
     })

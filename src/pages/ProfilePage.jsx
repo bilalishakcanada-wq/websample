@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { profileService } from '../services/profileService'
 import { portfolioService } from '../services/portfolioService'
 import { badgeService } from '../services/badgeService'
+import { serviceCategories } from '../data/categories'
 import MobileNav from '../components/MobileNav'
 import BackHome from '../components/BackHome'
 
@@ -23,6 +24,7 @@ function ProfilePage() {
   const [portfolio, setPortfolio] = useState([])
   const [uploadingPortfolio, setUploadingPortfolio] = useState(false)
   const [verificationStatus, setVerificationStatus] = useState(null)
+  const [verificationTrade, setVerificationTrade] = useState('')
   const [uploadingVerification, setUploadingVerification] = useState(false)
   const [form, setForm] = useState({
     fullName: user?.user_metadata?.full_name || '',
@@ -124,7 +126,7 @@ function ProfilePage() {
     setError('')
     try {
       const documentUrl = await badgeService.uploadVerificationDocument(user.id, file)
-      const request = await badgeService.requestVerification({ userId: user.id, documentUrl })
+      const request = await badgeService.requestVerification({ userId: user.id, documentUrl, trade: verificationTrade })
       setVerificationStatus({ status: request.status, created_at: new Date().toISOString() })
       setMessage('Zahtjev za verifikaciju je poslan.')
     } catch (requestError) {
@@ -222,12 +224,21 @@ function ProfilePage() {
                   {VERIFICATION_LABELS[verificationStatus.status]}
                 </div>
               ) : (
-                <p className="muted-text">Pošaljite ličnu kartu, potvrdu o zanimanju ili drugi dokaz stručnosti da dobijete "Verifikovan" značku i bolju vidljivost.</p>
+                <p className="muted-text">Pošaljite dokaz o struci (diploma, uvjerenje, licenca) da na profilu dobijete oznaku verifikovanog majstora za svoju struku.</p>
               )}
               {(!verificationStatus || verificationStatus.status === 'rejected') && (
                 <>
-                  <button type="button" className="ghost-button" onClick={() => verificationInputRef.current?.click()} disabled={uploadingVerification}>
-                    {uploadingVerification ? 'Šaljem...' : 'Pošalji dokument za verifikaciju'}
+                  <label className="verify-trade-select">
+                    Struka za koju se verifikuješ
+                    <select value={verificationTrade} onChange={(event) => setVerificationTrade(event.target.value)}>
+                      <option value="">Odaberi struku...</option>
+                      {serviceCategories.map((category) => (
+                        <option key={category.id} value={category.name}>{category.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="button" className="ghost-button" onClick={() => verificationInputRef.current?.click()} disabled={uploadingVerification || !verificationTrade}>
+                    {uploadingVerification ? 'Šaljem...' : 'Pošalji dokaz o struci'}
                   </button>
                   <input ref={verificationInputRef} type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onChange={handleVerificationUpload} />
                 </>

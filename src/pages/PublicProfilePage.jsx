@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { CalendarDays, MapPin, Play, ShieldCheck, Star, UserRound } from 'lucide-react'
+import { CalendarDays, MapPin, Play, ShieldAlert, ShieldCheck, Star, UserRound } from 'lucide-react'
 import { profileService } from '../services/profileService'
 import { reviewService } from '../services/reviewService'
 import { listingService } from '../services/listingService'
@@ -80,10 +80,27 @@ function PublicProfilePage() {
               <h1>{profile.full_name || 'Korisnik Poso.ba'}</h1>
               {profile.display_uid && <span className="uid-chip">{profile.display_uid}</span>}
             </div>
+            {profile.account_type !== 'client' && (
+              <div className={`verify-banner ${profile.verified_trade ? 'verified' : 'unverified'}`}>
+                {profile.verified_trade
+                  ? <><ShieldCheck size={16} /> Verifikovan majstor — {profile.verified_trade}</>
+                  : <><ShieldAlert size={16} /> Majstor još nije verifikovan</>}
+              </div>
+            )}
             <div className="public-profile-meta">
               {profile.city && <span><MapPin size={15} /> {profile.city}</span>}
               <span><CalendarDays size={15} /> Član od {memberSince}</span>
             </div>
+            {profile.trades?.length > 0 && (
+              <div className="trade-list">
+                {profile.trades.map((trade) => (
+                  <span className="trade-tag" key={trade}>
+                    {trade}
+                    {profile.verified_trade === trade && <ShieldCheck size={12} />}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="public-profile-rating">
               <Star size={17} fill="currentColor" />
               {summary.average

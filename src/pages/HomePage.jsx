@@ -613,7 +613,7 @@ function HomePage() {
               })}
             </svg>
           </span>
-          <span>Poso.ba Bosna i Hercegovina</span>
+          <span>Bosna i Hercegovina</span>
         </section>
       </main>
 

@@ -82,7 +82,8 @@ function App() {
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="postavke" element={<SettingsPage />} />
         </Route>
-        <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage mode="admin" /></ProtectedRoute>} />
+        <Route path="/mod" element={<ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR']}><AdminPage mode="moderator" /></ProtectedRoute>} />
         <Route path="/pravila" element={<RulesPage />} />
         <Route path="/o-nama" element={<AboutPage />} />
         <Route path="/zaradi" element={<EarnMoneyPage />} />

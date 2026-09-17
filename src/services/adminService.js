@@ -1,6 +1,18 @@
 import { supabase } from '../lib/supabase'
 import { publicError } from '../utils/validation'
 
+const isPrivateIp = (ip) => /^(10\.|127\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$|fc|fd|fe80)/i.test(ip)
+
+// SQL raises short codes; turn them into something a person can act on.
+const staffErrorMessage = (error) => {
+  const text = error?.message || ''
+  if (text.includes('FORBIDDEN_STAFF')) return 'Samo administrator može djelovati na nalog člana tima.'
+  if (text.includes('SELF')) return 'Ne možeš to uraditi na vlastitom nalogu.'
+  if (text.includes('OWNER')) return 'Vlasnik platforme je zaštićen — ova radnja nije moguća.'
+  if (text.includes('FORBIDDEN')) return 'Nemaš ovlaštenje za ovu radnju.'
+  return 'Radnja nije uspjela. Pokušaj ponovo.'
+}
+
 export const adminService = {
   async listAllListings() {
     const { data, error } = await supabase
@@ -46,18 +58,138 @@ export const adminService = {
     }
   },
 
-  async listProfiles() {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, user_id, full_name, email, city, subscription_status, account_status, suspended_until, suspension_reason, created_at, member_id, ai_assessment, ai_assessed_at')
-      .order('created_at', { ascending: false })
-      .limit(100)
-
+  /** Users for the staff panel (search by name, ID, email, city or user id). Moderators get no emails. */
+  async listUsers({ term = '', status = null, limit = 100 } = {}) {
+    const { data, error } = await supabase.rpc('staff_list_users', { p_term: term, p_status: status, p_limit: limit })
     if (error) {
-      console.error('Admin profiles fetch failed', { message: error.message, code: error.code })
+      console.error('Staff user list failed', { message: error.message, code: error.code })
       throw publicError()
     }
     return data || []
+  },
+
+  /** Everything about one account in one call (private fields only for admins). */
+  async userDossier(userId) {
+    const { data, error } = await supabase.rpc('admin_user_dossier', { p_user_id: userId })
+    if (error) {
+      console.error('User dossier failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data
+  },
+
+  async overview() {
+    const { data, error } = await supabase.rpc('staff_overview')
+    if (error) return null
+    return data
+  },
+
+  async listStaff() {
+    const { data, error } = await supabase.rpc('admin_list_staff')
+    if (error) {
+      console.error('Staff list failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async staffActions(limit = 100) {
+    const { data, error } = await supabase.rpc('admin_staff_actions', { p_limit: limit })
+    if (error) {
+      console.error('Staff actions failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  /** Grant or remove ADMIN / MODERATOR (admin only, never on yourself). */
+  async setRole(userId, role, grant) {
+    const { error } = await supabase.rpc('admin_set_role', { p_user_id: userId, p_role: role, p_grant: grant })
+    if (error) {
+      console.error('Set role failed', { message: error.message, code: error.code })
+      throw new Error(error.message?.includes('SELF') ? 'Ne možeš mijenjati vlastitu ulogu.' : staffErrorMessage(error))
+    }
+  },
+
+  async badgeCatalog() {
+    const { data, error } = await supabase.rpc('admin_badge_catalog')
+    if (error) {
+      console.error('Badge catalog failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async saveBadge({ code, label, description, icon, color, kind = 'custom' }) {
+    const { data, error } = await supabase.rpc('admin_save_badge', { p_code: code, p_label: label, p_description: description || '', p_icon: icon, p_color: color || null, p_kind: kind })
+    if (error) {
+      console.error('Save badge failed', { message: error.message, code: error.code })
+      if (error.message?.includes('BAD_CODE')) throw new Error('Kod značke: 3–40 malih slova, cifara ili _.')
+      throw publicError()
+    }
+    return data
+  },
+
+  async deleteBadge(code) {
+    const { error } = await supabase.rpc('admin_delete_badge', { p_code: code })
+    if (error) {
+      console.error('Delete badge failed', { message: error.message, code: error.code })
+      throw new Error(error.message?.includes('SYSTEM_BADGE') ? 'Sistemske značke se ne mogu obrisati.' : 'Brisanje nije uspjelo.')
+    }
+  },
+
+  async grantBadge(userId, code, note = null) {
+    const { error } = await supabase.rpc('admin_grant_badge', { p_user_id: userId, p_code: code, p_note: note })
+    if (error) {
+      console.error('Grant badge failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  async revokeBadge(userId, code) {
+    const { error } = await supabase.rpc('admin_revoke_badge', { p_user_id: userId, p_code: code })
+    if (error) {
+      console.error('Revoke badge failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  async addNote(userId, body) {
+    const { data: auth } = await supabase.auth.getUser()
+    const { error } = await supabase.from('staff_notes').insert({ user_id: userId, author_id: auth?.user?.id, body: body.trim().slice(0, 2000) })
+    if (error) {
+      console.error('Add note failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
+  async deleteNote(id) {
+    const { error } = await supabase.from('staff_notes').delete().eq('id', id)
+    if (error) throw publicError()
+  },
+
+  /**
+   * Approximate location for a list of IPs. Cached in ip_geo; unknown ones are
+   * looked up once via ipwho.is (free, no key) and stored for everyone on staff.
+   */
+  async geoLookup(ips) {
+    const unique = [...new Set(ips.filter(Boolean))].filter((ip) => !isPrivateIp(ip))
+    if (unique.length === 0) return {}
+    const result = {}
+    const { data: cached } = await supabase.from('ip_geo').select('*').in('ip', unique)
+    for (const row of cached || []) result[row.ip] = row
+    const missing = unique.filter((ip) => !result[ip]).slice(0, 15)
+    await Promise.all(missing.map(async (ip) => {
+      try {
+        const response = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`)
+        const geo = await response.json()
+        if (!geo?.success) return
+        const row = { ip, country: geo.country, country_code: geo.country_code, region: geo.region, city: geo.city, isp: geo.connection?.isp || null, lat: geo.latitude, lng: geo.longitude }
+        result[ip] = row
+        await supabase.from('ip_geo').upsert(row)
+      } catch { /* offline or rate-limited — leave unknown */ }
+    }))
+    return result
   },
 
   async setAccountStatus(userId, accountStatus) {
@@ -106,16 +238,13 @@ export const adminService = {
   },
 
   async listModerationEvents() {
-    const { data, error } = await supabase
-      .from('moderation_events')
-      .select('id, user_id, source_table, source_id, fields, kinds, snippet, action, dismissed, created_at, profiles!moderation_events_user_id_fkey(full_name, email, member_id, account_status)')
-      .order('created_at', { ascending: false })
-      .limit(200)
+    const { data, error } = await supabase.rpc('staff_moderation_events', { p_limit: 200 })
     if (error) {
       console.error('Admin moderation events fetch failed', { message: error.message, code: error.code })
       throw publicError()
     }
-    return data || []
+    // same shape the panel used before: profile fields nested under `profiles`
+    return (data || []).map(({ full_name, member_id, email, account_status, ...event }) => ({ ...event, profiles: { full_name, member_id, email, account_status } }))
   },
 
   async listModerationQueue() {
@@ -143,7 +272,7 @@ export const adminService = {
     const { error } = await supabase.rpc('admin_lift_suspension', { p_user_id: userId })
     if (error) {
       console.error('Admin lift suspension failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw new Error(staffErrorMessage(error))
     }
   },
 
@@ -177,11 +306,12 @@ export const adminService = {
     return () => supabase.removeChannel(channel)
   },
 
-  async suspend(userId, days = null, reason = null) {
-    const { error } = await supabase.rpc('admin_suspend', { p_user_id: userId, p_days: days, p_reason: reason })
+  /** Suspend for `hours` (null = permanent). Moderators cannot touch staff accounts. */
+  async suspend(userId, hours = null, reason = null) {
+    const { error } = await supabase.rpc('admin_suspend_for', { p_user_id: userId, p_hours: hours, p_reason: reason })
     if (error) {
       console.error('Admin suspend failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw new Error(staffErrorMessage(error))
     }
   },
 
@@ -190,7 +320,7 @@ export const adminService = {
     const { error } = await supabase.rpc('admin_redact', { p_kind: kind, p_id: id, p_note: note })
     if (error) {
       console.error('Admin redact failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw new Error(staffErrorMessage(error))
     }
   },
 

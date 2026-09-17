@@ -18,7 +18,7 @@ const firstNameOf = (user) => (user?.user_metadata?.full_name || user?.email || 
 function SiteHeader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { user, logout, isAdmin } = useAuth()
+  const { user, logout, isAdmin, isModerator } = useAuth()
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [menuPinned, setMenuPinned] = useState(false)
   const [navMode, setNavMode] = useState('client')
@@ -136,6 +136,7 @@ function SiteHeader() {
                 <NavLink to="/messages" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><MessageCircle size={16} /> Poruke</NavLink>
                 <NavLink to="/account" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><LayoutDashboard size={16} /> Moj nalog</NavLink>
                 {isAdmin && <NavLink to="/admin" className={({ isActive }) => `site-nav-link site-nav-admin ${isActive ? 'active' : ''}`}><ShieldCheck size={16} /> Admin</NavLink>}
+                {isModerator && <NavLink to="/mod" className={({ isActive }) => `site-nav-link site-nav-admin ${isActive ? 'active' : ''}`}><ShieldCheck size={16} /> Mod</NavLink>}
                 <NotificationBell />
                 <Link to="/account/profil" className="site-user-chip"><span className="site-user-avatar"><UserRound size={15} /></span>{firstNameOf(user)}</Link>
               </>
@@ -169,6 +170,7 @@ function SiteHeader() {
                 <Link to="/messages"><MessageCircle size={16} /> Poruke</Link>
                 <Link to="/account/profil"><UserRound size={16} /> Moj profil</Link>
                 {isAdmin && <Link to="/admin"><ShieldCheck size={16} /> Admin panel</Link>}
+                {isModerator && <Link to="/mod"><ShieldCheck size={16} /> Mod panel</Link>}
                 <button type="button" onClick={async () => { await logout(); navigate('/') }}><LogOut size={16} /> Odjava</button>
               </>
             ) : (

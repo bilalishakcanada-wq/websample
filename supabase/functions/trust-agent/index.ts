@@ -6,7 +6,7 @@
 // recommended action. It never bans on its own unless the admin turns on
 // moderation_settings.ai_auto_suspend — by default it flags for a human.
 //
-// Ways in: the 30-minute sweep (x-sweep-key) or an admin (Authorization JWT)
+// Ways in: the 30-minute sweep (x-sweep-key) or a staff member (Authorization JWT)
 // asking for one user: { "user_id": "..." }.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -131,8 +131,8 @@ Deno.serve(async (req) => {
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
     const { data, error } = await admin.auth.getUser(token)
     if (error || !data?.user) return json({ error: 'unauthorized' }, 401)
-    const { data: isAdmin } = await admin.rpc('is_admin_user', { p_user_id: data.user.id })
-    if (isAdmin !== true) return json({ error: 'forbidden' }, 403)
+    const { data: isStaff } = await admin.rpc('is_staff_user', { p_user_id: data.user.id })
+    if (isStaff !== true) return json({ error: 'forbidden' }, 403)
     mode = 'admin'
   }
 

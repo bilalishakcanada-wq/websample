@@ -7,17 +7,17 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [staffRole, setStaffRole] = useState(null) // 'admin' | 'moderator' | null
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const refreshAdminStatus = async (currentUser) => {
     if (!currentUser) {
-      setIsAdmin(false)
+      setStaffRole(null)
       return
     }
-    const { data, error: rpcError } = await supabase.rpc('is_admin')
-    setIsAdmin(!rpcError && data === true)
+    const { data, error: rpcError } = await supabase.rpc('staff_role')
+    setStaffRole(!rpcError && (data === 'admin' || data === 'moderator') ? data : null)
     trustService.touchLastSeen()
   }
 
@@ -92,9 +92,11 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const isAdmin = staffRole === 'admin'
+  const isModerator = staffRole === 'moderator'
   const value = useMemo(
-    () => ({ user, isAdmin, loading, error, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
-    [user, isAdmin, loading, error],
+    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, loading, error, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
+    [user, isAdmin, isModerator, staffRole, loading, error],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
 
-const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']
+const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod']
 
 const COLUMNS = [
   ...FOOTER_GROUPS.map((group) => ({

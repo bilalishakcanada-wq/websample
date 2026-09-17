@@ -1,17 +1,5 @@
-import { Award, BadgeCheck, Crown, Gem, Handshake, MapPinned, Medal, ShieldCheck, TrendingUp, UserRound, Zap } from 'lucide-react'
-
-const ICONS = {
-  'shield-check': ShieldCheck,
-  star: Award,
-  'trending-up': TrendingUp,
-  'badge-check': BadgeCheck,
-  zap: Zap,
-  crown: Crown,
-  gem: Gem,
-  'map-pinned': MapPinned,
-  medal: Medal,
-  handshake: Handshake,
-}
+import { UserRound } from 'lucide-react'
+import { badgeIcon } from './badgeIcons'
 
 // Badge priority when there are more than four: verification and rarity first.
 const ORDER = ['verified', 'top_rated', 'founder', 'flawless', 'veteran', 'local_hero', 'reliable', 'fast_responder', 'rising_talent', 'trusted_client']
@@ -29,9 +17,9 @@ function AvatarWithBadges({ src, tier = 'unverified', badges = [], size = 128 })
         {src ? <img src={src} alt="" /> : <div className="avatar-badged-fallback"><UserRound size={size * 0.38} /></div>}
       </div>
       {sorted.map((badge, index) => {
-        const Icon = ICONS[badge.icon] || Award
+        const Icon = badgeIcon(badge.icon)
         return (
-          <span key={badge.code} className={`avatar-medal medal-${index} badge-${badge.code}`} title={`${badge.label} — ${badge.description || ''}`} aria-label={badge.label}>
+          <span key={badge.code} className={`avatar-medal medal-${index} badge-${badge.code} ${badge.color ? 'badge-colored' : ''}`} style={badge.color ? { '--badge-color': badge.color } : undefined} title={`${badge.label} — ${badge.description || ''}`} aria-label={badge.label}>
             <Icon size={size >= 120 ? 15 : 12} />
           </span>
         )

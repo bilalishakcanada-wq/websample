@@ -23,7 +23,7 @@ export const toCardListing = (listing) => ({
   location: listing.location || 'Lokacija nije navedena',
   time: formatBosnianDate(listing.created_at),
   offers: listing.bids?.[0]?.count ?? 0,
-  image: categoryImage(listing.category),
+  image: [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || categoryImage(listing.category),
   isLive: true,
 })
 

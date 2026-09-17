@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Building2, CalendarDays, Check, Laptop, Wallet } from 'lucide-react'
+import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { tagService } from '../services/tagService'
@@ -8,11 +8,14 @@ import { serviceCategories } from '../data/categories'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
+import ImagePicker from '../components/ImagePicker'
+import { profileService } from '../services/profileService'
 
 const STEPS = [
   { id: 'basics', label: 'Naslov i rok' },
   { id: 'location', label: 'Lokacija' },
   { id: 'details', label: 'Detalji' },
+  { id: 'photos', label: 'Slike' },
   { id: 'budget', label: 'Budžet' },
 ]
 
@@ -32,6 +35,8 @@ function PostTaskPage() {
   const [error, setError] = useState('')
   const [tagDraft, setTagDraft] = useState('')
   const [tagList, setTagList] = useState([])
+  const [photos, setPhotos] = useState({ files: [], removed: [] })
+  const [existingImages, setExistingImages] = useState([])
   const [form, setForm] = useState({
     title: '',
     timing: 'flexible',
@@ -58,6 +63,7 @@ function PostTaskPage() {
           mode: isRemote ? 'remote' : 'in-person',
           price: listing.price ?? '',
         }))
+        setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
       })
       .catch(() => {})
   }, [editId])
@@ -112,6 +118,15 @@ function PostTaskPage() {
         ? await listingService.updateListing(editId, payload)
         : await listingService.createListing(payload)
       if (tagList.length > 0) await tagService.createForListing(listing.id, tagList, user.id)
+      // photos: drop the ones removed while editing, upload the new ones, then let the AI check them
+      for (const image of existingImages.filter((item) => photos.removed.includes(item.id))) await listingService.deleteImage(image)
+      if (photos.files.length > 0) {
+        const kept = existingImages.filter((item) => !photos.removed.includes(item.id)).length
+        await listingService.uploadImages(user.id, listing.id, photos.files, kept)
+        const outcome = await profileService.checkMyMedia()
+        const flagged = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
+        if (flagged > 0) window.alert(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`)
+      }
       navigate(`/listings/${listing.id}`)
     } catch (requestError) {
       setError(requestError.message)
@@ -246,6 +261,15 @@ function PostTaskPage() {
 
         {step === 3 && (
           <section className="wizard-panel">
+            <h1>Pokaži šta treba uraditi</h1>
+            <p className="muted-text">Slika govori više od opisa — izvođači daju tačnije ponude kad vide problem. Opciono, ali preporučujemo.</p>
+            <ImagePicker existing={existingImages} files={photos.files} removed={photos.removed} onChange={setPhotos} />
+            <p className="wizard-hint"><ShieldCheck size={14} /> Slike sa brojem telefona, e-mailom ili društvenim mrežama automatski se uklanjaju (Pravilo #1).</p>
+          </section>
+        )}
+
+        {step === 4 && (
+          <section className="wizard-panel">
             <h1>Koliki je vaš budžet?</h1>
             <p className="muted-text">Ne brinite — iznos možete dogovoriti i naknadno sa izvođačem.</p>
             <label className="wizard-field wizard-budget">
@@ -269,6 +293,7 @@ function PostTaskPage() {
               <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : (form.location || '—')}</strong></div>
               <div className="wizard-summary-row"><span>Kada</span><strong>{timingLabel()}</strong></div>
+              <div className="wizard-summary-row"><span>Slike</span><strong>{existingImages.filter((item) => !photos.removed.includes(item.id)).length + photos.files.length || 'Bez slika'}</strong></div>
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>
             </div>
           </section>
@@ -286,7 +311,7 @@ function PostTaskPage() {
         )}
         {step === STEPS.length - 1 && (
           <button type="button" className="primary-button wizard-next" disabled={saving} onClick={submit}>
-            {saving ? 'Objavljujem...' : 'Objavi posao'}
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : 'Objavljujem...') : editId ? 'Sačuvaj izmjene' : 'Objavi posao'}
           </button>
         )}
       </footer>

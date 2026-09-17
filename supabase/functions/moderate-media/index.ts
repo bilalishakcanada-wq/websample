@@ -93,7 +93,8 @@ function storageRef(url: string): { bucket: string; path: string } | null {
   return { bucket: rest.slice(0, slash), path: decodeURIComponent(rest.slice(slash + 1)) }
 }
 
-type QueueItem = { id: string; user_id: string; kind: 'avatar' | 'portfolio'; media_url: string; source_id: string | null; attempts: number }
+type QueueItem = { id: string; user_id: string; kind: 'avatar' | 'portfolio' | 'listing'; media_url: string; source_id: string | null; attempts: number }
+const SOURCE_TABLE: Record<QueueItem['kind'], string> = { avatar: 'profiles', portfolio: 'portfolio_items', listing: 'listing_images' }
 
 async function enforce(item: QueueItem, verdict: Verdict) {
   if (verdict.status === 'flagged') {
@@ -101,14 +102,14 @@ async function enforce(item: QueueItem, verdict: Verdict) {
     if (item.kind === 'avatar') {
       await admin.from('profiles').update({ avatar_url: '' }).eq('user_id', item.user_id)
     } else if (item.source_id) {
-      await admin.from('portfolio_items').delete().eq('id', item.source_id)
+      await admin.from(SOURCE_TABLE[item.kind]).delete().eq('id', item.source_id)
     }
     if (ref) await admin.storage.from(ref.bucket).remove([ref.path])
     await admin.from('moderation_events').insert({
       user_id: item.user_id,
-      source_table: item.kind === 'avatar' ? 'profiles' : 'portfolio_items',
+      source_table: SOURCE_TABLE[item.kind],
       source_id: item.source_id,
-      fields: [item.kind === 'avatar' ? 'avatar_url' : 'media_url'],
+      fields: [item.kind === 'avatar' ? 'avatar_url' : item.kind === 'listing' ? 'url' : 'media_url'],
       kinds: ['image_contact'],
       snippet: [verdict.reason, ...(verdict.found || [])].filter(Boolean).join(' · ').slice(0, 200),
       action: 'removed',
@@ -150,7 +151,7 @@ Deno.serve(async (req) => {
     .in('status', ['pending', 'unconfigured'])
     .lt('attempts', 5)
     .order('created_at', { ascending: true })
-    .limit(mode === 'sweep' ? 20 : 3)
+    .limit(mode === 'sweep' ? 20 : 10)
   if (mode === 'user') query = query.eq('user_id', userId!)
 
   const { data: items, error } = await query

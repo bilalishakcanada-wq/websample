@@ -17,7 +17,8 @@ function ListingCard({ listing, onSave, saved = false }) {
     event.preventDefault()
     navigate('/register')
   }
-  const image = listing.image || categoryImage(listing.category)
+  const photo = [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url
+  const image = photo || listing.image || categoryImage(listing.category)
 
   return (
     <article className="listing-card">

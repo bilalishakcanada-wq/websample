@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, Flag, MapPin, MessageCircle, ShieldCheck, Send, Sparkles, Star, Tag, UserRound, Users, XCircle } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
@@ -15,6 +15,38 @@ import RuleOneNotice from '../components/RuleOneNotice'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
+
+/** Cover photo + thumbnail strip; a soft category placeholder when the job has no photos. */
+function Gallery({ images, title, category, onOpen }) {
+  const [active, setActive] = useState(0)
+  if (images.length === 0) {
+    return (
+      <div className="job-gallery job-gallery-empty">
+        <Images size={30} />
+        <span>{category || 'Oglas'}</span>
+        <small>Vlasnik nije dodao slike</small>
+      </div>
+    )
+  }
+  const current = images[Math.min(active, images.length - 1)]
+  return (
+    <div className="job-gallery">
+      <button type="button" className="job-gallery-main" onClick={() => onOpen(active)} aria-label="Uvećaj sliku">
+        <img src={current.url} alt={title} />
+        <span className="job-gallery-count"><Images size={13} /> {active + 1}/{images.length}</span>
+      </button>
+      {images.length > 1 && (
+        <div className="job-gallery-thumbs">
+          {images.map((image, index) => (
+            <button key={image.id || image.url} type="button" className={index === active ? 'active' : ''} onClick={() => setActive(index)} aria-label={`Slika ${index + 1}`}>
+              <img src={image.url} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const BID_STATUS_LABEL = {
   pending: 'Na čekanju',
@@ -41,6 +73,16 @@ function ListingDetailPage() {
   const [suggested, setSuggested] = useState([])
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [lightbox, setLightbox] = useState(null)
+  const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])
+
+  const share = async () => {
+    const url = window.location.href
+    try {
+      if (navigator.share) await navigator.share({ title: listing?.title, url })
+      else { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.') }
+    } catch { /* user cancelled */ }
+  }
 
   useEffect(() => {
     let active = true
@@ -177,148 +219,196 @@ function ListingDetailPage() {
   if (loading) return <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
   if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
+  const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
+  const when = (whenLine || '').trim() || 'Fleksibilan termin'
+  const isRemote = /online/i.test(listing.location || '')
+
   return (
-    <div className="app-shell page-with-mobile-nav">
-      <header className="detail-header"><button type="button" className="icon-button" onClick={() => navigate(-1)} aria-label="Nazad"><ArrowLeft size={20} /></button><span>Detalji zadatka</span><div className="detail-header-actions"><button type="button" className="icon-button" onClick={reportListing} aria-label="Prijavi oglas" title="Prijavi oglas"><Flag size={16} /></button><Link to="/search">Pretraga</Link></div></header>
-      <main className="content-container detail-page">
-        <div className="detail-layout">
-          <div>
-            <div className="detail-image"><Tag size={42} /></div>
-            <div className="detail-heading">
-              <span className="tag">{listing.category || 'Ostalo'}</span>
-              <h1>{listing.title}</h1>
-              <div className="detail-meta"><span><MapPin size={16} />{listing.location || 'Lokacija nije navedena'}</span><span><CalendarDays size={16} />Objavljeno {formatDate(listing.created_at)}</span></div>
-            </div>
+    <div className="app-shell page-with-mobile-nav job-page">
+      <main className="content-container">
+        <div className="job-top">
+          <button type="button" className="job-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Nazad</button>
+          <div className="job-top-actions">
+            <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>
+            {isOwner
+              ? <Link to={`/objavi?edit=${id}`} className="job-icon job-icon-text"><Pencil size={15} /> Uredi</Link>
+              : <button type="button" className="job-icon" onClick={reportListing} aria-label="Prijavi oglas" title="Prijavi oglas"><Flag size={16} /></button>}
           </div>
-          <aside className="detail-offer-card">
-            <span>Okvirni budžet</span>
-            <strong>{formatPrice(listing.price, listing.currency)}</strong>
-            {!isOwner && !myBid && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
-            {!isOwner && myBid && (
-              <div className={`my-bid-status status-${myBid.status}`}>
-                Vaša ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
-              </div>
-            )}
-            {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
-              <Link to="/messages" className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
-            )}
-            {isOwner && acceptedBid && listing.status === 'published' && (
-              <div className="outcome-actions">
-                <button type="button" className="primary-button full-width" onClick={() => setOutcome('completed')} disabled={outcomeBusy}><CheckCircle2 size={16} /> Posao završen</button>
-                <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
-              </div>
-            )}
-            {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
-            {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
-          </aside>
         </div>
 
-        <section className="detail-section"><h2>Opis zadatka</h2><p className="detail-description">{listing.description || 'Vlasnik oglasa nije dodao detaljan opis.'}</p><div className="detail-stats"><span><Clock3 size={16} />Potrebno do: Po dogovoru</span><span><Users size={16} />{bids.length} {bids.length === 1 ? 'ponuda' : 'ponuda'}</span></div></section>
-        <section className="detail-section"><h2>Detalji zadatka</h2><div className="detail-facts"><span><Tag size={18} /><b>Tip usluge</b> Uživo ili online, prema dogovoru</span><span><CalendarDays size={18} /><b>Kada je potrebno</b> Fleksibilan termin</span><span><MapPin size={18} /><b>Lokacija</b> {listing.location || 'Grad nije naveden'}</span></div></section>
+        <div className="job-layout">
+          <div className="job-main">
+            <Gallery images={images} title={listing.title} category={listing.category} onOpen={(index) => setLightbox(index)} />
 
-        <section className="detail-section">
-          <h2>O korisniku</h2>
-          <Link to={`/korisnik/${listing.user_id}`} className="poster-row poster-row-link">
-            {poster?.avatar_url
-              ? <img src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
-              : <div className="poster-avatar"><UserRound size={22} /></div>}
-            <div>
-              <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
-              <p>{poster?.city || 'Objavljuje zadatke na platformi'}</p>
-            </div>
-          </Link>
-        </section>
-
-        {tags.length > 0 && <section className="detail-section"><h2>Tagovi</h2><div className="tag-list">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div></section>}
-
-        {user && !isOwner && (
-          <section className="detail-section">
-            <h2>Ostavi recenziju</h2>
-            <form className="auth-form" onSubmit={submitReview}>
-              <div className="rating-picker">
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <button key={value} type="button" className={`rating-star ${reviewForm.rating >= value ? 'active' : ''}`} onClick={() => setReviewForm((current) => ({ ...current, rating: value }))} aria-label={`${value} zvjezdica`}>
-                    <Star size={22} fill={reviewForm.rating >= value ? 'currentColor' : 'none'} />
-                  </button>
-                ))}
+            <header className="job-head">
+              <div className="job-chips">
+                <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
+                {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
+                {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
+                {listing.status === 'published' && !acceptedBid && <span className="pill pill-ok">Otvoren za ponude</span>}
               </div>
-              <label>Komentar (opciono)<textarea value={reviewForm.comment} onChange={(event) => setReviewForm((current) => ({ ...current, comment: event.target.value }))} maxLength={1000} placeholder="Kakvo je bilo iskustvo?" /></label>
-              <button type="submit" className="ghost-button" disabled={submittingReview}>{submittingReview ? 'Šaljem...' : 'Pošalji recenziju'}</button>
-            </form>
-          </section>
-        )}
+              <h1>{listing.title}</h1>
+              <div className="job-meta">
+                <span><MapPin size={15} /> {listing.location || 'Lokacija nije navedena'}</span>
+                <span><CalendarDays size={15} /> {when}</span>
+                <span><Users size={15} /> {bids.length} {bids.length === 1 ? 'ponuda' : 'ponuda'}</span>
+                <span className="job-meta-date">Objavljeno {formatDate(listing.created_at)}</span>
+              </div>
+            </header>
 
-        <section className="detail-section">
-          <div className="section-heading"><h2>Ponude</h2><span className="muted-text">{bids.length}</span></div>
-          {!isOwner && bids.length > 0 && (
-            <p className="contact-protection-note"><ShieldCheck size={15} /> Kontakt podaci su zaštićeni dok vlasnik ne prihvati ponudu.</p>
-          )}
-          {bids.length === 0 ? <p className="muted-text">Još nema ponuda. Budi prvi koji će poslati ponudu.</p> : (
-            <div className="offers-list">
-              {bids.map((bid) => (
-                <article className={`offer-row bid-row status-${bid.status}`} key={bid.id}>
-                  {bid.bidder?.avatar_url
-                    ? <img src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
-                    : <div className="poster-avatar"><UserRound size={18} /></div>}
-                  <div>
-                    <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
-                    <p>{bid.message}</p>
-                    <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
-                  </div>
-                  <div className="offer-actions">
-                    <b>{formatPrice(bid.amount)}</b>
-                    {isOwner && bid.status === 'pending' && (
-                      <div className="bid-owner-actions">
-                        <button type="button" className="ghost-button" onClick={() => setBidStatus(bid.id, 'accepted')}><CheckCircle2 size={16} /> Prihvati</button>
-                        <button type="button" className="ghost-button danger-button" onClick={() => setBidStatus(bid.id, 'rejected')}><XCircle size={16} /> Odbij</button>
+            <section className="job-card">
+              <h2>Opis</h2>
+              <p className="job-description">{descriptionBody?.trim() || 'Vlasnik oglasa nije dodao detaljan opis.'}</p>
+              {tags.length > 0 && <div className="tag-list job-tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>}
+            </section>
+
+            <section className="job-card">
+              <h2>Detalji</h2>
+              <div className="job-facts">
+                <div><span className="job-fact-icon"><CalendarDays size={17} /></span><div><small>Kada</small><strong>{when}</strong></div></div>
+                <div><span className="job-fact-icon"><MapPin size={17} /></span><div><small>Gdje</small><strong>{isRemote ? 'Online / na daljinu' : listing.location || '—'}</strong></div></div>
+                <div><span className="job-fact-icon"><Tag size={17} /></span><div><small>Kategorija</small><strong>{listing.category || 'Ostalo'}</strong></div></div>
+                <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
+              </div>
+            </section>
+
+            <section className="job-card">
+              <div className="section-heading"><h2>Ponude</h2><span className="muted-text">{bids.length}</span></div>
+              {!isOwner && bids.length > 0 && (
+                <p className="contact-protection-note"><ShieldCheck size={15} /> Kontakt podaci su zaštićeni dok vlasnik ne prihvati ponudu.</p>
+              )}
+              {bids.length === 0 ? <p className="muted-text">Još nema ponuda. Budi prvi koji će poslati ponudu.</p> : (
+                <div className="offers-list">
+                  {bids.map((bid) => (
+                    <article className={`offer-row bid-row status-${bid.status}`} key={bid.id}>
+                      {bid.bidder?.avatar_url
+                        ? <img src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                        : <div className="poster-avatar"><UserRound size={18} /></div>}
+                      <div>
+                        <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
+                        <p>{bid.message}</p>
+                        <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
                       </div>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                      <div className="offer-actions">
+                        <b>{formatPrice(bid.amount)}</b>
+                        {isOwner && bid.status === 'pending' && (
+                          <div className="bid-owner-actions">
+                            <button type="button" className="ghost-button" onClick={() => setBidStatus(bid.id, 'accepted')}><CheckCircle2 size={16} /> Prihvati</button>
+                            <button type="button" className="ghost-button danger-button" onClick={() => setBidStatus(bid.id, 'rejected')}><XCircle size={16} /> Odbij</button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
 
-        {isOwner && suggested.length > 0 && (
-          <section className="detail-section">
-            <div className="rec-heading">
-              <h2>Predloženi izvođači</h2>
-              <p>Odabrani prema kategoriji, gradu i dosadašnjem radu na platformi.</p>
-            </div>
-            <div className="rec-grid">
-              {suggested.map((provider) => (
-                <Link className="rec-card" key={provider.user_id} to={`/korisnik/${provider.user_id}`}>
-                  <div className="rec-card-top">
-                    {provider.avatar_url
-                      ? <img src={provider.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
-                      : <div className="poster-avatar"><UserRound size={18} /></div>}
-                    <span className="rec-score" title="Koliko izvođač odgovara ovom poslu">
-                      <Sparkles size={13} /> {Math.round(provider.match_score)}
-                    </span>
-                  </div>
-                  <h3>{provider.display_name || 'Korisnik Poso.ba'}</h3>
-                  <div className="rec-card-meta">
-                    <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
-                    {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
-                    {provider.success_rate != null && <strong>{Math.round(provider.success_rate)}% uspješnost</strong>}
-                  </div>
-                  {provider.reasons?.length > 0 && (
-                    <ul className="rec-reasons">
-                      {provider.reasons.slice(0, 3).map((reason) => <li key={reason}>{reason}</li>)}
-                    </ul>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+            {isOwner && suggested.length > 0 && (
+              <section className="job-card">
+                <div className="rec-heading">
+                  <h2>Predloženi izvođači</h2>
+                  <p>Odabrani prema kategoriji, gradu i dosadašnjem radu na platformi.</p>
+                </div>
+                <div className="rec-grid">
+                  {suggested.map((provider) => (
+                    <Link className="rec-card" key={provider.user_id} to={`/korisnik/${provider.user_id}`}>
+                      <div className="rec-card-top">
+                        {provider.avatar_url
+                          ? <img src={provider.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                          : <div className="poster-avatar"><UserRound size={18} /></div>}
+                        <span className="rec-score" title="Koliko izvođač odgovara ovom poslu">
+                          <Sparkles size={13} /> {Math.round(provider.match_score)}
+                        </span>
+                      </div>
+                      <h3>{provider.display_name || 'Korisnik Poso.ba'}</h3>
+                      <div className="rec-card-meta">
+                        <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
+                        {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
+                        {provider.success_rate != null && <strong>{Math.round(provider.success_rate)}% uspješnost</strong>}
+                      </div>
+                      {provider.reasons?.length > 0 && (
+                        <ul className="rec-reasons">
+                          {provider.reasons.slice(0, 3).map((reason) => <li key={reason}>{reason}</li>)}
+                        </ul>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
-        <section className="detail-section"><h2>Pitanja i odgovori</h2><p className="muted-text">Postavljanje pitanja biće dostupno nakon prijave.</p></section>
-        {related.length > 0 && <section className="detail-section"><h2>Slični oglasi</h2><div className="listing-grid">{related.map((item) => <ListingCard key={item.id} listing={{ ...item, price: formatPrice(item.price, item.currency), time: formatDate(item.created_at) }} />)}</div></section>}
-        {message && <div className="form-success" role="status">{message}</div>}
+            {user && !isOwner && listing.status === 'completed' && acceptedBid?.bidder_id === user.id && (
+              <section className="job-card">
+                <h2>Ostavi recenziju</h2>
+                <form className="auth-form" onSubmit={submitReview}>
+                  <div className="rating-picker">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button key={value} type="button" className={`rating-star ${reviewForm.rating >= value ? 'active' : ''}`} onClick={() => setReviewForm((current) => ({ ...current, rating: value }))} aria-label={`${value} zvjezdica`}>
+                        <Star size={22} fill={reviewForm.rating >= value ? 'currentColor' : 'none'} />
+                      </button>
+                    ))}
+                  </div>
+                  <label>Komentar (opciono)<textarea value={reviewForm.comment} onChange={(event) => setReviewForm((current) => ({ ...current, comment: event.target.value }))} maxLength={1000} placeholder="Kakvo je bilo iskustvo?" /></label>
+                  <button type="submit" className="ghost-button" disabled={submittingReview}>{submittingReview ? 'Šaljem...' : 'Pošalji recenziju'}</button>
+                </form>
+              </section>
+            )}
+
+            {related.length > 0 && <section className="job-card job-card-plain"><h2>Slični oglasi</h2><div className="listing-grid">{related.map((item) => <ListingCard key={item.id} listing={{ ...item, price: formatPrice(item.price, item.currency), time: formatDate(item.created_at) }} />)}</div></section>}
+            {message && <div className="form-success" role="status">{message}</div>}
+          </div>
+
+          <aside className="job-side">
+            <div className="job-offer-card">
+              <span>Okvirni budžet</span>
+              <strong>{formatPrice(listing.price, listing.currency)}</strong>
+              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
+              {!isOwner && myBid && (
+                <div className={`my-bid-status status-${myBid.status}`}>
+                  Vaša ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
+                </div>
+              )}
+              {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
+                <Link to="/messages" className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
+              )}
+              {isOwner && acceptedBid && listing.status === 'published' && (
+                <div className="outcome-actions">
+                  <button type="button" className="primary-button full-width" onClick={() => setOutcome('completed')} disabled={outcomeBusy}><CheckCircle2 size={16} /> Posao završen</button>
+                  <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
+                </div>
+              )}
+              {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
+              {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
+              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje i dogovor idu kroz Poso.ba — kontakt se otključava tek kad je ponuda prihvaćena.</p>
+            </div>
+
+            <Link to={`/korisnik/${listing.user_id}`} className="job-poster">
+              {poster?.avatar_url
+                ? <img src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                : <div className="poster-avatar"><UserRound size={22} /></div>}
+              <div>
+                <small>Objavio</small>
+                <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
+                <span>{poster?.city || 'Bosna i Hercegovina'}{poster?.created_at ? ` · član od ${new Date(poster.created_at).getFullYear()}.` : ''}</span>
+              </div>
+            </Link>
+          </aside>
+        </div>
       </main>
-      {!isOwner && !myBid && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
+
+      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
+
+      {lightbox != null && images[lightbox] && (
+        <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
+          <button type="button" className="lightbox-close" aria-label="Zatvori"><X size={22} /></button>
+          {images.length > 1 && <button type="button" className="lightbox-nav prev" aria-label="Prethodna" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + images.length - 1) % images.length) }}><ChevronLeft size={26} /></button>}
+          <img src={images[lightbox].url} alt={listing.title} onClick={(event) => event.stopPropagation()} />
+          {images.length > 1 && <button type="button" className="lightbox-nav next" aria-label="Sljedeća" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + 1) % images.length) }}><ChevronRight size={26} /></button>}
+          <span className="lightbox-count">{lightbox + 1} / {images.length}</span>
+        </div>
+      )}
+
       {sheetOpen && (
         <div className="sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>

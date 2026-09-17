@@ -22,9 +22,9 @@ export const listingService = {
 
     const { data, error } = await supabase
       .from('listings')
-      .select('*, listing_tags(tag_id, tags(name))')
+      .select('*, listing_tags(tag_id, tags(name)), listing_images(id, url, position)')
       .eq('id', id)
-      .eq('status', 'published')
+      .in('status', ['published', 'completed'])
       .maybeSingle()
 
     if (error) {
@@ -37,7 +37,7 @@ export const listingService = {
   async listLatestPublished(limit = 8) {
     const { data, error } = await supabase
       .from('listings')
-      .select('id, user_id, title, description, category, location, price, currency, status, created_at, bids(count)')
+      .select('id, user_id, title, description, category, location, price, currency, status, created_at, bids(count), listing_images(url, position)')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(limit)
@@ -52,7 +52,7 @@ export const listingService = {
   async listRelated({ id, category, location }) {
     let query = supabase
       .from('listings')
-      .select('id, title, category, location, price, currency, created_at')
+      .select('id, title, category, location, price, currency, created_at, listing_images(url, position)')
       .eq('status', 'published')
       .neq('id', id)
       .limit(4)
@@ -87,7 +87,7 @@ export const listingService = {
 
     let query = supabase
       .from('listings')
-      .select('*, listing_tags(tag_id, tags(name)), bids(count)', { count: 'exact' })
+      .select('*, listing_tags(tag_id, tags(name)), bids(count), listing_images(url, position)', { count: 'exact' })
       .eq('status', status)
       .range(from, to)
       .order(orderColumn, { ascending, nullsFirst: false })
@@ -116,6 +116,48 @@ export const listingService = {
       throw publicError()
     }
     return { data, count }
+  },
+
+  /** First photo of a listing row (from the embedded listing_images), or null. */
+  coverImage(listing) {
+    const images = [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position)
+    return images[0]?.url || null
+  },
+
+  /** Upload job photos to storage and attach them to the listing (max 8, JPG/PNG/WEBP ≤ 5 MB). */
+  async uploadImages(userId, listingId, files, startPosition = 0) {
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp'])
+    const rows = []
+    for (const [index, file] of Array.from(files).slice(0, 8).entries()) {
+      if (!allowed.has(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Slika mora biti JPG, PNG ili WEBP i manja od 5 MB.')
+      const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
+      const path = `${userId}/listings/${listingId}/${crypto.randomUUID()}.${ext}`
+      const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '3600', contentType: file.type })
+      if (uploadError) {
+        console.error('Listing image upload failed', { message: uploadError.message })
+        throw new Error('Slika nije mogla biti učitana. Pokušaj ponovo.')
+      }
+      const { data } = supabase.storage.from('media').getPublicUrl(path)
+      rows.push({ listing_id: listingId, user_id: userId, url: data.publicUrl, path, position: startPosition + index })
+    }
+    if (rows.length === 0) return []
+    const { data, error } = await supabase.from('listing_images').insert(rows).select('id, url, position')
+    if (error) {
+      console.error('Listing image insert failed', { message: error.message, code: error.code })
+      throw new Error(error.message?.includes('policy') ? 'Dozvoljeno je najviše 8 slika po oglasu.' : 'Slike nisu sačuvane. Pokušaj ponovo.')
+    }
+    return data || []
+  },
+
+  async deleteImage(image) {
+    const { error } = await supabase.from('listing_images').delete().eq('id', image.id)
+    if (error) throw publicError()
+    if (image.path) await supabase.storage.from('media').remove([image.path]).catch(() => {})
+  },
+
+  async listImages(listingId) {
+    const { data } = await supabase.from('listing_images').select('id, url, path, position').eq('listing_id', listingId).order('position')
+    return data || []
   },
 
   async createListing(payload) {

@@ -9290,13 +9290,28 @@ body:has(.profile-cta-bar) .support-chat {
   display: block;
 }
 
-.earn-stage-doodle {
-  position: absolute;
-  right: 6%;
-  bottom: 8%;
-  width: 34%;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
-  animation: hero-drift 5s ease-in-out infinite alternate;
+.earn-stage-art {
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.08), transparent 55%), #0f3266;
+  box-shadow: none;
+}
+
+.earn-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.earn-art-coin { animation: earn-coin 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.earn-art-spark { animation: earn-spark 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+@keyframes earn-coin {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+
+@keyframes earn-spark {
+  0%, 100% { opacity: 0.25; scale: 0.7; }
+  50% { opacity: 1; scale: 1; }
 }
 
 .earn-stage-pill {

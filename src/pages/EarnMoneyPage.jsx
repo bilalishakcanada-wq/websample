@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Banknote, ChevronDown, MessageCircle, ShieldCheck, Star, Wallet } from 'lucide-react'
 import { contactService } from '../services/contactService'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
+import EarnArt from '../components/EarnArt'
 
 const formatKM = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
@@ -59,12 +60,8 @@ function EarnMoneyPage() {
               : 'Besplatna registracija, bez provizije na dogovorenu cijenu.'}
           </small>
         </div>
-        <div className="earn-stage-photo">
-          <img src="/images/categories/home.jpg" alt="Majstor na poslu" loading="eager" />
-          <svg className="earn-stage-doodle" viewBox="0 0 120 80" aria-hidden="true">
-            <path d="M8 60 C 30 20, 50 20, 60 50 S 95 70, 112 18" fill="none" stroke="#f5b400" strokeWidth="4" strokeLinecap="round" />
-            <path d="M96 14 l6 -8 l4 9" fill="none" stroke="#f5b400" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="earn-stage-photo earn-stage-art">
+          <EarnArt />
           <div className="earn-stage-pill"><Wallet size={15} /> Isplata primljena · Krečenje stana · 220 KM</div>
         </div>
       </section>

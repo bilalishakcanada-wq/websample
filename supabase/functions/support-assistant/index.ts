@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
     body: JSON.stringify({ model: MODEL, max_tokens: 600, system: systemPrompt(articles, safeProfile), messages: merged }),
   })
-  if (!res.ok) return json({ configured: true, error: `anthropic ${res.status}` }, 502)
+  if (!res.ok) return json({ configured: true, error: `anthropic ${res.status}: ${(await res.text()).slice(0, 300)}` }, 502)
   const data = await res.json()
   const text: string = (data.content || []).map((c: { text?: string }) => c.text || '').join('')
   let parsed: { reply?: string; handoff?: boolean; summary?: string } = {}

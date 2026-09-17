@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft, Award, Bot, Check, ExternalLink, Globe, MapPin, MessageSquare, NotebookPen, ShieldBan, ShieldCheck, Trash2, UserCog, X,
+  ArrowLeft, Award, Bot, Check, Coins, ExternalLink, Globe, MapPin, MessageSquare, NotebookPen, ShieldBan, ShieldCheck, Trash2, UserCog, X,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { badgeIcon } from '../../components/badgeIcons'
 import {
-  ACTION_LABEL, AiVerdict, Avatar, KIND_LABEL, RolePills, STAFF_ACTION_LABEL, StatusPill, SuspendDialog, deviceLabel, geoLabel, relativeTime, useStaff, verificationTitle,
+  ACTION_LABEL, AiVerdict, Avatar, CreditsDialog, KIND_LABEL, RolePills, STAFF_ACTION_LABEL, StatusPill, SuspendDialog, WALLET_KIND_LABEL, deviceLabel, formatKM as formatMoney, geoLabel, relativeTime, useStaff, verificationTitle,
 } from './shared'
 
 const ACCOUNT_TYPE = { client: 'Klijent', provider: 'Izvođač', both: 'Klijent i izvođač' }
@@ -332,6 +332,38 @@ function Verifications({ dossier, isAdmin, reload }) {
   )
 }
 
+function Wallet({ dossier, isAdmin, onAdjust }) {
+  const rows = dossier.wallet || []
+  const credited = rows.filter((row) => Number(row.amount) > 0).reduce((sum, row) => sum + Number(row.amount), 0)
+  const spent = rows.filter((row) => Number(row.amount) < 0).reduce((sum, row) => sum - Number(row.amount), 0)
+  return (
+    <div className="dossier-grid">
+      <section className="dossier-card dossier-card-wide wallet-hero">
+        <div>
+          <small>Balans (stanje računa)</small>
+          <strong>{formatMoney(dossier.profile.balance)}</strong>
+          <span className="muted-text">uplaćeno ukupno {formatMoney(credited)} · skinuto {formatMoney(spent)} · {rows.length} transakcija</span>
+        </div>
+        {isAdmin && <button type="button" className="primary-button" onClick={onAdjust}><Coins size={15} /> Uplati / skini</button>}
+      </section>
+      <section className="dossier-card dossier-card-wide">
+        <h3>Transakcije</h3>
+        {rows.length === 0 && <p className="muted-text">Još nema transakcija.</p>}
+        {rows.map((row) => (
+          <div key={row.id} className="wallet-row">
+            <span className={`wallet-sign ${Number(row.amount) > 0 ? 'plus' : 'minus'}`}>{Number(row.amount) > 0 ? '+' : '−'}</span>
+            <div>
+              <strong>{WALLET_KIND_LABEL[row.kind] || row.kind}{row.note ? ` · ${row.note}` : ''}</strong>
+              <small>{formatBosnianDate(row.created_at)}{row.actor_name ? ` · ${row.actor_name}` : ''} · stanje nakon: {formatMoney(row.balance_after)}</small>
+            </div>
+            <b className={Number(row.amount) > 0 ? 'plus' : 'minus'}>{Number(row.amount) > 0 ? '+' : ''}{formatMoney(row.amount)}</b>
+          </div>
+        ))}
+      </section>
+    </div>
+  )
+}
+
 function Notes({ dossier, reload }) {
   const { user } = useAuth()
   const { isAdmin } = useStaff()
@@ -393,6 +425,7 @@ function Overview({ dossier, onRunAgent, agentBusy }) {
         <Stat label="Prijave" value={stats.reports_against} hint={`protiv njega · poslao ${stats.reports_made}`} />
         <Stat label="Prijave na nalog" value={stats.logins} hint={`${stats.distinct_ips} IP adresa`} />
         <Stat label="Portfolio" value={stats.portfolio} />
+        <Stat label="Balans" value={formatMoney(profile.balance)} hint="stanje računa" />
       </div>
 
       <div className="dossier-grid">
@@ -450,7 +483,7 @@ function Overview({ dossier, onRunAgent, agentBusy }) {
 }
 
 const SECTIONS = [
-  ['overview', 'Pregled'], ['activity', 'Aktivnost'], ['messages', 'Poruke'], ['sessions', 'Sesije i IP'], ['safety', 'Pravilo #1'], ['verifications', 'Verifikacije'], ['notes', 'Bilješke'],
+  ['overview', 'Pregled'], ['activity', 'Aktivnost'], ['messages', 'Poruke'], ['wallet', 'Balans'], ['sessions', 'Sesije i IP'], ['safety', 'Pravilo #1'], ['verifications', 'Verifikacije'], ['notes', 'Bilješke'],
 ]
 
 /** Full per-user view for staff. */
@@ -462,6 +495,7 @@ function UserDossier({ userId, onBack }) {
   const [message, setMessage] = useState('')
   const [suspendOpen, setSuspendOpen] = useState(false)
   const [badgesOpen, setBadgesOpen] = useState(false)
+  const [creditsOpen, setCreditsOpen] = useState(false)
   const [agentBusy, setAgentBusy] = useState(false)
 
   const reload = async () => {
@@ -515,7 +549,7 @@ function UserDossier({ userId, onBack }) {
   const { profile } = dossier
   const roleValue = (dossier.roles || []).includes('ADMIN') ? 'ADMIN' : (dossier.roles || []).includes('MODERATOR') ? 'MODERATOR' : 'MEMBER'
   const suspended = profile.account_status === 'suspended'
-  const counts = { messages: dossier.stats.conversations, sessions: dossier.stats.distinct_ips, safety: dossier.stats.strikes_total, verifications: (dossier.verifications || []).length, notes: (dossier.notes || []).length }
+  const counts = { messages: dossier.stats.conversations, wallet: (dossier.wallet || []).length, sessions: dossier.stats.distinct_ips, safety: dossier.stats.strikes_total, verifications: (dossier.verifications || []).length, notes: (dossier.notes || []).length }
 
   return (
     <div className="dossier">
@@ -531,6 +565,7 @@ function UserDossier({ userId, onBack }) {
             <RolePills roles={dossier.roles} />
             <span className="pill">{ACCOUNT_TYPE[profile.account_type] || profile.account_type}</span>
             {dossier.trust?.label && <span className="pill pill-soft">{dossier.trust.label}</span>}
+            {Number(profile.balance) > 0 && <span className="pill pill-gold"><Coins size={12} /> {formatMoney(profile.balance)}</span>}
             {profile.ai_assessment && <span className={`pill risk-${profile.ai_assessment.risk_level}`}>AI {profile.ai_assessment.trust_score}/100</span>}
           </div>
           <p className="muted-text">{profile.city || 'Grad nije naveden'} · registrovan {formatBosnianDate(profile.created_at)} · aktivan {relativeTime(profile.last_seen_at)}{suspended && profile.suspension_reason ? ` · ${profile.suspension_reason}` : ''}</p>
@@ -538,6 +573,7 @@ function UserDossier({ userId, onBack }) {
         <div className="dossier-actions">
           {!suspended && <button type="button" className="danger-button" onClick={() => setSuspendOpen(true)}><ShieldBan size={15} /> Suspenduj</button>}
           {suspended && <button type="button" className="primary-button" onClick={() => run(() => adminService.liftSuspension(userId), 'Suspenzija je ukinuta.')}><ShieldCheck size={15} /> Ukini suspenziju</button>}
+          {isAdmin && <button type="button" className="ghost-button" onClick={() => setCreditsOpen(true)}><Coins size={15} /> Balans</button>}
           {isAdmin && <button type="button" className="ghost-button" onClick={() => setBadgesOpen(true)}><Award size={15} /> Značke</button>}
           {isAdmin && (
             <label className="dossier-role"><UserCog size={15} />
@@ -565,12 +601,14 @@ function UserDossier({ userId, onBack }) {
       {section === 'overview' && <Overview dossier={dossier} onRunAgent={runAgent} agentBusy={agentBusy} />}
       {section === 'activity' && <Activity userId={userId} dossier={dossier} />}
       {section === 'messages' && <Conversations dossier={dossier} isAdmin={isAdmin} />}
+      {section === 'wallet' && <Wallet dossier={dossier} isAdmin={isAdmin} onAdjust={() => setCreditsOpen(true)} />}
       {section === 'sessions' && <Sessions dossier={dossier} />}
       {section === 'safety' && <Safety dossier={dossier} />}
       {section === 'verifications' && <Verifications dossier={dossier} isAdmin={isAdmin} reload={reload} />}
       {section === 'notes' && <Notes dossier={dossier} reload={reload} />}
 
       {suspendOpen && <SuspendDialog user={profile} onClose={() => setSuspendOpen(false)} onDone={() => run(async () => {}, 'Nalog je suspendovan.')} />}
+      {creditsOpen && <CreditsDialog user={profile} balance={profile.balance} onClose={() => setCreditsOpen(false)} onDone={() => run(async () => {}, 'Balans je ažuriran.')} />}
       {badgesOpen && <BadgeManager userId={userId} held={dossier.badges || []} onClose={() => setBadgesOpen(false)} onChanged={reload} />}
     </div>
   )

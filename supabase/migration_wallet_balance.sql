@@ -1,0 +1,11 @@
+-- Balance (real money on the platform) — migrations wallet_credits, dossier_wallet,
+-- staff_list_users_balance, wallet_balance_wording.
+--   profiles.balance numeric(12,2) — protected system column (protect_profile_system_fields)
+--   wallet_transactions ledger: amount (signed), balance_after, kind
+--     (admin_credit | admin_debit | bonus | refund | fee | payout | purchase | promo), note, actor_id
+--     RLS: owner + staff read; writes only through admin_adjust_balance()
+--   admin_adjust_balance(user, amount, kind, note): admin only, balance can't go negative,
+--     inserts the ledger row, notifies the user ('wallet'), logs a staff action
+--   my_wallet(): balance + totals (all time / 30 days) + last 100 transactions for the signed-in user
+--   admin_wallet_overview(limit): platform totals, top balances, ledger with names
+--   admin_user_dossier(): profile.balance + 'wallet' ledger; staff_list_users(): balance (admin only)

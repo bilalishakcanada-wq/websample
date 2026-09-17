@@ -154,6 +154,27 @@ export const adminService = {
     }
   },
 
+  /** Add (positive) or remove (negative) credits on a user's wallet. */
+  async adjustBalance(userId, amount, kind = null, note = null) {
+    const { data, error } = await supabase.rpc('admin_adjust_balance', { p_user_id: userId, p_amount: amount, p_kind: kind, p_note: note })
+    if (error) {
+      console.error('Adjust balance failed', { message: error.message, code: error.code })
+      if (error.message?.includes('INSUFFICIENT')) throw new Error('Stanje ne može biti negativno.')
+      if (error.message?.includes('BAD_AMOUNT')) throw new Error('Iznos mora biti između 0,01 i 100.000 KM.')
+      throw new Error(staffErrorMessage(error))
+    }
+    return data
+  },
+
+  async walletOverview(limit = 100) {
+    const { data, error } = await supabase.rpc('admin_wallet_overview', { p_limit: limit })
+    if (error) {
+      console.error('Wallet overview failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data
+  },
+
   async addNote(userId, body) {
     const { data: auth } = await supabase.auth.getUser()
     const { error } = await supabase.from('staff_notes').insert({ user_id: userId, author_id: auth?.user?.id, body: body.trim().slice(0, 2000) })

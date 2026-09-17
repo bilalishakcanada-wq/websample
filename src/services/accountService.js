@@ -4,6 +4,16 @@ import { publicError, sanitizeText } from '../utils/validation'
 const LICENCE_TYPES = ['electrician', 'plumber', 'gas', 'hvac', 'construction', 'driver']
 
 export const accountService = {
+  /** Balance, totals and the ledger of the signed-in user. */
+  async myWallet() {
+    const { data, error } = await supabase.rpc('my_wallet')
+    if (error) {
+      console.error('Wallet fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data
+  },
+
   async tierDashboard() {
     const { data, error } = await supabase.rpc('my_tier_dashboard')
     if (error) { console.error('Tier dashboard failed', { message: error.message, code: error.code }); return null }

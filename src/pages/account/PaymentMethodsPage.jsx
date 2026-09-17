@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { CreditCard, Lock, PlusCircle, Trash2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
@@ -65,10 +66,10 @@ function PaymentMethodsPage() {
           <button type="button" className="account-link-button" onClick={() => setMessage('Poso.ba Pay i plaćanje karticom stižu uskoro — do tada se plaćanje dogovara direktno sa izvođačem.')}>
             <PlusCircle size={20} /> Dodaj kreditnu ili debitnu karticu
           </button>
-          <h3 className="account-sub">Poso.ba krediti</h3>
+          <h3 className="account-sub">Balans</h3>
           <span className="muted-text">Stanje:</span>
-          <strong className="credits-balance">0 KM</strong>
-          <p className="muted-text">Krediti se automatski primjenjuju kad prihvatiš ponudu na poslu.</p>
+          <strong className="credits-balance">{Number(profile.balance || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} KM</strong>
+          <p className="muted-text">Tvoj novac na Poso.ba — iz njega se naplaćuje naknada za završene poslove. <Link to="/account/novcanik">Otvori balans</Link></p>
         </>
       )}
 

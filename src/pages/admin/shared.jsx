@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react'
-import { Bot, Clock, ShieldBan, UserRound, X } from 'lucide-react'
+import { Bot, Clock, Coins, Minus, Plus, ShieldBan, UserRound, X } from 'lucide-react'
 import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 
@@ -11,10 +11,14 @@ export const KIND_LABEL = { phone: 'telefon', email: 'email', url: 'link', socia
 export const ACTION_LABEL = { masked: 'Maskirano', removed: 'Uklonjeno', flagged: 'Označeno', suspended: 'Suspendovan', lifted: 'Suspenzija ukinuta' }
 export const QUEUE_LABEL = { pending: 'Čeka AI pregled', clean: 'Čisto', flagged: 'Uklonjeno', error: 'Greška', unconfigured: 'Čeka API ključ' }
 export const STAFF_ACTION_LABEL = {
+  wallet_adjust: 'Balans',
   suspend: 'Suspenzija', lift: 'Ukinuta suspenzija', redact: 'Uklonjen sadržaj', badge_grant: 'Dodijeljena značka', badge_revoke: 'Uklonjena značka',
   badge_save: 'Značka sačuvana', badge_delete: 'Značka obrisana', moderator_grant: 'Postao moderator', moderator_revoke: 'Uklonjen moderator',
   admin_grant: 'Postao admin', admin_revoke: 'Uklonjen admin',
 }
+export const WALLET_KIND_LABEL = { admin_credit: 'Uplata (tim)', admin_debit: 'Skidanje (tim)', bonus: 'Bonus', refund: 'Povrat', fee: 'Naknada', payout: 'Isplata', purchase: 'Uplata', promo: 'Promocija' }
+export const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
+
 export const VERIFICATION_LABEL = { identity: 'Lična karta / pasoš', police_check: 'Uvjerenje o nekažnjavanju', licence: 'Licenca', trade: 'Struka' }
 export const LICENCE_LABEL = { electrician: 'električar', plumber: 'vodoinstalater', gas: 'plin', hvac: 'klimatizacija i grijanje', construction: 'građevina', driver: 'vozačka' }
 
@@ -157,6 +161,80 @@ export function SuspendDialog({ user, onClose, onDone }) {
         <div className="adm-modal-actions">
           <button type="button" className="ghost-button" onClick={onClose}>Odustani</button>
           <button type="button" className="danger-button" onClick={submit} disabled={busy || !valid}>{busy ? 'Suspendujem…' : preset === null && !custom ? 'Trajno suspenduj' : 'Suspenduj'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CREDIT_AMOUNTS = [5, 10, 20, 50, 100]
+const CREDIT_KINDS = [['admin_credit', 'Uplata'], ['bonus', 'Bonus'], ['promo', 'Promocija'], ['refund', 'Povrat']]
+const DEBIT_KINDS = [['admin_debit', 'Skidanje'], ['fee', 'Naknada'], ['payout', 'Isplata']]
+
+/** Add or remove money on a user's balance. */
+export function CreditsDialog({ user, balance = 0, onClose, onDone }) {
+  const [direction, setDirection] = useState('add')
+  const [amount, setAmount] = useState('10')
+  const [kind, setKind] = useState('admin_credit')
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const value = Number(String(amount).replace(',', '.'))
+  const valid = value > 0 && value <= 100000 && (direction === 'add' || value <= Number(balance))
+  const after = direction === 'add' ? Number(balance) + (value || 0) : Number(balance) - (value || 0)
+
+  const submit = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await adminService.adjustBalance(user.user_id, direction === 'add' ? value : -value, kind, note)
+      onDone?.()
+      onClose()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="adm-modal-backdrop" onClick={onClose} role="presentation">
+      <div className="adm-modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="adm-modal-head">
+          <h3><Coins size={18} /> Balans</h3>
+          <button type="button" className="icon-button" onClick={onClose} aria-label="Zatvori"><X size={18} /></button>
+        </div>
+        <div className="adm-modal-user"><Avatar src={user.avatar_url} size={36} /><div><strong>{user.full_name || 'Korisnik'}</strong><span className="uid-chip">{user.member_id}</span></div><span className="credits-now">{formatKM(balance)}</span></div>
+
+        <div className="credits-direction">
+          <button type="button" className={direction === 'add' ? 'active add' : ''} onClick={() => { setDirection('add'); setKind('admin_credit') }}><Plus size={15} /> Dodaj</button>
+          <button type="button" className={direction === 'remove' ? 'active remove' : ''} onClick={() => { setDirection('remove'); setKind('admin_debit') }}><Minus size={15} /> Skini</button>
+        </div>
+
+        <span className="adm-label">Iznos (KM)</span>
+        <div className="adm-presets">
+          {CREDIT_AMOUNTS.map((preset) => <button key={preset} type="button" className={Number(amount) === preset ? 'active' : ''} onClick={() => setAmount(String(preset))}>{preset} KM</button>)}
+        </div>
+        <div className="credits-amount">
+          <input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" />
+          <span>KM</span>
+        </div>
+
+        <span className="adm-label">Vrsta</span>
+        <div className="adm-reason-chips">
+          {(direction === 'add' ? CREDIT_KINDS : DEBIT_KINDS).map(([id, label]) => <button key={id} type="button" className={kind === id ? 'active' : ''} onClick={() => setKind(id)}>{label}</button>)}
+        </div>
+        <span className="adm-label">Napomena (vidi je korisnik)</span>
+        <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} maxLength={200} placeholder="npr. Bonus dobrodošlice" />
+
+        <div className={`credits-preview ${direction}`}>
+          <span>Novo stanje</span>
+          <strong>{formatKM(Math.max(0, after))}</strong>
+        </div>
+        {error && <div className="form-error">{error}</div>}
+        <div className="adm-modal-actions">
+          <button type="button" className="ghost-button" onClick={onClose}>Odustani</button>
+          <button type="button" className={direction === 'add' ? 'primary-button' : 'danger-button'} onClick={submit} disabled={busy || !valid}>{busy ? 'Čuvam…' : direction === 'add' ? `Dodaj ${formatKM(value || 0)}` : `Skini ${formatKM(value || 0)}`}</button>
         </div>
       </div>
     </div>

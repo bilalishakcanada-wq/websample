@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Award, Bell, Camera, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wrench,
+  Award, Bell, Camera, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { profileService } from '../../services/profileService'
@@ -15,6 +15,7 @@ export const ACCOUNT_NAV = [
   { to: '/account/ploca', label: 'Ploča izvođača', icon: Trophy, providerOnly: true },
   { to: '/account/placanja', label: 'Historija plaćanja', icon: History },
   { to: '/account/nacini-placanja', label: 'Načini plaćanja', icon: CreditCard },
+  { to: '/account/novcanik', label: 'Balans', icon: Wallet },
   { to: '/account/obavijesti', label: 'Obavijesti', icon: Bell },
   { to: '/account/profil', label: 'Profil', icon: IdCard },
   { to: '/account/vjestine', label: 'Vještine', icon: Wrench, providerOnly: true },

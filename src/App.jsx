@@ -36,6 +36,7 @@ import PortfolioPage from './pages/account/PortfolioPage'
 import TierDashboardPage from './pages/account/TierDashboardPage'
 import PaymentHistoryPage from './pages/account/PaymentHistoryPage'
 import PaymentMethodsPage from './pages/account/PaymentMethodsPage'
+import WalletPage from './pages/account/WalletPage'
 import NotificationsPage from './pages/account/NotificationsPage'
 import SettingsPage from './pages/account/SettingsPage'
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="ploca" element={<TierDashboardPage />} />
           <Route path="placanja" element={<PaymentHistoryPage />} />
           <Route path="nacini-placanja" element={<PaymentMethodsPage />} />
+          <Route path="novcanik" element={<WalletPage />} />
           <Route path="obavijesti" element={<NotificationsPage />} />
           <Route path="profil" element={<ProfileSettingsPage />} />
           <Route path="vjestine" element={<SkillsPage />} />

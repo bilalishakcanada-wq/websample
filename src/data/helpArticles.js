@@ -36,6 +36,8 @@ export const HELP_ARTICLES = [
     a: 'Obično isti ili sljedeći radni dan. Dok čekaš, u Značkama piše „Na čekanju“. Ako je dokument nečitak ili se ime ne poklapa sa profilom, zahtjev bude odbijen — pošalji ponovo jasniju sliku.' },
   { id: 'payouts', audience: 'provider', q: 'Kako primam isplate?', keywords: ['isplat', 'iban', 'račun', 'bank', 'novac', 'kad dobijam pare', 'uplat'],
     a: 'U „Moj nalog → Načini plaćanja → Primam uplate“ upiši ime vlasnika, banku i IBAN. Do pokretanja Poso.ba Pay plaćanje ide direktno između tebe i klijenta po dogovoru; u „Historiji plaćanja“ vidiš sve završene poslove i obračun naknade.' },
+  { id: 'balance', audience: 'provider', q: 'Šta je balans na mom nalogu?', keywords: ['balans', 'stanje', 'saldo', 'novčanik', 'novcanik', 'pare na nalogu'],
+    a: 'Balans je tvoj novac na Poso.ba — vidiš ga u „Moj nalog → Balans“ sa svakom uplatom, naknadom i isplatom. Iz balansa se naplaćuje naknada kad se posao završi; uplate, bonuse i povrate dodaje Poso.ba tim. Ako nešto ne štima, piši podršci sa svojim privatnim ID-om.' },
   { id: 'success-rate', audience: 'provider', q: 'Šta je uspješnost i kako je podižem?', keywords: ['uspješnost', 'procenat', 'success', 'rejting'],
     a: 'Uspješnost = završeni poslovi ÷ (završeni + otkazani tvojom krivicom). Diže je svaki posao koji klijent označi kao završen; ruši je otkazivanje nakon što si prihvaćen. Šalji ponude samo na poslove koje stvarno možeš uraditi.' },
   { id: 'portfolio', audience: 'provider', q: 'Kako dodajem portfolio radova?', keywords: ['portfolio', 'radov', 'galerij', 'moje slike'],

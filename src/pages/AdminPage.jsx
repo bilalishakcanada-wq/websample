@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Award, BellRing, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, UsersRound, Users,
+  Award, BellRing, Coins, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, UsersRound, Users,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { adminService } from '../services/adminService'
@@ -12,6 +12,7 @@ import MessagesTab from './admin/MessagesTab'
 import UsersTab from './admin/UsersTab'
 import TeamTab from './admin/TeamTab'
 import BadgesTab from './admin/BadgesTab'
+import WalletTab from './admin/WalletTab'
 import { ListingsTab, ModerationTab, RegistryTab, ReportsTab, SupportTab, VerificationTab } from './admin/SimpleTabs'
 
 const TABS = [
@@ -24,6 +25,7 @@ const TABS = [
   { id: 'verification', label: 'Verifikacija', icon: ShieldCheck, hint: 'Dokumenti i licence', counter: 'verifications_pending', adminOnly: true },
   { id: 'listings', label: 'Oglasi', icon: Tag, hint: 'Svi oglasi', adminOnly: true },
   { id: 'badges', label: 'Značke', icon: Award, hint: 'Katalog i dodjela', adminOnly: true },
+  { id: 'wallet', label: 'Balans', icon: Coins, hint: 'Stanja računa i transakcije', adminOnly: true },
   { id: 'team', label: 'Tim', icon: UsersRound, hint: 'Admini, moderatori, dnevnik', adminOnly: true },
   { id: 'registry', label: 'ID registar', icon: IdCard, hint: 'Privatni ID-ovi, i obrisani', adminOnly: true },
 ]
@@ -141,6 +143,7 @@ function AdminPage({ mode = 'admin' }) {
             {isAdminMode && tab === 'verification' && <VerificationTab />}
             {isAdminMode && tab === 'listings' && <ListingsTab />}
             {isAdminMode && tab === 'badges' && <BadgesTab />}
+            {isAdminMode && tab === 'wallet' && <WalletTab />}
             {isAdminMode && tab === 'team' && <TeamTab />}
             {isAdminMode && tab === 'registry' && <RegistryTab />}
           </section>

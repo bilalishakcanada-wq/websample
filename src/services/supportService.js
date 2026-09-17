@@ -2,10 +2,22 @@ import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 
 export const supportService = {
+  /** Ask the AI assistant. Resolves { configured:false } when the API key is missing so the caller can fall back. */
+  async askAssistant(message, articles) {
+    try {
+      const { data, error } = await supabase.functions.invoke('support-assistant', { body: { message, articles } })
+      if (error) throw error
+      return data || { configured: false }
+    } catch (invokeError) {
+      console.warn('Support assistant unavailable', { message: invokeError.message })
+      return { configured: false }
+    }
+  },
+
   async listMyMessages(userId) {
     const { data, error } = await supabase
       .from('support_messages')
-      .select('id, user_id, sender, message, created_at')
+      .select('id, user_id, sender, message, created_at, handoff')
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
 
@@ -16,14 +28,14 @@ export const supportService = {
     return data || []
   },
 
-  async send({ userId, sender = 'user', message }) {
+  async send({ userId, sender = 'user', message, needsHuman = true, handoff = false }) {
     const cleanMessage = sanitizeText(message).slice(0, 2000)
     if (!cleanMessage) throw new Error('Poruka ne može biti prazna.')
 
     const { data, error } = await supabase
       .from('support_messages')
-      .insert({ user_id: userId, sender, message: cleanMessage })
-      .select('id, user_id, sender, message, created_at')
+      .insert({ user_id: userId, sender, message: cleanMessage, needs_human: needsHuman, handoff })
+      .select('id, user_id, sender, message, created_at, handoff')
       .single()
 
     if (error) {

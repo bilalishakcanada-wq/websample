@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BookOpen, LifeBuoy, Send, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supportService } from '../services/supportService'
-import { findHelpAnswer } from '../data/helpArticles'
+import { HELP_ARTICLES, findHelpAnswer } from '../data/helpArticles'
+
+const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
 
 const QUICK = [
   ['Kako objavim posao?', 'Kako objavim posao?'],
@@ -12,6 +14,8 @@ const QUICK = [
   ['Pravilo #1', 'Šta je Pravilo #1?'],
   ['Želim razgovarati s timom', 'Želim razgovarati s timom'],
 ]
+// complaints, money and account problems always go to a person, even without the AI
+const SERIOUS = /(prevar|scam|pare|novac|novc|uze[ol]|ukra|spor|reklamac|suspend|blokir|hak|žalb|zalb|nije doš|nije dos|ne javlja|prijet|uvred)/i
 const HUMAN = /\b(tim(om|u|a)?|čovjek|covjek|operater|agent|osob[ae]|živ[aou]|ziv[aou]|podrška|podrska)\b/i
 
 const timeLabel = (value) => new Date(value).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' })
@@ -19,7 +23,13 @@ const timeLabel = (value) => new Date(value).toLocaleTimeString('bs-BA', { hour:
 /** Floating support: the assistant answers from the help centre instantly, the team takes over in the same thread. */
 function SupportChat() {
   const { user } = useAuth()
+  const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
+  const onHelpPage = pathname.startsWith('/pomoc')
   const [open, setOpen] = useState(false)
+
+  // deep link: /pomoc?chat=1 opens the conversation straight away
+  useEffect(() => { if (onHelpPage && searchParams.get('chat') === '1') setOpen(true) }, [onHelpPage, searchParams])
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(false)
@@ -53,19 +63,28 @@ function SupportChat() {
 
   const push = (row) => setMessages((current) => (current.some((item) => item.id === row.id) ? current : [...current, row]))
 
+  /**
+   * Assistant turn: Claude (support-assistant function) when the key is set; otherwise the
+   * keyword matcher. Both end in a stored 'assistant' bubble; a hand-off pings the team.
+   */
   const assistantReply = async (text) => {
     setTyping(true)
-    await new Promise((resolve) => setTimeout(resolve, 700))
-    const wantsHuman = HUMAN.test(text)
-    const article = wantsHuman ? null : findHelpAnswer(text)
-    const reply = article
-      ? `${article.a}\n\nAko ti ovo ne pomaže, napiši „tim“ i naš kolega preuzima razgovor.`
-      : wantsHuman
-        ? 'Proslijedio sam razgovor našem timu — javit će ti se ovdje i na email, obično u roku od par sati. Slobodno odmah opiši problem.'
-        : 'Nisam siguran u odgovor, pa sam proslijedio poruku našem timu — javit će ti se ovdje i na email, obično u roku od par sati. U međuvremenu pogledaj Centar za pomoć.'
     try {
-      const created = await supportService.send({ userId: user.id, sender: 'assistant', message: reply })
+      const ai = await supportService.askAssistant(text, ARTICLES)
+      if (ai.configured && ai.message) { push(ai.message); return }
+      await new Promise((resolve) => setTimeout(resolve, 600))
+      const wantsHuman = HUMAN.test(text) || SERIOUS.test(text)
+      const article = wantsHuman ? null : findHelpAnswer(text)
+      const handoff = !article
+      const reply = article
+        ? `${article.a}\n\nAko ti ovo ne pomaže, napiši „tim“ i naš kolega preuzima razgovor.`
+        : wantsHuman
+          ? 'Povezujem te sa našim timom — javit će ti se ovdje i na email, obično u roku od par sati. Slobodno odmah opiši problem što detaljnije.'
+          : 'Nisam siguran u odgovor, pa povezujem tim — javit će ti se ovdje i na email, obično u roku od par sati. U međuvremenu pogledaj Centar za pomoć.'
+      const created = await supportService.send({ userId: user.id, sender: 'assistant', message: reply, needsHuman: false, handoff })
       push(created)
+      // no AI to summarise: re-send the user's own words as the ping to the team
+      if (handoff) await supportService.send({ userId: user.id, sender: 'user', message: `(predaja timu) ${text}`, needsHuman: true }).then(push).catch(() => {})
     } catch { /* assistant is best-effort */ } finally {
       setTyping(false)
     }
@@ -76,12 +95,12 @@ function SupportChat() {
     if (!clean || !user || sending) return
     setSending(true)
     setError('')
+    // once a person replied or the assistant handed over, messages go straight to the team
+    const humanActive = messages.some((item) => item.sender === 'admin' || (item.sender === 'assistant' && item.handoff))
     try {
-      const created = await supportService.send({ userId: user.id, sender: 'user', message: clean })
+      const created = await supportService.send({ userId: user.id, sender: 'user', message: clean, needsHuman: humanActive })
       push(created)
       setDraft('')
-      // only the assistant answers automatically; once a human replied, the thread is theirs
-      const humanActive = messages.some((item) => item.sender === 'admin')
       if (!humanActive) assistantReply(clean)
     } catch (requestError) {
       setError(requestError.message)
@@ -89,6 +108,8 @@ function SupportChat() {
       setSending(false)
     }
   }
+
+  if (!onHelpPage) return null
 
   return (
     <div className="support-chat">
@@ -122,10 +143,11 @@ function SupportChat() {
                     {QUICK.map(([label, text]) => <button key={label} type="button" onClick={() => send(text)}>{label}</button>)}
                   </div>
                 )}
-                {messages.map((item) => (
+                {messages.filter((item) => !item.message.startsWith('(predaja timu)')).map((item) => (
                   <div key={item.id} className={`support-bubble ${item.sender === 'user' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>
                     {item.sender !== 'user' && <small>{item.sender === 'assistant' ? 'Poso asistent' : 'Poso.ba tim'} · {timeLabel(item.created_at)}</small>}
                     {item.message}
+                    {item.handoff && <span className="support-handoff"><LifeBuoy size={12} /> Tim je obaviješten</span>}
                   </div>
                 ))}
                 {typing && <div className="support-bubble from-admin support-typing"><span /><span /><span /></div>}

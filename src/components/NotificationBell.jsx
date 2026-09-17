@@ -43,7 +43,7 @@ function NotificationBell() {
       setItems((current) => current.map((row) => (row.id === item.id ? { ...row, read_at: new Date().toISOString() } : row)))
     }
     if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
-    else if (item.type === 'support_reply') window.dispatchEvent(new CustomEvent('poso:open-support'))
+    else if (item.type === 'support_reply') navigate('/pomoc?chat=1')
     else navigate('/account/obavijesti')
   }
 

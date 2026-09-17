@@ -107,3 +107,10 @@ create policy "support_messages_admin_update" on public.support_messages for upd
 -- Support assistant (migration support_assistant_sender): support_messages.sender also allows
 -- 'assistant' — the in-app helper writes its automatic answers into the user's own thread
 -- (user insert policy: sender in ('user','assistant')). Only 'user' messages ping the staff.
+
+-- AI live support (migration support_ai_handoff):
+--   support_messages.needs_human (staff pinged only when true) + handoff (assistant handed the thread over)
+--   on_support_message_notify(): user messages ping staff only when needs_human
+--   support_handoff(user, summary): called by the support-assistant Edge Function (service role) — notifies staff + external ping
+-- Edge Function support-assistant (verify_jwt=false, user JWT): Claude answers from the help articles in Bosnian,
+-- returns {reply, handoff, summary}; needs ANTHROPIC_API_KEY (optional SUPPORT_MODEL). Without it the widget uses the keyword matcher.

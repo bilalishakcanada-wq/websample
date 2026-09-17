@@ -1,10 +1,11 @@
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Clock, Mail, MessageCircle, ShieldAlert } from 'lucide-react'
 import InfoLayout from '../components/InfoLayout'
 import ContactForm from '../components/ContactForm'
 
 function ContactPage() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   return (
     <InfoLayout
       eyebrow="Kontakt"
@@ -23,7 +24,7 @@ function ContactPage() {
             <Mail size={20} /><strong>Email</strong>
             <p><a href="mailto:podrska@poso.ba">podrska@poso.ba</a></p>
           </div>
-          <button type="button" className="info-card info-card-button" onClick={() => window.dispatchEvent(new CustomEvent('poso:open-support'))}>
+          <button type="button" className="info-card info-card-button" onClick={() => navigate('/pomoc?chat=1')}>
             <MessageCircle size={20} /><strong>Live chat</strong>
             <p>Klikni i otvori razgovor s podrškom u dnu ekrana.</p>
           </button>

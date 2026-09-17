@@ -11703,3 +11703,4 @@ body:has(.profile-cta-bar) .support-chat {
   .help-art { display: none; }
   .help-hero { padding: 44px 16px 40px; }
 }
+.support-handoff { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent-strong); font-size: 0.68rem; font-weight: 800; }

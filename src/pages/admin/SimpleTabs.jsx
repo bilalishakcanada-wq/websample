@@ -131,7 +131,7 @@ export function ModerationTab() {
           <div className="admin-queue-item">
             <a href={item.media_url} target="_blank" rel="noreferrer"><img src={item.media_url} alt="" /></a>
             <div>
-              <strong>{item.kind === 'avatar' ? 'Profilna slika' : 'Portfolio'}</strong>
+              <strong>{{ avatar: 'Profilna slika', portfolio: 'Portfolio', listing: 'Slika oglasa' }[item.kind] || item.kind}</strong>
               <p className="muted-text">{formatBosnianDate(item.created_at)} · pokušaja: {item.attempts}{item.result?.reason ? ` · ${item.result.reason}` : ''}</p>
             </div>
           </div>
@@ -236,7 +236,7 @@ export function SupportTab() {
             </div>
             <div className="support-chat-messages admin-messages">
               {messages.map((item) => (
-                <div key={item.id} className={`support-bubble ${item.sender === 'admin' ? 'from-user' : 'from-admin'}`}>{item.message}</div>
+                <div key={item.id} className={`support-bubble ${item.sender === 'admin' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>{item.sender === 'assistant' && <small>Poso asistent (automatski)</small>}{item.message}</div>
               ))}
             </div>
             <form className="support-chat-form" onSubmit={sendReply}>

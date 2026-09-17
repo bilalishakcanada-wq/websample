@@ -11641,3 +11641,65 @@ body:has(.profile-cta-bar) .support-chat {
 .task-card-photo { position: relative; width: 96px; height: 96px; border-radius: 14px; overflow: hidden; background: var(--surface-soft); grid-row: span 2; }
 .task-card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .task-card-photo span { position: absolute; right: 6px; bottom: 6px; padding: 0.1rem 0.4rem; border-radius: 999px; background: rgba(8, 27, 56, 0.75); color: white; font-size: 0.68rem; font-weight: 800; }
+
+/* =========================================================================
+   Help centre + support assistant
+   ========================================================================= */
+.help-page { padding-bottom: 60px; }
+.help-hero { position: relative; overflow: hidden; padding: 64px 16px 56px; background: radial-gradient(800px 300px at 50% 120%, rgba(245, 180, 0, 0.18), transparent 60%), linear-gradient(180deg, #0b2247, #0d2a52); color: white; text-align: center; }
+.help-art { position: absolute; top: 50%; width: 280px; transform: translateY(-50%); opacity: 0.9; pointer-events: none; }
+.help-art-left { left: max(0px, calc(50% - 720px)); }
+.help-art-right { right: max(0px, calc(50% - 720px)); }
+.help-hero-inner { position: relative; max-width: 720px; margin: 0 auto; display: grid; gap: 16px; justify-items: center; }
+.help-eyebrow { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.help-hero h1 { margin: 0; color: white; font-size: clamp(2rem, 5vw, 3.2rem); }
+.help-hero-search { display: flex; align-items: center; gap: 10px; width: 100%; padding: 0 18px; height: 60px; border-radius: 999px; background: white; color: var(--text-soft); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); }
+.help-hero-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 1rem; color: var(--text); }
+.help-hero-search button { width: 30px; height: 30px; border-radius: 50%; background: var(--surface-soft); color: var(--text); font-size: 1.1rem; }
+.help-body { display: grid; gap: 36px; padding-top: 36px; }
+.help-audiences { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.help-audience { display: grid; gap: 4px; padding: 26px 20px; border-radius: 18px; border: 2px solid var(--primary); background: var(--surface); color: var(--primary); text-align: center; transition: background 0.15s ease, transform 0.15s ease; }
+.help-audience strong { font-family: var(--font-display); font-stretch: 88%; font-size: 1.25rem; }
+.help-audience span { font-size: 0.82rem; color: var(--text-soft); }
+.help-audience:hover { transform: translateY(-2px); }
+.help-audience.active { background: var(--primary); color: white; }
+.help-audience.active span { color: rgba(255, 255, 255, 0.75); }
+.help-section h2 { margin: 0 0 14px; font-size: 1.35rem; }
+.help-popular { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.help-popular-card { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--stroke); text-align: left; font-weight: 700; color: var(--text); }
+.help-popular-card span { flex: 1; }
+.help-popular-card svg:first-child { color: var(--primary); }
+.help-popular-card:hover { border-color: var(--primary); }
+.help-empty { text-align: center; padding: 30px; border-radius: 18px; background: var(--surface); }
+.help-empty .primary-button { display: inline-flex; gap: 8px; margin-top: 10px; }
+.help-contact { display: grid; gap: 20px; padding-top: 24px; border-top: 1px solid var(--stroke); }
+.help-contact-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.help-contact-card { display: grid; gap: 6px; justify-items: start; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--stroke); text-align: left; color: var(--text); }
+.help-contact-card strong { font-size: 1.02rem; }
+.help-contact-card > span:last-child { font-size: 0.82rem; color: var(--text-soft); }
+.help-contact-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--primary); color: var(--accent); }
+.help-contact-card:hover { border-color: var(--primary); }
+
+.support-chat-panel { width: min(92vw, 380px); max-height: min(78vh, 600px); }
+.support-chat-who { display: flex; align-items: center; gap: 10px; }
+.support-chat-who > span:last-child { display: grid; gap: 1px; line-height: 1.2; }
+.support-chat-who small { font-weight: 600; font-size: 0.7rem; color: rgba(255, 255, 255, 0.65); }
+.support-avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--primary-strong); flex: 0 0 auto; }
+.support-bubble small { display: block; margin-bottom: 3px; font-size: 0.68rem; font-weight: 800; color: var(--text-soft); }
+.support-bubble-assistant { white-space: pre-line; border-left: 3px solid var(--accent); }
+.support-quick { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+.support-quick button { padding: 0.4rem 0.75rem; border-radius: 999px; background: var(--surface); border: 1px solid var(--primary); color: var(--primary); font-size: 0.78rem; font-weight: 700; }
+.support-quick button:hover { background: var(--primary); color: white; }
+.support-typing { display: inline-flex; gap: 4px; padding: 12px 14px; }
+.support-typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-soft); animation: support-dot 1.2s ease-in-out infinite; }
+.support-typing span:nth-child(2) { animation-delay: 0.2s; }
+.support-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes support-dot { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+.support-chat-foot { padding: 4px 14px 0; }
+.support-help-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 700; color: var(--text-soft); }
+
+@media (max-width: 800px) {
+  .help-audiences, .help-contact-cards, .help-popular { grid-template-columns: 1fr; }
+  .help-art { display: none; }
+  .help-hero { padding: 44px 16px 40px; }
+}

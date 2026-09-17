@@ -103,3 +103,7 @@ create policy "support_messages_admin_update" on public.support_messages for upd
 -- insert into public.user_roles (user_id, role_id)
 -- select '<YOUR-USER-ID-HERE>', id from public.roles where name = 'ADMIN'
 -- on conflict (user_id, role_id) do nothing;
+
+-- Support assistant (migration support_assistant_sender): support_messages.sender also allows
+-- 'assistant' — the in-app helper writes its automatic answers into the user's own thread
+-- (user insert policy: sender in ('user','assistant')). Only 'user' messages ping the staff.

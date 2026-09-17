@@ -260,7 +260,7 @@ function Activity({ userId, dossier }) {
       <section className="dossier-card dossier-card-wide">
         <h3>Podrška ({dossier.stats?.support_messages} poruka)</h3>
         {(dossier.support || []).length === 0 && <p className="muted-text">Nije pisao podršci.</p>}
-        {(dossier.support || []).map((item) => <div key={item.id} className="admin-mini-row"><span>[{item.sender === 'admin' ? 'tim' : 'korisnik'}] {item.message}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
+        {(dossier.support || []).map((item) => <div key={item.id} className="admin-mini-row"><span>[{item.sender === 'admin' ? 'tim' : item.sender === 'assistant' ? 'asistent' : 'korisnik'}] {item.message}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
       </section>
     </div>
   )

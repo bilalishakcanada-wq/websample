@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
   BadgeCheck,
-  Bell,
   Check,
   MapPin,
   MessageCircle,
@@ -18,6 +17,7 @@ import {
 import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../data/mockData'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import TrustArt from '../components/TrustArt'
+import EarnArt from '../components/EarnArt'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import { useLiveListings } from '../hooks/useLiveListings'
 import CityPicker from '../components/CityPicker'
@@ -477,18 +477,8 @@ function HomePage() {
             </button>
           </div>
           <div className="boss-band-visual">
-            <div className="boss-band-visual-image">
-              <img src="/images/categories/construction.jpg" alt="Izvođač na poslu" loading="lazy" />
-            </div>
-            <div className="float-card float-card-payment">
-              <Wallet size={16} />
-              <div>
-                <strong>Isplata primljena!</strong>
-                <span>Krečenje stana · 220 KM</span>
-              </div>
-            </div>
-            <div className="float-pill float-pill-alert">
-              <Bell size={13} /> Novi posao!
+            <div className="boss-band-visual-image boss-band-art">
+              <EarnArt />
             </div>
           </div>
         </section>

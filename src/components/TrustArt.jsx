@@ -6,7 +6,6 @@ const GOLD_DARK = '#d99900'
 const SKIN = '#f3c9a6'
 const SKIN_2 = '#d9a67c'
 const WHITE = '#ffffff'
-const MINT = '#2f9e5f'
 
 const STAR = 'M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z'
 

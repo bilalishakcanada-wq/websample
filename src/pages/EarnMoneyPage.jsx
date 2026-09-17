@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Banknote, ChevronDown, MessageCircle, ShieldCheck, Star, Wallet } from 'lucide-react'
+import { ArrowRight, Banknote, ChevronDown, MessageCircle, ShieldCheck, Star } from 'lucide-react'
 import { contactService } from '../services/contactService'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import EarnArt from '../components/EarnArt'
@@ -62,7 +62,6 @@ function EarnMoneyPage() {
         </div>
         <div className="earn-stage-photo earn-stage-art">
           <EarnArt />
-          <div className="earn-stage-pill"><Wallet size={15} /> Isplata primljena · Krečenje stana · 220 KM</div>
         </div>
       </section>
 

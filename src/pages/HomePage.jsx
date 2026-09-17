@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../data/mockData'
 import { useLocalStorage } from '../hooks/useLocalStorage'
+import TrustArt from '../components/TrustArt'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
 import { useLiveListings } from '../hooks/useLiveListings'
 import CityPicker from '../components/CityPicker'
@@ -301,17 +302,7 @@ function HomePage() {
 
         <section className="trust-section reveal">
           <div className="trust-visual">
-            <img src="/images/categories/home.jpg" alt="Zadovoljan korisnik Poso.ba" loading="lazy" />
-            <div className="float-card float-card-payment">
-              <BadgeCheck size={16} />
-              <div>
-                <strong>Posao završen!</strong>
-                <span>Ocjena data · 5.0</span>
-              </div>
-            </div>
-            <div className="float-pill float-pill-alert">
-              <ShieldCheck size={13} /> Profil verifikovan
-            </div>
+            <TrustArt />
           </div>
           <div>
             <span className="eyebrow small-eyebrow">Sigurnost i povjerenje</span>

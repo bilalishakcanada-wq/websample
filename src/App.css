@@ -3911,12 +3911,14 @@ select {
   position: relative;
 }
 
-.trust-visual img {
+.trust-visual img,
+.trust-visual .trust-art {
   width: 100%;
   border-radius: 26px;
   aspect-ratio: 4 / 5;
   object-fit: cover;
   box-shadow: var(--shadow);
+  display: block;
 }
 
 .trust-visual .float-card {

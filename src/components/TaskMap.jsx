@@ -46,6 +46,11 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
 
     map.on('load', () => {
+      // credits stay reachable behind the small ⓘ button (licence requires them), but start collapsed
+      containerRef.current?.querySelectorAll('.maplibregl-ctrl-attrib').forEach((el) => {
+        el.classList.remove('maplibregl-compact-show')
+        el.removeAttribute('open')
+      })
       map.addSource('tasks', {
         type: 'geojson',
         data: toGeoJSON([]),

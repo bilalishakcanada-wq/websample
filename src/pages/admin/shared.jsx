@@ -12,11 +12,12 @@ export const ACTION_LABEL = { masked: 'Maskirano', removed: 'Uklonjeno', flagged
 export const QUEUE_LABEL = { pending: 'Čeka AI pregled', clean: 'Čisto', flagged: 'Uklonjeno', error: 'Greška', unconfigured: 'Čeka API ključ' }
 export const STAFF_ACTION_LABEL = {
   wallet_adjust: 'Balans',
+  job_resolve: 'Riješen spor oko uplate',
   suspend: 'Suspenzija', lift: 'Ukinuta suspenzija', redact: 'Uklonjen sadržaj', badge_grant: 'Dodijeljena značka', badge_revoke: 'Uklonjena značka',
   badge_save: 'Značka sačuvana', badge_delete: 'Značka obrisana', moderator_grant: 'Postao moderator', moderator_revoke: 'Uklonjen moderator',
   admin_grant: 'Postao admin', admin_revoke: 'Uklonjen admin',
 }
-export const WALLET_KIND_LABEL = { admin_credit: 'Uplata (tim)', admin_debit: 'Skidanje (tim)', bonus: 'Bonus', refund: 'Povrat', fee: 'Naknada', payout: 'Isplata', purchase: 'Uplata', promo: 'Promocija' }
+export const WALLET_KIND_LABEL = { admin_credit: 'Uplata (tim)', admin_debit: 'Skidanje (tim)', bonus: 'Bonus', refund: 'Povrat', fee: 'Naknada', payout: 'Isplata', purchase: 'Uplata', promo: 'Promocija', escrow_hold: 'Osigurana uplata za posao', escrow_refund: 'Povrat osigurane uplate', job_income: 'Zarada od posla' }
 export const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
 export const VERIFICATION_LABEL = { identity: 'Lična karta / pasoš', police_check: 'Uvjerenje o nekažnjavanju', licence: 'Licenca', trade: 'Struka' }

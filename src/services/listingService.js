@@ -24,7 +24,7 @@ export const listingService = {
       .from('listings')
       .select('*, listing_tags(tag_id, tags(name)), listing_images(id, url, position)')
       .eq('id', id)
-      .in('status', ['published', 'completed'])
+      .in('status', ['published', 'assigned', 'completed', 'cancelled'])
       .maybeSingle()
 
     if (error) {
@@ -88,8 +88,10 @@ export const listingService = {
     let query = supabase
       .from('listings')
       .select('*, listing_tags(tag_id, tags(name)), bids(count), listing_images(url, position)', { count: 'exact' })
-      .eq('status', status)
       .range(from, to)
+    // an owner's dashboard shows every live job (open, assigned, done); everyone else only open ones
+    query = ownerId && status === 'published' ? query.in('status', ['published', 'assigned', 'completed', 'cancelled']) : query.eq('status', status)
+    query = query
       .order(orderColumn, { ascending, nullsFirst: false })
 
     const safeSearch = sanitizeText(search).slice(0, 80).replace(/[%_(),]/g, '')

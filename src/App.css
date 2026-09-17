@@ -11765,3 +11765,67 @@ body:has(.profile-cta-bar) .support-chat {
 .credits-preview.remove strong { color: #b93c3c; }
 .credits-balance { font-family: var(--font-display); font-stretch: 88%; font-size: 1.6rem; color: var(--primary-strong); display: block; }
 @media (max-width: 900px) { .wallet-stats, .wallet-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* =========================================================================
+   Poso.ba Pay — accept sheet, job payment card, admin escrow
+   ========================================================================= */
+.pay-sheet { display: grid; gap: 14px; }
+.pay-sheet-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+.pay-sheet-head h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.pay-sheet-head p { margin: 0; font-size: 0.85rem; }
+.pay-sheet-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--primary); color: var(--accent); }
+.pay-breakdown { display: grid; gap: 0; border-radius: 14px; border: 1px solid var(--stroke); overflow: hidden; }
+.pay-breakdown > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--stroke); font-size: 0.9rem; }
+.pay-breakdown > div:last-child { border-bottom: none; }
+.pay-breakdown span { color: var(--text-soft); }
+.pay-breakdown-total { background: var(--surface-soft); }
+.pay-breakdown-total strong { font-family: var(--font-display); font-stretch: 88%; font-size: 1.15rem; color: var(--primary-strong); }
+.pay-breakdown .is-short { color: #b93c3c; }
+.pay-note { display: flex; gap: 6px; align-items: flex-start; margin: 0; font-size: 0.84rem; line-height: 1.5; }
+.pay-note svg { flex: 0 0 auto; margin-top: 3px; color: #2f9e5f; }
+.pay-short { display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: #fff1cc; border: 1px solid #f3d17a; font-size: 0.84rem; }
+.pay-short svg { flex: 0 0 auto; color: #a16207; margin-top: 2px; }
+.pay-short > div { display: grid; gap: 2px; }
+.pay-sheet-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.pay-sheet-actions .primary-button { display: inline-flex; gap: 8px; }
+.pay-fine { display: flex; gap: 6px; align-items: center; margin: 0; font-size: 0.74rem; color: var(--text-soft); }
+
+.pay-card { border-color: rgba(13, 42, 82, 0.2); background: linear-gradient(180deg, #fbfcff, var(--surface)); }
+.pay-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.pay-card-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.pay-card .pay-breakdown { margin: 14px 0 10px; }
+.pay-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; list-style: none; margin: 0; padding: 0; position: relative; }
+.pay-step { display: grid; justify-items: center; gap: 6px; text-align: center; position: relative; }
+.pay-step::before { content: ''; position: absolute; top: 16px; left: -50%; width: 100%; height: 3px; background: var(--stroke); z-index: 0; }
+.pay-step:first-child::before { display: none; }
+.pay-step.done::before { background: #2f9e5f; }
+.pay-step.active::before { background: linear-gradient(90deg, #2f9e5f, var(--accent)); }
+.pay-step-dot { position: relative; z-index: 1; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-soft); color: var(--text-soft); border: 2px solid var(--stroke); }
+.pay-step.done .pay-step-dot { background: #2f9e5f; border-color: #2f9e5f; color: white; }
+.pay-step.active .pay-step-dot { background: var(--accent); border-color: var(--accent); color: var(--primary-strong); box-shadow: 0 0 0 6px var(--accent-soft); }
+.pay-step.off { opacity: 0.35; }
+.pay-step-label { font-size: 0.72rem; font-weight: 800; color: var(--text-soft); }
+.pay-step.done .pay-step-label, .pay-step.active .pay-step-label { color: var(--text); }
+.pay-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.pay-actions .primary-button { display: inline-flex; gap: 8px; }
+.pay-actions .ghost-button.danger { color: #b93c3c; }
+.pay-dispute { display: grid; gap: 8px; margin-top: 12px; }
+.pay-dispute textarea { padding: 0.6rem 0.8rem; border-radius: 10px; border: 1px solid var(--stroke); font: inherit; font-size: 0.88rem; }
+.pay-side { display: inline-flex; align-items: center; gap: 6px; padding: 0.4rem 0.7rem; border-radius: 10px; background: var(--accent-soft); color: var(--accent-strong); font-size: 0.8rem; font-weight: 800; }
+.pay-side.pay-status-released { background: #e3f6e9; color: #1d6b3a; }
+.pay-side.pay-status-refunded { background: var(--surface-soft); color: var(--text-soft); }
+.pill.pay-status-funded, .pay-status-text.pay-status-funded { background: var(--accent-soft); color: var(--accent-strong); }
+.pill.pay-status-requested, .pay-status-text.pay-status-requested { background: #e0f2fe; color: #075985; }
+.pill.pay-status-released, .pay-status-text.pay-status-released { background: #e3f6e9; color: #1d6b3a; }
+.pill.pay-status-refunded, .pay-status-text.pay-status-refunded { background: var(--surface-soft); color: var(--text-soft); }
+.pill.pay-status-disputed, .pay-status-text.pay-status-disputed { background: #fdecec; color: #7a1f1f; }
+.pay-status-text { padding: 0.05rem 0.4rem; border-radius: 999px; font-weight: 800; }
+.pay-how { margin-top: 10px; font-size: 0.8rem; color: var(--text-soft); }
+.pay-how summary { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 800; color: var(--primary); }
+.pay-how ol { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; line-height: 1.45; }
+.pay-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pay-admin-row.is-disputed { border-color: #f5b5b5; background: #fff7f7; }
+.pay-admin-side { display: grid; gap: 6px; justify-items: end; }
+.pay-admin-side b { font-family: var(--font-display); font-stretch: 88%; font-size: 1.05rem; }
+.pay-dispute-text { color: #7a1f1f; display: inline-flex; gap: 4px; align-items: center; }
+@media (max-width: 700px) { .pay-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .pay-step::before { display: none; } .pay-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

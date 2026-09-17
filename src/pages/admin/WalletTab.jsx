@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Coins, Search, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { AlertTriangle, Coins, Lock, Search, TrendingDown, TrendingUp, Users } from 'lucide-react'
 import { adminService } from '../../services/adminService'
+import { paymentService } from '../../services/paymentService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, CreditsDialog, WALLET_KIND_LABEL, formatKM, useStaff } from './shared'
 
@@ -13,8 +14,25 @@ function WalletTab() {
   const [candidates, setCandidates] = useState([])
   const [picked, setPicked] = useState(null)
   const [message, setMessage] = useState('')
+  const [jobs, setJobs] = useState(null)
 
-  const load = () => adminService.walletOverview(150).then(setData).catch((requestError) => setError(requestError.message))
+  const load = () => Promise.all([
+    adminService.walletOverview(150).then(setData),
+    paymentService.adminOverview(150).then(setJobs),
+  ]).catch((requestError) => setError(requestError.message))
+
+  const resolve = async (row, action) => {
+    let share = null
+    if (action === 'split') {
+      const answer = window.prompt(`Koliko KM ide izvođaču (od ${row.amount} KM)? Ostatak se vraća klijentu.`, String(Math.round(row.amount / 2)))
+      if (answer === null) return
+      share = Number(answer.replace(',', '.'))
+      if (!(share >= 0 && share <= Number(row.amount))) { setError('Iznos mora biti između 0 i cijene posla.'); return }
+    } else if (!window.confirm(action === 'release' ? `Osloboditi ${row.amount} KM izvođaču ${row.provider_name}?` : `Vratiti ${row.amount} KM klijentu ${row.client_name}?`)) return
+    const note = window.prompt('Kratka odluka (vide je obje strane):', action === 'release' ? 'Tim: posao je urađen, isplata izvođaču' : action === 'refund' ? 'Tim: posao nije urađen, povrat klijentu' : 'Tim: podjela iznosa') || null
+    setError('')
+    try { await paymentService.adminResolve(row.listing_id, action, share, note); setMessage('Spor je riješen.'); load() } catch (requestError) { setError(requestError.message) }
+  }
   useEffect(() => { load() }, [])
 
   const search = async (event) => {
@@ -75,6 +93,43 @@ function WalletTab() {
           ))}
         </section>
       </div>
+
+      {jobs && (
+        <section className="dossier-card">
+          <h3><Lock size={16} /> Poso.ba Pay — osigurane uplate</h3>
+          <div className="wallet-kpis">
+            <div className="wallet-kpi main"><Lock size={18} /><strong>{formatKM(jobs.held)}</strong><span>trenutno osigurano (escrow)</span></div>
+            <div className="wallet-kpi"><AlertTriangle size={18} /><strong>{jobs.disputed}</strong><span>otvorenih sporova</span></div>
+            <div className="wallet-kpi"><TrendingUp size={18} /><strong>{formatKM(jobs.released_30d)}</strong><span>isplaćeno u 30 dana</span></div>
+            <div className="wallet-kpi"><Coins size={18} /><strong>{formatKM(jobs.fees_30d)}</strong><span>naknade platforme · 30 d (ukupno {formatKM(jobs.fees_total)})</span></div>
+          </div>
+          {(jobs.rows || []).length === 0 && <p className="muted-text">Još nema plaćanja kroz platformu.</p>}
+          {(jobs.rows || []).map((row) => (
+            <div key={row.id} className={`wallet-row pay-admin-row ${row.status === 'disputed' ? 'is-disputed' : ''}`}>
+              <span className={`wallet-sign ${row.status === 'released' ? 'plus' : row.status === 'disputed' ? 'minus' : ''}`}><Lock size={15} /></span>
+              <div>
+                <strong><a href={`/listings/${row.listing_id}`} target="_blank" rel="noreferrer">{row.title}</a> <span className={`pill pay-status-${row.status}`}>{{ funded: 'Osigurano', requested: 'Čeka oslobađanje', released: 'Isplaćeno', refunded: 'Vraćeno', disputed: 'SPOR' }[row.status]}</span></strong>
+                <small>
+                  klijent <button type="button" className="adm-userlink" onClick={() => openUser(row.client_id)}>{row.client_name}</button> → izvođač <button type="button" className="adm-userlink" onClick={() => openUser(row.provider_id)}>{row.provider_name}</button>
+                  {' · '}naknada {row.fee_percent} % ({formatKM(row.fee_amount)}) · izvođaču {formatKM(row.net_amount)} · {formatBosnianDate(row.released_at || row.refunded_at || row.requested_at || row.funded_at)}
+                </small>
+                {row.status === 'disputed' && <small className="pay-dispute-text"><AlertTriangle size={12} /> {row.dispute_by === 'client' ? 'Klijent' : 'Izvođač'}: „{row.dispute_reason}“</small>}
+                {row.resolution && <small>Odluka: {row.resolution}</small>}
+              </div>
+              <div className="pay-admin-side">
+                <b>{formatKM(row.amount)}</b>
+                {['disputed', 'funded', 'requested'].includes(row.status) && (
+                  <div className="admin-row-actions">
+                    <button type="button" className="ghost-button" onClick={() => resolve(row, 'release')}>Izvođaču</button>
+                    <button type="button" className="ghost-button" onClick={() => resolve(row, 'refund')}>Klijentu</button>
+                    <button type="button" className="ghost-button" onClick={() => resolve(row, 'split')}>Podijeli</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       <section className="dossier-card">
         <h3>Sve transakcije</h3>

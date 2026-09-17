@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
@@ -12,6 +12,8 @@ import { useAuth } from '../context/AuthContext'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
+import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
+import { paymentService } from '../services/paymentService'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -74,6 +76,8 @@ function ListingDetailPage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
   const [submittingReview, setSubmittingReview] = useState(false)
   const [lightbox, setLightbox] = useState(null)
+  const [payment, setPayment] = useState(null)
+  const [acceptBid, setAcceptBid] = useState(null)
   const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])
 
   const share = async () => {
@@ -93,6 +97,7 @@ function ListingDetailPage() {
         setListing(result)
         setBids(listingBids)
         if (result) {
+          paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
           setRelated(await listingService.listRelated({ id, category: result.category, location: result.location }))
           profileService.getPublicProfile(result.user_id).then((profile) => active && setPoster(profile)).catch(() => {})
         }
@@ -103,6 +108,18 @@ function ListingDetailPage() {
   }, [id])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+
+  // the other side moves the job forward -> refresh payment + bids + listing status
+  const refreshJob = async () => {
+    const [row, fresh, listingBids] = await Promise.all([paymentService.forListing(id), listingService.getById(id), bidService.listForListing(id)])
+    setPayment(row)
+    if (fresh) setListing(fresh)
+    setBids(listingBids)
+  }
+  useEffect(() => {
+    if (!user || !id) return undefined
+    return paymentService.subscribe(id, () => { refreshJob().catch(() => {}) })
+  }, [user, id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isOwner || !id) return undefined
@@ -174,7 +191,7 @@ function ListingDetailPage() {
     setSubmittingReview(true)
     setMessage('')
     try {
-      await reviewService.createReview({ reviewerId: user.id, revieweeId: listing.user_id, listingId: id, rating: reviewForm.rating, comment: reviewForm.comment })
+      await reviewService.createReview({ reviewerId: user.id, revieweeId: isOwner ? acceptedBid.bidder_id : listing.user_id, listingId: id, rating: reviewForm.rating, comment: reviewForm.comment })
       setReviewForm({ rating: 5, comment: '' })
       setMessage('Hvala na recenziji!')
     } catch (requestError) {
@@ -207,6 +224,11 @@ function ListingDetailPage() {
   }
 
   const setBidStatus = async (bidId, status) => {
+    if (status === 'accepted') {
+      const bid = bids.find((item) => item.id === bidId)
+      if (bid) setAcceptBid(bid)
+      return
+    }
     try {
       const updated = await bidService.setStatus(bidId, status)
       setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : status === 'accepted' && item.id !== updated.id && item.status === 'pending' ? item : item)))
@@ -244,6 +266,8 @@ function ListingDetailPage() {
               <div className="job-chips">
                 <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
                 {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
+                {listing.status === 'assigned' && <span className="pill pill-gold"><Lock size={12} /> Izvođač odabran · uplata osigurana</span>}
+                {listing.status === 'cancelled' && <span className="pill pill-danger">Otkazan</span>}
                 {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
                 {listing.status === 'published' && !acceptedBid && <span className="pill pill-ok">Otvoren za ponude</span>}
               </div>
@@ -261,6 +285,10 @@ function ListingDetailPage() {
               <p className="job-description">{descriptionBody?.trim() || 'Vlasnik oglasa nije dodao detaljan opis.'}</p>
               {tags.length > 0 && <div className="tag-list job-tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>}
             </section>
+
+            {payment && (isOwner || user?.id === payment.provider_id) && (
+              <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} onChanged={refreshJob} />
+            )}
 
             <section className="job-card">
               <h2>Detalji</h2>
@@ -293,7 +321,7 @@ function ListingDetailPage() {
                         <b>{formatPrice(bid.amount)}</b>
                         {isOwner && bid.status === 'pending' && (
                           <div className="bid-owner-actions">
-                            <button type="button" className="ghost-button" onClick={() => setBidStatus(bid.id, 'accepted')}><CheckCircle2 size={16} /> Prihvati</button>
+                            <button type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
                             <button type="button" className="ghost-button danger-button" onClick={() => setBidStatus(bid.id, 'rejected')}><XCircle size={16} /> Odbij</button>
                           </div>
                         )}
@@ -338,7 +366,7 @@ function ListingDetailPage() {
               </section>
             )}
 
-            {user && !isOwner && listing.status === 'completed' && acceptedBid?.bidder_id === user.id && (
+            {user && listing.status === 'completed' && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
               <section className="job-card">
                 <h2>Ostavi recenziju</h2>
                 <form className="auth-form" onSubmit={submitReview}>
@@ -372,7 +400,7 @@ function ListingDetailPage() {
               {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
                 <Link to="/messages" className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
               )}
-              {isOwner && acceptedBid && listing.status === 'published' && (
+              {isOwner && acceptedBid && !payment && listing.status === 'published' && (
                 <div className="outcome-actions">
                   <button type="button" className="primary-button full-width" onClick={() => setOutcome('completed')} disabled={outcomeBusy}><CheckCircle2 size={16} /> Posao završen</button>
                   <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
@@ -380,7 +408,9 @@ function ListingDetailPage() {
               )}
               {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
               {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
-              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje i dogovor idu kroz Poso.ba — kontakt se otključava tek kad je ponuda prihvaćena.</p>
+              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Poso.ba`}</div>}
+              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Poso.ba Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
+              {!payment && <HowPaymentWorks />}
             </div>
 
             <Link to={`/korisnik/${listing.user_id}`} className="job-poster">
@@ -399,6 +429,9 @@ function ListingDetailPage() {
 
       {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
 
+      {acceptBid && (
+        <AcceptOfferSheet bid={acceptBid} providerName={acceptBid.bidder?.display_name} onClose={() => setAcceptBid(null)} onDone={async () => { await refreshJob(); setMessage('Ponuda je prihvaćena i uplata je osigurana. Izvođač je obaviješten.') }} />
+      )}
       {lightbox != null && images[lightbox] && (
         <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
           <button type="button" className="lightbox-close" aria-label="Zatvori"><X size={22} /></button>

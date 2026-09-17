@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, Coins, Gift, Info, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Coins, Gift, Info, Lock, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 
@@ -13,6 +13,9 @@ const KIND = {
   fee: ['Naknada za posao', Receipt],
   purchase: ['Uplata', Receipt],
   payout: ['Isplata', ArrowUpRight],
+  escrow_hold: ['Osigurana uplata za posao', Lock],
+  escrow_refund: ['Povrat osigurane uplate', RefreshCcw],
+  job_income: ['Zarada od posla', Coins],
 }
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -52,7 +55,7 @@ function WalletPage() {
 
       <div className="wallet-info">
         <Info size={16} />
-        <span>Ovo je tvoj novac na Poso.ba. Iz balansa se naplaćuje naknada kad se posao završi, a uplate, bonuse i povrate dodaje Poso.ba tim. Uplata karticom i isplata na račun stižu sa Poso.ba Pay. <Link to="/nivoi">Kako rade naknade →</Link></span>
+        <span>Ovo je tvoj novac na Poso.ba. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Uplate, bonuse i povrate dodaje Poso.ba tim; uplata karticom i isplata na račun stižu uskoro. <Link to="/nivoi">Kako rade naknade →</Link></span>
       </div>
 
       <div className="wallet-list-head">

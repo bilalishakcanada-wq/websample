@@ -45,6 +45,7 @@ function NotificationBell() {
     if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
     else if (item.type === 'support_reply') navigate('/pomoc?chat=1')
     else if (item.type === 'wallet') navigate('/account/novcanik')
+    else if (item.type === 'job') navigate('/account/placanja')
     else navigate('/account/obavijesti')
   }
 

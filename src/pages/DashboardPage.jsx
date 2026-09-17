@@ -8,6 +8,9 @@ import { formatBosnianDate } from '../utils/dateFormat'
 
 const STATUS_LABELS = {
   published: 'Objavljen',
+  assigned: 'Izvođač odabran · plaćeno',
+  completed: 'Završen',
+  cancelled: 'Otkazan',
   draft: 'Nacrt',
   paused: 'Pauziran',
   closed: 'Zatvoren',

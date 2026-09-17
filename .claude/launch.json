@@ -18,7 +18,8 @@
         "vite",
         "--port",
         "54971",
-        "--strictPort"
+        "--strictPort",
+        "--host"
       ],
       "port": 54971
     }

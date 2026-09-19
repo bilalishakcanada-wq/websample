@@ -71,14 +71,15 @@ create trigger on_message_notify after insert on public.messages for each row ex
 -- ---------- new offer -> notification for the job owner; accepted -> for the bidder ----------
 create or replace function public.on_bid_notify()
 returns trigger language plpgsql security definer set search_path = public as $$
-declare v_owner uuid; v_title text; v_name text;
+declare v_owner uuid; v_title text; v_name text; v_amount text;
 begin
   select user_id, title into v_owner, v_title from public.listings where id = new.listing_id;
+  v_amount := case when new.amount is null then '?' else rtrim(rtrim(new.amount::text, '0'), '.') end;
   if TG_OP = 'INSERT' then
     if v_owner is null or v_owner = new.bidder_id then return new; end if;
     select public.display_name_of(full_name) into v_name from public.profiles where user_id = new.bidder_id;
     insert into public.notifications (user_id, type, title, message, link, dedupe_key)
-    values (v_owner, 'offer', 'Nova ponuda: ' || coalesce(new.amount::text, '?') || ' KM', coalesce(v_name, 'Izvođač') || ' · ' || coalesce(v_title, ''), '/listings/' || new.listing_id::text, 'bid:' || new.id::text);
+    values (v_owner, 'offer', 'Nova ponuda: ' || v_amount || ' KM', coalesce(v_name, 'Izvođač') || ' · ' || coalesce(v_title, ''), '/listings/' || new.listing_id::text, 'bid:' || new.id::text);
   elsif TG_OP = 'UPDATE' and new.status = 'accepted' and old.status is distinct from 'accepted' then
     insert into public.notifications (user_id, type, title, message, link, dedupe_key)
     values (new.bidder_id, 'offer_accepted', 'Ponuda prihvaćena 🎉', coalesce(v_title, 'Posao') || ' — uplata je osigurana, možeš početi.', '/listings/' || new.listing_id::text, 'bidacc:' || new.id::text);

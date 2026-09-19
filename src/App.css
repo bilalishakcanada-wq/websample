@@ -4337,7 +4337,9 @@ button:disabled {
 .auth-shell,
 .dashboard-shell,
 .wizard-shell {
-  animation: page-fade-in 0.34s ease both;
+  /* "backwards": nothing lingers after the fade, so fixed overlays inside a page
+     (offer sheet, lightbox, splash) still stack above the tab bar */
+  animation: page-fade-in 0.34s ease backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5084,7 +5086,7 @@ button:disabled {
   border: 1px solid var(--stroke);
   border-radius: 26px;
   box-shadow: var(--shadow);
-  animation: page-fade-in 0.4s ease both;
+  animation: page-fade-in 0.4s ease backwards;
 }
 
 .profile-hero-avatar {

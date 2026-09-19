@@ -36,7 +36,7 @@ const categoryCards = [
     id: 'something-else',
     name: 'Nešto drugo',
     description: 'Opiši svojim riječima šta ti treba',
-    image: withBase('/images/categories/profile.jpg'),
+    image: withBase('/images/categories/profile.webp'),
     target: '/objavi',
   },
 ]

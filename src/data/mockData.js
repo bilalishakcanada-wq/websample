@@ -1,14 +1,14 @@
 import { withBase } from '../utils/paths'
 export const mockServiceCategories = [
-  { id: 'handyman', name: 'Majstor za sve', icon: 'home', count: 1280, image: withBase('/images/categories/home.jpg'), description: 'Sitne popravke i održavanje doma' },
-  { id: 'cleaning', name: 'Čišćenje', icon: 'sparkles', count: 690, image: withBase('/images/categories/cleaning.jpg'), description: 'Stan, kuća i poslovni prostor' },
-  { id: 'it-support', name: 'IT podrška', icon: 'laptop', count: 960, image: withBase('/images/categories/it.jpg'), description: 'Računari, mreže i tehnička pomoć' },
-  { id: 'design', name: 'Dizajn i kreativne usluge', icon: 'palette', count: 730, image: withBase('/images/categories/design.jpg'), description: 'Logo, grafika i web dizajn' },
-  { id: 'renovation', name: 'Renoviranje i građevinski radovi', icon: 'hammer', count: 840, image: withBase('/images/categories/construction.jpg'), description: 'Adaptacije, zidanje i završni radovi' },
-  { id: 'electrician', name: 'Električar', icon: 'zap', count: 510, image: withBase('/images/categories/electrician.jpg'), description: 'Instalacije, rasvjeta i popravke' },
-  { id: 'moving-transport', name: 'Selidbe i transport', icon: 'truck', count: 380, image: withBase('/images/categories/moving.jpg'), description: 'Pakovanje, prevoz i selidbe' },
-  { id: 'gardening', name: 'Baštovanstvo', icon: 'leaf', count: 320, image: withBase('/images/categories/gardening.jpg'), description: 'Uređenje dvorišta i zelenila' },
-  { id: 'marketing', name: 'Marketing i digitalne usluge', icon: 'monitor', count: 560, image: withBase('/images/categories/marketing.jpg'), description: 'Društvene mreže, oglasi i sadržaj' },
+  { id: 'handyman', name: 'Majstor za sve', icon: 'home', count: 1280, image: withBase('/images/categories/home.webp'), description: 'Sitne popravke i održavanje doma' },
+  { id: 'cleaning', name: 'Čišćenje', icon: 'sparkles', count: 690, image: withBase('/images/categories/cleaning.webp'), description: 'Stan, kuća i poslovni prostor' },
+  { id: 'it-support', name: 'IT podrška', icon: 'laptop', count: 960, image: withBase('/images/categories/it.webp'), description: 'Računari, mreže i tehnička pomoć' },
+  { id: 'design', name: 'Dizajn i kreativne usluge', icon: 'palette', count: 730, image: withBase('/images/categories/design.webp'), description: 'Logo, grafika i web dizajn' },
+  { id: 'renovation', name: 'Renoviranje i građevinski radovi', icon: 'hammer', count: 840, image: withBase('/images/categories/construction.webp'), description: 'Adaptacije, zidanje i završni radovi' },
+  { id: 'electrician', name: 'Električar', icon: 'zap', count: 510, image: withBase('/images/categories/electrician.webp'), description: 'Instalacije, rasvjeta i popravke' },
+  { id: 'moving-transport', name: 'Selidbe i transport', icon: 'truck', count: 380, image: withBase('/images/categories/moving.webp'), description: 'Pakovanje, prevoz i selidbe' },
+  { id: 'gardening', name: 'Baštovanstvo', icon: 'leaf', count: 320, image: withBase('/images/categories/gardening.webp'), description: 'Uređenje dvorišta i zelenila' },
+  { id: 'marketing', name: 'Marketing i digitalne usluge', icon: 'monitor', count: 560, image: withBase('/images/categories/marketing.webp'), description: 'Društvene mreže, oglasi i sadržaj' },
 ]
 
 export const mockTasks = [
@@ -23,7 +23,7 @@ export const mockTasks = [
     rating: 4.9,
     reviews: 42,
     freelance: 'Amina',
-    image: withBase('/images/jobs/elektrika.jpg'),
+    image: withBase('/images/jobs/elektrika.webp'),
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ export const mockTasks = [
     rating: 4.8,
     reviews: 31,
     freelance: 'Mirza',
-    image: withBase('/images/jobs/popravke.jpg'),
+    image: withBase('/images/jobs/popravke.webp'),
   },
   {
     id: 3,
@@ -49,7 +49,7 @@ export const mockTasks = [
     rating: 5.0,
     reviews: 28,
     freelance: 'Lejla',
-    image: withBase('/images/jobs/dizajn.jpg'),
+    image: withBase('/images/jobs/dizajn.webp'),
   },
   {
     id: 4,
@@ -62,7 +62,7 @@ export const mockTasks = [
     rating: 4.7,
     reviews: 54,
     freelance: 'Nedim',
-    image: withBase('/images/jobs/it.jpg'),
+    image: withBase('/images/jobs/it.webp'),
   },
   {
     id: 5,
@@ -75,7 +75,7 @@ export const mockTasks = [
     rating: 4.9,
     reviews: 37,
     freelance: 'Amra',
-    image: withBase('/images/categories/cleaning.jpg'),
+    image: withBase('/images/categories/cleaning.webp'),
   },
   {
     id: 6,
@@ -88,14 +88,14 @@ export const mockTasks = [
     rating: 4.8,
     reviews: 19,
     freelance: 'Denis',
-    image: withBase('/images/categories/moving.jpg'),
+    image: withBase('/images/categories/moving.webp'),
   },
 ]
 
 export const mockProfessionals = [
-  { id: 1, name: 'Amra H.', role: 'Kućni majstor', rate: '45 KM/h', badge: 'Najviši rejting', rating: 4.9, jobs: 156, photo: withBase('/images/providers/amra.jpg') },
-  { id: 2, name: 'Nedim K.', role: 'Web developer', rate: '60 KM/h', badge: 'Na mreži 4h', rating: 4.8, jobs: 98, photo: withBase('/images/providers/nedim.jpg') },
-  { id: 3, name: 'Lejla S.', role: 'Grafički dizajner', rate: '55 KM/h', badge: 'Verified', rating: 5.0, jobs: 64, photo: withBase('/images/providers/lejla.jpg') },
+  { id: 1, name: 'Amra H.', role: 'Kućni majstor', rate: '45 KM/h', badge: 'Najviši rejting', rating: 4.9, jobs: 156, photo: withBase('/images/providers/amra.webp') },
+  { id: 2, name: 'Nedim K.', role: 'Web developer', rate: '60 KM/h', badge: 'Na mreži 4h', rating: 4.8, jobs: 98, photo: withBase('/images/providers/nedim.webp') },
+  { id: 3, name: 'Lejla S.', role: 'Grafički dizajner', rate: '55 KM/h', badge: 'Verified', rating: 5.0, jobs: 64, photo: withBase('/images/providers/lejla.webp') },
 ]
 
 export const mockPlans = [

@@ -6,7 +6,7 @@ import { withBase } from '../utils/paths'
 
 const categoryImage = (category) => {
   const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.jpg')
+  return match?.image || withBase('/images/categories/home.webp')
 }
 
 const shortTag = (category) => {

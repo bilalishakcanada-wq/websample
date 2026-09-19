@@ -7,7 +7,7 @@ const isRealListingId = (id) => /^[0-9a-f-]{36}$/i.test(String(id))
 
 const categoryImage = (category) => {
   const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.jpg')
+  return match?.image || withBase('/images/categories/home.webp')
 }
 
 function ListingCard({ listing, onSave, saved = false }) {

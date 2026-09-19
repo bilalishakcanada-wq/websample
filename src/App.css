@@ -12172,3 +12172,10 @@ button { touch-action: manipulation; }
 .notif-list-open { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; color: var(--text-soft); background: rgba(13, 42, 82, 0.05); margin-left: auto; align-self: center; }
 .notif-list li { align-items: center; }
 @media (prefers-reduced-motion: reduce) { .push-prompt-icon { animation: none; } }
+
+/* phones: the tab bar already has the gold "+" — keep the header to logo, bell and menu */
+@media (max-width: 768px) {
+  .site-header-cta { display: none; }
+  .site-logo-text { display: inline; }
+  body[data-page='objavi'] .site-header-cta { display: none; }
+}

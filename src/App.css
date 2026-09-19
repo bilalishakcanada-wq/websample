@@ -12118,9 +12118,16 @@ button { touch-action: manipulation; }
   .page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .auth-shell, .reveal { animation: none !important; transition: none !important; }
   .earn-art-coin, .earn-art-spark, .admin-live-dot, .hero-star { animation: none !important; }
 }
-/* inside the native app the OS draws the status bar; keep content clear of it */
-.is-native .site-header { padding-top: env(safe-area-inset-top); }
-.is-native .site-header-spacer { height: calc(var(--header-h) + env(safe-area-inset-top)); }
+/* Installed app (iOS home screen / native shell): the status bar overlaps the top,
+   so the header grows by the safe-area inset and everything anchored to it follows. */
+.site-header { padding-top: env(safe-area-inset-top, 0px); height: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+.site-header-spacer { height: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+.site-drawer { top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+.route-loading { top: calc(var(--header-h) + env(safe-area-inset-top, 0px)); }
+@media (max-width: 768px) {
+  .chat-sidebar { height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px) - 84px); }
+  .chat-layout.has-active .chat-main { height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px) - 24px); }
+}
 
 /* =========================================================================
    App polish: toasts, staggered list entrances, live numbers

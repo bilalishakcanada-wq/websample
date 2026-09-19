@@ -11707,11 +11707,27 @@ body:has(.profile-cta-bar) .support-chat {
   .adm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dossier-head { grid-template-columns: auto minmax(0, 1fr); }
   .dossier-actions { grid-column: 1 / -1; justify-content: flex-start; max-width: none; }
+  .dossier-actions .ghost-button, .dossier-actions .primary-button { padding: 0.55rem 0.75rem; font-size: 0.85rem; min-height: 40px; }
   .dossier-grid, .team-grid, .badge-manager-grid, .badge-form-grid { grid-template-columns: 1fr; }
   .dossier-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dossier-kv { grid-template-columns: 1fr; gap: 2px; }
   .adm-user-row { grid-template-columns: auto minmax(0, 1fr); }
   .adm-user-meta { align-items: flex-start; grid-column: 2; }
+
+  /* nothing in the console may widen the phone viewport: rows wrap, long strings break */
+  .adm, .adm-main, .adm-content, .adm-topbar { min-width: 0; max-width: 100%; }
+  .adm-content { overflow-x: clip; padding: 14px; }
+  .admin-table { grid-template-columns: minmax(0, 1fr); }
+  .admin-row { min-width: 0; padding: 12px; }
+  .admin-row > * { min-width: 0; }
+  .admin-feed-main { flex: 1 1 100%; }
+  .admin-row-actions { flex-wrap: wrap; }
+  .admin-snippet, .admin-row p, .admin-row strong, .admin-row span, .adm-user-meta { overflow-wrap: anywhere; }
+  .admin-subtabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .admin-subtabs button { white-space: nowrap; flex: 0 0 auto; }
+  .adm-topbar { flex-wrap: wrap; }
+  .adm-topbar h1 { font-size: 1.35rem; }
+  .adm-kpi strong { font-size: 1.5rem; }
 }
 
 .dossier-head .pill { background: rgba(255, 255, 255, 0.14); color: white; }

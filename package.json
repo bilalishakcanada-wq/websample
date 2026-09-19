@@ -9,9 +9,23 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "start": "NODE_ENV=production node server/index.js"
+    "start": "NODE_ENV=production node server/index.js",
+    "app:sync": "cap sync",
+    "app:ios": "cap open ios",
+    "app:android": "cap open android",
+    "app:assets": "capacitor-assets generate --iconBackgroundColor '#0d2a52' --iconBackgroundColorDark '#0d2a52' --splashBackgroundColor '#0d2a52' --splashBackgroundColorDark '#0d2a52'",
+    "deploy:pages": "./scripts/deploy-pages.sh"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/share": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@marsidev/react-turnstile": "^1.6.1",
     "@supabase/supabase-js": "^2.53.0",
     "cors": "^2.8.5",
@@ -31,6 +45,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",

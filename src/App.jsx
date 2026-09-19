@@ -53,12 +53,14 @@ function LegacyProfileRedirect() {
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import InstallPrompt from './components/InstallPrompt'
+import ScrollToTop from './components/ScrollToTop'
 import MobileNav from './components/MobileNav'
 import SupportChat from './components/SupportChat'
 
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <ScrollToTop />
       <SiteHeader />
       <SupportChat />
       <InstallPrompt />

@@ -11847,3 +11847,59 @@ body:has(.profile-cta-bar) .support-chat {
 .route-loading { position: fixed; top: var(--header-h); left: 0; right: 0; height: 3px; z-index: 90; background: rgba(13, 42, 82, 0.08); overflow: hidden; }
 .route-loading span { position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, var(--accent), var(--primary)); animation: route-bar 1s ease-in-out infinite; }
 @keyframes route-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+
+/* =========================================================================
+   Mobile app feel: fixed tab bar, touch feedback, page transitions
+   ========================================================================= */
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { overscroll-behavior-y: none; }
+button, a { -webkit-touch-callout: none; }
+button { touch-action: manipulation; }
+
+/* every page slides in softly, like a native screen */
+@keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .job-page > .content-container, .auth-shell { animation: page-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* press feedback */
+.primary-button, .ghost-button, .secondary-button, .danger-button, .listing-card, .task-card, .help-audience, .goal-card, .wizard-option, .trade-chip, .check-pill, .mobile-nav-item, .account-nav a, .adm-nav button, .pay-actions button { transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+.primary-button:active, .ghost-button:active, .secondary-button:active, .danger-button:active, .help-audience:active, .goal-card:active, .wizard-option:active, .trade-chip:active, .check-pill:active, .adm-nav button:active, .pay-actions button:active { transform: scale(0.97); }
+.listing-card:active, .task-card:active { transform: scale(0.985); }
+
+/* hover-only effects stay off on touch screens */
+@media (hover: none) {
+  .listing-card:hover, .task-card:hover, .help-audience:hover, .adm-user-row:hover, .job-gallery-main:hover img { transform: none; }
+}
+
+@media (max-width: 768px) {
+  /* iOS zooms into inputs under 16px */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* fixed app tab bar */
+  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; margin: 0; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(13, 42, 82, 0.08); }
+  .mobile-nav-item.active { color: var(--primary); }
+  .mobile-nav-item.active svg { transform: translateY(-1px); }
+  .mobile-nav-item svg { transition: transform 0.2s ease; }
+  #root { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .site-footer { padding-bottom: 24px; }
+  .sticky-offer-button { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
+  .support-chat { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
+  .install-banner { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .sheet-backdrop .offer-sheet, .adm-modal { max-height: calc(100dvh - 24px); }
+
+  /* tighter, app-like spacing */
+  .content-container { padding-left: 14px; padding-right: 14px; }
+  h1 { letter-spacing: -0.015em; }
+  .job-head h1 { font-size: 1.5rem; }
+  .pay-steps { gap: 8px; }
+  .adm-topbar h1 { font-size: 1.35rem; }
+  .dossier-head h2 { font-size: 1.2rem; }
+}
+
+/* less motion for people who asked for it */
+@media (prefers-reduced-motion: reduce) {
+  .page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .auth-shell, .reveal { animation: none !important; transition: none !important; }
+  .earn-art-coin, .earn-art-spark, .admin-live-dot, .hero-star { animation: none !important; }
+}
+/* inside the native app the OS draws the status bar; keep content clear of it */
+.is-native .site-header { padding-top: env(safe-area-inset-top); }
+.is-native .site-header-spacer { height: calc(var(--header-h) + env(safe-area-inset-top)); }

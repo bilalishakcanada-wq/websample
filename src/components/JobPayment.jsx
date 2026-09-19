@@ -4,6 +4,7 @@ import { AlertTriangle, BadgeCheck, Check, CircleDollarSign, Handshake, Lock, Sh
 import { paymentService } from '../services/paymentService'
 import { accountService } from '../services/accountService'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { haptic } from '../utils/native'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -40,6 +41,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
     setError('')
     try {
       await paymentService.acceptAndFund(bid.id)
+      haptic('medium')
       onDone?.()
       onClose()
     } catch (requestError) {
@@ -101,7 +103,7 @@ export function JobPaymentCard({ payment, role, onChanged }) {
   const run = async (key, fn) => {
     setBusy(key)
     setError('')
-    try { await fn(); onChanged?.() } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
+    try { await fn(); haptic('medium'); onChanged?.() } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
   }
 
   const release = () => {

@@ -4,6 +4,9 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+import { setupNative } from './utils/native'
+
+setupNative()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

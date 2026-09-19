@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Poso.ba</string>
+    <string name="title_activity_main">Poso.ba</string>
+    <string name="package_name">ba.poso.app</string>
+    <string name="custom_url_scheme">ba.poso.app</string>
+</resources>

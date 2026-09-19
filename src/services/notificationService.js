@@ -4,7 +4,7 @@ export const notificationService = {
   async listMine(limit = 20) {
     const { data, error } = await supabase
       .from('notifications')
-      .select('id, type, title, message, read_at, created_at')
+      .select('id, type, title, message, link, read_at, created_at')
       .order('created_at', { ascending: false })
       .limit(limit)
     if (error) {

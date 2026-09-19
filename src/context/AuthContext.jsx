@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { disablePush, syncPush } from '../utils/push'
 import { authService } from '../services/authService'
 import { trustService } from '../services/trustService'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -42,11 +43,13 @@ export function AuthProvider({ children }) {
 
     initSession()
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const sessionUser = session?.user || null
       setUser(sessionUser)
       // resolve the admin role before letting guarded routes decide
       refreshAdminStatus(sessionUser).finally(() => setLoading(false))
+      // a device that already allowed push gets (re)attached to this account
+      if (sessionUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) syncPush()
     })
 
     return () => listener.subscription.unsubscribe()
@@ -73,6 +76,8 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     setError('')
+    // this device must stop receiving the old account's notifications
+    await disablePush({ keepDevice: true }).catch(() => {})
     await authService.signOut()
     setUser(null)
   }

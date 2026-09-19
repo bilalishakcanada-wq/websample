@@ -56,12 +56,14 @@ import InstallPrompt from './components/InstallPrompt'
 import ScrollToTop from './components/ScrollToTop'
 import MobileNav from './components/MobileNav'
 import Toaster from './components/Toaster'
+import SwBridge from './components/SwBridge'
 import SupportChat from './components/SupportChat'
 
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
+      <SwBridge />
       <SiteHeader />
       <SupportChat />
       <InstallPrompt />

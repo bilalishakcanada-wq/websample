@@ -18,7 +18,17 @@ export default defineConfig({
     react(),
     process.env.VITE_NO_PWA ? null : VitePWA({
       registerType: 'autoUpdate',
+      // custom service worker (src/sw.js): workbox precache + Web Push handlers
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+      },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
+      // lets the service worker (and push) be tested on the dev server too
+      devOptions: { enabled: true, type: 'module', suppressWarnings: true },
       manifest: {
         name: 'Poso.ba — Marketplace za usluge',
         short_name: 'Poso.ba',
@@ -41,16 +51,6 @@ export default defineConfig({
           { name: 'Objavi posao', url: `${base}objavi`, icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
           { name: 'Pretraži poslove', url: `${base}search`, icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
           { name: 'Poruke', url: `${base}messages`, icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        // the map library chunk is large; still fine to precache
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-        navigateFallbackDenylist: [/^\/api\//, /\/storage\/v1\//],
-        runtimeCaching: [
-          { urlPattern: ({ url }) => url.hostname.endsWith('supabase.co') && url.pathname.startsWith('/storage/'), handler: 'CacheFirst', options: { cacheName: 'poso-media', expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 3600 } } },
-          { urlPattern: ({ url }) => url.hostname.includes('fonts.g'), handler: 'StaleWhileRevalidate', options: { cacheName: 'poso-fonts' } },
         ],
       },
     }),

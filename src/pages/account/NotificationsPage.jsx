@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, Bot, LifeBuoy, MessageCircle, ShieldBan } from 'lucide-react'
+import { BadgeCheck, Bell, Bot, ChevronRight, Handshake, LifeBuoy, MessageCircle, ShieldBan, Wallet } from 'lucide-react'
 import { notificationService } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 
-const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Bell }
+const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Bell, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, wallet: Wallet, job: Wallet, task_alert: Bell }
 
 function NotificationsPage() {
   const [items, setItems] = useState(null)
@@ -45,6 +45,7 @@ function NotificationsPage() {
               <li key={item.id} className={item.read_at ? '' : 'unread'}>
                 <span className="notif-list-icon"><Icon size={16} /></span>
                 <div><strong>{item.title}</strong>{item.message && <p>{item.message}</p>}<time>{formatBosnianDate(item.created_at)}</time></div>
+                {item.link && <Link to={item.link} className="notif-list-open" aria-label="Otvori"><ChevronRight size={18} /></Link>}
               </li>
             )
           })}

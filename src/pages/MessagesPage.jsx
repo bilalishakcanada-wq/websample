@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import PushPrompt from '../components/PushPrompt'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
@@ -186,6 +187,8 @@ function MessagesPage() {
           <h1>Poruke</h1>
           {unreadTotal > 0 && <span className="chat-unread-total">{unreadTotal} nepročitan{unreadTotal === 1 ? 'a' : 'ih'}</span>}
         </div>
+
+        {!active && <PushPrompt compact reason="Javit ćemo ti kad stigne nova poruka." />}
 
         <div className={`chat-layout ${active ? 'has-active' : ''}`}>
           <aside className="chat-sidebar">

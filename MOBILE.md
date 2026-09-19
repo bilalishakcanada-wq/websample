@@ -22,3 +22,12 @@ Kad želiš da aplikacija radi i bez interneta / potpuno iz paketa: obriši `ser
 
 Ikone i splash ekrani su već generisani (`npm run app:assets` ih pravi iz `assets/icon.png` i `assets/splash.png`).
 ID aplikacije: `ba.poso.app`, ime: Poso.ba.
+
+## Push obavijesti (Web Push)
+
+- Radi u Chrome/Edge/Firefox (Android + desktop) i u Safariju na iOS 16.4+ **samo kad je Poso.ba dodan na početni ekran**.
+- Korisnik ih uključi karticom „Uključi obavijesti“ (nadzorna ploča / poruke) ili u *Postavke → Ovaj uređaj*.
+- Tok: `notifications` insert → trigger `on_notification_push` → Edge Function `send-push` → push servis → `src/sw.js` prikazuje notifikaciju; klik otvara `link` u aplikaciji.
+- Nove obavijesti se prave i za poruke (`on_message_notify`, jedna po razgovoru dok se ne pročita) i ponude (`on_bid_notify`).
+- VAPID: javni ključ je u `src/utils/push.js` (`VITE_VAPID_PUBLIC_KEY` ga može pregaziti); privatni je u Supabase Vault (`vapid_private_jwk`), čita ga samo `service_role` preko `public.vapid_private_jwk()`.
+- SQL je u `supabase/migration_push_notifications.sql`.

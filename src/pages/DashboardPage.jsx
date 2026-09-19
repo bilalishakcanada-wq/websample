@@ -6,6 +6,7 @@ import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import CountUp from '../components/CountUp'
+import PushPrompt from '../components/PushPrompt'
 
 const STATUS_LABELS = {
   published: 'Objavljen',
@@ -80,6 +81,8 @@ function DashboardPage() {
           <div className="stat-card"><strong><CountUp value={listings.reduce((sum, item) => sum + (item.bids?.[0]?.count || 0), 0)} /></strong><span>Primljene ponude</span></div>
           <div className="stat-card"><strong><CountUp value={listings.filter((item) => item.status === 'published').length} /></strong><span>Aktivni oglasi</span></div>
         </div>
+
+        <PushPrompt />
 
         {message && <div className="form-success">{message}</div>}
         {error && <div className="form-error">{error}</div>}

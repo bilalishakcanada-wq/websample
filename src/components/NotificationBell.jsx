@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, Bot, LifeBuoy, MessageCircle, ShieldBan } from 'lucide-react'
+import { BadgeCheck, Bell, Bot, Handshake, LifeBuoy, MessageCircle, ShieldBan, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { desktopNotify, notificationService, playPing } from '../services/notificationService'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { currentSubscription } from '../utils/push'
+import { toast } from './Toaster'
 
-const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot }
+const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, wallet: Wallet, job: Wallet }
 
 function NotificationBell() {
   const navigate = useNavigate()
@@ -18,10 +20,18 @@ function NotificationBell() {
     if (!user) return undefined
     let active = true
     notificationService.listMine().then((rows) => active && setItems(rows))
-    const unsubscribe = notificationService.subscribe(user.id, (row) => {
+    const unsubscribe = notificationService.subscribe(user.id, async (row) => {
       setItems((current) => [row, ...current].slice(0, 30))
-      playPing()
-      desktopNotify(row.title, row.message || '')
+      // app in front: a toast (unless the user is already in the chat); in the
+      // background: the push service worker notifies, or the browser API if push is off
+      if (document.visibilityState === 'visible') {
+        if (!(row.type === 'message' && window.location.pathname.includes('/messages'))) {
+          playPing()
+          toast(row.title, { kind: row.type === 'offer_accepted' || row.type === 'wallet' ? 'success' : 'info' })
+        }
+      } else if (!(await currentSubscription())) {
+        desktopNotify(row.title, row.message || '')
+      }
     })
     return () => { active = false; unsubscribe() }
   }, [user])
@@ -42,7 +52,8 @@ function NotificationBell() {
       await notificationService.markRead([item.id])
       setItems((current) => current.map((row) => (row.id === item.id ? { ...row, read_at: new Date().toISOString() } : row)))
     }
-    if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
+    if (item.link) navigate(item.link)
+    else if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
     else if (item.type === 'support_reply') navigate('/pomoc?chat=1')
     else if (item.type === 'wallet') navigate('/account/novcanik')
     else if (item.type === 'job') navigate('/account/placanja')

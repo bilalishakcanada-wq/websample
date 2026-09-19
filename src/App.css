@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Archivo:wdth,wght@75..100,600..900&display=swap');
+/* Fonts (Manrope, Archivo) are linked from index.html so they load in parallel with this stylesheet. */
 
 :root {
   --bg: #f6f4ee;

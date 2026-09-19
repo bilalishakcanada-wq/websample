@@ -49,14 +49,16 @@ function LegacyProfileRedirect() {
 }
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
+import InstallPrompt from './components/InstallPrompt'
 import MobileNav from './components/MobileNav'
 import SupportChat from './components/SupportChat'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <SiteHeader />
       <SupportChat />
+      <InstallPrompt />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />

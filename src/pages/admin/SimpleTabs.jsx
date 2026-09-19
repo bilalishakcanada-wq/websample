@@ -5,6 +5,7 @@ import { supportService } from '../../services/supportService'
 import { desktopNotify, playPing } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { ACTION_LABEL, KIND_LABEL, QUEUE_LABEL, useStaff, verificationTitle } from './shared'
+import { withBase } from '../../utils/paths'
 
 export function RegistryTab() {
   const { openUser } = useStaff()
@@ -336,7 +337,7 @@ export function ReportsTab() {
           </div>
           <span className={`tag tag-${report.status}`}>{report.status}</span>
           <div className="admin-row-actions">
-            {report.target_type === 'listing' && <a className="ghost-button" href={`/listings/${report.target_id}`} target="_blank" rel="noreferrer">Oglas</a>}
+            {report.target_type === 'listing' && <a className="ghost-button" href={withBase(`/listings/${report.target_id}`)} target="_blank" rel="noreferrer">Oglas</a>}
             <button type="button" className="ghost-button" onClick={() => act(report.id, 'resolved')}>Riješeno</button>
             <button type="button" className="ghost-button" onClick={() => act(report.id, 'rejected')}>Odbaci</button>
           </div>
@@ -382,7 +383,7 @@ export function ListingsTab() {
           </div>
           <span className={`tag tag-${listing.status}`}>{listing.status}</span>
           <div className="admin-row-actions">
-            <a className="ghost-button" href={`/listings/${listing.id}`} target="_blank" rel="noreferrer">Otvori</a>
+            <a className="ghost-button" href={withBase(`/listings/${listing.id}`)} target="_blank" rel="noreferrer">Otvori</a>
             <button type="button" className="ghost-button" onClick={() => openUser(listing.user_id)}>Vlasnik</button>
             {listing.status !== 'archived' && <button type="button" className="ghost-button" onClick={() => act(listing.id, 'archived')}>Ukloni</button>}
             {listing.status === 'archived' && <button type="button" className="ghost-button" onClick={() => act(listing.id, 'published')}>Vrati</button>}

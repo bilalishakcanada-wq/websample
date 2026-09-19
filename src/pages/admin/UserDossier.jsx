@@ -7,6 +7,7 @@ import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { badgeIcon } from '../../components/badgeIcons'
 import {
+import { withBase } from '../../utils/paths'
   ACTION_LABEL, AiVerdict, Avatar, CreditsDialog, KIND_LABEL, RolePills, STAFF_ACTION_LABEL, StatusPill, SuspendDialog, WALLET_KIND_LABEL, deviceLabel, formatKM as formatMoney, geoLabel, relativeTime, useStaff, verificationTitle,
 } from './shared'
 
@@ -240,7 +241,7 @@ function Activity({ userId, dossier }) {
       <section className="dossier-card">
         <h3>Oglasi ({dossier.stats?.listings})</h3>
         {(dossier.listings || []).length === 0 && <p className="muted-text">Nema oglasa.</p>}
-        {(dossier.listings || []).map((item) => <div key={item.id} className="admin-mini-row"><a href={`/listings/${item.id}`} target="_blank" rel="noreferrer">{item.title}</a><span className={`tag tag-${item.status}`}>{item.status}</span></div>)}
+        {(dossier.listings || []).map((item) => <div key={item.id} className="admin-mini-row"><a href={withBase(`/listings/${item.id}`)} target="_blank" rel="noreferrer">{item.title}</a><span className={`tag tag-${item.status}`}>{item.status}</span></div>)}
       </section>
       <section className="dossier-card">
         <h3>Ponude ({dossier.stats?.bids})</h3>
@@ -585,7 +586,7 @@ function UserDossier({ userId, onBack }) {
             </label>
           )}
           <button type="button" className="ghost-button" onClick={runAgent} disabled={agentBusy}><Bot size={15} /> {agentBusy ? 'AI…' : 'AI procjena'}</button>
-          <a className="ghost-button" href={`/korisnik/${userId}`} target="_blank" rel="noreferrer"><ExternalLink size={15} /> Javni profil</a>
+          <a className="ghost-button" href={withBase(`/korisnik/${userId}`)} target="_blank" rel="noreferrer"><ExternalLink size={15} /> Javni profil</a>
         </div>
       </header>
 

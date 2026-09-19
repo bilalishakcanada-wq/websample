@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { isStrongPassword, isValidEmail, publicError, sanitizeText } from '../utils/validation'
+import { withBase } from '../utils/paths'
 
 let enabledProvidersPromise = null
 
@@ -84,7 +85,7 @@ export const authService = {
   async signInWithProvider(provider) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}${withBase('/dashboard')}` },
     })
 
     if (error) {
@@ -119,7 +120,7 @@ export const authService = {
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
 
     const { data, error } = await supabase.auth.resetPasswordForEmail(cleanedEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}${withBase('/reset-password')}`,
     })
 
     if (error) throw publicError()

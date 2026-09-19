@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService'
 import { paymentService } from '../../services/paymentService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, CreditsDialog, WALLET_KIND_LABEL, formatKM, useStaff } from './shared'
+import { withBase } from '../../utils/paths'
 
 /** Platform-wide balances: totals, quick top-up, top balances and the ledger. */
 function WalletTab() {
@@ -108,7 +109,7 @@ function WalletTab() {
             <div key={row.id} className={`wallet-row pay-admin-row ${row.status === 'disputed' ? 'is-disputed' : ''}`}>
               <span className={`wallet-sign ${row.status === 'released' ? 'plus' : row.status === 'disputed' ? 'minus' : ''}`}><Lock size={15} /></span>
               <div>
-                <strong><a href={`/listings/${row.listing_id}`} target="_blank" rel="noreferrer">{row.title}</a> <span className={`pill pay-status-${row.status}`}>{{ funded: 'Osigurano', requested: 'Čeka oslobađanje', released: 'Isplaćeno', refunded: 'Vraćeno', disputed: 'SPOR' }[row.status]}</span></strong>
+                <strong><a href={withBase(`/listings/${row.listing_id}`)} target="_blank" rel="noreferrer">{row.title}</a> <span className={`pill pay-status-${row.status}`}>{{ funded: 'Osigurano', requested: 'Čeka oslobađanje', released: 'Isplaćeno', refunded: 'Vraćeno', disputed: 'SPOR' }[row.status]}</span></strong>
                 <small>
                   klijent <button type="button" className="adm-userlink" onClick={() => openUser(row.client_id)}>{row.client_name}</button> → izvođač <button type="button" className="adm-userlink" onClick={() => openUser(row.provider_id)}>{row.provider_name}</button>
                   {' · '}naknada {row.fee_percent} % ({formatKM(row.fee_amount)}) · izvođaču {formatKM(row.net_amount)} · {formatBosnianDate(row.released_at || row.refunded_at || row.requested_at || row.funded_at)}

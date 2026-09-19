@@ -9,6 +9,7 @@ import { contactInfoMessage, scanContactInfo } from '../../utils/moderation'
 import { formatBosnianPhone, isValidBosnianPhone } from '../../utils/phone'
 import CityField from '../../components/CityField'
 import RuleOneNotice from '../../components/RuleOneNotice'
+import { withBase } from '../../utils/paths'
 
 const splitName = (fullName) => {
   const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean)
@@ -95,7 +96,7 @@ function ProfileSettingsPage() {
   const removeAccount = async () => {
     if (!window.confirm('Ovo trajno briše tvoj nalog i sve lične podatke. Nastaviti?')) return
     setDeleting(true)
-    try { await deleteAccount(); window.location.assign('/') } catch (requestError) { setError(requestError.message); setDeleting(false) }
+    try { await deleteAccount(); window.location.assign(withBase('/')) } catch (requestError) { setError(requestError.message); setDeleting(false) }
   }
 
   const copyId = async () => {

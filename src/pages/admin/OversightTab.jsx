@@ -3,6 +3,7 @@ import { Bot } from 'lucide-react'
 import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { AiVerdict, SuspendDialog, useStaff } from './shared'
+import { withBase } from '../../utils/paths'
 
 const FEED_KINDS = [
   ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
@@ -84,7 +85,7 @@ function OversightTab() {
             {['message', 'bid', 'review', 'listing'].includes(row.kind) && (
               <button type="button" className="ghost-button" onClick={() => { const note = window.prompt('Razlog uklanjanja (vidi ga korisnik u istoriji):', 'Kršenje pravila zajednice'); if (note != null) act(() => adminService.redact(row.kind, row.id, note)) }}>Ukloni</button>
             )}
-            {row.kind === 'listing' && <a className="ghost-button" href={`/listings/${row.ref_id}`} target="_blank" rel="noreferrer">Otvori</a>}
+            {row.kind === 'listing' && <a className="ghost-button" href={withBase(`/listings/${row.ref_id}`)} target="_blank" rel="noreferrer">Otvori</a>}
             {row.user_id && <button type="button" className="ghost-button" onClick={() => openUser(row.user_id)}>Dosije</button>}
             {row.user_id && !assessments[row.user_id] && <button type="button" className="ghost-button" onClick={() => runAgent(row.user_id)} disabled={busyId === row.user_id}><Bot size={14} /> {busyId === row.user_id ? '...' : 'AI'}</button>}
             {row.user_id && row.account_status !== 'suspended' && (

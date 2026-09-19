@@ -1,5 +1,6 @@
 import { Ban, Handshake, ScanEye, ShieldBan, ShieldCheck, Star, UserCheck, MessageCircle } from 'lucide-react'
 import InfoLayout from '../components/InfoLayout'
+import { withBase } from '../utils/paths'
 
 const RULES = [
   { icon: Handshake, title: 'Poštovanje je osnova', text: 'Obraćaj se drugima kako bi želio da se obraćaju tebi. Uvrede, prijetnje i uznemiravanje znače trajno uklanjanje naloga.' },
@@ -60,7 +61,7 @@ function CommunityGuidelinesPage() {
           <li><span className="step-index">2</span><div><strong>Privremeno ograničenje</strong><p>Za ponovljene prekršaje — nalog ne može objavljivati ni slati ponude 7 do 30 dana.</p></div></li>
           <li><span className="step-index">3</span><div><strong>Trajno uklanjanje</strong><p>Za prevaru, uznemiravanje, lažni identitet ili zabranjen sadržaj — odmah, bez opomene.</p></div></li>
         </ol>
-        <p className="muted-text">Na svaku odluku možeš odgovoriti kroz <a href="/kontakt?tema=account">kontakt formu</a> — pregledamo je druga osoba iz tima.</p>
+        <p className="muted-text">Na svaku odluku možeš odgovoriti kroz <a href={withBase('/kontakt?tema=account')}>kontakt formu</a> — pregledamo je druga osoba iz tima.</p>
       </section>
     </InfoLayout>
   )

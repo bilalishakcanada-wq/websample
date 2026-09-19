@@ -36,3 +36,4 @@ coverage
 *.key
 *.crt
 private/
+.gh-pages

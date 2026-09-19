@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useStaff } from './shared'
+import { withBase } from '../../utils/paths'
 
 /** Every conversation on the platform — admin only. */
 function MessagesTab({ initialConversationId = '' }) {
@@ -61,7 +62,7 @@ function MessagesTab({ initialConversationId = '' }) {
               <button type="button" className="adm-userlink" onClick={() => openUser(active.one_id)}><strong>{active.one_name}</strong> <span className="uid-chip">{active.one_member}</span></button>
               <span>↔</span>
               <button type="button" className="adm-userlink" onClick={() => openUser(active.two_id)}><strong>{active.two_name}</strong> <span className="uid-chip">{active.two_member}</span></button>
-              {active.listing_id && <a className="ghost-button" href={`/listings/${active.listing_id}`} target="_blank" rel="noreferrer">Oglas</a>}
+              {active.listing_id && <a className="ghost-button" href={withBase(`/listings/${active.listing_id}`)} target="_blank" rel="noreferrer">Oglas</a>}
             </div>
             <div className="support-chat-messages admin-messages">
               {thread.map((item) => (

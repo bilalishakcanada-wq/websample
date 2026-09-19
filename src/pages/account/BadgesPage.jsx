@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService, LICENCES } from '../../services/accountService'
 import { formatBosnianPhone, isValidBosnianPhone, digitsOnly } from '../../utils/phone'
+import { withBase } from '../../utils/paths'
 
 const LICENCE_ICON = { electrician: Zap, plumber: Droplets, gas: Flame, hvac: Thermometer, construction: HardHat, driver: Car }
 
@@ -132,7 +133,7 @@ function BadgesPage() {
       <h3 className="account-sub">Značke identiteta</h3>
       <div className="badge-grid">
         <BadgeRow icon={ShieldCheck} title="Uvjerenje o nekažnjavanju" text="Umiri druge članove — priloži važeće uvjerenje o nekažnjavanju (MUP / sud)." state={stateFor('police_check', 'police_check')} onAdd={() => startUpload('police_check')} />
-        <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Načinima plaćanja." state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign('/account/nacini-placanja') }} addLabel="Dodaj" />
+        <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Načinima plaćanja." state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign(withBase('/account/nacini-placanja')) }} addLabel="Dodaj" />
         <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom — dobijaš trenutne obavijesti o poslovima." state={stateFor('mobile_verified', '__none__')} onAdd={() => setPhoneStep('phone')}>
           {phoneStep !== 'idle' && badgeCodes.has('mobile_verified') === false && (
             <div className="phone-verify">

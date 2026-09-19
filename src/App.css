@@ -12179,3 +12179,24 @@ button { touch-action: manipulation; }
   .site-logo-text { display: inline; }
   body[data-page='objavi'] .site-header-cta { display: none; }
 }
+
+/* ---------- success splash (job published etc.) ---------- */
+.success-splash { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; padding: 20px; background: rgba(6, 21, 48, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade-in 0.2s ease both; }
+.success-splash-card { position: relative; width: min(100%, 380px); padding: 40px 24px 24px; border-radius: 28px; background: var(--surface); text-align: center; box-shadow: 0 30px 80px rgba(6, 21, 48, 0.4); animation: splash-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both; overflow: hidden; }
+.success-splash-check { position: relative; z-index: 2; display: grid; place-items: center; width: 88px; height: 88px; margin: 0 auto 18px; border-radius: 50%; background: var(--accent); color: var(--primary-strong); animation: check-pop 0.5s 0.15s cubic-bezier(0.34, 1.5, 0.64, 1) both; }
+.success-splash-check svg { animation: check-draw 0.4s 0.3s ease both; }
+.success-splash-ring { position: absolute; top: 40px; left: 50%; width: 88px; height: 88px; margin-left: -44px; border-radius: 50%; border: 3px solid var(--accent); animation: ring-out 1.2s 0.4s ease-out infinite; }
+.success-splash h2 { margin: 0 0 8px; font-family: var(--font-display); font-stretch: 85%; font-size: 1.7rem; color: var(--primary-strong); }
+.success-splash p { margin: 0 0 20px; color: var(--text-soft); line-height: 1.5; }
+.success-splash-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+@keyframes splash-pop { from { opacity: 0; transform: translateY(24px) scale(0.92); } to { opacity: 1; transform: none; } }
+@keyframes check-pop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes check-draw { from { opacity: 0; transform: scale(0.4) rotate(-20deg); } to { opacity: 1; transform: none; } }
+@keyframes ring-out { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
+@media (prefers-reduced-motion: reduce) { .success-splash-ring { animation: none; opacity: 0; } }
+
+/* tab bar: the active tab gets a soft pill behind its icon (Material-style) */
+@media (max-width: 768px) {
+  .mobile-nav-item svg { padding: 3px 10px; border-radius: 999px; box-sizing: content-box; transition: background 0.25s ease, transform 0.2s ease; }
+  .mobile-nav-item.active svg { background: rgba(245, 180, 0, 0.22); }
+}

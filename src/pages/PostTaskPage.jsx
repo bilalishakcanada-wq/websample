@@ -128,8 +128,8 @@ function PostTaskPage() {
         const flagged = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
         if (flagged > 0) window.alert(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`)
       }
-      toast(editId ? 'Izmjene su sačuvane.' : 'Posao je objavljen — ponude stižu uskoro.', { kind: 'success' })
-      navigate(`/listings/${listing.id}`)
+      if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
+      navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError.message)
       setSaving(false)

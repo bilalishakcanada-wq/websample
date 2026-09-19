@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
+import SuccessSplash from '../components/SuccessSplash'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
 import { listingService } from '../services/listingService'
@@ -61,6 +62,9 @@ const BID_STATUS_LABEL = {
 function ListingDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const justPublished = searchParams.get('published') === '1'
+  const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
   const [listing, setListing] = useState(null)
   const [related, setRelated] = useState([])
@@ -248,6 +252,9 @@ function ListingDetailPage() {
 
   return (
     <div className="app-shell page-with-mobile-nav job-page">
+      {justPublished && listing && (
+        <SuccessSplash title="Posao je objavljen!" text="Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena." onClose={closeSplash} onShare={share} />
+      )}
       <main className="content-container">
         <div className="job-top">
           <button type="button" className="job-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Nazad</button>

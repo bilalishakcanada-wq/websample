@@ -50,6 +50,15 @@ function AccountLayout() {
   }, [reload])
 
   // first visit after registration: profile must be filled in
+  // On phones the nav is a horizontal strip: keep the active item in view.
+  const navRef = useRef(null)
+  useEffect(() => {
+    const active = navRef.current?.querySelector('a.active')
+    if (active && window.matchMedia('(max-width: 960px)').matches) {
+      active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    }
+  }, [pathname, bundle])
+
   useEffect(() => {
     if (bundle?.profile && !bundle.profile.onboarding_completed && pathname !== '/account/profil') {
       navigate('/account/profil?setup=1', { replace: true })
@@ -136,7 +145,7 @@ function AccountLayout() {
             <strong className="account-name">{profile.full_name || 'Tvoj nalog'}</strong>
             <span className="account-type">{isProvider ? (profile.account_type === 'both' ? 'Klijent i izvođač' : 'Izvođač') : 'Klijent'}</span>
             {avatarNotice && <small className="account-avatar-notice">{avatarNotice}</small>}
-            <nav className="account-nav" aria-label="Nalog">
+            <nav ref={navRef} className="account-nav" aria-label="Nalog">
               {nav.map(({ to, label, icon: Icon, end, chevron }) => (
                 <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
                   <Icon size={16} /> <span>{label}</span>{chevron && <ChevronRight size={16} className="account-nav-chevron" />}

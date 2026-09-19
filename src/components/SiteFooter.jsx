@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
+import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
 
-const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod']
+const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/messages']
 
 const COLUMNS = [
   ...FOOTER_GROUPS.map((group) => ({
@@ -31,7 +32,21 @@ function FooterLink({ to, children }) {
   return <Link to={to}>{children}</Link>
 }
 
+/** true on screens wider than a phone; footer groups stay expanded there. */
+function useWideScreen() {
+  const query = '(min-width: 641px)'
+  const [wide, setWide] = useState(() => (typeof window === 'undefined' ? true : window.matchMedia(query).matches))
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const onChange = (event) => setWide(event.matches)
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+  return wide
+}
+
 function SiteFooter() {
+  const wide = useWideScreen()
   const { pathname } = useLocation()
   if (HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))) return null
 
@@ -40,14 +55,15 @@ function SiteFooter() {
       <div className="site-footer-inner">
         <div className="site-footer-columns">
           {COLUMNS.map((column) => (
-            <div className="site-footer-col" key={column.title}>
-              <h4>{column.title}</h4>
+            // <details> collapses each group on phones; CSS forces it open on wider screens.
+            <details className="site-footer-col" key={column.title} open={wide || undefined}>
+              <summary><h4>{column.title}</h4><ChevronDown size={16} className="site-footer-chev" /></summary>
               <ul>
                 {column.links.map(([label, to]) => (
                   <li key={`${column.title}-${label}`}><FooterLink to={to}>{label}</FooterLink></li>
                 ))}
               </ul>
-            </div>
+            </details>
           ))}
         </div>
 

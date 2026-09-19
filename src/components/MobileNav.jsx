@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Home, MessageCircle, Plus, Search, UserRound } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 
@@ -9,12 +10,21 @@ const tabs = [
   ['/account', 'Nalog', UserRound],
 ]
 
-const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin']
+// Focused flows (auth, post wizard, staff console) run full-screen without the tab bar.
+const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi']
 
 function MobileNav() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  if (HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))) return null
+  const hidden = HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))
+
+  // Lets CSS drop the bottom padding reserved for the bar when it is not shown.
+  useEffect(() => {
+    document.body.dataset.tabbar = hidden ? 'off' : 'on'
+    return () => { delete document.body.dataset.tabbar }
+  }, [hidden])
+
+  if (hidden) return null
 
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">

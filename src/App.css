@@ -55,7 +55,9 @@ a {
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -1810,7 +1812,25 @@ button {
   }
 
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .dashboard-grid .stat-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .dashboard-grid .stat-card strong {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-grid .stat-card span {
+    font-size: 0.85rem;
+  }
+
+  .dashboard-grid .stat-card:nth-child(3):last-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -6604,14 +6624,72 @@ body:has(.profile-cta-bar) .support-chat {
   }
 }
 
+/* footer groups render as <details>: always open on wide screens, collapsible on phones */
+.site-footer-col summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: default;
+  pointer-events: none;
+}
+
+.site-footer-col summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-footer-chev {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .site-footer-inner {
-    padding: 40px 0 24px;
+    padding: 28px 0 20px;
   }
 
   .site-footer-columns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 26px 18px;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .site-footer-col {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .site-footer-col summary {
+    cursor: pointer;
+    pointer-events: auto;
+    padding: 14px 0;
+    min-height: 44px;
+  }
+
+  .site-footer-col summary h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .site-footer-chev {
+    display: block;
+    color: rgba(255, 255, 255, 0.55);
+    transition: transform 0.2s ease;
+  }
+
+  .site-footer-col[open] .site-footer-chev {
+    transform: rotate(180deg);
+  }
+
+  .site-footer-col ul {
+    padding: 0 0 16px;
+    gap: 10px;
+  }
+
+  .site-footer-col a {
+    font-size: 0.95rem;
+    min-height: 0;
+  }
+
+  .site-footer-bottom {
+    margin-top: 22px;
   }
 
   .site-footer-bottom {
@@ -10024,6 +10102,50 @@ body:has(.profile-cta-bar) .support-chat {
   }
 }
 
+/* Phones: the inbox and an open thread each fill the screen like a native messenger */
+@media (max-width: 768px) {
+  .chat-layout {
+    margin-bottom: 12px;
+  }
+
+  .chat-sidebar {
+    height: calc(100dvh - var(--header-h) - 74px - env(safe-area-inset-bottom) - 84px);
+    min-height: 360px;
+  }
+
+  .chat-layout.has-active .chat-main {
+    height: calc(100dvh - var(--header-h) - 74px - env(safe-area-inset-bottom) - 24px);
+    border-radius: 18px;
+  }
+
+  .chat-layout.has-active ~ *,
+  .chat-page.has-active .chat-topline {
+    display: none;
+  }
+
+  .chat-page.has-active,
+  .chat-page.has-active > .content-container {
+    padding-bottom: 0;
+    min-height: 0;
+  }
+
+  .chat-composer-hint {
+    display: none;
+  }
+
+  .chat-page.has-active .chat-layout {
+    margin-bottom: 0;
+  }
+
+  .chat-welcome-empty {
+    display: none;
+  }
+
+  .chat-composer textarea {
+    max-height: 120px;
+  }
+}
+
 /* ---------- Account panel (sidebar + sections) ---------- */
 .account-page {
   padding-top: 16px;
@@ -10950,26 +11072,90 @@ body:has(.profile-cta-bar) .support-chat {
     padding: 0 16px 40px;
   }
 
+  .account-shell > * {
+    min-width: 0;
+  }
+
   .account-sidebar {
     position: static;
-    padding: 22px 16px 12px;
+    padding: 16px 16px 10px;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-areas:
+      'avatar name'
+      'avatar type'
+      'notice notice'
+      'nav nav';
+    column-gap: 14px;
+    row-gap: 2px;
+    align-items: center;
+    justify-items: start;
+    border-radius: 22px;
   }
 
   .account-avatar {
-    width: 96px;
-    height: 96px;
+    grid-area: avatar;
+    width: 64px;
+    height: 64px;
+    border-width: 2px;
+    align-self: center;
+  }
+
+  .account-avatar svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .account-avatar-edit {
+    width: 26px;
+    height: 26px;
+    right: -4px;
+    bottom: -2px;
+  }
+
+  .account-name {
+    grid-area: name;
+    margin-top: 0;
+    align-self: end;
+    font-size: 1.2rem;
+    line-height: 1.15;
+  }
+
+  .account-type {
+    grid-area: type;
+    align-self: start;
+  }
+
+  .account-avatar-notice {
+    grid-area: notice;
+    text-align: left;
+  }
+
+  .account-nav {
+    grid-area: nav;
   }
 
   .account-nav {
     display: flex;
+    width: calc(100% + 32px);
+    margin: 4px -16px 0;
+    padding: 0 16px;
     overflow-x: auto;
     gap: 4px;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .account-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .account-nav a {
     white-space: nowrap;
     padding: 10px 12px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
   }
 
   .account-nav-chevron {
@@ -11858,7 +12044,9 @@ button { touch-action: manipulation; }
 
 /* every page slides in softly, like a native screen */
 @keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .job-page > .content-container, .auth-shell { animation: page-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* fill-mode "backwards": once the slide finishes the element keeps no transform, so
+   position: fixed children (wizard footer, sheets, lightbox) stay anchored to the viewport */
+.page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .job-page > .content-container, .auth-shell { animation: page-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 
 /* press feedback */
 .primary-button, .ghost-button, .secondary-button, .danger-button, .listing-card, .task-card, .help-audience, .goal-card, .wizard-option, .trade-chip, .check-pill, .mobile-nav-item, .account-nav a, .adm-nav button, .pay-actions button { transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
@@ -11880,6 +12068,12 @@ button { touch-action: manipulation; }
   .mobile-nav-item.active svg { transform: translateY(-1px); }
   .mobile-nav-item svg { transition: transform 0.2s ease; }
   #root { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  body[data-tabbar='off'] #root { padding-bottom: 0; }
+
+  /* the post wizard is a focused, full-screen flow on phones: its own header only */
+  body[data-page='objavi'] .site-header, body[data-page='objavi'] .site-header-spacer { display: none; }
+  body[data-page='objavi'] .wizard-header { position: sticky; top: 0; z-index: 30; padding-top: max(16px, env(safe-area-inset-top)); }
+  body[data-page='objavi'] .wizard-shell { min-height: 100dvh; }
   .site-footer { padding-bottom: 24px; }
   .sticky-offer-button { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
   .support-chat { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }

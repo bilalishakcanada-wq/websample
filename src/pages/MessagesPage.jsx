@@ -180,7 +180,7 @@ function MessagesPage() {
   const lastOwnRead = [...thread].reverse().find((item) => item.sender_id === user.id && item.read_at)
 
   return (
-    <div className="app-shell page-with-mobile-nav chat-page">
+    <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`}>
       <main className="content-container">
         <div className="chat-topline">
           <h1>Poruke</h1>

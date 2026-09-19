@@ -1,44 +1,47 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
+// Every other page loads on demand — the phone downloads only what it opens.
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
+const SearchPage = lazy(() => import('./pages/SearchPage'))
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'))
+const MessagesPage = lazy(() => import('./pages/MessagesPage'))
+const RulesPage = lazy(() => import('./pages/RulesPage'))
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const PostTaskPage = lazy(() => import('./pages/PostTaskPage'))
+const EarnMoneyPage = lazy(() => import('./pages/EarnMoneyPage'))
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'))
+const HelpPage = lazy(() => import('./pages/HelpPage'))
+const GuidesPage = lazy(() => import('./pages/GuidesPage'))
+const BusinessPage = lazy(() => import('./pages/BusinessPage'))
+const ContactPage = lazy(() => import('./pages/ContactPage'))
+const PricingPage = lazy(() => import('./pages/PricingPage'))
+const CommunityGuidelinesPage = lazy(() => import('./pages/CommunityGuidelinesPage'))
+const ProviderPrinciplesPage = lazy(() => import('./pages/ProviderPrinciplesPage'))
+const TiersInfoPage = lazy(() => import('./pages/TiersInfoPage'))
+const AccountLayout = lazy(() => import('./pages/account/AccountLayout'))
+const ProfileSettingsPage = lazy(() => import('./pages/account/ProfileSettingsPage'))
+const SkillsPage = lazy(() => import('./pages/account/SkillsPage'))
+const BadgesPage = lazy(() => import('./pages/account/BadgesPage'))
+const PortfolioPage = lazy(() => import('./pages/account/PortfolioPage'))
+const TierDashboardPage = lazy(() => import('./pages/account/TierDashboardPage'))
+const PaymentHistoryPage = lazy(() => import('./pages/account/PaymentHistoryPage'))
+const PaymentMethodsPage = lazy(() => import('./pages/account/PaymentMethodsPage'))
+const WalletPage = lazy(() => import('./pages/account/WalletPage'))
+const NotificationsPage = lazy(() => import('./pages/account/NotificationsPage'))
+const SettingsPage = lazy(() => import('./pages/account/SettingsPage'))
+
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
-import DashboardPage from './pages/DashboardPage'
-import AdminPage from './pages/AdminPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ForbiddenPage from './pages/ForbiddenPage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import SearchPage from './pages/SearchPage'
-import ListingDetailPage from './pages/ListingDetailPage'
-import MessagesPage from './pages/MessagesPage'
-import RulesPage from './pages/RulesPage'
-import PublicProfilePage from './pages/PublicProfilePage'
-import AboutPage from './pages/AboutPage'
-import PrivacyPage from './pages/PrivacyPage'
-import PostTaskPage from './pages/PostTaskPage'
-import EarnMoneyPage from './pages/EarnMoneyPage'
-import HowItWorksPage from './pages/HowItWorksPage'
-import HelpPage from './pages/HelpPage'
-import GuidesPage from './pages/GuidesPage'
-import BusinessPage from './pages/BusinessPage'
-import ContactPage from './pages/ContactPage'
-import PricingPage from './pages/PricingPage'
-import CommunityGuidelinesPage from './pages/CommunityGuidelinesPage'
-import ProviderPrinciplesPage from './pages/ProviderPrinciplesPage'
-import TiersInfoPage from './pages/TiersInfoPage'
-import AccountLayout from './pages/account/AccountLayout'
-import ProfileSettingsPage from './pages/account/ProfileSettingsPage'
-import SkillsPage from './pages/account/SkillsPage'
-import BadgesPage from './pages/account/BadgesPage'
-import PortfolioPage from './pages/account/PortfolioPage'
-import TierDashboardPage from './pages/account/TierDashboardPage'
-import PaymentHistoryPage from './pages/account/PaymentHistoryPage'
-import PaymentMethodsPage from './pages/account/PaymentMethodsPage'
-import WalletPage from './pages/account/WalletPage'
-import NotificationsPage from './pages/account/NotificationsPage'
-import SettingsPage from './pages/account/SettingsPage'
 
 // Old links keep working: /profile?tab=... -> the matching account section.
 function LegacyProfileRedirect() {
@@ -59,6 +62,7 @@ function App() {
       <SiteHeader />
       <SupportChat />
       <InstallPrompt />
+      <Suspense fallback={<div className="route-loading" aria-busy="true"><span /></div>}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -104,6 +108,7 @@ function App() {
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
+      </Suspense>
       <SiteFooter />
       <MobileNav />
     </BrowserRouter>

@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { listingService } from '../services/listingService'
 import { mockServiceCategories, mockTasks } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { withBase } from '../utils/paths'
 
 const categoryImage = (category) => {
   const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || '/images/categories/home.jpg'
+  return match?.image || withBase('/images/categories/home.jpg')
 }
 
 const shortTag = (category) => {

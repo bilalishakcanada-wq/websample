@@ -25,6 +25,7 @@ import { useRankedProviders } from '../hooks/useRankedProviders'
 import { usePlatformStats } from '../hooks/usePlatformStats'
 import { ArcHeadline, HeroStars, LadderArt, SwingArt } from '../components/HeroArt'
 import { POPULAR_CITIES } from '../data/siteMap'
+import { withBase } from '../utils/paths'
 
 const categoryCards = [
   ...mockServiceCategories.map((category) => ({
@@ -35,7 +36,7 @@ const categoryCards = [
     id: 'something-else',
     name: 'Nešto drugo',
     description: 'Opiši svojim riječima šta ti treba',
-    image: '/images/categories/profile.jpg',
+    image: withBase('/images/categories/profile.jpg'),
     target: '/objavi',
   },
 ]

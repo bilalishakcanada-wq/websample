@@ -11842,3 +11842,8 @@ body:has(.profile-cta-bar) .support-chat {
 /* safe areas on phones with a notch / home bar */
 .site-header { padding-top: env(safe-area-inset-top); }
 .mobile-nav { padding-bottom: env(safe-area-inset-bottom); }
+
+/* route loading bar (lazy pages) */
+.route-loading { position: fixed; top: var(--header-h); left: 0; right: 0; height: 3px; z-index: 90; background: rgba(13, 42, 82, 0.08); overflow: hidden; }
+.route-loading span { position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, var(--accent), var(--primary)); animation: route-bar 1s ease-in-out infinite; }
+@keyframes route-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }

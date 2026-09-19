@@ -6,16 +6,30 @@
  */
 const RELOAD_FLAG = 'poso-chunk-reload'
 
+export const UPDATE_EVENT = 'poso:update-ready'
+let updateReady = false
+export const isUpdateReady = () => updateReady
+
+const typing = () => {
+  const el = document.activeElement
+  return Boolean(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable))
+}
+
 export function watchServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return
   let hadController = Boolean(navigator.serviceWorker.controller)
-  let reloading = false
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadController) { hadController = true; return } // first install: nothing to swap
-    if (reloading) return
-    reloading = true
-    window.location.reload()
+    if (updateReady) return
+    updateReady = true
+    // never pull the page from under someone who is typing — SwBridge reloads on the next navigation
+    if (typing()) window.dispatchEvent(new CustomEvent(UPDATE_EVENT))
+    else window.location.reload()
   })
+  // installed apps stay open for days: look for a new build every hour and when coming back to the foreground
+  const check = () => navigator.serviceWorker.getRegistration().then((reg) => reg?.update()).catch(() => {})
+  window.setInterval(check, 60 * 60 * 1000)
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check() })
 }
 
 /** import() wrapper for React.lazy: one automatic reload when a chunk is missing. */

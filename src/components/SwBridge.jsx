@@ -1,12 +1,26 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { syncPush } from '../utils/push'
+import { UPDATE_EVENT, isUpdateReady } from '../utils/appUpdates'
+import { toast } from './Toaster'
 
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
 
 /** Listens to the service worker: notification taps navigate in-app, endpoint rotations re-save the subscription. */
 function SwBridge() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  // a new version installed while the user was typing: apply it on the next screen change
+  useEffect(() => {
+    if (isUpdateReady()) window.location.reload()
+  }, [pathname])
+  useEffect(() => {
+    const onReady = () => toast('Nova verzija Poso.ba je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })
+    window.addEventListener(UPDATE_EVENT, onReady)
+    return () => window.removeEventListener(UPDATE_EVENT, onReady)
+  }, [])
+
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return undefined
     const onMessage = (event) => {

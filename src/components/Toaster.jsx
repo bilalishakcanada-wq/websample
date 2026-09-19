@@ -24,8 +24,17 @@ function Toaster() {
       setItems((list) => [...list.slice(-2), item])
       window.setTimeout(() => setItems((list) => list.filter((entry) => entry.id !== item.id)), item.duration)
     }
+    // connectivity changes are the one toast the app raises on its own
+    const onOffline = () => toast('Nema interneta — provjeri vezu.', { kind: 'error', duration: 6000 })
+    const onOnline = () => toast('Ponovo si online.', { kind: 'success', duration: 2000 })
     window.addEventListener(EVENT, onToast)
-    return () => window.removeEventListener(EVENT, onToast)
+    window.addEventListener('offline', onOffline)
+    window.addEventListener('online', onOnline)
+    return () => {
+      window.removeEventListener(EVENT, onToast)
+      window.removeEventListener('offline', onOffline)
+      window.removeEventListener('online', onOnline)
+    }
   }, [])
 
   if (items.length === 0) return null

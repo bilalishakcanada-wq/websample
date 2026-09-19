@@ -5,8 +5,10 @@ import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { setupNative } from './utils/native'
+import { watchServiceWorkerUpdates } from './utils/appUpdates'
 
 setupNative()
+watchServiceWorkerUpdates()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

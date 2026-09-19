@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from '../components/Toaster'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -127,6 +128,7 @@ function PostTaskPage() {
         const flagged = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
         if (flagged > 0) window.alert(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`)
       }
+      toast(editId ? 'Izmjene su sačuvane.' : 'Posao je objavljen — ponude stižu uskoro.', { kind: 'success' })
       navigate(`/listings/${listing.id}`)
     } catch (requestError) {
       setError(requestError.message)

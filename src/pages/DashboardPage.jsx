@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
 import { formatBosnianDate } from '../utils/dateFormat'
+import CountUp from '../components/CountUp'
 
 const STATUS_LABELS = {
   published: 'Objavljen',
@@ -75,9 +76,9 @@ function DashboardPage() {
         </div>
 
         <div className="dashboard-grid">
-          <div className="stat-card"><strong>{listings.length}</strong><span>Objavljeni poslovi</span></div>
-          <div className="stat-card"><strong>{listings.reduce((sum, item) => sum + (item.bids?.[0]?.count || 0), 0)}</strong><span>Primljene ponude</span></div>
-          <div className="stat-card"><strong>{listings.filter((item) => item.status === 'published').length}</strong><span>Aktivni oglasi</span></div>
+          <div className="stat-card"><strong><CountUp value={listings.length} /></strong><span>Objavljeni poslovi</span></div>
+          <div className="stat-card"><strong><CountUp value={listings.reduce((sum, item) => sum + (item.bids?.[0]?.count || 0), 0)} /></strong><span>Primljene ponude</span></div>
+          <div className="stat-card"><strong><CountUp value={listings.filter((item) => item.status === 'published').length} /></strong><span>Aktivni oglasi</span></div>
         </div>
 
         {message && <div className="form-success">{message}</div>}

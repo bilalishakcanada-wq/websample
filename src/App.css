@@ -12113,3 +12113,34 @@ button { touch-action: manipulation; }
 /* inside the native app the OS draws the status bar; keep content clear of it */
 .is-native .site-header { padding-top: env(safe-area-inset-top); }
 .is-native .site-header-spacer { height: calc(var(--header-h) + env(safe-area-inset-top)); }
+
+/* =========================================================================
+   App polish: toasts, staggered list entrances, live numbers
+   ========================================================================= */
+.toaster { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 120; display: grid; gap: 8px; width: min(100% - 32px, 420px); pointer-events: none; }
+.toast { pointer-events: auto; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 12px 12px 14px; border-radius: 14px; background: var(--primary-strong); color: white; font-weight: 600; font-size: 0.93rem; box-shadow: 0 16px 40px rgba(6, 21, 48, 0.35); animation: toast-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.toast svg:first-child { color: var(--accent); }
+.toast-success svg:first-child { color: #4ade80; }
+.toast-error { background: #7f1d1d; }
+.toast-error svg:first-child { color: #fca5a5; }
+.toast button { display: grid; place-items: center; width: 28px; height: 28px; min-height: 0; border-radius: 8px; background: rgba(255, 255, 255, 0.12); color: white; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+@media (max-width: 768px) { .toaster { bottom: calc(88px + env(safe-area-inset-bottom)); } body[data-tabbar='off'] .toaster { bottom: calc(96px + env(safe-area-inset-bottom)); } }
+
+/* cards fade+rise one after another when a list mounts (search, dashboard, recommendations) */
+@keyframes card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.browse-list > .task-card, .listing-grid > *, .rec-grid > *, .dashboard-listing, .admin-table > .admin-row, .help-audiences > *, .chat-list-row { animation: card-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.browse-list > .task-card:nth-child(1), .listing-grid > :nth-child(1), .rec-grid > :nth-child(1), .dashboard-listing:nth-child(1), .admin-table > .admin-row:nth-child(1), .help-audiences > :nth-child(1), .chat-list-row:nth-child(1) { animation-delay: 0.03s; }
+.browse-list > .task-card:nth-child(2), .listing-grid > :nth-child(2), .rec-grid > :nth-child(2), .dashboard-listing:nth-child(2), .admin-table > .admin-row:nth-child(2), .help-audiences > :nth-child(2), .chat-list-row:nth-child(2) { animation-delay: 0.08s; }
+.browse-list > .task-card:nth-child(3), .listing-grid > :nth-child(3), .rec-grid > :nth-child(3), .dashboard-listing:nth-child(3), .admin-table > .admin-row:nth-child(3), .help-audiences > :nth-child(3), .chat-list-row:nth-child(3) { animation-delay: 0.13s; }
+.browse-list > .task-card:nth-child(4), .listing-grid > :nth-child(4), .rec-grid > :nth-child(4), .dashboard-listing:nth-child(4), .admin-table > .admin-row:nth-child(4), .chat-list-row:nth-child(4) { animation-delay: 0.18s; }
+.browse-list > .task-card:nth-child(5), .listing-grid > :nth-child(5), .rec-grid > :nth-child(5), .dashboard-listing:nth-child(5), .admin-table > .admin-row:nth-child(5), .chat-list-row:nth-child(5) { animation-delay: 0.23s; }
+.browse-list > .task-card:nth-child(6), .listing-grid > :nth-child(6), .rec-grid > :nth-child(6), .dashboard-listing:nth-child(6), .admin-table > .admin-row:nth-child(6), .chat-list-row:nth-child(6) { animation-delay: 0.28s; }
+.browse-list > .task-card:nth-child(n+7), .listing-grid > :nth-child(n+7), .rec-grid > :nth-child(n+7), .dashboard-listing:nth-child(n+7), .admin-table > .admin-row:nth-child(n+7), .chat-list-row:nth-child(n+7) { animation-delay: 0.32s; }
+
+/* numbers that tick up keep a steady width so the layout does not wobble */
+.count-up { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .toast, .browse-list > .task-card, .listing-grid > *, .rec-grid > *, .dashboard-listing, .admin-table > .admin-row, .help-audiences > *, .chat-list-row { animation: none; }
+}

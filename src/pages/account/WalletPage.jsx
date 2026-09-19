@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowDownLeft, ArrowUpRight, Coins, Gift, Info, Lock, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import CountUp from '../../components/CountUp'
 
 const KIND = {
   admin_credit: ['Uplata — Poso.ba tim', Gift],
@@ -41,16 +42,16 @@ function WalletPage() {
           <span className="wallet-card-label"><Wallet size={15} /> Stanje računa</span>
           <span className="wallet-card-chip"><ShieldCheck size={13} /> Sigurno na platformi</span>
         </div>
-        <strong className="wallet-card-balance">{money(wallet.balance)}</strong>
+        <strong className="wallet-card-balance"><CountUp value={wallet.balance} format={money} duration={900} /></strong>
         <span className="wallet-card-sub">trenutno stanje · {wallet.count} {Number(wallet.count) === 1 ? 'transakcija' : 'transakcija'}</span>
         <Coins className="wallet-card-art" size={120} aria-hidden="true" />
       </div>
 
       <div className="wallet-stats">
-        <div><ArrowDownLeft size={16} /><span>Uplaćeno ukupno</span><strong>{money(wallet.credited_total)}</strong></div>
-        <div><ArrowUpRight size={16} /><span>Skinuto ukupno</span><strong>{money(wallet.spent_total)}</strong></div>
-        <div><ArrowDownLeft size={16} /><span>Uplaćeno · 30 dana</span><strong>{money(wallet.credited_30d)}</strong></div>
-        <div><ArrowUpRight size={16} /><span>Skinuto · 30 dana</span><strong>{money(wallet.spent_30d)}</strong></div>
+        <div><ArrowDownLeft size={16} /><span>Uplaćeno ukupno</span><strong><CountUp value={wallet.credited_total} format={money} /></strong></div>
+        <div><ArrowUpRight size={16} /><span>Skinuto ukupno</span><strong><CountUp value={wallet.spent_total} format={money} /></strong></div>
+        <div><ArrowDownLeft size={16} /><span>Uplaćeno · 30 dana</span><strong><CountUp value={wallet.credited_30d} format={money} /></strong></div>
+        <div><ArrowUpRight size={16} /><span>Skinuto · 30 dana</span><strong><CountUp value={wallet.spent_30d} format={money} /></strong></div>
       </div>
 
       <div className="wallet-info">

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import CountUp from '../components/CountUp'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Award, BellRing, Coins, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, UsersRound, Users,
@@ -125,7 +126,7 @@ function AdminPage({ mode = 'admin' }) {
             <div className="adm-kpis">
               {KPIS.map(([key, label, subKey, subTemplate]) => (
                 <div key={key} className={`adm-kpi kpi-${key}`}>
-                  <strong>{overview[key] ?? 0}</strong>
+                  <strong><CountUp value={overview[key] ?? 0} /></strong>
                   <span>{label}</span>
                   <small>{subKey ? subTemplate.replace('{v}', overview[subKey] ?? 0) : subTemplate}</small>
                 </div>

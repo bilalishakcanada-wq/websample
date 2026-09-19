@@ -55,6 +55,7 @@ import SiteFooter from './components/SiteFooter'
 import InstallPrompt from './components/InstallPrompt'
 import ScrollToTop from './components/ScrollToTop'
 import MobileNav from './components/MobileNav'
+import Toaster from './components/Toaster'
 import SupportChat from './components/SupportChat'
 
 function App() {
@@ -113,6 +114,7 @@ function App() {
       </Suspense>
       <SiteFooter />
       <MobileNav />
+      <Toaster />
     </BrowserRouter>
   )
 }

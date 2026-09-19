@@ -5,6 +5,7 @@ import { paymentService } from '../services/paymentService'
 import { accountService } from '../services/accountService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
+import { toast } from './Toaster'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -42,6 +43,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
     try {
       await paymentService.acceptAndFund(bid.id)
       haptic('medium')
+      toast(`Ponuda prihvaćena — ${money(amount)} je osigurano na Poso.ba.`, { kind: 'success' })
       onDone?.()
       onClose()
     } catch (requestError) {
@@ -100,10 +102,11 @@ export function JobPaymentCard({ payment, role, onChanged }) {
   const [dispute, setDispute] = useState(null) // null | 'open' | text
   const current = stepIndex(payment.status)
 
+  const DONE = { release: 'Uplata oslobođena — izvođač je dobio novac.', request: 'Zatraženo — klijent je obaviješten.', cancel: 'Posao otkazan, novac je vraćen.', dispute: 'Prijava poslana. Tim se javlja u roku 48 h.' }
   const run = async (key, fn) => {
     setBusy(key)
     setError('')
-    try { await fn(); haptic('medium'); onChanged?.() } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
+    try { await fn(); haptic('medium'); toast(DONE[key] || 'Sačuvano.', { kind: 'success' }); onChanged?.() } catch (requestError) { setError(requestError.message); toast(requestError.message, { kind: 'error' }) } finally { setBusy('') }
   }
 
   const release = () => {

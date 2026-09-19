@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { toast } from '../components/Toaster'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
@@ -84,7 +85,7 @@ function ListingDetailPage() {
     const url = window.location.href
     try {
       if (navigator.share) await navigator.share({ title: listing?.title, url })
-      else { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.') }
+      else { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
     } catch { /* user cancelled */ }
   }
 
@@ -158,7 +159,7 @@ function ListingDetailPage() {
       setBids((current) => [{ ...created, bidder: null }, ...current])
       setBidForm({ amount: '', message: '' })
       setSheetOpen(false)
-      setMessage('Ponuda je uspješno poslana.')
+      setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
     } catch (requestError) {
       setBidError(requestError.message)
     } finally {
@@ -193,7 +194,7 @@ function ListingDetailPage() {
     try {
       await reviewService.createReview({ reviewerId: user.id, revieweeId: isOwner ? acceptedBid.bidder_id : listing.user_id, listingId: id, rating: reviewForm.rating, comment: reviewForm.comment })
       setReviewForm({ rating: 5, comment: '' })
-      setMessage('Hvala na recenziji!')
+      setMessage('Hvala na recenziji!'); toast('Hvala na recenziji!', { kind: 'success' })
     } catch (requestError) {
       setMessage(requestError.message)
     } finally {

@@ -10,6 +10,8 @@ import { messageService } from '../services/messageService'
 import { reportService } from '../services/reportService'
 import { contactInfoMessage, scanChatMessage } from '../utils/moderation'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import Chat from '../app/Chat'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -64,6 +66,7 @@ function MessagesPage() {
   const inputRef = useRef(null)
   const imageRef = useRef(null)
   const [uploading, setUploading] = useState(false)
+  const isPhone = useMediaQuery('(max-width: 768px)')
 
   const loadInbox = () => messageService.inbox().then(setInbox).catch((requestError) => setError(requestError.message))
 
@@ -207,6 +210,17 @@ function MessagesPage() {
     return groups
   }, [thread])
   const lastOwnRead = [...thread].reverse().find((item) => item.sender_id === user.id && item.read_at)
+
+  if (isPhone) {
+    return (
+      <Chat
+        user={user} inbox={inbox} visible={visible} active={active} loading={loading} query={query} setQuery={setQuery} filter={filter} setFilter={setFilter}
+        unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
+        listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
+        uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
+      />
+    )
+  }
 
   return (
     <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`}>

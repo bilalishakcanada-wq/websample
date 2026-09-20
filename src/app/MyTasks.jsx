@@ -6,6 +6,7 @@ import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useMode } from './mode'
+import { EmptyBoxMascot } from './Mascots'
 import './app.css'
 
 const STATUS = { published: ['Otvoren', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
@@ -40,7 +41,8 @@ function MyTasks() {
         <section className="ap-section">
           {jobs === null && <div className="ap-skeleton" />}
           {jobs && jobs.length === 0 && (
-            <div className="ap-empty">
+            <div className="ap-empty ap-empty-art">
+              <EmptyBoxMascot />
               <strong>Još nemaš objavljenih poslova</strong>
               <span>Opiši šta ti treba i ponude stižu brzo.</span>
               <Link to="/objavi" className="ap-btn ap-btn-primary ap-btn-inline"><Plus size={16} /> Objavi posao</Link>
@@ -53,7 +55,7 @@ function MyTasks() {
                 <Link key={job.id} to={`/listings/${job.id}`} className="ap-row">
                   <div>
                     <strong>{job.title}</strong>
-                    <span><Users size={13} /> {job.bids?.[0]?.count || 0} ponuda · {money(job.price)} · {formatBosnianDate(job.created_at)}</span>
+                    <span><Users size={13} /> {job.bids?.[0]?.count || 0} ponuda · {money(job.price)}</span>
                   </div>
                   <em className={`ap-pill ap-pill-${tone}`}>{label}</em>
                   <ChevronRight size={18} />
@@ -68,7 +70,8 @@ function MyTasks() {
         <section className="ap-section">
           {bids === null && <div className="ap-skeleton" />}
           {bids && bids.length === 0 && (
-            <div className="ap-empty">
+            <div className="ap-empty ap-empty-art">
+              <EmptyBoxMascot />
               <strong>Još nisi poslao/la nijednu ponudu</strong>
               <span>Pronađi posao koji ti odgovara i pošalji cijenu.</span>
               <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>

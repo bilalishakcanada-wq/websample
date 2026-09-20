@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
+import { MailMascot } from '../app/Mascots'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
@@ -216,8 +217,8 @@ function MessagesPage() {
               {loading && <div className="page-state">Učitavanje...</div>}
               {!loading && visible.length === 0 && (
                 <div className="chat-list-empty">
-                  <MessagesSquare size={26} />
-                  <p>{inbox.length === 0 ? 'Još nema razgovora. Otvore se čim neka ponuda bude prihvaćena.' : 'Nema poruka za ovaj filter.'}</p>
+                  <MailMascot className="chat-list-mascot" />
+                  <p>{inbox.length === 0 ? 'Još nema poruka. Razgovor se otvara čim neka ponuda bude prihvaćena.' : 'Nema poruka za ovaj filter.'}</p>
                 </div>
               )}
               {visible.map((item) => (

@@ -156,3 +156,35 @@ export function EarnMascot(props) {
     </svg>
   )
 }
+
+/** Mailbox — empty inbox */
+export function MailMascot(props) {
+  return (
+    <svg viewBox="0 0 240 300" {...props}>
+      <Sparkle x="40" y="60" s="0.7" /><Sparkle x="200" y="90" s="0.6" />
+      <rect x="112" y="170" width="18" height="100" rx="6" fill={INK} />
+      <rect x="40" y="90" width="160" height="90" rx="40" fill={NAVY} stroke={INK} strokeWidth="6" />
+      <rect x="40" y="90" width="90" height="90" rx="40" fill={NAVY} stroke={INK} strokeWidth="6" />
+      <rect x="120" y="96" width="76" height="78" rx="6" fill={GOLD} stroke={INK} strokeWidth="5" />
+      <rect x="132" y="112" width="52" height="8" rx="4" fill={INK} opacity="0.5" />
+      <path d="M186 66 L186 106" stroke={INK} strokeWidth="6" strokeLinecap="round" />
+      <path d="M186 66 L214 78 L186 90 Z" fill={GOLD} stroke={INK} strokeWidth="5" strokeLinejoin="round" />
+      <Face x="80" y="130" s="0.7" />
+    </svg>
+  )
+}
+
+/** Open box — nothing here yet */
+export function EmptyBoxMascot(props) {
+  return (
+    <svg viewBox="0 0 240 300" {...props}>
+      <Sparkle x="200" y="70" s="0.7" /><Sparkle x="36" y="100" s="0.6" />
+      <path d="M50 140 L120 170 L190 140 L190 240 L120 270 L50 240 Z" fill={GOLD} stroke={INK} strokeWidth="6" strokeLinejoin="round" />
+      <path d="M120 170 L120 270" stroke={INK} strokeWidth="5" />
+      <path d="M50 140 L20 110 L90 84 L120 116 Z" fill={NAVY} stroke={INK} strokeWidth="6" strokeLinejoin="round" />
+      <path d="M190 140 L220 110 L150 84 L120 116 Z" fill={NAVY} stroke={INK} strokeWidth="6" strokeLinejoin="round" />
+      <Face x="86" y="212" s="0.7" />
+      <path d="M150 60 q20 -30 40 -10 t10 30" stroke={INK} strokeWidth="4" fill="none" strokeDasharray="6 8" strokeLinecap="round" />
+    </svg>
+  )
+}

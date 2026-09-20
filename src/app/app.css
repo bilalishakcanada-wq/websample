@@ -242,3 +242,9 @@
 .ap-job-state { color: var(--primary) !important; font-weight: 700; }
 .ap-sub .account-section-head h1, .ap-sub .dashboard-topline h1 { display: none; }
 .ap-sub .account-section { padding-top: 0; }
+.ap-empty-art svg { width: 120px; height: 150px; margin: 0 auto 4px; }
+.chat-list-mascot { width: 130px; height: 150px; margin: 10px auto 0; }
+@media (max-width: 768px) {
+  .chat-page .chat-topline h1 { font-size: 1.45rem; }
+  .chat-page .chat-sidebar { border-radius: 16px; }
+}

@@ -12275,3 +12275,11 @@ button { touch-action: manipulation; }
   .filter-sheet-handle { display: block; width: 44px; height: 5px; margin: 6px auto 14px; border-radius: 999px; background: #d5dce8; }
   .filter-popover .popover-option { min-height: 46px; }
 }
+
+/* phones: search header is one compact line (the tab bar already gets you home) */
+@media (max-width: 768px) {
+  .browse-header { align-items: center; padding-top: 8px; padding-bottom: 6px; }
+  .browse-header .back-home-link { display: none; }
+  .browse-header h1 { font-size: 1.45rem; margin: 0; }
+  .browse-header .muted-text { font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; background: rgba(13, 42, 82, 0.06); font-weight: 700; }
+}

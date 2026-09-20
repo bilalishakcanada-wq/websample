@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Home, MessageCircle, Plus, Search, UserRound } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { haptic } from '../utils/native'
 
 const tabs = [
   ['/', 'Početna', Home],
@@ -29,12 +30,12 @@ function MobileNav() {
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">
       {tabs.map(([to, label, Icon]) => (
-        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
+        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} onClick={() => haptic('light')}>
           <Icon size={20} />
           <span>{label}</span>
         </NavLink>
       ))}
-      <button type="button" className="mobile-nav-publish" onClick={() => navigate('/objavi')} aria-label="Objavi oglas">
+      <button type="button" className="mobile-nav-publish" onClick={() => { haptic('medium'); navigate('/objavi') }} aria-label="Objavi oglas">
         <Plus size={24} />
       </button>
     </nav>

@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { rankListings } from '../utils/ranking'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, Laptop, List, MapPin,
@@ -44,12 +46,23 @@ const PRICE_PRESETS = [
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
 function FilterMenu({ id, label, active, open, onToggle, children, width }) {
+  // phones: the popover becomes a bottom sheet rendered on <body> (the sticky, blurred
+  // filter bar would otherwise trap a position: fixed panel inside itself)
+  const isPhone = useMediaQuery('(max-width: 768px)')
+  const panel = open && (
+    <div className="filter-popover" style={!isPhone && width ? { width } : undefined} role="dialog" data-menu={id}>
+      <div className="filter-sheet-handle" aria-hidden="true" />
+      {children}
+    </div>
+  )
   return (
     <div className={`filter-menu ${open ? 'open' : ''}`} data-menu={id}>
       <button type="button" className={`filter-pill ${active ? 'active' : ''}`} onClick={() => onToggle(id)} aria-expanded={open}>
         {label} <ChevronDown size={14} />
       </button>
-      {open && <div className="filter-popover" style={width ? { width } : undefined}>{children}</div>}
+      {open && isPhone
+        ? createPortal(<><div className="filter-sheet-backdrop" onClick={() => onToggle(id)} aria-hidden="true" />{panel}</>, document.body)
+        : panel}
     </div>
   )
 }
@@ -133,7 +146,8 @@ function SearchPage() {
   useEffect(() => {
     if (!openMenu) return undefined
     const close = (event) => {
-      if (filterBarRef.current && !filterBarRef.current.contains(event.target)) setOpenMenu('')
+      const insideSheet = event.target instanceof Element && event.target.closest('.filter-popover')
+      if (filterBarRef.current && !filterBarRef.current.contains(event.target) && !insideSheet) setOpenMenu('')
     }
     const onKey = (event) => event.key === 'Escape' && setOpenMenu('')
     document.addEventListener('pointerdown', close)

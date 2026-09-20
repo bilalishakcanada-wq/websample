@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MailMascot } from '../../app/Mascots'
-import { BadgeCheck, Bell, Bot, ChevronRight, Handshake, LifeBuoy, MessageCircle, ShieldBan, Wallet } from 'lucide-react'
+import { Award, BadgeCheck, Bell, Bot, ChevronRight, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
 import { notificationService } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 
-const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Bell, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, wallet: Wallet, job: Wallet, task_alert: Bell }
+const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Award, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles }
 
 function NotificationsPage() {
   const [items, setItems] = useState(null)

@@ -39,6 +39,8 @@ export const messageService = {
 
   async markRead(conversationId) {
     const { error } = await supabase.rpc('mark_conversation_read', { p_conversation_id: conversationId })
+    // the tab-bar badge listens for this
+    try { window.dispatchEvent(new Event('poso:messages-read')) } catch { /* ignore */ }
     if (error) console.error('Supabase mark read failed', { message: error.message, code: error.code })
   },
 

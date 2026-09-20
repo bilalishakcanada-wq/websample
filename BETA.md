@@ -11,6 +11,11 @@ Svaki push na `main` automatski gradi i objavljuje novu verziju (GitHub Actions 
 
 Na telefonu aplikacija počinje ekranom dobrodošlice → „Šta ti je glavni cilj?“ → 3 kratka ekrana uvoda → objava posla ili pregled poslova (registracija se traži tek na kraju).
 
+## Obavijesti — šta stiže i kome
+Sve ide u zvono u aplikaciji + push (kad je uključen) + link na pravi ekran:
+- Dobrodošlica pri registraciji · **Tvoj posao je objavljen** · nova ponuda · ponuda prihvaćena (rezervacija) · ponuda odbijena · pitanje uz posao / odgovor · nova poruka · uplata osigurana / zatražena isplata / isplaćeno / otkazano / spor · nova recenzija · značke i verifikacija · **novi posao u tvom gradu za tvoju struku** (izvođači) + alarmi po ključnoj riječi.
+- Tab „Poruke“ ima brojač nepročitanih.
+
 ## Obavijesti (push)
 - Nakon prijave pojavi se kartica **„Uključi obavijesti“** (nadzorna ploča / poruke) — ili *Nalog → Postavke → Ovaj uređaj → Uključi*.
 - Na iPhoneu obavijesti rade **samo iz instalirane aplikacije** (početni ekran), iOS 16.4+.

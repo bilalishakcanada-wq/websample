@@ -342,7 +342,7 @@ function MessagesPage() {
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
                     onKeyDown={onKeyDown}
-                    placeholder={active.contacts_allowed ? 'Napišite poruku…' : 'Napišite poruku… (bez brojeva i kontakata do prihvaćene ponude)'}
+                    placeholder="Napiši poruku…"
                     rows={1}
                     maxLength={2000}
                   />

@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react'
-import { Map as MapLibreMap, NavigationControl, LngLatBounds, Popup } from 'maplibre-gl'
+import { Map as MapLibreMap, NavigationControl, LngLatBounds, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+// MapLibre 6 finds its worker next to its own module URL — after bundling that file no
+// longer exists (blank map, no tiles). Let Vite bundle the worker and hand MapLibre the URL.
+import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+
+setWorkerUrl(mapWorkerUrl)
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron'
 const BIH_CENTER = [17.8, 44.1]
@@ -43,6 +48,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     })
     map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
     mapRef.current = map
+    if (import.meta.env.DEV) window.__posoMap = map
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
 
     map.on('load', () => {
@@ -115,10 +121,24 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
 
     // The container starts hidden on mobile (list view), so re-measure
     // whenever it changes size or becomes visible.
-    const observer = new ResizeObserver(() => map.resize())
+    const observer = new ResizeObserver(() => { map.resize(); map.triggerRepaint() })
     observer.observe(containerRef.current)
 
+    // A WebGL canvas can lose its last frame when an ancestor finishes a CSS animation
+    // (page fade-in) or the tab comes back to the foreground; MapLibre is idle then and
+    // would stay blank, so ask for a fresh frame in those moments.
+    const repaint = () => { if (mapRef.current === map) map.triggerRepaint() }
+    const timers = [400, 1200, 2500].map((ms) => window.setTimeout(repaint, ms))
+    map.once('idle', () => window.setTimeout(repaint, 50))
+    const onVisible = () => { if (document.visibilityState === 'visible') repaint() }
+    document.addEventListener('visibilitychange', onVisible)
+    const onAnimationEnd = () => repaint()
+    document.addEventListener('animationend', onAnimationEnd, true)
+
     return () => {
+      timers.forEach((timer) => window.clearTimeout(timer))
+      document.removeEventListener('visibilitychange', onVisible)
+      document.removeEventListener('animationend', onAnimationEnd, true)
       observer.disconnect()
       map.remove()
       mapRef.current = null

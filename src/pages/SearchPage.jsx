@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useBackToClose } from '../hooks/useBackToClose'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, Laptop, List, MapPin,
@@ -66,6 +67,7 @@ function SearchPage() {
     sort: searchParams.get('sort') || 'newest',
   })
   const [openMenu, setOpenMenu] = useState('')
+  useBackToClose(Boolean(openMenu), () => setOpenMenu(''))
   const [citySearch, setCitySearch] = useState('')
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)

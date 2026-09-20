@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import SuccessSplash from '../components/SuccessSplash'
+import { useBackToClose } from '../hooks/useBackToClose'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
@@ -84,6 +85,11 @@ function ListingDetailPage() {
   const [payment, setPayment] = useState(null)
   const [acceptBid, setAcceptBid] = useState(null)
   const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])
+
+  // phone back button closes overlays instead of leaving the job
+  useBackToClose(sheetOpen, () => setSheetOpen(false))
+  useBackToClose(Boolean(acceptBid), () => setAcceptBid(null))
+  useBackToClose(lightbox !== null, () => setLightbox(null))
 
   const share = async () => {
     const url = window.location.href

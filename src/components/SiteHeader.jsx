@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useBackToClose } from '../hooks/useBackToClose'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -23,6 +24,7 @@ function SiteHeader() {
   const [menuPinned, setMenuPinned] = useState(false)
   const [navMode, setNavMode] = useState('client')
   const [mobileOpen, setMobileOpen] = useState(false)
+  useBackToClose(mobileOpen, () => setMobileOpen(false))
   const [scrolled, setScrolled] = useState(false)
   const headerRef = useRef(null)
   const megaMenuRef = useRef(null)

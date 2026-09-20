@@ -1,5 +1,6 @@
 import BrandMark from './BrandMark'
 import { Link } from 'react-router-dom'
+import { DoneMascot } from '../app/Mascots'
 
 function AuthLayout({ title, subtitle, children, footer }) {
   return (
@@ -8,6 +9,7 @@ function AuthLayout({ title, subtitle, children, footer }) {
         <BrandMark size={42} className="brand-mark" />
         <span className="brand-name">Poso.ba</span>
       </Link>
+      <div className="auth-art" aria-hidden="true"><DoneMascot /></div>
 
       <div className="auth-card">
         <h1>{title}</h1>

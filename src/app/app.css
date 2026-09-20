@@ -477,3 +477,23 @@
 .ch-attach { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #eef2f8; color: var(--primary); min-height: 0; flex-shrink: 0; }
 .ch-send { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--primary-strong); min-height: 0; flex-shrink: 0; }
 .ch-send:disabled { opacity: 0.4; }
+
+/* ---------- my tasks: status filter + browse-style cards ---------- */
+.mt-filter { display: inline-flex; align-items: center; gap: 4px; margin: 4px 0 12px; min-height: 36px; padding: 0 4px; background: transparent; color: var(--primary-strong); font-weight: 800; font-size: 0.95rem; }
+.ap-sheet-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 50px; padding: 8px 10px; border-radius: 12px; background: transparent; color: var(--text); font-weight: 600; font-size: 1rem; text-align: left; }
+.ap-sheet-option.active { background: #eef2f8; color: var(--primary); }
+.mt-list { display: grid; gap: 12px; }
+.mt-card { display: grid; gap: 6px; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--stroke); color: var(--text); }
+.mt-card-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.mt-card-head strong { font-size: 1.02rem; line-height: 1.3; }
+.mt-card-head em { font-style: normal; font-weight: 800; white-space: nowrap; color: var(--primary-strong); }
+.mt-card > span { display: inline-flex; align-items: center; gap: 6px; font-size: 0.84rem; color: var(--text-soft); }
+.mt-card > span svg { color: #9aa6b8; }
+.mt-card-foot { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.mt-state { font-size: 0.86rem; font-weight: 800; }
+.mt-state.s-open { color: #1d7a4f; }
+.mt-state.s-assigned { color: var(--primary); }
+.mt-state.s-done { color: var(--text-soft); }
+.mt-state.s-off { color: #b93c3c; }
+.mt-card-foot small { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-soft); }
+.mt-avatar { margin-left: auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eef2f8; color: var(--primary); }

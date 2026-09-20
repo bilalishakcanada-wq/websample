@@ -1,19 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Bell, ChevronRight, Plus, Users } from 'lucide-react'
+import { Bell, CalendarDays, Check, ChevronDown, MapPin, Plus, UserRound, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useMode } from './mode'
+import { useBackToClose } from '../hooks/useBackToClose'
 import { EmptyBoxMascot } from './Mascots'
 import './app.css'
 
-const STATUS = { published: ['Otvoren', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
-const BID_STATUS = { pending: ['Čeka odgovor', 'open'], accepted: ['Prihvaćena', 'done'], rejected: ['Odbijena', 'off'], withdrawn: ['Povučena', 'off'] }
+const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
+const BID_STATUS = { pending: ['Ponuda poslana', 'open'], accepted: ['Dodijeljen tebi', 'done'], rejected: ['Nije prošla', 'off'], withdrawn: ['Povučena', 'off'] }
+const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani']]
+const BID_FILTERS = [['all', 'Sve ponude'], ['pending', 'Čekaju odgovor'], ['accepted', 'Dodijeljeni meni'], ['rejected', 'Nisu prošle']]
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
+const when = (description) => ((description || '').split('\n\nKada:')[1] || '').trim() || 'Fleksibilan termin'
 
-/** "Moji poslovi": the jobs I posted and the offers I sent, as two simple lists. */
+/** "Moji poslovi": jobs I posted and offers I sent — cards like the browse list, with a status filter. */
 function MyTasks() {
   const { user } = useAuth()
   const [mode] = useMode()
@@ -21,6 +25,9 @@ function MyTasks() {
   const tab = params.get('tab') || (mode === 'tasker' ? 'ponude' : 'objavljeni')
   const [jobs, setJobs] = useState(null)
   const [bids, setBids] = useState(null)
+  const [filter, setFilter] = useState('all')
+  const [pick, setPick] = useState(false)
+  useBackToClose(pick, () => setPick(false))
 
   useEffect(() => {
     let alive = true
@@ -29,13 +36,31 @@ function MyTasks() {
     return () => { alive = false }
   }, [user.id])
 
+  const switchTab = (next) => { setParams({ tab: next }, { replace: true }); setFilter('all') }
+  const filters = tab === 'objavljeni' ? JOB_FILTERS : BID_FILTERS
+  const filterLabel = filters.find(([id]) => id === filter)?.[1] || filters[0][1]
+  const visibleJobs = useMemo(() => (jobs || []).filter((job) => filter === 'all' || job.status === filter), [jobs, filter])
+  const visibleBids = useMemo(() => (bids || []).filter((bid) => filter === 'all' || bid.status === filter), [bids, filter])
+
   return (
-    <div className="ap ap-page">
+    <div className="ap ap-page mt">
       <header className="ap-page-head"><h1>Moji poslovi</h1><Link to="/account/obavijesti" className="ap-icon-btn" aria-label="Obavijesti"><Bell size={20} /></Link></header>
       <div className="ap-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => setParams({ tab: 'objavljeni' }, { replace: true })}>Objavljeni {jobs ? `(${jobs.length})` : ''}</button>
-        <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => setParams({ tab: 'ponude' }, { replace: true })}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
+        <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavio/la sam {jobs ? `(${jobs.length})` : ''}</button>
+        <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => switchTab('ponude')}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
       </div>
+
+      <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>
+      {pick && (
+        <div className="ap-sheet-backdrop" onClick={() => setPick(false)}>
+          <div className="ap-sheet" role="listbox" onClick={(event) => event.stopPropagation()}>
+            <span className="ap-sheet-handle" style={{ display: "block" }} />
+            {filters.map(([id, label]) => (
+              <button key={id} type="button" role="option" aria-selected={filter === id} className={`ap-sheet-option ${filter === id ? 'active' : ''}`} onClick={() => { setFilter(id); setPick(false) }}>{label}{filter === id && <Check size={18} />}</button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {tab === 'objavljeni' && (
         <section className="ap-section">
@@ -48,17 +73,21 @@ function MyTasks() {
               <Link to="/objavi" className="ap-btn ap-btn-primary ap-btn-inline"><Plus size={16} /> Objavi posao</Link>
             </div>
           )}
-          <div className="ap-list">
-            {(jobs || []).map((job) => {
+          {jobs && jobs.length > 0 && visibleJobs.length === 0 && <p className="jd-empty">Nema poslova u ovom filteru.</p>}
+          <div className="mt-list">
+            {visibleJobs.map((job) => {
               const [label, tone] = STATUS[job.status] || STATUS.published
+              const offers = job.bids?.[0]?.count || 0
               return (
-                <Link key={job.id} to={`/listings/${job.id}`} className="ap-row">
-                  <div>
-                    <strong>{job.title}</strong>
-                    <span><Users size={13} /> {job.bids?.[0]?.count || 0} ponuda · {money(job.price)}</span>
+                <Link key={job.id} to={`/listings/${job.id}`} className="mt-card">
+                  <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
+                  <span><MapPin size={14} /> {job.location || 'Online'}</span>
+                  <span><CalendarDays size={14} /> {when(job.description)}</span>
+                  <div className="mt-card-foot">
+                    <b className={`mt-state s-${tone}`}>{label}</b>
+                    <small><Users size={13} /> {offers} {offers === 1 ? 'ponuda' : 'ponuda'}</small>
+                    <i className="mt-avatar"><UserRound size={16} /></i>
                   </div>
-                  <em className={`ap-pill ap-pill-${tone}`}>{label}</em>
-                  <ChevronRight size={18} />
                 </Link>
               )
             })}
@@ -77,17 +106,20 @@ function MyTasks() {
               <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>
             </div>
           )}
-          <div className="ap-list">
-            {(bids || []).map((bid) => {
+          {bids && bids.length > 0 && visibleBids.length === 0 && <p className="jd-empty">Nema ponuda u ovom filteru.</p>}
+          <div className="mt-list">
+            {visibleBids.map((bid) => {
               const [label, tone] = BID_STATUS[bid.status] || BID_STATUS.pending
               return (
-                <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="ap-row">
-                  <div>
-                    <strong>{bid.listing?.title || 'Posao'}</strong>
-                    <span>Tvoja ponuda: {money(bid.amount)} · {formatBosnianDate(bid.created_at)}</span>
+                <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="mt-card">
+                  <div className="mt-card-head"><strong>{bid.listing?.title || 'Posao'}</strong><em>{money(bid.amount)}</em></div>
+                  <span><MapPin size={14} /> {bid.listing?.location || 'Online'}</span>
+                  <span><CalendarDays size={14} /> Ponuda poslana {formatBosnianDate(bid.created_at)}</span>
+                  <div className="mt-card-foot">
+                    <b className={`mt-state s-${tone}`}>{label}</b>
+                    <small>Tvoja cijena</small>
+                    <i className="mt-avatar"><UserRound size={16} /></i>
                   </div>
-                  <em className={`ap-pill ap-pill-${tone}`}>{label}</em>
-                  <ChevronRight size={18} />
                 </Link>
               )
             })}

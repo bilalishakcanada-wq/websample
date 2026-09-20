@@ -60,7 +60,6 @@ import MobileNav from './components/MobileNav'
 import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
-import WelcomeTour from './components/WelcomeTour'
 import SupportChat from './components/SupportChat'
 import { useMediaQuery } from './hooks/useMediaQuery'
 
@@ -139,7 +138,6 @@ function App() {
       <SiteFooter />
       <MobileNav />
       <Toaster />
-      <WelcomeTour />
     </BrowserRouter>
   )
 }

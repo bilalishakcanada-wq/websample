@@ -9,7 +9,7 @@ Svaki push na `main` automatski gradi i objavljuje novu verziju (GitHub Actions 
 - **iPhone (Safari):** otvori link → *Dijeli* (ikona kvadrata sa strelicom) → **Dodaj na početni ekran**. Aplikacija se otvara preko cijelog ekrana, bez Safari trake.
 - **Android (Chrome):** otvori link → pojavi se traka „Instaliraj Poso.ba“ (ili meni ⋮ → **Instaliraj aplikaciju**).
 
-Pri prvom otvaranju instalirane aplikacije prikaže se kratki uvod (3 ekrana). Pregled bilo gdje: dodaj `?tour=1` na link.
+Na telefonu aplikacija počinje ekranom dobrodošlice → „Šta ti je glavni cilj?“ → 3 kratka ekrana uvoda → objava posla ili pregled poslova (registracija se traži tek na kraju).
 
 ## Obavijesti (push)
 - Nakon prijave pojavi se kartica **„Uključi obavijesti“** (nadzorna ploča / poruke) — ili *Nalog → Postavke → Ovaj uređaj → Uključi*.

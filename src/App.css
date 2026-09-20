@@ -12283,3 +12283,17 @@ button { touch-action: manipulation; }
   .browse-header h1 { font-size: 1.45rem; margin: 0; }
   .browse-header .muted-text { font-size: 0.82rem; padding: 4px 10px; border-radius: 999px; background: rgba(13, 42, 82, 0.06); font-weight: 700; }
 }
+
+/* phones: info pages keep only the breadcrumb (the tab bar has Home); reveal sections
+   start visible so nothing looks half-loaded on a short screen */
+@media (max-width: 768px) {
+  .info-header .back-home-link { display: none; }
+  .info-header .breadcrumbs { margin-top: 0; }
+  .info-page .reveal { opacity: 1; transform: none; transition: none; }
+  .info-page .reveal-stagger > * { opacity: 1; transform: none; transition: none; }
+}
+@media (max-width: 768px) {
+  .breadcrumbs { flex-wrap: wrap; }
+  .breadcrumbs a { display: inline-flex; align-items: center; min-height: 0; }
+  .info-page > .content-container { padding-top: 8px; }
+}

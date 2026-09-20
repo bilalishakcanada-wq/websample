@@ -16,10 +16,11 @@ function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState('')
   const verificationPending = searchParams.get('verification') === 'pending'
 
-  if (user) {
-    const destination = location.state?.from?.pathname || '/account'
-    return <Navigate to={destination} replace />
-  }
+  // ?next=/objavi (phone flows) or the guarded page that sent us here
+  const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
+  const destination = safeNext(searchParams.get('next')) || location.state?.from?.pathname || '/account'
+
+  if (user) return <Navigate to={destination} replace />
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -33,7 +34,7 @@ function LoginPage() {
 
     try {
       await login({ ...form, captchaToken })
-      navigate('/account')
+      navigate(destination)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -65,7 +66,7 @@ function LoginPage() {
       </form>
 
       <p className="auth-switch">
-        Nemaš račun? <Link to="/register">Registruj se</Link>
+        Nemaš račun? <Link to={`/register${searchParams.get('next') ? `?next=${encodeURIComponent(searchParams.get('next'))}` : ''}`}>Registruj se</Link>
       </p>
 
       <OAuthButtons verb="Prijavi se" onError={setError} />

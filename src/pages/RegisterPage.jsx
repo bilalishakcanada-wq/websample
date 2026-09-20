@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Briefcase, Hammer, Repeat } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import { serviceCategories } from '../data/categories'
+import { getMode } from '../app/mode'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove i biram ponude', icon: Briefcase },
@@ -15,9 +17,14 @@ const ACCOUNT_TYPES = [
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isPhone = useMediaQuery('(max-width: 768px)')
   const { user, register } = useAuth()
   const [form, setForm] = useState({ fullName: '', email: '', password: '', city: '', phone: '' })
-  const [accountType, setAccountType] = useState('client')
+  // the goal chosen on the phone welcome flow pre-fills the account type
+  const [accountType, setAccountType] = useState(() => (getMode() === 'tasker' ? 'provider' : 'client'))
+  const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
+  const next = safeNext(searchParams.get('next'))
   const [trades, setTrades] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,7 +38,7 @@ function RegisterPage() {
   }
 
   if (user) {
-    return <Navigate to="/account" replace />
+    return <Navigate to={next || '/account'} replace />
   }
 
   const handleChange = (event) => {
@@ -51,7 +58,8 @@ function RegisterPage() {
         accountType,
         trades: offersServices ? trades : [],
       })
-      navigate(result.session ? '/account/profil?setup=1' : '/login?verification=pending')
+      if (result.session) navigate(next || '/account/profil?setup=1')
+      else navigate(`/login?verification=pending${next ? `&next=${encodeURIComponent(next)}` : ''}`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -62,7 +70,7 @@ function RegisterPage() {
   return (
     <AuthLayout title="Napravi svoj račun">
       <form onSubmit={handleSubmit} className="auth-form">
-        <fieldset className="account-type-picker">
+        <fieldset className={`account-type-picker ${isPhone && next ? 'is-collapsed' : ''}`}>
           <legend>Kako želiš koristiti Poso.ba?</legend>
           {ACCOUNT_TYPES.map(({ value, label, hint, icon: Icon }) => (
             <button
@@ -119,10 +127,12 @@ function RegisterPage() {
             <input id="city" name="city" placeholder=" " value={form.city} onChange={handleChange} />
             <label htmlFor="city">Grad</label>
           </div>
-          <div className="field">
-            <input id="phone" name="phone" placeholder=" " value={form.phone} onChange={handleChange} />
-            <label htmlFor="phone">Telefon</label>
-          </div>
+          {!isPhone && (
+            <div className="field">
+              <input id="phone" name="phone" placeholder=" " value={form.phone} onChange={handleChange} />
+              <label htmlFor="phone">Telefon</label>
+            </div>
+          )}
         </div>
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}</div>}
@@ -132,7 +142,7 @@ function RegisterPage() {
       </form>
 
       <p className="auth-switch">
-        Već imaš račun? <Link to="/login">Prijavi se</Link>
+        Već imaš račun? <Link to={`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`}>Prijavi se</Link>
       </p>
 
       <OAuthButtons verb="Registruj se" onError={setError} />

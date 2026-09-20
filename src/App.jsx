@@ -60,6 +60,19 @@ import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
 import WelcomeTour from './components/WelcomeTour'
 import SupportChat from './components/SupportChat'
+import { useMediaQuery } from './hooks/useMediaQuery'
+
+// phone app screens (welcome, goal, intro, post flow, my tasks); desktop keeps its pages
+const StartGoal = lazy(lazyImport(() => import('./app/StartGoal')))
+const Intro = lazy(lazyImport(() => import('./app/Intro')))
+const PostFlow = lazy(lazyImport(() => import('./app/PostFlow')))
+const MyTasks = lazy(lazyImport(() => import('./app/MyTasks')))
+
+/** Phones get the one-question-per-screen flow; wider screens keep the wizard. */
+function PostRoute() {
+  const isPhone = useMediaQuery('(max-width: 768px)')
+  return isPhone ? <PostFlow /> : <ProtectedRoute><PostTaskPage /></ProtectedRoute>
+}
 
 function App() {
   return (
@@ -80,7 +93,10 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/objavi" element={<ProtectedRoute><PostTaskPage /></ProtectedRoute>} />
+        <Route path="/objavi" element={<PostRoute />} />
+        <Route path="/start" element={<StartGoal />} />
+        <Route path="/intro" element={<Intro />} />
+        <Route path="/moji-poslovi" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
         <Route path="/dashboard" element={<Navigate to="/account" replace />} />
         <Route path="/profile" element={<LegacyProfileRedirect />} />
         <Route path="/nivoi" element={<TiersInfoPage />} />

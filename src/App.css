@@ -3599,9 +3599,6 @@ select {
     box-shadow: 0 8px 18px rgba(245, 180, 0, 0.35);
   }
 
-  .mobile-nav-item:nth-child(3) {
-    visibility: hidden;
-  }
 
   .listing-card {
     grid-template-columns: 72px 1fr;
@@ -12206,10 +12203,11 @@ button { touch-action: manipulation; }
 @keyframes ring-out { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
 @media (prefers-reduced-motion: reduce) { .success-splash-ring { animation: none; opacity: 0; } }
 
-/* tab bar: the active tab gets a soft pill behind its icon (Material-style) */
+/* tab bar: plain line icons, navy when active (the app people already know) */
 @media (max-width: 768px) {
-  .mobile-nav-item svg { padding: 3px 10px; border-radius: 999px; box-sizing: content-box; transition: background 0.25s ease, transform 0.2s ease; }
-  .mobile-nav-item.active svg { background: rgba(245, 180, 0, 0.22); }
+  .mobile-nav-item { font-size: 0.62rem; font-weight: 700; color: #6b7a90; gap: 3px; }
+  .mobile-nav-item.active { color: var(--primary-strong); }
+  .mobile-nav-item svg { transition: transform 0.15s ease; }
 }
 
 /* map chunk loading placeholder */
@@ -12304,3 +12302,35 @@ button { touch-action: manipulation; }
 .price-hint-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .price-hint-chips button { min-height: 34px; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid rgba(13, 42, 82, 0.15); color: var(--primary-strong); font-weight: 800; font-size: 0.82rem; }
 .price-hint-chips button.active { background: var(--primary-strong); color: var(--accent); border-color: var(--primary-strong); }
+
+/* ---------- phone chrome: header is logo + bell (+ "Prijava" for visitors); no drawer, no burger ---------- */
+@media (max-width: 768px) {
+  .site-burger, .site-drawer { display: none !important; }
+  .site-phone-login { display: inline-flex !important; align-items: center; min-height: 36px; padding: 6px 14px; border-radius: 999px; background: var(--primary-strong); color: white; font-weight: 800; font-size: 0.86rem; margin-left: auto; }
+  .site-mobile-bell { margin-left: auto; }
+  .site-mobile-bell + .site-phone-login { margin-left: 8px; }
+  /* screens that draw their own top bar hide the site chrome entirely */
+  body[data-chrome='off'] .site-header, body[data-chrome='off'] .site-header-spacer, body[data-chrome='off'] .mobile-nav, body[data-chrome='off'] .site-footer-dark, body[data-chrome='off'] .install-banner { display: none !important; }
+  body[data-chrome='off'] #root { padding-bottom: 0; }
+  /* the app screens replace the marketing footer on phones */
+  body[data-page='home'] .site-footer-dark, body[data-page='moji-poslovi'] .site-footer-dark, body[data-page='account'] .site-footer-dark, body[data-page='search'] .site-footer-dark { display: none; }
+}
+.site-phone-login { display: none; }
+/* phone sign-up reached from a flow: the goal is already chosen, keep the picker out of the way */
+@media (max-width: 768px) { .account-type-picker.is-collapsed { display: none; } }
+
+/* ---------- browse (search) on phones: plain top bar, chips, simple cards ---------- */
+@media (max-width: 768px) {
+  .ap-browse-top { display: grid; grid-template-columns: 42px minmax(0, 1fr) 42px; align-items: center; gap: 8px; padding: 10px 14px 6px; }
+  .ap-browse-top h1 { margin: 0; text-align: center; font-size: 1.05rem; font-weight: 800; color: var(--primary-strong); }
+  .ap-browse-top .ap-icon-btn.active { background: var(--primary-strong); color: white; }
+  .browse-page .browse-header, .browse-page .mobile-view-toggle { display: none; }
+  .browse-page .filter-search { display: none; }
+  .browse-page.search-open .filter-search { display: flex; }
+  .browse-page .filter-bar { top: 0; padding-top: 6px; padding-bottom: 8px; }
+  .browse-page .task-card { border-radius: 14px; }
+  .browse-page .task-card-facts li { font-size: 0.78rem; }
+  .browse-page .task-card-status { color: var(--primary); font-weight: 800; }
+  .browse-page .browse-map { height: calc(100dvh - 190px - env(safe-area-inset-bottom, 0px)); min-height: 320px; border-radius: 0; margin: 0 -14px; }
+  .browse-page .browse-map .task-map { border-radius: 0; }
+}

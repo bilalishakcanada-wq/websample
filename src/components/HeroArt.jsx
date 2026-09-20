@@ -119,7 +119,7 @@ function fitTextPaths(svg) {
   })
 }
 
-export function ArcHeadline() {
+export function ArcHeadline({ top = 'URADI BILO ŠTA', bottom = 'ODMAH.', id = 'hero-arc', as: Tag = 'h1', className = '' }) {
   const svgRef = useRef(null)
 
   useLayoutEffect(() => {
@@ -128,23 +128,23 @@ export function ArcHeadline() {
     let cancelled = false
     document.fonts?.ready.then(() => { if (!cancelled) fitTextPaths(svg) })
     return () => { cancelled = true }
-  }, [])
+  }, [top, bottom])
 
   return (
-    <h1 className="hero-arc">
-      <svg ref={svgRef} viewBox="0 0 1000 470" role="img" aria-labelledby="hero-arc-title">
-        <title id="hero-arc-title">Uradi bilo šta. Odmah.</title>
+    <Tag className={`hero-arc ${className}`.trim()}>
+      <svg ref={svgRef} viewBox="0 0 1000 470" role="img" aria-labelledby={`${id}-title`}>
+        <title id={`${id}-title`}>{`${top} ${bottom}`}</title>
         <defs>
-          <path id="hero-arc-top" d={TOP_ARC} />
-          <path id="hero-arc-bottom" d={BOTTOM_ARC} />
+          <path id={`${id}-top`} d={TOP_ARC} />
+          <path id={`${id}-bottom`} d={BOTTOM_ARC} />
         </defs>
-        <text className="hero-arc-line" data-fill="#hero-arc-top" data-fill-ratio="0.95">
-          <textPath href="#hero-arc-top" startOffset="50%" textAnchor="middle">URADI BILO ŠTA</textPath>
+        <text className="hero-arc-line" data-fill={`#${id}-top`} data-fill-ratio="0.95">
+          <textPath href={`#${id}-top`} startOffset="50%" textAnchor="middle">{top}</textPath>
         </text>
-        <text className="hero-arc-line hero-arc-accent" data-fill="#hero-arc-bottom" data-fill-ratio="0.7">
-          <textPath href="#hero-arc-bottom" startOffset="50%" textAnchor="middle">ODMAH.</textPath>
+        <text className="hero-arc-line hero-arc-accent" data-fill={`#${id}-bottom`} data-fill-ratio="0.7">
+          <textPath href={`#${id}-bottom`} startOffset="50%" textAnchor="middle">{bottom}</textPath>
         </text>
       </svg>
-    </h1>
+    </Tag>
   )
 }

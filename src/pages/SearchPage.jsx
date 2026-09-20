@@ -91,6 +91,7 @@ function SearchPage() {
   const [error, setError] = useState('')
   const [activeId, setActiveId] = useState(null)
   const [mobileView, setMobileView] = useState('list')
+  const [phoneSearchOpen, setPhoneSearchOpen] = useState(() => Boolean(searchParams.get('q')))
   // phones show list OR map; wider screens show both (mirrors the CSS breakpoint)
   const [isPhone, setIsPhone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches)
   useEffect(() => {
@@ -228,7 +229,16 @@ function SearchPage() {
   const sortLabel = SORT_OPTIONS.find((option) => option.value === filters.sort)?.label || 'Najnovije'
 
   return (
-    <div className="app-shell page-with-mobile-nav browse-page">
+    <div className={`app-shell page-with-mobile-nav browse-page ${isPhone && phoneSearchOpen ? 'search-open' : ''}`}>
+      {isPhone && (
+        <div className="ap-browse-top">
+          <button type="button" className="ap-icon-btn" onClick={() => setMobileView(mobileView === 'map' ? 'list' : 'map')} aria-label={mobileView === 'map' ? 'Lista' : 'Mapa'}>
+            {mobileView === 'map' ? <List size={20} /> : <MapIcon size={20} />}
+          </button>
+          <h1>Pretraži poslove</h1>
+          <button type="button" className={`ap-icon-btn ${phoneSearchOpen || filters.query ? 'active' : ''}`} onClick={() => setPhoneSearchOpen((open) => !open)} aria-label="Traži"><SearchIcon size={20} /></button>
+        </div>
+      )}
       <header className="app-page-header browse-header">
         <div>
           <BackHome />

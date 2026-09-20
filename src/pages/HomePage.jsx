@@ -1,13 +1,19 @@
 import { Suspense, lazy } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import MobileHome from './home/MobileHome'
+import Welcome from '../app/Welcome'
+import AppHome from '../app/AppHome'
 
 // the marketing page is only needed on tablets/desktops, so phones never download it
 const DesktopHome = lazy(() => import('./home/DesktopHome'))
 
 function HomePage() {
   const isPhone = useMediaQuery('(max-width: 768px)')
-  if (isPhone) return <MobileHome />
+  const { user, loading } = useAuth()
+  if (isPhone) {
+    if (loading) return <div className="route-loading"><span /></div>
+    return user ? <AppHome /> : <Welcome />
+  }
   return (
     <Suspense fallback={<div className="route-loading"><span /></div>}>
       <DesktopHome />

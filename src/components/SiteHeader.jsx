@@ -152,6 +152,7 @@ function SiteHeader() {
           </div>
 
           {user && <div className="site-mobile-bell"><NotificationBell /></div>}
+          {!user && <Link to="/login" className="site-phone-login">Prijava</Link>}
           <button type="button" className="site-burger" aria-label="Meni" aria-expanded={mobileOpen} onClick={() => setMobileOpen((open) => !open)}>
             {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>

@@ -6,6 +6,9 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { profileService } from '../../services/profileService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
+import AccountMenu from '../../app/AccountMenu'
+import { ArrowLeft } from 'lucide-react'
 
 const AccountContext = createContext(null)
 export const useAccount = () => useContext(AccountContext)
@@ -25,6 +28,7 @@ export const ACCOUNT_NAV = [
 ]
 
 function AccountLayout() {
+  const isPhone = useMediaQuery('(max-width: 768px)')
   const { user } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -131,6 +135,34 @@ function AccountLayout() {
 
   const isSuspended = profile.account_status === 'suspended'
   const nav = ACCOUNT_NAV.filter((item) => !item.providerOnly || isProvider)
+
+  // phones: /account is a plain menu; sub-pages get a back bar instead of the sidebar
+  if (isPhone) {
+    const current = ACCOUNT_NAV.find((item) => item.to === pathname)
+    return (
+      <AccountContext.Provider value={value}>
+        <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleAvatarChange} />
+        {pathname === '/account' ? (
+          <AccountMenu onPickAvatar={() => avatarInputRef.current?.click()} uploadingAvatar={uploadingAvatar} />
+        ) : (
+          <div className="ap ap-page ap-sub">
+            <div className="ap-subbar">
+              <button type="button" className="ap-back" onClick={() => navigate('/account')} aria-label="Nazad na nalog"><ArrowLeft size={22} /></button>
+              <strong>{current?.label || 'Nalog'}</strong>
+            </div>
+            {isSuspended && (
+              <div className="profile-suspended-banner">
+                <ShieldBan size={20} />
+                <div><strong>Nalog je suspendovan</strong><span>{profile.suspension_reason || 'Prekršeno je Pravilo #1.'}</span></div>
+              </div>
+            )}
+            {avatarNotice && <small className="account-avatar-notice">{avatarNotice}</small>}
+            <Outlet />
+          </div>
+        )}
+      </AccountContext.Provider>
+    )
+  }
 
   return (
     <AccountContext.Provider value={value}>

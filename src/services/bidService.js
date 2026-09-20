@@ -32,6 +32,21 @@ export const bidService = {
     return (bids || []).map((bid) => ({ ...bid, bidder: byId.get(bid.bidder_id) || null }))
   },
 
+  /** The signed-in provider's offers with the job they belong to (newest first). */
+  async listMine(userId, limit = 50) {
+    const { data, error } = await supabase
+      .from('bids')
+      .select('id, listing_id, amount, message, status, created_at, listing:listings(id, title, status, location, price, created_at)')
+      .eq('bidder_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) {
+      console.error('Supabase my bids fetch failed', { message: error.message, code: error.code })
+      return []
+    }
+    return data || []
+  },
+
   async createBid({ listingId, bidderId, amount, message }) {
     const cleanMessage = sanitizeText(message).slice(0, 2000)
     const cleanAmount = Number(amount)

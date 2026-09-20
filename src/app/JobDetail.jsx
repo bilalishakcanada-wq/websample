@@ -25,7 +25,6 @@ function JobDetail(props) {
   const [asking, setAsking] = useState(false)
   const [askError, setAskError] = useState('')
 
-  const pending = bids.filter((bid) => bid.status === 'pending')
   const open = listing.status === 'published' && !acceptedBid
   const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 

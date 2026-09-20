@@ -24,6 +24,8 @@ export default defineConfig({
       filename: 'sw.js',
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // the 1 MB map chunk is fetched (and runtime-cached) only when someone opens the map
+        globIgnores: ['**/TaskMap-*.js', '**/node_modules/**'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],

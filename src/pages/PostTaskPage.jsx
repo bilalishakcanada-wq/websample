@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from '../components/Toaster'
+import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -135,6 +136,8 @@ function PostTaskPage() {
       setSaving(false)
     }
   }
+
+  const priceStats = useCategoryPrice(form.category)
 
   return (
     <div className="wizard-shell">
@@ -288,6 +291,16 @@ function PostTaskPage() {
                 />
               </div>
             </label>
+            {priceStats && (
+              <div className="price-hint">
+                <span>Slični poslovi u „{form.category}“ obično koštaju <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.count} objavljenih, raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM).</span>
+                <div className="price-hint-chips">
+                  {[Math.round(priceStats.median * 0.8), Math.round(priceStats.median), Math.round(priceStats.median * 1.25)].map((value) => (
+                    <button key={value} type="button" className={Number(form.price) === value ? 'active' : ''} onClick={() => update({ price: String(value) })}>{value} KM</button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="wizard-summary">
               <h3>Pregled oglasa</h3>

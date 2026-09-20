@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import SuccessSplash from '../components/SuccessSplash'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
@@ -85,6 +86,8 @@ function ListingDetailPage() {
   const [payment, setPayment] = useState(null)
   const [acceptBid, setAcceptBid] = useState(null)
   const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])
+
+  const priceStats = useCategoryPrice(listing?.category)
 
   // phone back button closes overlays instead of leaving the job
   useBackToClose(sheetOpen, () => setSheetOpen(false))
@@ -464,6 +467,16 @@ function ListingDetailPage() {
             <p className="muted-text">Vlasnik je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možete ponuditi manje ili više uz obrazloženje.</p>
             <form className="auth-form" onSubmit={submitBid}>
               <label>Vaša ponuda (KM)<input type="number" min="0" step="0.01" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              {priceStats && (
+                <div className="price-hint">
+                  <span>Tipično za „{listing.category}“: <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> (raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM, {priceStats.count} poslova)</span>
+                  <div className="price-hint-chips">
+                    {[Math.round(priceStats.median * 0.85), Math.round(priceStats.median), Math.round(priceStats.median * 1.2)].map((value) => (
+                      <button key={value} type="button" className={Number(bidForm.amount) === value ? 'active' : ''} onClick={() => setBidForm({ ...bidForm, amount: String(value) })}>{value} KM</button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napišite zašto ste prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
               {bidError && <div className="form-error">{bidError}</div>}

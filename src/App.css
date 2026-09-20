@@ -12297,3 +12297,10 @@ button { touch-action: manipulation; }
   .breadcrumbs a { display: inline-flex; align-items: center; min-height: 0; }
   .info-page > .content-container { padding-top: 8px; }
 }
+
+/* smart price hint (offer sheet + budget step) */
+.price-hint { display: grid; gap: 8px; margin: -6px 0 4px; padding: 12px 14px; border-radius: 14px; background: rgba(245, 180, 0, 0.12); border: 1px solid rgba(245, 180, 0, 0.35); font-size: 0.84rem; color: var(--text); line-height: 1.4; }
+.price-hint strong { color: var(--primary-strong); }
+.price-hint-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.price-hint-chips button { min-height: 34px; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid rgba(13, 42, 82, 0.15); color: var(--primary-strong); font-weight: 800; font-size: 0.82rem; }
+.price-hint-chips button.active { background: var(--primary-strong); color: var(--accent); border-color: var(--primary-strong); }

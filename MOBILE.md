@@ -31,3 +31,5 @@ ID aplikacije: `ba.poso.app`, ime: Poso.ba.
 - Nove obavijesti se prave i za poruke (`on_message_notify`, jedna po razgovoru dok se ne pročita) i ponude (`on_bid_notify`).
 - VAPID: javni ključ je u `src/utils/push.js` (`VITE_VAPID_PUBLIC_KEY` ga može pregaziti); privatni je u Supabase Vault (`vapid_private_jwk`), čita ga samo `service_role` preko `public.vapid_private_jwk()`.
 - SQL je u `supabase/migration_push_notifications.sql`.
+
+> Napomena: u nativnoj ljusci (Capacitor/WKWebView) Web Push ne radi — za push u App Store verziji treba `@capacitor/push-notifications` + APNs/FCM. Za beta preko početnog ekrana (PWA) push radi kako je opisano gore.

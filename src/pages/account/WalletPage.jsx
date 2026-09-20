@@ -56,7 +56,12 @@ function WalletPage() {
 
       <div className="wallet-info">
         <Info size={16} />
-        <span>Ovo je tvoj novac na Poso.ba. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Uplate, bonuse i povrate dodaje Poso.ba tim; uplata karticom i isplata na račun stižu uskoro. <Link to="/nivoi">Kako rade naknade →</Link></span>
+        <span>Ovo je tvoj novac na Poso.ba. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Uplata karticom i isplata na račun stižu uskoro — do tada uplatu i isplatu dogovaraš s timom. <Link to="/nivoi">Kako rade naknade →</Link></span>
+      </div>
+
+      <div className="wallet-cta">
+        <Link to={`/pomoc?chat=1&msg=${encodeURIComponent('Želim uplatiti na balans: ____ KM. Kako da uplatim?')}`} className="primary-button"><ArrowDownLeft size={16} /> Zatraži uplatu</Link>
+        <Link to={`/pomoc?chat=1&msg=${encodeURIComponent(`Želim isplatu sa balansa (${money(wallet.balance)}) na svoj račun.`)}`} className="ghost-button"><ArrowUpRight size={16} /> Zatraži isplatu</Link>
       </div>
 
       <div className="wallet-list-head">

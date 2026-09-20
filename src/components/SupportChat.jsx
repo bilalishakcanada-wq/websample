@@ -15,7 +15,7 @@ const QUICK = [
   ['Želim razgovarati s timom', 'Želim razgovarati s timom'],
 ]
 // complaints, money and account problems always go to a person, even without the AI
-const SERIOUS = /(prevar|scam|pare|novac|novc|uze[ol]|ukra|spor|reklamac|suspend|blokir|hak|žalb|zalb|nije doš|nije dos|ne javlja|prijet|uvred)/i
+const SERIOUS = /(prevar|scam|pare|novac|novc|uplat|isplat|balans|uze[ol]|ukra|spor|reklamac|suspend|blokir|hak|žalb|zalb|nije doš|nije dos|ne javlja|prijet|uvred)/i
 const HUMAN = /\b(tim(om|u|a)?|čovjek|covjek|operater|agent|osob[ae]|živ[aou]|ziv[aou]|podrška|podrska)\b/i
 
 const timeLabel = (value) => new Date(value).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' })
@@ -28,10 +28,16 @@ function SupportChat() {
   const onHelpPage = pathname.startsWith('/pomoc')
   const [open, setOpen] = useState(false)
 
-  // deep link: /pomoc?chat=1 opens the conversation straight away
-  useEffect(() => { if (onHelpPage && searchParams.get('chat') === '1') setOpen(true) }, [onHelpPage, searchParams])
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
+  // deep link: /pomoc?chat=1 opens the conversation straight away; ?msg= pre-fills the draft
+  useEffect(() => {
+    if (onHelpPage && searchParams.get('chat') === '1') {
+      setOpen(true)
+      const prefill = searchParams.get('msg')
+      if (prefill) setDraft(prefill.slice(0, 500))
+    }
+  }, [onHelpPage, searchParams])
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
   const [typing, setTyping] = useState(false)

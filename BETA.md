@@ -35,9 +35,28 @@ Na telefonu aplikacija počinje ekranom dobrodošlice → „Šta ti je glavni c
 - **Email/Telegram za admina:** `RESEND_API_KEY` + `ADMIN_EMAIL` ili `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` kao Edge Function secrets.
 
 ## Native aplikacija (iOS / Android)
-Projekat je već spreman u `ios/` i `android/` (Capacitor 8, učitava live sajt). Za iOS treba **Xcode** (App Store, besplatan):
-```bash
-export PATH="$HOME/.nvm/versions/node/v22.23.2/bin:$PATH"
-npm run app:sync && npm run app:ios
-```
-Zatim u Xcodeu: odaberi svoj tim (Signing) → Run na iPhone ili simulator. Za TestFlight: Product → Archive → Distribute. Detalji u `MOBILE.md`.
+Projekat je spreman u `ios/` i `android/` (Capacitor 8; aplikacija učitava live sajt, pa je uvijek sinhronizovana sa web-om). Ikona, splash i dozvole su podešeni.
+
+### Android — beta bez Google Play-a (najbrže)
+Svaki push na `main` (ili ručno: GitHub → *Actions* → **Android app** → *Run workflow*) gradi APK. Testerima pošalji ovaj link:
+
+**https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta** → `poso-ba-beta.apk`
+
+Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare.
+
+### Android — Google Play (interno testiranje)
+1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Poso.ba.
+2. Napravi ključ za potpis (jednom, čuvaj ga!):
+   ```bash
+   keytool -genkeypair -v -keystore poso-release.keystore -alias poso -keyalg RSA -keysize 2048 -validity 10000
+   ```
+3. GitHub → repo *Settings → Secrets and variables → Actions* → dodaj: `ANDROID_KEYSTORE_BASE64` (`base64 -i poso-release.keystore | pbcopy`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (=`poso`), `ANDROID_KEY_PASSWORD`.
+4. Pokreni workflow → u *Releases* se pojavi i `poso-ba-release.aab` → Play Console → *Testing → Internal testing → Create release* → upload `.aab` → dodaj emailove testera → podijeli link.
+
+### iOS — TestFlight
+1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Poso.ba, Bundle ID `ba.poso.app`.
+2. U Xcodeu: `open ios/App/App.xcodeproj` → **App** → *Signing & Capabilities* → tvoj tim → gore odaberi **Any iOS Device (arm64)** → *Product → Archive* → *Distribute App → TestFlight & App Store* → Upload.
+3. App Store Connect → *TestFlight* → dodaj testere (email) ili uključi **Public link** i pošalji ga. Testeri instaliraju aplikaciju TestFlight i otvore link.
+4. Za svoj iPhone odmah (bez TestFlight-a): spoji kabl, odaberi telefon u Xcodeu → ▶ Run (na telefonu: *Settings → General → VPN & Device Management → Trust*).
+
+Detalji i rješavanje problema: `MOBILE.md`.

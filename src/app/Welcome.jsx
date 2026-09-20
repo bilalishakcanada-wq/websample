@@ -1,19 +1,19 @@
+import BrandMark from '../components/BrandMark'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArcHeadline } from '../components/HeroArt'
 import { BroomMascot, WrenchMascot, BoxMascot, RollerMascot, LaptopMascot } from './Mascots'
-import { withBase } from '../utils/paths'
 import { haptic } from '../utils/native'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 
-/* Rotating "URADI ___ ODMAH" scenes: colour, photo and a mascot sticker. */
+/* Rotating "URADI ___ ODMAH" scenes: a colour and one of our illustrations. */
 const SCENES = [
-  { key: 'cleaning', word: 'ČIŠĆENJE', color: '#0d2a52', photo: withBase('/images/categories/cleaning.webp'), Mascot: BroomMascot },
-  { key: 'repairs', word: 'POPRAVKE', color: '#c47a00', photo: withBase('/images/categories/home.webp'), Mascot: WrenchMascot },
-  { key: 'moving', word: 'SELIDBU', color: '#1d7a4f', photo: withBase('/images/categories/moving.webp'), Mascot: BoxMascot },
-  { key: 'painting', word: 'KREČENJE', color: '#163a6b', photo: withBase('/images/categories/construction.webp'), Mascot: RollerMascot },
-  { key: 'anything', word: 'BILO ŠTA', color: '#061530', photo: withBase('/images/categories/it.webp'), Mascot: LaptopMascot },
+  { key: 'cleaning', word: 'ČIŠĆENJE', color: '#0d2a52', Mascot: BroomMascot },
+  { key: 'repairs', word: 'POPRAVKE', color: '#b86f00', Mascot: WrenchMascot },
+  { key: 'moving', word: 'SELIDBU', color: '#1d7a4f', Mascot: BoxMascot },
+  { key: 'painting', word: 'KREČENJE', color: '#163a6b', Mascot: RollerMascot },
+  { key: 'anything', word: 'BILO ŠTA', color: '#061530', Mascot: LaptopMascot },
 ]
 
 /** First screen of the phone app for visitors: one big promise, "Počni" and "Prijava". */
@@ -34,12 +34,9 @@ function Welcome() {
   return (
     <div className="wl" style={{ '--wl-color': scene.color }}>
       <div className="wl-stage" key={scene.key}>
-        <div className="wl-brand">Poso.ba</div>
+        <div className="wl-brand"><BrandMark size={28} tile={false} /> Poso.ba</div>
         <ArcHeadline top={`URADI ${scene.word}`} bottom="ODMAH." id="wl-arc" as="div" className="wl-arc" />
-        <div className="wl-card">
-          <img src={scene.photo} alt="" />
-          <div className="wl-mascot"><Mascot /></div>
-        </div>
+        <div className="wl-card"><Mascot /></div>
         <div className="wl-dots" aria-hidden="true">
           {SCENES.map((item, i) => <span key={item.key} className={i === index ? 'active' : ''} />)}
         </div>

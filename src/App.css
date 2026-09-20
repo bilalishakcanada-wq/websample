@@ -10960,6 +10960,9 @@ body:has(.profile-cta-bar) .support-chat {
   background: none;
 }
 
+.account-empty-art.notif-art svg,
+.empty-state-art { width: min(56vw, 200px); height: auto; }
+
 .account-empty-actions {
   display: flex;
   gap: 12px;
@@ -12191,9 +12194,7 @@ button { touch-action: manipulation; }
 /* ---------- success splash (job published etc.) ---------- */
 .success-splash { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; padding: 20px; background: rgba(6, 21, 48, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade-in 0.2s ease both; }
 .success-splash-card { position: relative; width: min(100%, 380px); padding: 40px 24px 24px; border-radius: 28px; background: var(--surface); text-align: center; box-shadow: 0 30px 80px rgba(6, 21, 48, 0.4); animation: splash-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both; overflow: hidden; }
-.success-splash-check { position: relative; z-index: 2; display: grid; place-items: center; width: 88px; height: 88px; margin: 0 auto 18px; border-radius: 50%; background: var(--accent); color: var(--primary-strong); animation: check-pop 0.5s 0.15s cubic-bezier(0.34, 1.5, 0.64, 1) both; }
-.success-splash-check svg { animation: check-draw 0.4s 0.3s ease both; }
-.success-splash-ring { position: absolute; top: 40px; left: 50%; width: 88px; height: 88px; margin-left: -44px; border-radius: 50%; border: 3px solid var(--accent); animation: ring-out 1.2s 0.4s ease-out infinite; }
+.success-splash-art { display: block; width: min(60%, 200px); height: auto; margin: -12px auto 6px; animation: check-pop 0.5s 0.15s cubic-bezier(0.34, 1.5, 0.64, 1) both; }
 .success-splash h2 { margin: 0 0 8px; font-family: var(--font-display); font-stretch: 85%; font-size: 1.7rem; color: var(--primary-strong); }
 .success-splash p { margin: 0 0 20px; color: var(--text-soft); line-height: 1.5; }
 .success-splash-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -12201,7 +12202,7 @@ button { touch-action: manipulation; }
 @keyframes check-pop { from { transform: scale(0); } to { transform: scale(1); } }
 @keyframes check-draw { from { opacity: 0; transform: scale(0.4) rotate(-20deg); } to { opacity: 1; transform: none; } }
 @keyframes ring-out { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(1.9); } }
-@media (prefers-reduced-motion: reduce) { .success-splash-ring { animation: none; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .success-splash-art { animation: none; } }
 
 /* tab bar: plain line icons, navy when active (the app people already know) */
 @media (max-width: 768px) {
@@ -12334,3 +12335,7 @@ button { touch-action: manipulation; }
   body[data-page='messages'] .chat-sidebar { height: calc(100dvh - 74px - env(safe-area-inset-bottom, 0px) - 84px - env(safe-area-inset-top, 0px)); }
   body[data-page='messages'] .chat-layout.has-active .chat-main { height: calc(100dvh - 74px - env(safe-area-inset-bottom, 0px) - 24px - env(safe-area-inset-top, 0px)); }
 }
+
+/* Brand mark SVG (replaces the old letter tiles): the drawing carries its own navy tile */
+svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important; padding: 0; border-radius: 22%; }
+.brand-mark.brand-mark-svg { box-shadow: 0 12px 20px rgba(13, 42, 82, 0.2); }

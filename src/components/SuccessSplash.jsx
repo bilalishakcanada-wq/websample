@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { Check, Share2 } from 'lucide-react'
+import { Share2 } from 'lucide-react'
 import { haptic } from '../utils/native'
+import { DoneMascot } from '../app/Mascots'
 
 /** Full-screen "done!" moment (animated check) after a big action, e.g. a job is published. */
 function SuccessSplash({ title, text, onClose, onShare }) {
@@ -13,8 +14,7 @@ function SuccessSplash({ title, text, onClose, onShare }) {
   return (
     <div className="success-splash" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
       <div className="success-splash-card" onClick={(event) => event.stopPropagation()}>
-        <span className="success-splash-check"><Check size={40} strokeWidth={3} /></span>
-        <span className="success-splash-ring" aria-hidden="true" />
+        <DoneMascot className="success-splash-art" />
         <h2>{title}</h2>
         {text && <p>{text}</p>}
         <div className="success-splash-actions">

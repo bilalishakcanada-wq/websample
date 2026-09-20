@@ -1,3 +1,4 @@
+import BrandMark from './BrandMark'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
@@ -69,7 +70,7 @@ function SiteFooter() {
 
         <div className="site-footer-bottom">
           <div className="site-footer-brand">
-            <span className="brand-mark">P</span>
+            <BrandMark size={42} className="brand-mark" />
             <div>
               <strong>Poso.ba</strong>
               <span>Marketplace za usluge u Bosni i Hercegovini</span>

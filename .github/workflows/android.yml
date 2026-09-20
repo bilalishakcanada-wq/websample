@@ -1,0 +1,121 @@
+# Builds the Android app on GitHub's servers (no Android Studio needed on the Mac).
+#
+#  • Every run produces a DEBUG APK that testers can install directly ("Beta" channel):
+#      https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta
+#  • When the signing secrets below exist it also builds a signed RELEASE APK + AAB
+#    (the .aab is what Google Play Console wants):
+#      ANDROID_KEYSTORE_BASE64  – `base64 -i poso-release.keystore | pbcopy`
+#      ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+#
+# The app shell loads the live site (capacitor.config.json → server.url), so the web
+# bundle built here is only the offline fallback.
+name: Android app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+      - name: Build web bundle (offline fallback inside the app)
+        env:
+          VITE_BASE: /
+          VITE_APP_NAME: Poso.ba
+          VITE_DEFAULT_LOCALE: bs
+          VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
+          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
+        run: npm run build
+      - run: npx cap sync android
+
+      # Build number = run number, so every build installs over the previous one.
+      - name: Stamp version code
+        run: sed -i "s/versionCode 1$/versionCode ${{ github.run_number }}/" android/app/build.gradle
+
+      - name: Build debug APK (beta testers)
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Signing config (only when secrets are set)
+        if: ${{ env.KEYSTORE != '' }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE" | base64 -d > android/app/poso-release.keystore
+          cat >> android/app/build.gradle <<'EOF'
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("poso-release.keystore")
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+                  }
+              }
+              buildTypes { release { signingConfig signingConfigs.release } }
+          }
+          EOF
+          echo "SIGNED=1" >> "$GITHUB_ENV"
+
+      - name: Build signed release APK + AAB (Google Play)
+        if: ${{ env.SIGNED == '1' }}
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
+
+      - name: Collect
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/poso-ba-beta.apk
+          [ -f android/app/build/outputs/apk/release/app-release.apk ] && cp android/app/build/outputs/apk/release/app-release.apk out/poso-ba-release.apk || true
+          [ -f android/app/build/outputs/bundle/release/app-release.aab ] && cp android/app/build/outputs/bundle/release/app-release.aab out/poso-ba-release.aab || true
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: poso-ba-android-${{ github.run_number }}
+          path: out/*
+
+      # Stable link for testers: the "android-beta" pre-release always holds the newest build.
+      - uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          tag_name: android-beta
+          name: Poso.ba Android beta
+          prerelease: true
+          body: |
+            Najnovija beta verzija Poso.ba aplikacije za Android (build ${{ github.run_number }}).
+
+            **Instalacija:** preuzmi `poso-ba-beta.apk` na telefon → otvori → dozvoli instalaciju iz nepoznatih izvora → Instaliraj.
+          files: out/*

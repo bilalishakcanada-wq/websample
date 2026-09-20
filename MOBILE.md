@@ -30,12 +30,19 @@ Xcode 27 je već instaliran. iOS projekat je sinhronizovan (`ios/App`), ikone i 
 3. **Simulator:** gore u traci izaberi *App → iPhone 17 Pro* (bilo koji simulator) → klikni ▶ (Run). Aplikacija se otvara preko cijelog ekrana i učitava live sajt.
 4. **Tvoj iPhone:** spoji ga kablom → na telefonu *Postavke → Privatnost i sigurnost → Developer Mode → uključi* → u Xcode-u izaberi svoj iPhone kao uređaj → *Signing & Capabilities → Team: dodaj svoj Apple ID* (besplatan nalog radi za testiranje 7 dana) → ▶ Run. Na telefonu: *Postavke → Opšte → VPN i upravljanje uređajem → Vjeruj*.
 5. **TestFlight / App Store:** treba Apple Developer Program (99 $/god): *Product → Archive → Distribute App → TestFlight*. Testeri instaliraju TestFlight i dobiju link.
-6. **Android:** instaliraj Android Studio → `npm run app:android` → Run. Za Play: *Build → Generate Signed Bundle*.
+6. **Android bez Android Studija:** GitHub Actions (`.github/workflows/android.yml`) gradi APK na svakom pushu — link za testere je u `BETA.md`. Android Studio treba samo ako želiš lokalni build (`npm run app:android`).
 
 Nakon svake promjene web koda **nije potreban novi build** — ljuska učitava live sajt. Novi build treba samo kad se mijenja `capacitor.config.json`, ikone ili native plugini.
 
-Ikone i splash ekrani su već generisani (`npm run app:assets` ih pravi iz `assets/icon.png` i `assets/splash.png`).
-ID aplikacije: `ba.poso.app`, ime: Poso.ba.
+Ikone i splash ekrani se prave iz jednog SVG znaka: `node scripts/brand-assets.mjs && npm run app:assets`
+(piše `assets/icon*.png`, `assets/splash*.png`, `public/icons/*`, pa iOS/Android kataloge). Isti znak je i u
+`src/components/BrandMark.jsx` (zaglavlje, prijava, dobrodošlica) i `public/favicon.svg`.
+ID aplikacije: `ba.poso.app`, ime: Poso.ba. iPhone je zaključan na portret; kamera/galerija imaju opise dozvola.
+
+## Ako build „visi“ ili Xcode javlja greške
+- **Disk skoro pun + iCloud „Desktop & Documents“**: macOS izbaci fajlove projekta u oblak (prazni „dataless“ fajlovi) i svaki build/`npm` visi. Rješenje: oslobodi 20+ GB i drži `node_modules` van iCloud-a — `node_modules` je simbolički link na `node_modules.nosync` (iCloud preskače `*.nosync`). Ako se ponovi: `rm -rf node_modules node_modules.nosync && mkdir node_modules.nosync && ln -s node_modules.nosync node_modules && npm install`.
+- **Xcode: „Expression implicitly coerced from 'String?' to 'Any'“ (AppPlugin)** — upozorenje iz Capacitorovog paketa, ne iz našeg koda; bezopasno.
+- **Xcode: „The image set Splash has unassigned children“** — stari fajlovi iz šablona; riješeno (obrisani).
 
 ## Push obavijesti (Web Push)
 

@@ -1,3 +1,4 @@
+import BrandMark from './BrandMark'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
@@ -76,7 +77,7 @@ function SiteHeader() {
       <header ref={headerRef} className={`site-header ${scrolled ? 'scrolled' : ''}`}>
         <div className="site-header-inner">
           <Link to="/" className="site-logo" aria-label="Poso.ba početna">
-            <span className="site-logo-mark">P</span>
+            <BrandMark size={34} className="site-logo-mark" />
             <span className="site-logo-text">Poso.ba</span>
           </Link>
 

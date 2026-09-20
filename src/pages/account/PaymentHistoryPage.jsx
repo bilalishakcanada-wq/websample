@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react'
+import { WalletMascot } from '../../app/Mascots'
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 
@@ -38,7 +39,7 @@ function PaymentHistoryPage() {
       {rows === null && <div className="skeleton-card" />}
       {rows !== null && visible.length === 0 && (
         <div className="account-empty">
-          <div className="account-empty-art"><Receipt size={34} /></div>
+          <div className="account-empty-art notif-art"><WalletMascot /></div>
           <p>Još nema plaćanja. Prvo stiže kad prihvatiš ponudu ili kad klijent prihvati tvoju.</p>
           <Link to="/search" className="primary-button">Pregledaj poslove</Link>
         </div>

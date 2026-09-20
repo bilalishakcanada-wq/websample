@@ -68,6 +68,8 @@ const StartGoal = lazy(lazyImport(() => import('./app/StartGoal')))
 const Intro = lazy(lazyImport(() => import('./app/Intro')))
 const PostFlow = lazy(lazyImport(() => import('./app/PostFlow')))
 const MyTasks = lazy(lazyImport(() => import('./app/MyTasks')))
+// dev-only gallery of every illustration (never bundled in production)
+const MascotGallery = import.meta.env.DEV ? lazy(() => import('./app/MascotGallery')) : null
 
 /** Phones get the one-question-per-screen flow; wider screens keep the wizard. */
 function PostRoute() {
@@ -98,6 +100,7 @@ function App() {
         <Route path="/start" element={<StartGoal />} />
         <Route path="/intro" element={<Intro />} />
         <Route path="/moji-poslovi" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
+        {MascotGallery && <Route path="/dev/ilustracije" element={<MascotGallery />} />}
         <Route path="/dashboard" element={<Navigate to="/account" replace />} />
         <Route path="/profile" element={<LegacyProfileRedirect />} />
         <Route path="/nivoi" element={<TiersInfoPage />} />

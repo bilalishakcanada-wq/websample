@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -15,10 +16,12 @@ function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
   const verificationPending = searchParams.get('verification') === 'pending'
+  const isPhone = useMediaQuery('(max-width: 768px)')
 
   // ?next=/objavi (phone flows) or the guarded page that sent us here
   const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
-  const destination = safeNext(searchParams.get('next')) || location.state?.from?.pathname || '/account'
+  // phones land on the app home, the website on the account dashboard
+  const destination = safeNext(searchParams.get('next')) || location.state?.from?.pathname || (isPhone ? '/' : '/account')
 
   if (user) return <Navigate to={destination} replace />
 

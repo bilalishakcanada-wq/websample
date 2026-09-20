@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, CircleCheck, Coins } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { DoneMascot, EarnMascot } from './Mascots'
 import { setMode } from './mode'
 import { haptic } from '../utils/native'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 
 const GOALS = [
-  { id: 'poster', icon: CircleCheck, title: 'Uradi posao', sub: 'Nađi izvođača' },
-  { id: 'tasker', icon: Coins, title: 'Zaradi novac', sub: 'Postani izvođač' },
+  { id: 'poster', Art: DoneMascot, title: 'Uradi posao', sub: 'Nađi izvođača' },
+  { id: 'tasker', Art: EarnMascot, title: 'Zaradi novac', sub: 'Postani izvođač' },
 ]
 
 /** "Šta ti je glavni cilj?" — picks the app face (poster / tasker); changeable later in the account. */
@@ -33,9 +34,9 @@ function StartGoal() {
       <p className="ap-sub">Možeš promijeniti kasnije.</p>
 
       <div className="ap-goals">
-        {GOALS.map(({ id, icon: Icon, title, sub }) => (
+        {GOALS.map(({ id, Art, title, sub }) => (
           <button key={id} type="button" className={`ap-goal ${choice === id ? 'active' : ''}`} onClick={() => { setChoice(id); haptic('light') }} aria-pressed={choice === id}>
-            <Icon size={22} />
+            <Art className="ap-goal-art" />
             <strong>{title}</strong>
             <span>{sub}</span>
           </button>

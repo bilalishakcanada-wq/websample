@@ -13,7 +13,7 @@
     "app:sync": "cap sync",
     "app:ios": "cap open ios",
     "app:android": "cap open android",
-    "app:assets": "capacitor-assets generate --iconBackgroundColor '#0d2a52' --iconBackgroundColorDark '#0d2a52' --splashBackgroundColor '#0d2a52' --splashBackgroundColorDark '#0d2a52'",
+    "app:assets": "capacitor-assets generate --ios --android --iconBackgroundColor '#0d2a52' --iconBackgroundColorDark '#0d2a52' --splashBackgroundColor '#0d2a52' --splashBackgroundColorDark '#0d2a52'",
     "deploy:pages": "./scripts/deploy-pages.sh"
   },
   "dependencies": {

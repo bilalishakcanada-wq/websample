@@ -15,6 +15,7 @@ import { serviceCategories } from '../data/categories'
 import { bosniaCities } from '../data/cities'
 import { cityCoordinates, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
 import { listingService } from '../services/listingService'
+import { FindMascot } from '../app/Mascots'
 import { formatBosnianDate } from '../utils/dateFormat'
 
 const RADIUS_OPTIONS = [
@@ -341,7 +342,7 @@ function SearchPage() {
           {loading && <div className="skeleton-list">{[1, 2, 3].map((item) => <div className="skeleton-card" key={item} />)}</div>}
           {!loading && listings.length === 0 && (
             <div className="empty-state">
-              <SlidersHorizontal size={36} />
+              <FindMascot className="empty-state-art" />
               <h2>Nema oglasa za ove filtere</h2>
               <p>Proširi udaljenost, uključi online poslove ili poništi filtere.</p>
               <button type="button" className="ghost-button" onClick={resetAll}>Poništi filtere</button>

@@ -1,10 +1,11 @@
+import BrandMark from './BrandMark'
 import { Link } from 'react-router-dom'
 
 function AuthLayout({ title, subtitle, children, footer }) {
   return (
     <div className="auth-shell">
       <Link to="/" className="auth-logo">
-        <span className="brand-mark">P</span>
+        <BrandMark size={42} className="brand-mark" />
         <span className="brand-name">Poso.ba</span>
       </Link>
 

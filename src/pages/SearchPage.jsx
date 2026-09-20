@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { rankListings } from '../utils/ranking'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, Laptop, List, MapPin,
@@ -23,6 +24,7 @@ const RADIUS_OPTIONS = [
 ]
 
 const SORT_OPTIONS = [
+  { value: 'recommended', label: 'Preporučeno' },
   { value: 'newest', label: 'Najnovije' },
   { value: 'oldest', label: 'Najstarije' },
   { value: 'price_desc', label: 'Cijena: veća prvo' },
@@ -65,7 +67,8 @@ function SearchPage() {
     remoteOnly: false,
     hasBudget: false,
     noOffers: false,
-    sort: searchParams.get('sort') || 'newest',
+    // a text search defaults to relevance; browsing defaults to newest
+    sort: searchParams.get('sort') || (searchParams.get('q') ? 'recommended' : 'newest'),
   })
   const [openMenu, setOpenMenu] = useState('')
   useBackToClose(Boolean(openMenu), () => setOpenMenu(''))
@@ -173,8 +176,10 @@ function SearchPage() {
     if (filters.sort === 'closest' && origin) {
       items.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
     }
+    // relevance model: query match, freshness, few offers, completeness, distance
+    if (filters.sort === 'recommended') items = rankListings(items, { query: filters.query })
     return items
-  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort])
+  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null

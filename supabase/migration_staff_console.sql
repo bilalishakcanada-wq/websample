@@ -743,3 +743,8 @@ $$;
 -- create table public.client_errors (id uuid pk, user_id uuid, message text, stack text, url text, user_agent text, created_at timestamptz);
 -- RLS: staff read only; writes only through public.log_client_error(p_message, p_stack, p_url, p_user_agent)
 -- (security definer, 30 rows/minute cap, granted to anon + authenticated). Called from src/utils/errorReporter.js.
+
+-- ---------- recommended_listings v2 (2026-09-20) ----------
+-- Scoring (max 120, returned as 0..100): declared trades match +25, category affinity from past
+-- bids +8 each (max 4), same city +22, freshness 18 - 2/day, competition 15 - 5/offer, budget +5,
+-- photos +3. Reasons array explains the score in the UI ("Odgovara tvojim vještinama", ...).

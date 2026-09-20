@@ -127,7 +127,9 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     // A WebGL canvas can lose its last frame when an ancestor finishes a CSS animation
     // (page fade-in) or the tab comes back to the foreground; MapLibre is idle then and
     // would stay blank, so ask for a fresh frame in those moments.
-    const repaint = () => { if (mapRef.current === map) map.triggerRepaint() }
+    // resize() (not just triggerRepaint) — it re-applies the canvas size, which makes the
+    // browser take a fresh frame from WebGL even when it had dropped the previous one
+    const repaint = () => { if (mapRef.current === map) { map.resize(); map.triggerRepaint() } }
     const timers = [400, 1200, 2500].map((ms) => window.setTimeout(repaint, ms))
     map.once('idle', () => window.setTimeout(repaint, 50))
     const onVisible = () => { if (document.visibilityState === 'visible') repaint() }

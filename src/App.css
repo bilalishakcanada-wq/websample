@@ -12067,7 +12067,9 @@ button, a { -webkit-touch-callout: none; }
 button { touch-action: manipulation; }
 
 /* every page slides in softly, like a native screen */
-@keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* opacity only: page containers hold position:fixed children (sheets, footers), and a transform
+   — even a finished or paused one — would turn the container into their containing block */
+@keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
 /* fill-mode "backwards": once the slide finishes the element keeps no transform, so
    position: fixed children (wizard footer, sheets, lightbox) stay anchored to the viewport */
 .page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .job-page > .content-container, .auth-shell { animation: page-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards; }

@@ -30,13 +30,13 @@ originalnim BiH identitetom.
 - PWA — instalabilna na telefon (manifest + service worker + ikone), Web Push obavijesti (ponude, poruke, isplate)
 - Poso.ba Pay — balans (pravi novac), rezervacija uplate pri prihvatanju ponude, oslobađanje, sporovi, admin rješavanje
 - Staff konzola (/admin, /mod) — nadzor uživo, dosijei, značke, suspenzije, balans, greške aplikacije
-- Capacitor ljuska za iOS/Android (`ios/`, `android/`)
+- Native aplikacija (Capacitor 8): `ios/` (Xcode → simulator / iPhone / TestFlight) i `android/` — GitHub Actions gradi beta APK: https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta
+- Brend: znak „p✓“ (`src/components/BrandMark.jsx`, `scripts/brand-assets.mjs` → ikone/splash za iOS, Android i PWA) i porodica ilustracija (`src/app/Mascots.jsx`, dev galerija `/dev/ilustracije`)
 
 ## Šta NIJE implementirano (namjerno)
 
 - Stvarni payment provider (Stripe/RevenueCat/itd.) — sve je pripremljeno za kasniju integraciju
-- Push notifikacije — infrastruktura nije još postavljena
-- Native iOS/Android aplikacija — trenutno je ovo web aplikacija (PWA-installable)
+- Push u native ljusci (APNs/FCM) — Web Push radi u PWA verziji; za App Store/Play verziju treba `@capacitor/push-notifications`
 
 ## Lokalni razvoj
 

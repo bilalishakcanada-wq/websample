@@ -1,3 +1,4 @@
+import { NATIVE_AUTH_CALLBACK, isNativeApp, openInSystemBrowser } from '../utils/native'
 import { supabase } from '../lib/supabase'
 import { isStrongPassword, isValidEmail, publicError, sanitizeText } from '../utils/validation'
 import { withBase } from '../utils/paths'
@@ -83,10 +84,17 @@ export const authService = {
   },
 
   async signInWithProvider(provider) {
+    // Inside the iOS/Android app Google refuses to sign in from an embedded web view, so the
+    // consent screen opens in the system browser and comes back through the app's URL scheme
+    // (ba.poso.app://auth/callback → handled in utils/native.js).
+    const native = isNativeApp()
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}${withBase('/dashboard')}` },
+      options: native
+        ? { redirectTo: NATIVE_AUTH_CALLBACK, skipBrowserRedirect: true }
+        : { redirectTo: `${window.location.origin}${withBase('/dashboard')}` },
     })
+    if (!error && native && data?.url) await openInSystemBrowser(data.url)
 
     if (error) {
       console.error('Supabase OAuth sign-in failed', { provider, message: error.message, code: error.code, status: error.status })

@@ -12252,3 +12252,17 @@ button { touch-action: manipulation; }
 
 /* the search page holds a WebGL map: no fade on its container (a finished ancestor animation can blank the canvas) */
 .browse-page > .content-container { animation: none; }
+
+/* ---------- auth screens on phones: navy aurora band + white sheet ---------- */
+@media (max-width: 768px) {
+  .auth-shell { position: relative; padding: 0 0 32px; background: var(--surface); isolation: isolate; }
+  .auth-shell::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 190px; z-index: -1; background: radial-gradient(120% 90% at 20% 0%, rgba(245, 180, 0, 0.35), transparent 55%), radial-gradient(90% 80% at 100% 30%, rgba(74, 128, 230, 0.45), transparent 60%), linear-gradient(170deg, #0a1f45, #0d2a52); }
+  .auth-shell::after { content: ''; position: absolute; left: 0; right: 0; top: 150px; height: 40px; z-index: -1; background: var(--surface); border-radius: 28px 28px 0 0; }
+  .auth-logo { align-self: flex-start; margin: calc(20px + env(safe-area-inset-top, 0px)) 20px 0; color: white; }
+  .auth-logo .brand-name { color: white; }
+  .auth-logo .brand-mark { background: var(--accent); color: var(--primary-strong); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25); }
+  .auth-shell .auth-card { width: 100%; margin-top: 108px; padding: 6px 20px 0; }
+  .auth-shell .auth-card h1 { text-align: left; font-size: 1.8rem; margin-bottom: 18px; }
+  .auth-subtitle { text-align: left; margin: -10px 0 18px; }
+  .auth-legal { padding: 0 20px; }
+}

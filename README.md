@@ -1,5 +1,7 @@
 # Poso.ba
 
+**Live (beta):** https://bilalishakcanada-wq.github.io/websample/ — vodič za testere: [BETA.md](BETA.md) · mobilna/native aplikacija: [MOBILE.md](MOBILE.md)
+
 Bosanski marketplace za lokalne usluge — povezuje korisnike koji trebaju pomoć sa provjerenim
 izvođačima (majstori, IT, dizajn, čišćenje, selidbe, itd.), inspirisan Airtaskerom ali sa
 originalnim BiH identitetom.
@@ -25,9 +27,10 @@ originalnim BiH identitetom.
 - Live chat podrška (support widget) povezan na bazu + admin inbox za odgovaranje
 - Admin panel (/admin) — podrška, prijave, moderacija oglasa, upravljanje korisnicima
 - Brisanje naloga (GDPR-style) putem Supabase Edge Function-a
-- PWA — instalabilna na telefon (manifest + service worker + ikone)
-- 3 nivoa pretplate (Free/Plus/Premium) i kupovina kredita — UI i podaci spremni, naplata
-  namjerno nije povezana
+- PWA — instalabilna na telefon (manifest + service worker + ikone), Web Push obavijesti (ponude, poruke, isplate)
+- Poso.ba Pay — balans (pravi novac), rezervacija uplate pri prihvatanju ponude, oslobađanje, sporovi, admin rješavanje
+- Staff konzola (/admin, /mod) — nadzor uživo, dosijei, značke, suspenzije, balans, greške aplikacije
+- Capacitor ljuska za iOS/Android (`ios/`, `android/`)
 
 ## Šta NIJE implementirano (namjerno)
 

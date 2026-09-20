@@ -18,6 +18,10 @@ import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../util
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
 import { paymentService } from '../services/paymentService'
+import { questionService } from '../services/questionService'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useFullscreen } from '../app/useFullscreen'
+import JobDetail from '../app/JobDetail'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -85,6 +89,12 @@ function ListingDetailPage() {
   const [lightbox, setLightbox] = useState(null)
   const [payment, setPayment] = useState(null)
   const [acceptBid, setAcceptBid] = useState(null)
+  const [questions, setQuestions] = useState([])
+  const [metrics, setMetrics] = useState({})
+  const isPhone = useMediaQuery('(max-width: 768px)')
+  useFullscreen(isPhone)
+  const tab = searchParams.get('tab') === 'pitanja' ? 'pitanja' : 'ponude'
+  const setTab = (value) => setSearchParams((params) => { if (value === 'pitanja') params.set('tab', 'pitanja'); else params.delete('tab'); return params }, { replace: true })
   const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])
 
   const priceStats = useCategoryPrice(listing?.category)
@@ -112,6 +122,8 @@ function ListingDetailPage() {
         setBids(listingBids)
         if (result) {
           paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
+          questionService.list(id).then((rows) => active && setQuestions(rows)).catch(() => {})
+          bidService.bidderMetrics(id).then((rows) => active && setMetrics(rows)).catch(() => {})
           setRelated(await listingService.listRelated({ id, category: result.category, location: result.location }))
           profileService.getPublicProfile(result.user_id).then((profile) => active && setPoster(profile)).catch(() => {})
         }
@@ -178,6 +190,16 @@ function ListingDetailPage() {
     } finally {
       setSending(false)
     }
+  }
+
+  const askQuestion = async (body) => {
+    if (!user) { navigate(`/login?next=${encodeURIComponent(`/listings/${id}?tab=pitanja`)}`); return }
+    if (findProhibitedTerm(body)) throw new Error('Pitanje sadrži sadržaj koji krši Pravila korištenja.')
+    const scan = scanContactInfo(body)
+    if (!scan.clean) throw new Error(contactInfoMessage(scan, 'pitanje'))
+    const created = await questionService.ask({ listingId: id, userId: user.id, body })
+    setQuestions((current) => [...current, { ...created, author: { display_name: user.user_metadata?.full_name || 'Ti', avatar_url: user.user_metadata?.avatar_url || null } }])
+    toast(isOwner ? 'Odgovor je objavljen.' : 'Pitanje je poslano vlasniku.', { kind: 'success' })
   }
 
   const reportListing = async () => {
@@ -258,6 +280,70 @@ function ListingDetailPage() {
   const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
   const when = (whenLine || '').trim() || 'Fleksibilan termin'
   const isRemote = /online/i.test(listing.location || '')
+
+  const overlays = (
+    <>
+      {acceptBid && (
+        <AcceptOfferSheet bid={acceptBid} providerName={acceptBid.bidder?.display_name} onClose={() => setAcceptBid(null)} onDone={async () => { await refreshJob(); setMessage('Ponuda je prihvaćena i uplata je osigurana. Izvođač je obaviješten.') }} />
+      )}
+      {lightbox != null && images[lightbox] && (
+        <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
+          <button type="button" className="lightbox-close" aria-label="Zatvori"><X size={22} /></button>
+          {images.length > 1 && <button type="button" className="lightbox-nav prev" aria-label="Prethodna" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + images.length - 1) % images.length) }}><ChevronLeft size={26} /></button>}
+          <img src={images[lightbox].url} alt={listing.title} onClick={(event) => event.stopPropagation()} />
+          {images.length > 1 && <button type="button" className="lightbox-nav next" aria-label="Sljedeća" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + 1) % images.length) }}><ChevronRight size={26} /></button>}
+          <span className="lightbox-count">{lightbox + 1} / {images.length}</span>
+        </div>
+      )}
+      {sheetOpen && (
+        <div className="sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
+          <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
+            <div className="sheet-handle" />
+            <h2 id="offer-title">Pošalji ponudu</h2>
+            <p className="muted-text">Vlasnik je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možete ponuditi manje ili više uz obrazloženje.</p>
+            <form className="auth-form" onSubmit={submitBid}>
+              <label>Vaša ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              {priceStats && (
+                <div className="price-hint">
+                  <span>Tipično za „{listing.category}“: <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> (raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM, {priceStats.count} poslova)</span>
+                  <div className="price-hint-chips">
+                    {[Math.round(priceStats.median * 0.85), Math.round(priceStats.median), Math.round(priceStats.median * 1.2)].map((value) => (
+                      <button key={value} type="button" className={Number(bidForm.amount) === value ? 'active' : ''} onClick={() => setBidForm({ ...bidForm, amount: String(value) })}>{value} KM</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napišite zašto ste prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
+              <RuleOneNotice compact />
+              {bidError && <div className="form-error">{bidError}</div>}
+              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
+              <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
+            </form>
+          </section>
+        </div>
+      )}
+    </>
+  )
+
+  if (isPhone) {
+    return (
+      <>
+        {justPublished && (
+          <SuccessSplash title="Posao je objavljen!" text="Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena." onClose={closeSplash} onShare={share} />
+        )}
+        <JobDetail
+          listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
+          isOwner={isOwner} myBid={myBid} acceptedBid={acceptedBid} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          onBack={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
+          onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={(bidId) => { if (window.confirm('Odbiti ovu ponudu?')) setBidStatus(bidId, 'rejected') }}
+          onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
+          reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
+          tab={tab} setTab={setTab}
+        />
+        {overlays}
+      </>
+    )
+  }
 
   return (
     <div className="app-shell page-with-mobile-nav job-page">
@@ -446,46 +532,7 @@ function ListingDetailPage() {
 
       {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
 
-      {acceptBid && (
-        <AcceptOfferSheet bid={acceptBid} providerName={acceptBid.bidder?.display_name} onClose={() => setAcceptBid(null)} onDone={async () => { await refreshJob(); setMessage('Ponuda je prihvaćena i uplata je osigurana. Izvođač je obaviješten.') }} />
-      )}
-      {lightbox != null && images[lightbox] && (
-        <div className="lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
-          <button type="button" className="lightbox-close" aria-label="Zatvori"><X size={22} /></button>
-          {images.length > 1 && <button type="button" className="lightbox-nav prev" aria-label="Prethodna" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + images.length - 1) % images.length) }}><ChevronLeft size={26} /></button>}
-          <img src={images[lightbox].url} alt={listing.title} onClick={(event) => event.stopPropagation()} />
-          {images.length > 1 && <button type="button" className="lightbox-nav next" aria-label="Sljedeća" onClick={(event) => { event.stopPropagation(); setLightbox((lightbox + 1) % images.length) }}><ChevronRight size={26} /></button>}
-          <span className="lightbox-count">{lightbox + 1} / {images.length}</span>
-        </div>
-      )}
-
-      {sheetOpen && (
-        <div className="sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
-          <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
-            <div className="sheet-handle" />
-            <h2 id="offer-title">Pošalji ponudu</h2>
-            <p className="muted-text">Vlasnik je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možete ponuditi manje ili više uz obrazloženje.</p>
-            <form className="auth-form" onSubmit={submitBid}>
-              <label>Vaša ponuda (KM)<input type="number" min="0" step="0.01" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
-              {priceStats && (
-                <div className="price-hint">
-                  <span>Tipično za „{listing.category}“: <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> (raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM, {priceStats.count} poslova)</span>
-                  <div className="price-hint-chips">
-                    {[Math.round(priceStats.median * 0.85), Math.round(priceStats.median), Math.round(priceStats.median * 1.2)].map((value) => (
-                      <button key={value} type="button" className={Number(bidForm.amount) === value ? 'active' : ''} onClick={() => setBidForm({ ...bidForm, amount: String(value) })}>{value} KM</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napišite zašto ste prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
-              <RuleOneNotice compact />
-              {bidError && <div className="form-error">{bidError}</div>}
-              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
-              <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
-            </form>
-          </section>
-        </div>
-      )}
+      {overlays}
     </div>
   )
 }

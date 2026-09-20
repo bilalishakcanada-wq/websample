@@ -27,6 +27,8 @@ export const ACCOUNT_NAV = [
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true },
   { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true },
   { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
+  { to: '/account/placanje', label: 'Opcije plaćanja', icon: CreditCard, hidden: true },
+  { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
 ]
 
 function AccountLayout() {

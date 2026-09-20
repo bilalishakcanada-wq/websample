@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Award, Bell, Camera, ChevronRight, CreditCard, History, IdCard, Images, LifeBuoy, LogOut, Settings, ShieldCheck, Trophy, UserRound, Wallet, Wrench } from 'lucide-react'
+import { Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, ShieldCheck, UserRound, Users, Wrench } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
@@ -16,35 +16,41 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
 
   const groups = [
     {
-      title: 'Nalog',
+      title: 'Postavke naloga',
       rows: [
-        ['/account/informacije', 'Informacije o nalogu', IdCard],
-        ['/account/znacke', 'Značke', Award],
-        ...(isProvider ? [['/account/vjestine', 'Vještine', Wrench], ['/account/portfolio', 'Portfolio', Images], ['/account/ploca', 'Ploča izvođača', Trophy]] : []),
-      ],
-    },
-    {
-      title: 'Plaćanje',
-      rows: [
-        ['/account/novcanik', 'Balans', Wallet],
-        ['/account/placanja', 'Historija plaćanja', History],
-        ['/account/nacini-placanja', 'Načini plaćanja', CreditCard],
+        ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
+        ['/account/informacije', 'Informacije o nalogu', null, IdCard],
       ],
     },
     {
       title: 'Obavijesti',
       rows: [
-        ['/account/obavijesti', 'Obavijesti', Bell],
-        ['/account/postavke', 'Postavke obavijesti', Settings],
-        ...(isProvider ? [['/account/alarmi', 'Alarmi za poslove', Bell]] : []),
+        ['/account/postavke-obavijesti', 'Postavke obavijesti', null, Bell],
+        ...(isProvider ? [['/account/alarmi', 'Alarmi za poslove', 'Budi prvi koji sazna za nove poslove', BellRing]] : []),
+      ],
+    },
+    ...(isProvider ? [{
+      title: 'Za izvođače',
+      rows: [
+        ['/account/ploca', 'Moja ploča', 'Nivo, naknada i zarada', LayoutDashboard],
+        ['/account/vjestine', 'Vještine', null, Wrench],
+        ['/account/portfolio', 'Portfolio radova', null, Images],
+      ],
+    }] : []),
+    {
+      title: 'Pomoć i podrška',
+      rows: [
+        ['/pomoc', 'Česta pitanja', null, HelpCircle],
+        ['/pravila-zajednice', 'Pravila zajednice', null, Users],
+        ['/kontakt', 'Kontaktiraj nas', null, MessageSquare],
+        ...(isStaff ? [['/admin', 'Admin panel', null, ShieldCheck]] : []),
       ],
     },
     {
-      title: 'Pomoć i sigurnost',
+      title: 'Sigurnost',
       rows: [
-        ['/pomoc', 'Pomoć i podrška', LifeBuoy],
-        ['/pravila-zajednice', 'Pravila zajednice', ShieldCheck],
-        ...(isStaff ? [['/admin', 'Admin panel', ShieldCheck]] : []),
+        ['/pravila', 'Pravila i uslovi', null, FileText],
+        ['/privatnost', 'Privatnost', null, Lock],
       ],
     },
   ]
@@ -75,10 +81,10 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
 
       {groups.map((group) => (
         <section key={group.title} className="ap-section">
-          <span className="ap-label">{group.title}</span>
-          <div className="ap-menu">
-            {group.rows.map(([to, label, Icon]) => (
-              <Link key={to} to={to} className="ap-menu-row"><Icon size={18} /><span>{label}</span><ChevronRight size={18} /></Link>
+          <span className="ap-label ap-eyebrow">{group.title}</span>
+          <div className="ap-menu ap-menu-plain">
+            {group.rows.map(([to, label, sub, Icon]) => (
+              <Link key={to} to={to} className="ap-menu-row"><Icon size={18} /><span>{label}{sub && <small>{sub}</small>}</span><ChevronRight size={18} /></Link>
             ))}
           </div>
         </section>

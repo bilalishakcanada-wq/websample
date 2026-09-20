@@ -9,6 +9,9 @@ import { toast } from './Toaster'
 
 const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, wallet: Wallet, job: Wallet }
 
+// notification ids already toasted/pinged in this session (shared by every bell instance)
+const announced = new Set()
+
 function NotificationBell() {
   const navigate = useNavigate()
   const { user, isAdmin } = useAuth()
@@ -22,6 +25,9 @@ function NotificationBell() {
     notificationService.listMine().then((rows) => active && setItems(rows))
     const unsubscribe = notificationService.subscribe(user.id, async (row) => {
       setItems((current) => [row, ...current].slice(0, 30))
+      // the header mounts two bells (desktop + phone): only one of them announces
+      if (announced.has(row.id)) return
+      announced.add(row.id)
       // app in front: a toast (unless the user is already in the chat); in the
       // background: the push service worker notifies, or the browser API if push is off
       if (document.visibilityState === 'visible') {

@@ -3,7 +3,7 @@ import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
@@ -62,6 +62,8 @@ function MessagesPage() {
   const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('poso-chat-tips') !== 'hidden' } catch { return true } })
   const listRef = useRef(null)
   const inputRef = useRef(null)
+  const imageRef = useRef(null)
+  const [uploading, setUploading] = useState(false)
 
   const loadInbox = () => messageService.inbox().then(setInbox).catch((requestError) => setError(requestError.message))
 
@@ -155,6 +157,23 @@ function MessagesPage() {
       loadInbox()
     } catch (requestError) {
       setError(requestError.message)
+    }
+  }
+
+  const sendImage = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !active) return
+    setError('')
+    setUploading(true)
+    try {
+      const created = await messageService.sendImage({ conversationId: active.id, senderId: user.id, receiverId: active.other_id, file })
+      setThread((current) => (current.some((item) => item.id === created.id) ? current : [...current, created]))
+      loadInbox()
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -296,8 +315,10 @@ function MessagesPage() {
                       {group.items.map((item) => {
                         const mine = item.sender_id === user.id
                         return (
-                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'}`}>
-                            <p>{item.content}</p>
+                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''}`}>
+                            {item.attachment_type === 'image' && item.attachment_url
+                              ? <a href={item.attachment_url} target="_blank" rel="noreferrer" className="chat-image"><img src={item.attachment_url} alt="Slika" loading="lazy" /></a>
+                              : <p>{item.content}</p>}
                             <span className="chat-bubble-meta">
                               {timeOf(item.created_at)}
                               {mine && (item.read_at ? <CheckCheck size={13} className="seen" /> : <Check size={13} />)}
@@ -314,6 +335,8 @@ function MessagesPage() {
                 {notice && <div className="form-success chat-alert">{notice}</div>}
 
                 <form className="chat-composer" onSubmit={sendMessage}>
+                  <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
+                  <button type="button" className="chat-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={20} /></button>
                   <textarea
                     ref={inputRef}
                     value={draft}

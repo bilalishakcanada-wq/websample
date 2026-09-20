@@ -47,6 +47,14 @@ export const bidService = {
     return data || []
   },
 
+  /** Rating / completion rate for everyone who made an offer on this job (offer cards). */
+  async bidderMetrics(listingId) {
+    if (!/^[0-9a-f-]{36}$/i.test(listingId)) return {}
+    const { data, error } = await supabase.rpc('bidder_metrics', { p_listing_id: listingId })
+    if (error) return {}
+    return Object.fromEntries((data || []).map((row) => [row.user_id, row]))
+  },
+
   async createBid({ listingId, bidderId, amount, message }) {
     const cleanMessage = sanitizeText(message).slice(0, 2000)
     const cleanAmount = Number(amount)

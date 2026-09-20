@@ -9,6 +9,8 @@ import AvatarWithBadges from '../components/AvatarWithBadges'
 import BadgeChip from '../components/BadgeChip'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import ProfileView from '../app/ProfileView'
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
@@ -68,6 +70,7 @@ function PublicProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const isPhone = useMediaQuery('(max-width: 768px)')
 
   useEffect(() => {
     let active = true
@@ -120,6 +123,8 @@ function PublicProfilePage() {
       setNotice(requestError.message)
     }
   }
+
+  if (isPhone) return <ProfileView bundle={bundle} user={user} onReport={reportProfile} />
 
   return (
     <div className={`app-shell page-with-mobile-nav public-profile-page ${isProvider ? 'is-provider' : 'is-client'}`}>

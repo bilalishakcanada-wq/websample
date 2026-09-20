@@ -12342,3 +12342,11 @@ button { touch-action: manipulation; }
 /* Brand mark SVG (replaces the old letter tiles): the drawing carries its own navy tile */
 svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important; padding: 0; border-radius: 22%; }
 .brand-mark.brand-mark-svg { box-shadow: 0 12px 20px rgba(13, 42, 82, 0.2); }
+
+/* chat: photo messages */
+.chat-attach { width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; background: var(--surface-soft); color: var(--primary); border: 1px solid var(--stroke); }
+.chat-attach:disabled { opacity: 0.5; }
+.chat-bubble.has-image { padding: 4px; background: transparent; box-shadow: none; }
+.chat-bubble.has-image .chat-bubble-meta { padding: 2px 6px 0; color: var(--text-soft); justify-content: flex-end; }
+.chat-image { display: block; border-radius: 16px; overflow: hidden; max-width: 240px; }
+.chat-image img { display: block; width: 100%; height: auto; max-height: 320px; object-fit: cover; }

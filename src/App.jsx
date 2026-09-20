@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
+import './app/app.css'
 // Every other page loads on demand — the phone downloads only what it opens.
 const DashboardPage = lazy(lazyImport(() => import('./pages/DashboardPage')))
 const AdminPage = lazy(lazyImport(() => import('./pages/AdminPage')))
@@ -38,6 +39,8 @@ const PaymentMethodsPage = lazy(lazyImport(() => import('./pages/account/Payment
 const WalletPage = lazy(lazyImport(() => import('./pages/account/WalletPage')))
 const NotificationsPage = lazy(lazyImport(() => import('./pages/account/NotificationsPage')))
 const SettingsPage = lazy(lazyImport(() => import('./pages/account/SettingsPage')))
+const PaymentOptionsPage = lazy(lazyImport(() => import('./pages/account/PaymentOptionsPage')))
+const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
 
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -118,6 +121,8 @@ function App() {
           <Route path="postavke" element={<SettingsPage />} />
           <Route path="alarmi" element={<TaskAlertsPage />} />
           <Route path="informacije" element={<AccountInfoPage />} />
+          <Route path="placanje" element={<PaymentOptionsPage />} />
+          <Route path="postavke-obavijesti" element={<NotificationPrefsPage />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage mode="admin" /></ProtectedRoute>} />
         <Route path="/mod" element={<ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR']}><AdminPage mode="moderator" /></ProtectedRoute>} />

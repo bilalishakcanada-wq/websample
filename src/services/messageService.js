@@ -64,7 +64,7 @@ export const messageService = {
   async listMessages(conversationId) {
     const { data, error } = await supabase
       .from('messages')
-      .select('id, sender_id, receiver_id, content, created_at, read_at')
+      .select('id, sender_id, receiver_id, content, created_at, read_at, attachment_url, attachment_type')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true })
 
@@ -82,13 +82,33 @@ export const messageService = {
     const { data, error } = await supabase
       .from('messages')
       .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: cleanContent })
-      .select('id, sender_id, receiver_id, content, created_at')
+      .select('id, sender_id, receiver_id, content, created_at, attachment_url, attachment_type')
       .single()
 
     if (error) {
       console.error('Supabase message insert failed', { message: error.message, code: error.code })
       throw publicError()
     }
+    return data
+  },
+
+  /** Photo message: the image is shrunk in the browser, stored under the sender's folder, then sent as a message. */
+  async sendImage({ conversationId, senderId, receiverId, file }) {
+    const allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'])
+    if (!file || !allowed.has(file.type) || file.size > 15 * 1024 * 1024) throw new Error('Slika mora biti JPG, PNG ili WEBP, manja od 15 MB.')
+    const { resizeImage } = await import('../utils/imageResize')
+    const shrunk = await resizeImage(file)
+    const ext = shrunk.type === 'image/webp' ? 'webp' : shrunk.type === 'image/png' ? 'png' : 'jpg'
+    const path = `${senderId}/chat/${conversationId}/${Date.now()}.${ext}`
+    const { error: uploadError } = await supabase.storage.from('media').upload(path, shrunk, { cacheControl: '31536000', contentType: shrunk.type })
+    if (uploadError) { console.error('Chat image upload failed', { message: uploadError.message }); throw new Error('Slika nije poslana. Pokušaj ponovo.') }
+    const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: '📷 Slika', attachment_url: urlData.publicUrl, attachment_type: 'image' })
+      .select('id, sender_id, receiver_id, content, created_at, attachment_url, attachment_type')
+      .single()
+    if (error) { console.error('Supabase image message insert failed', { message: error.message, code: error.code }); throw publicError() }
     return data
   },
 

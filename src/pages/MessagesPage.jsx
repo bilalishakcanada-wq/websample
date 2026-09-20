@@ -99,8 +99,16 @@ function MessagesPage() {
     setActiveId(id)
     setError('')
     setNotice('')
-    setSearchParams(id ? { c: id } : {}, { replace: true })
+    // opening a thread is a new history entry so the phone's back button returns to the inbox
+    setSearchParams(id ? { c: id } : {}, { replace: !id })
   }
+
+  // deep links (?c=…) from notifications while the page is already open, and the back button
+  const paramId = searchParams.get('c') || ''
+  useEffect(() => {
+    if (paramId !== activeId) { setActiveId(paramId); setError(''); setNotice('') }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramId])
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase()

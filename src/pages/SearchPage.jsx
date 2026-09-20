@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
@@ -6,7 +6,8 @@ import {
   Map as MapIcon, Search as SearchIcon, SlidersHorizontal, UserRound, Users, X,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
-import TaskMap from '../components/TaskMap'
+// maplibre is ~0.8 MB: only fetched when the map is actually on screen
+const TaskMap = lazy(() => import('../components/TaskMap'))
 import { serviceCategories } from '../data/categories'
 import { bosniaCities } from '../data/cities'
 import { cityCoordinates, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
@@ -74,6 +75,14 @@ function SearchPage() {
   const [error, setError] = useState('')
   const [activeId, setActiveId] = useState(null)
   const [mobileView, setMobileView] = useState('list')
+  // phones show list OR map; wider screens show both (mirrors the CSS breakpoint)
+  const [isPhone, setIsPhone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches)
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 900px)')
+    const onChange = (event) => setIsPhone(event.matches)
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
   const filterBarRef = useRef(null)
   const cardRefs = useRef({})
 
@@ -339,7 +348,11 @@ function SearchPage() {
         </section>
 
         <aside className="browse-map">
-          <TaskMap listings={listings} activeId={activeId} onSelect={selectFromMap} focus={mapFocus} />
+          {(mobileView === 'map' || !isPhone) && (
+            <Suspense fallback={<div className="browse-map-loading"><span /></div>}>
+              <TaskMap listings={listings} activeId={activeId} onSelect={selectFromMap} focus={mapFocus} />
+            </Suspense>
+          )}
         </aside>
       </main>
     </div>

@@ -12211,3 +12211,8 @@ button { touch-action: manipulation; }
   .mobile-nav-item svg { padding: 3px 10px; border-radius: 999px; box-sizing: content-box; transition: background 0.25s ease, transform 0.2s ease; }
   .mobile-nav-item.active svg { background: rgba(245, 180, 0, 0.22); }
 }
+
+/* map chunk loading placeholder */
+.browse-map-loading { position: relative; height: 100%; min-height: 360px; border-radius: 20px; background: linear-gradient(135deg, #eef2f8, #f7f4ec); overflow: hidden; }
+.browse-map-loading span { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent); animation: shimmer-slide 1.2s ease-in-out infinite; }
+@keyframes shimmer-slide { from { transform: translateX(-100%); } to { transform: translateX(100%); } }

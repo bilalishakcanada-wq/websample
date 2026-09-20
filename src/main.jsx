@@ -6,9 +6,11 @@ import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { setupNative } from './utils/native'
 import { watchServiceWorkerUpdates } from './utils/appUpdates'
+import { installErrorReporter } from './utils/errorReporter'
 
 setupNative()
 watchServiceWorkerUpdates()
+installErrorReporter()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

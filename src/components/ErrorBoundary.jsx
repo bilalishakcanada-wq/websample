@@ -1,10 +1,15 @@
 import { Component } from 'react'
+import { reportClientError } from '../utils/errorReporter'
 
 class ErrorBoundary extends Component {
   state = { hasError: false }
 
   static getDerivedStateFromError() {
     return { hasError: true }
+  }
+
+  componentDidCatch(error) {
+    reportClientError(error, 'render')
   }
 
   render() {

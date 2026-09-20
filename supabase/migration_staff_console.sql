@@ -738,3 +738,8 @@ $$;
 -- hardening (migration staff_console_hardening): staff RPCs revoked from anon,
 -- owner_user_id() + log_auth_session() revoked from everyone (internal only),
 -- duration_label() gets a fixed search_path.
+
+-- ---------- client error log (beta crash reports) ----------
+-- create table public.client_errors (id uuid pk, user_id uuid, message text, stack text, url text, user_agent text, created_at timestamptz);
+-- RLS: staff read only; writes only through public.log_client_error(p_message, p_stack, p_url, p_user_agent)
+-- (security definer, 30 rows/minute cap, granted to anon + authenticated). Called from src/utils/errorReporter.js.

@@ -84,6 +84,17 @@ export const adminService = {
     return data
   },
 
+  /** Crash reports from the app (beta): newest first. */
+  async clientErrors(limit = 40) {
+    const { data, error } = await supabase
+      .from('client_errors')
+      .select('id, user_id, message, stack, url, user_agent, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) throw new Error(staffErrorMessage(error))
+    return data || []
+  },
+
   async listStaff() {
     const { data, error } = await supabase.rpc('admin_list_staff')
     if (error) {

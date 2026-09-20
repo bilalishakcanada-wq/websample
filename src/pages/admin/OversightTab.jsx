@@ -7,9 +7,37 @@ import { withBase } from '../../utils/paths'
 
 const FEED_KINDS = [
   ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
-  ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'], ['login', 'Prijave na nalog'],
+  ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'], ['login', 'Prijave na nalog'], ['errors', 'Greške aplikacije'],
 ]
 const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '⭐', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
+
+/** Crash reports sent by the app itself (see src/utils/errorReporter.js). */
+function ClientErrors({ openUser }) {
+  const [rows, setRows] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    adminService.clientErrors().then(setRows).catch((requestError) => setError(requestError.message))
+  }, [])
+  if (error) return <div className="form-error">{error}</div>
+  if (rows === null) return <div className="page-state">Učitavanje...</div>
+  if (rows.length === 0) return <p className="muted-text">Nema prijavljenih grešaka — aplikacija radi bez padova. 🎉</p>
+  return rows.map((row) => (
+    <div key={row.id} className="admin-row feed-error">
+      <div className="admin-feed-main">
+        <span className="admin-feed-kind">🐞</span>
+        <div>
+          <strong>{row.message}</strong>
+          <p className="muted-text">
+            {row.user_id ? <button type="button" className="adm-userlink" onClick={() => openUser(row.user_id)}>korisnik</button> : 'gost'} · {formatBosnianDate(row.created_at)}
+            {row.url && <> · <span className="uid-chip">{row.url.replace(/^https?:\/\/[^/]+/, '')}</span></>}
+          </p>
+          {row.user_agent && <p className="admin-snippet">{row.user_agent.slice(0, 120)}</p>}
+          {row.stack && <details className="admin-stack"><summary>Stack</summary><pre>{row.stack}</pre></details>}
+        </div>
+      </div>
+    </div>
+  ))
+}
 
 function OversightTab() {
   const { openUser } = useStaff()
@@ -25,6 +53,7 @@ function OversightTab() {
   useEffect(() => { kindRef.current = kind }, [kind])
 
   const load = (nextKind = kindRef.current) => {
+    if (nextKind === 'errors') return // its own loader (ClientErrors)
     setLoading(true)
     adminService.activityFeed({ kind: nextKind || null, limit: 150 }).then(setRows).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
   }
@@ -65,7 +94,8 @@ function OversightTab() {
         ))}
       </div>
       {error && <div className="form-error">{error}</div>}
-      {loading && rows.length === 0 ? <div className="page-state">Učitavanje...</div> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
+      {kind === 'errors' && <ClientErrors openUser={openUser} />}
+      {kind !== 'errors' && (loading && rows.length === 0 ? <div className="page-state">Učitavanje...</div> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
         <div key={`${row.kind}-${row.id}`} className={`admin-row feed-${row.kind}`}>
           <div className="admin-feed-main">
             <span className="admin-feed-kind">{KIND_ICON[row.kind] || '•'}</span>
@@ -96,7 +126,7 @@ function OversightTab() {
             )}
           </div>
         </div>
-      ))}
+      )))}
       {suspendTarget && <SuspendDialog user={suspendTarget} onClose={() => setSuspendTarget(null)} onDone={() => load()} />}
     </div>
   )

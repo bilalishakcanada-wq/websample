@@ -12221,3 +12221,8 @@ button { touch-action: manipulation; }
 .wallet-cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; }
 .wallet-cta a { display: inline-flex; align-items: center; gap: 8px; }
 @media (max-width: 560px) { .wallet-cta a { flex: 1 1 auto; justify-content: center; } }
+
+/* staff console: crash reports */
+.admin-stack { margin-top: 6px; }
+.admin-stack summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-soft); }
+.admin-stack pre { margin: 6px 0 0; padding: 10px; max-height: 220px; overflow: auto; font-size: 0.72rem; line-height: 1.4; border-radius: 10px; background: #0d1b33; color: #dbe6f7; white-space: pre-wrap; word-break: break-all; }

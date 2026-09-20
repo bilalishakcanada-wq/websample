@@ -31,6 +31,8 @@ const SkillsPage = lazy(lazyImport(() => import('./pages/account/SkillsPage')))
 const BadgesPage = lazy(lazyImport(() => import('./pages/account/BadgesPage')))
 const PortfolioPage = lazy(lazyImport(() => import('./pages/account/PortfolioPage')))
 const TierDashboardPage = lazy(lazyImport(() => import('./pages/account/TierDashboardPage')))
+const TaskAlertsPage = lazy(lazyImport(() => import('./pages/account/TaskAlertsPage')))
+const AccountInfoPage = lazy(lazyImport(() => import('./pages/account/AccountInfoPage')))
 const PaymentHistoryPage = lazy(lazyImport(() => import('./pages/account/PaymentHistoryPage')))
 const PaymentMethodsPage = lazy(lazyImport(() => import('./pages/account/PaymentMethodsPage')))
 const WalletPage = lazy(lazyImport(() => import('./pages/account/WalletPage')))
@@ -112,6 +114,8 @@ function App() {
           <Route path="znacke" element={<BadgesPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="postavke" element={<SettingsPage />} />
+          <Route path="alarmi" element={<TaskAlertsPage />} />
+          <Route path="informacije" element={<AccountInfoPage />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage mode="admin" /></ProtectedRoute>} />
         <Route path="/mod" element={<ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR']}><AdminPage mode="moderator" /></ProtectedRoute>} />

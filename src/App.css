@@ -12334,3 +12334,13 @@ button { touch-action: manipulation; }
   .browse-page .browse-map { height: calc(100dvh - 190px - env(safe-area-inset-bottom, 0px)); min-height: 320px; border-radius: 0; margin: 0 -14px; }
   .browse-page .browse-map .task-map { border-radius: 0; }
 }
+
+/* task alerts */
+.alert-form { display: grid; gap: 12px; padding: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--stroke); margin: 12px 0 18px; }
+.alert-form label { display: grid; gap: 6px; font-weight: 700; font-size: 0.86rem; color: var(--primary-strong); }
+.alert-form select, .alert-form input { width: 100%; min-height: 46px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--stroke); background: var(--surface-soft); font-size: 0.95rem; }
+.alert-form .primary-button { justify-self: start; }
+.alert-list { display: grid; gap: 8px; }
+.alert-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--stroke); }
+.alert-row strong { display: block; }
+.alert-row span { font-size: 0.82rem; color: var(--text-soft); }

@@ -18,7 +18,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
     {
       title: 'Nalog',
       rows: [
-        ['/account/profil', 'Informacije o nalogu', IdCard],
+        ['/account/informacije', 'Informacije o nalogu', IdCard],
         ['/account/znacke', 'Značke', Award],
         ...(isProvider ? [['/account/vjestine', 'Vještine', Wrench], ['/account/portfolio', 'Portfolio', Images], ['/account/ploca', 'Ploča izvođača', Trophy]] : []),
       ],
@@ -32,10 +32,16 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
       ],
     },
     {
-      title: 'Ostalo',
+      title: 'Obavijesti',
       rows: [
         ['/account/obavijesti', 'Obavijesti', Bell],
-        ['/account/postavke', 'Postavke', Settings],
+        ['/account/postavke', 'Postavke obavijesti', Settings],
+        ...(isProvider ? [['/account/alarmi', 'Alarmi za poslove', Bell]] : []),
+      ],
+    },
+    {
+      title: 'Pomoć i sigurnost',
+      rows: [
         ['/pomoc', 'Pomoć i podrška', LifeBuoy],
         ['/pravila-zajednice', 'Pravila zajednice', ShieldCheck],
         ...(isStaff ? [['/admin', 'Admin panel', ShieldCheck]] : []),

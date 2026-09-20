@@ -25,6 +25,8 @@ export const ACCOUNT_NAV = [
   { to: '/account/znacke', label: 'Značke', icon: Award },
   { to: '/account/portfolio', label: 'Portfolio', icon: Images, providerOnly: true },
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true },
+  { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true },
+  { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
 ]
 
 function AccountLayout() {
@@ -134,7 +136,7 @@ function AccountLayout() {
   }
 
   const isSuspended = profile.account_status === 'suspended'
-  const nav = ACCOUNT_NAV.filter((item) => !item.providerOnly || isProvider)
+  const nav = ACCOUNT_NAV.filter((item) => !item.hidden && (!item.providerOnly || isProvider))
 
   // phones: /account is a plain menu; sub-pages get a back bar instead of the sidebar
   if (isPhone) {

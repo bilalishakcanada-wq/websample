@@ -14,7 +14,7 @@ export const NATIVE_AUTH_CALLBACK = 'ba.poso.app://auth/callback'
 export async function openInSystemBrowser(url) {
   const browser = plugin('Browser')
   if (browser) await browser.open({ url, presentationStyle: 'popover' })
-  else window.open(url, '_blank')
+  else window.location.assign(url) // older app build without the Browser plugin: plain redirect
 }
 
 export async function setupNative() {

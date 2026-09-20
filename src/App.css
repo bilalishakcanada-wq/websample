@@ -12344,3 +12344,15 @@ button { touch-action: manipulation; }
 .alert-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--stroke); }
 .alert-row strong { display: block; }
 .alert-row span { font-size: 0.82rem; color: var(--text-soft); }
+/* phones: screens with their own title bar do not repeat the site header */
+@media (max-width: 768px) {
+  body[data-page='search'] .site-header, body[data-page='search'] .site-header-spacer,
+  body[data-page='moji-poslovi'] .site-header, body[data-page='moji-poslovi'] .site-header-spacer,
+  body[data-page='account'] .site-header, body[data-page='account'] .site-header-spacer,
+  body[data-page='messages'] .site-header, body[data-page='messages'] .site-header-spacer { display: none; }
+  body[data-page='search'] .ap-browse-top, body[data-page='moji-poslovi'] .ap-page-head, body[data-page='messages'] .chat-topline { padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+  body[data-page='account'] .ap-account-head { padding-top: calc(18px + env(safe-area-inset-top, 0px)); border-radius: 0 0 26px 26px; }
+  body[data-page='account'] .ap-subbar { padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+  body[data-page='messages'] .chat-sidebar { height: calc(100dvh - 74px - env(safe-area-inset-bottom, 0px) - 84px - env(safe-area-inset-top, 0px)); }
+  body[data-page='messages'] .chat-layout.has-active .chat-main { height: calc(100dvh - 74px - env(safe-area-inset-bottom, 0px) - 24px - env(safe-area-inset-top, 0px)); }
+}

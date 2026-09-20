@@ -52,6 +52,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
   return (
     <div className="ap ap-page ap-account">
       <header className="ap-account-head">
+        <Link to="/account/obavijesti" className="ap-account-bell" aria-label="Obavijesti"><Bell size={20} /></Link>
         <button type="button" className="ap-account-avatar" onClick={onPickAvatar} disabled={uploadingAvatar} aria-label="Promijeni profilnu sliku">
           {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={36} />}
           <span><Camera size={13} /></span>

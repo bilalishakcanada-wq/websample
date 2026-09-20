@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronRight, Plus, Users } from 'lucide-react'
+import { Bell, ChevronRight, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
@@ -31,7 +31,7 @@ function MyTasks() {
 
   return (
     <div className="ap ap-page">
-      <header className="ap-page-head"><h1>Moji poslovi</h1></header>
+      <header className="ap-page-head"><h1>Moji poslovi</h1><Link to="/account/obavijesti" className="ap-icon-btn" aria-label="Obavijesti"><Bell size={20} /></Link></header>
       <div className="ap-tabs" role="tablist">
         <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => setParams({ tab: 'objavljeni' }, { replace: true })}>Objavljeni {jobs ? `(${jobs.length})` : ''}</button>
         <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => setParams({ tab: 'ponude' }, { replace: true })}>Moje ponude {bids ? `(${bids.length})` : ''}</button>

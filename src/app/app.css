@@ -179,7 +179,7 @@
 .ap-banner small { display: block; color: var(--text-soft); font-size: 0.8rem; }
 
 /* ---------- my tasks ---------- */
-.ap-page-head { padding: 16px 0 8px; }
+.ap-page-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 8px; }
 .ap-page-head h1 { margin: 0; font-family: var(--font-display); font-stretch: 85%; font-size: 1.7rem; color: var(--primary-strong); }
 .ap-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 14px; background: #eef2f8; }
 .ap-tabs button { min-height: 42px; border-radius: 11px; background: transparent; color: var(--text-soft); font-weight: 800; font-size: 0.9rem; }
@@ -187,7 +187,8 @@
 
 /* ---------- account menu ---------- */
 .ap-account { padding-top: 0; }
-.ap-account-head { display: flex; align-items: center; gap: 14px; margin: 0 calc(-1 * var(--ap-x)) 14px; padding: 22px var(--ap-x) 26px; background: var(--primary-strong); color: white; border-radius: 0 0 26px 26px; }
+.ap-account-bell { position: absolute; right: 16px; top: calc(14px + env(safe-area-inset-top, 0px)); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(255, 255, 255, 0.12); color: white; }
+.ap-account-head { position: relative; display: flex; align-items: center; gap: 14px; margin: 0 calc(-1 * var(--ap-x)) 14px; padding: 22px var(--ap-x) 26px; background: var(--primary-strong); color: white; border-radius: 0 0 26px 26px; }
 .ap-account-head small { display: block; font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); margin-top: 2px; }
 .ap-account-links { display: flex; gap: 14px; margin-top: 8px; }
 .ap-account-links a { font-size: 0.8rem; font-weight: 700; color: white; min-height: 0; }

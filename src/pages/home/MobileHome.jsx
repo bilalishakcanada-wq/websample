@@ -14,6 +14,7 @@ import { matchService } from '../../services/matchService'
 import CityPicker from '../../components/CityPicker'
 import EarnArt from '../../components/EarnArt'
 import { haptic } from '../../utils/native'
+import { prefetchRoute } from '../../utils/prefetch'
 import './mobile-home.css'
 
 const CATEGORY_ICONS = { home: Home, sparkles: Sparkles, laptop: Laptop, palette: Palette, hammer: Hammer, zap: Zap, truck: Truck, leaf: Leaf, monitor: Monitor }
@@ -37,7 +38,7 @@ function MobileHome() {
   const [city, setCity] = useState(() => { try { return localStorage.getItem('poso-city') || 'Sarajevo' } catch { return 'Sarajevo' } })
   const [cityOpen, setCityOpen] = useState(false)
   const { combined: jobs, hasLive, loading } = useLiveListings({ limit: 8 })
-  const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
+  const { combined: providers, hasLive: hasLiveProviders, loading: providersLoading } = useRankedProviders(6)
   const { stats, rating } = usePlatformStats()
   const [recommended, setRecommended] = useState([])
   const jobsRailRef = useRef(null)
@@ -159,7 +160,7 @@ function MobileHome() {
         <div className="mh-rail mh-rail-jobs" ref={jobsRailRef}>
           {loading && jobs.length === 0 && [1, 2, 3].map((n) => <div key={n} className="mh-job mh-skeleton" />)}
           {jobs.map((job, index) => (
-            <Link key={job.id} to={job.isLive ? `/listings/${job.id}` : '/search'} className="mh-job" style={{ '--i': index }}>
+            <Link key={job.id} to={job.isLive ? `/listings/${job.id}` : '/search'} className="mh-job" style={{ '--i': index }} onPointerDown={() => prefetchRoute(job.isLive ? '/listings' : '/search')}>
               <div className="mh-job-media">
                 <img src={job.image} alt="" loading="lazy" decoding="async" />
                 <span className="mh-job-price">{job.price}</span>
@@ -177,7 +178,8 @@ function MobileHome() {
       <section className="mh-section">
         <div className="mh-head"><h2>Top izvođači</h2><Link to="/search">Pronađi <ArrowRight size={14} /></Link></div>
         <div className="mh-rail mh-rail-pro">
-          {providers.slice(0, 6).map((pro, index) => {
+          {providersLoading && [1, 2, 3].map((n) => <div key={n} className="mh-pro mh-skeleton mh-skeleton-pro" />)}
+          {!providersLoading && providers.slice(0, 6).map((pro, index) => {
             const live = hasLiveProviders && !pro.isDemo
             const name = live ? (pro.display_name || 'Korisnik Poso.ba') : pro.name
             const photo = live ? pro.avatar_url : pro.photo

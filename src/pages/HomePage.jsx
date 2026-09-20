@@ -26,6 +26,8 @@ import { usePlatformStats } from '../hooks/usePlatformStats'
 import { ArcHeadline, HeroStars, LadderArt, SwingArt } from '../components/HeroArt'
 import { POPULAR_CITIES } from '../data/siteMap'
 import { withBase } from '../utils/paths'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import MobileHome from './home/MobileHome'
 
 const categoryCards = [
   ...mockServiceCategories.map((category) => ({
@@ -42,6 +44,13 @@ const categoryCards = [
 ]
 
 function HomePage() {
+  // phones get the app-style home screen; the marketing page stays for tablets and desktops
+  const isPhone = useMediaQuery('(max-width: 768px)')
+  if (isPhone) return <MobileHome />
+  return <DesktopHome />
+}
+
+function DesktopHome() {
   const navigate = useNavigate()
   const [selectedPlan, setSelectedPlan] = useState('plus')
   const [selectedCredit, setSelectedCredit] = useState('50')

@@ -4,6 +4,8 @@
 .mh { --mh-pad: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding-bottom: 12px; max-width: 100%; overflow-x: clip; }
 .mh-section { padding: 14px var(--mh-pad) 6px; min-width: 0; }
 .mh-section-last { padding-bottom: 18px; }
+.mh-section-tight { padding-top: 4px; padding-bottom: 0; }
+.mh-section-tight .push-prompt { margin-bottom: 0; }
 .mh-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 12px; }
 .mh-head h2 { margin: 0; font-family: var(--font-display); font-stretch: 85%; font-size: 1.28rem; letter-spacing: -0.01em; color: var(--primary-strong); }
 .mh-head a { display: inline-flex; align-items: center; gap: 4px; font-size: 0.86rem; font-weight: 700; color: var(--primary); min-height: 0; }

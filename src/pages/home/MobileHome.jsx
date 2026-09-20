@@ -13,6 +13,7 @@ import { usePlatformStats } from '../../hooks/usePlatformStats'
 import { matchService } from '../../services/matchService'
 import CityPicker from '../../components/CityPicker'
 import EarnArt from '../../components/EarnArt'
+import PushPrompt from '../../components/PushPrompt'
 import { haptic } from '../../utils/native'
 import { prefetchRoute } from '../../utils/prefetch'
 import './mobile-home.css'
@@ -137,6 +138,8 @@ function MobileHome() {
           <span className="mh-post-arrow"><ArrowRight size={20} /></span>
         </Link>
       </section>
+
+      {user && <section className="mh-section mh-section-tight"><PushPrompt compact reason="Javit ćemo ti kad stigne ponuda ili poruka." /></section>}
 
       {/* ---------- recommended (signed in) ---------- */}
       {recommended.length > 0 && (

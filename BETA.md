@@ -24,6 +24,9 @@ Svaki push na `main` automatski gradi i objavljuje novu verziju (GitHub Actions 
 7. Admin/mod panel na telefonu (*/admin*, */mod*).
 
 ## Šta samo vlasnik može podesiti (Supabase / servisi)
+- **VAŽNO za registracije:** Supabase-ov ugrađeni email servis šalje samo ~2 emaila na sat, pa testeri neće dobiti potvrdu registracije. Za beta uradi jedno od dvoje:
+  - *Auth → Providers → Email → isključi „Confirm email“* (najbrže), ili
+  - *Auth → SMTP Settings → Custom SMTP* (npr. Resend besplatni plan) — tada radi i potvrda emaila i reset lozinke bez limita.
 - **Auth → URL Configuration:** dodaj `https://bilalishakcanada-wq.github.io/websample/` u *Site URL* i *Redirect URLs* (inače Google prijava i reset lozinke vraćaju na pogrešnu adresu).
 - **Facebook prijava:** App ID + App Secret u *Auth → Providers → Facebook* (dugme već postoji).
 - **AI podrška / AI provjera profila:** Anthropic nalog treba kredite (`ANTHROPIC_API_KEY` je već postavljen kao secret). Do tada radi ugrađeni odgovarač i ručno preuzimanje razgovora.

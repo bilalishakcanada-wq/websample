@@ -14,11 +14,25 @@ uvijek najnoviju verziju — svaki push na `main` = nova verzija u aplikaciji, b
 Kad želiš da aplikacija radi i bez interneta / potpuno iz paketa: obriši `server` iz
 `capacitor.config.json`, napravi build sa `VITE_BASE=/ npm run build` i pokreni `npm run app:sync`.
 
-## Prvi put (Mac)
-1. Instaliraj **Xcode** iz App Storea (besplatno, ~12 GB) i jednom ga otvori da prihvatiš licencu.
-2. `npm run app:ios` → u Xcode-u izaberi simulator (iPhone 16) → ▶ Run.
-3. Za TestFlight: Xcode → Signing & Capabilities → tvoj Apple Developer tim (99 $/god) → Product → Archive → Distribute → TestFlight.
-4. Android: instaliraj Android Studio → `npm run app:android` → Run. Za Play: Build → Generate Signed Bundle.
+## Prvi put (Mac) — korak po korak
+Xcode 27 je već instaliran. iOS projekat je sinhronizovan (`ios/App`), ikone i splash su generisani.
+
+1. **Prihvati Xcode licencu** (jednom, traži lozinku Maca) — u Terminalu:
+   ```bash
+   sudo xcodebuild -license accept
+   ```
+   Bez ovoga ne rade ni `git`, ni `python3`, ni build.
+2. **Otvori projekat u Xcode-u:**
+   ```bash
+   open ios/App/App.xcodeproj
+   ```
+   (ili `npm run app:ios`). Pri prvom otvaranju Xcode sam skine Capacitor pakete (SPM) — sačekaj da završi (donji status bar).
+3. **Simulator:** gore u traci izaberi *App → iPhone 17 Pro* (bilo koji simulator) → klikni ▶ (Run). Aplikacija se otvara preko cijelog ekrana i učitava live sajt.
+4. **Tvoj iPhone:** spoji ga kablom → na telefonu *Postavke → Privatnost i sigurnost → Developer Mode → uključi* → u Xcode-u izaberi svoj iPhone kao uređaj → *Signing & Capabilities → Team: dodaj svoj Apple ID* (besplatan nalog radi za testiranje 7 dana) → ▶ Run. Na telefonu: *Postavke → Opšte → VPN i upravljanje uređajem → Vjeruj*.
+5. **TestFlight / App Store:** treba Apple Developer Program (99 $/god): *Product → Archive → Distribute App → TestFlight*. Testeri instaliraju TestFlight i dobiju link.
+6. **Android:** instaliraj Android Studio → `npm run app:android` → Run. Za Play: *Build → Generate Signed Bundle*.
+
+Nakon svake promjene web koda **nije potreban novi build** — ljuska učitava live sajt. Novi build treba samo kad se mijenja `capacitor.config.json`, ikone ili native plugini.
 
 Ikone i splash ekrani su već generisani (`npm run app:assets` ih pravi iz `assets/icon.png` i `assets/splash.png`).
 ID aplikacije: `ba.poso.app`, ime: Poso.ba.

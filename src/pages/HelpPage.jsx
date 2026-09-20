@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowRight, BookOpen, ChevronDown, Mail, MessageCircle, Search, ShieldCheck } from 'lucide-react'
+import { ArrowRight, BookOpen, Bug, ChevronDown, Mail, MessageCircle, Search, ShieldCheck } from 'lucide-react'
 import ContactForm from '../components/ContactForm'
 import { HELP_ARTICLES, HELP_AUDIENCES, searchHelp } from '../data/helpArticles'
 
@@ -120,6 +120,11 @@ function HelpPage() {
               <span className="help-contact-icon"><ShieldCheck size={22} /></span>
               <strong>Pravila zajednice</strong>
               <span>Pravilo #1, sigurnost i šta nije dozvoljeno</span>
+            </Link>
+            <Link className="help-contact-card help-contact-bug" to={`/pomoc?chat=1&msg=${encodeURIComponent('Prijava greške (beta): šta sam radio/la → šta se desilo → šta sam očekivao/la. Telefon/preglednik: ')}`}>
+              <span className="help-contact-icon"><Bug size={22} /></span>
+              <strong>Prijavi grešku</strong>
+              <span>Beta verzija — svaka prijava nam pomaže</span>
             </Link>
           </div>
           <div className="contact-card" id="poruka">

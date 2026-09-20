@@ -19,6 +19,10 @@ export async function setupNative() {
 
 /** Short tap feedback on important actions (accept offer, release payment). */
 export function haptic(kind = 'light') {
-  if (!isNativeApp()) return
+  if (!isNativeApp()) {
+    // installed web app on Android: the Vibration API gives the same tap feedback
+    try { navigator.vibrate?.(kind === 'heavy' ? 30 : kind === 'medium' ? 18 : 8) } catch { /* ignore */ }
+    return
+  }
   try { plugin('Haptics')?.impact({ style: kind === 'heavy' ? 'HEAVY' : kind === 'medium' ? 'MEDIUM' : 'LIGHT' }) } catch { /* ignore */ }
 }

@@ -536,3 +536,5 @@
 .ap-myjobs .mt-list { margin-top: 10px; }
 .mt-card-compact { padding: 12px 14px; }
 .mt-card-compact .mt-card-foot { margin-top: 2px; }
+
+.jd-review-done { margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: rgba(25, 179, 123, 0.1); color: #0f7a54; font-weight: 700; }

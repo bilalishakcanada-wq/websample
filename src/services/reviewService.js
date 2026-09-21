@@ -52,6 +52,13 @@ export const reviewService = {
     return { average: Math.round(average * 10) / 10, count: data.length }
   },
 
+  /** Has this person already reviewed this job? (one review per person per job) */
+  async mineForListing(listingId, reviewerId) {
+    if (!listingId || !reviewerId) return null
+    const { data } = await supabase.from('reviews').select('id, rating, comment, created_at').eq('listing_id', listingId).eq('reviewer_id', reviewerId).maybeSingle()
+    return data || null
+  },
+
   async createReview({ reviewerId, revieweeId, listingId, rating, comment }) {
     if (reviewerId === revieweeId) throw new Error('Ne možete ostaviti recenziju samom sebi.')
     const cleanComment = sanitizeText(comment).slice(0, 1000)
@@ -68,6 +75,7 @@ export const reviewService = {
 
     if (error) {
       console.error('Supabase review insert failed', { message: error.message, code: error.code })
+      if (error.code === '23505') throw new Error('Već si ostavio/la recenziju za ovaj posao.')
       throw publicError()
     }
     return data

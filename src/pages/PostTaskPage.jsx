@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { serviceCategories } from '../data/categories'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
+import { guessCategory } from '../utils/categoryGuess'
 import ImagePicker from '../components/ImagePicker'
 import { profileService } from '../services/profileService'
 
@@ -27,19 +28,26 @@ const TIMING_OPTIONS = [
   { id: 'flexible', label: 'Fleksibilan sam' },
 ]
 
+const DRAFT_KEY = 'poso-post-draft-web'
+
 function PostTaskPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
-  const [step, setStep] = useState(0)
+  // a half-written job survives a refresh or an accidental click away (not when editing an existing one)
+  const draft = useMemo(() => {
+    if (editId) return null
+    try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { return null }
+  }, [editId])
+  const [step, setStep] = useState(draft?.step || 0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tagDraft, setTagDraft] = useState('')
-  const [tagList, setTagList] = useState([])
+  const [tagList, setTagList] = useState(draft?.tags || [])
   const [photos, setPhotos] = useState({ files: [], removed: [] })
   const [existingImages, setExistingImages] = useState([])
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(draft?.form || {
     title: '',
     timing: 'flexible',
     date: '',
@@ -49,6 +57,13 @@ function PostTaskPage() {
     description: '',
     price: '',
   })
+  useEffect(() => {
+    if (editId) return
+    try {
+      if (form.title.trim()) localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList }))
+      else localStorage.removeItem(DRAFT_KEY)
+    } catch { /* ignore */ }
+  }, [form, step, tagList, editId])
 
   useEffect(() => {
     if (!editId) return
@@ -130,6 +145,7 @@ function PostTaskPage() {
         if (flagged > 0) window.alert(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`)
       }
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
+      try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError.message)
@@ -138,6 +154,15 @@ function PostTaskPage() {
   }
 
   const priceStats = useCategoryPrice(form.category)
+  const [guessed, setGuessed] = useState(false)
+  // entering "Detalji" with no category: pre-select what the title suggests (the person can still change it)
+  const goNext = () => {
+    if (step === 1 && !form.category) {
+      const guess = guessCategory(form.title, form.description)
+      if (guess) { update({ category: guess }); setGuessed(true) }
+    }
+    setStep((s) => s + 1)
+  }
 
   return (
     <div className="wizard-shell">
@@ -146,7 +171,7 @@ function PostTaskPage() {
           <ArrowLeft size={20} />
         </button>
         <span className="wizard-title">Objavi posao</span>
-        <button type="button" className="back-home-link" onClick={() => navigate('/')}>Odustani</button>
+        <button type="button" className="back-home-link" onClick={() => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } navigate('/') }}>Odustani</button>
       </header>
 
       <div className="wizard-progress">
@@ -224,10 +249,11 @@ function PostTaskPage() {
             <p className="muted-text">Što jasnije opišete, to ćete dobiti bolje i preciznije ponude.</p>
             <label className="wizard-field">
               <span>Kategorija</span>
-              <select value={form.category} onChange={(event) => update({ category: event.target.value })}>
+              <select value={form.category} onChange={(event) => { update({ category: event.target.value }); setGuessed(false) }}>
                 <option value="">Odaberi kategoriju</option>
                 {serviceCategories.map((category) => <option key={category.id} value={category.name}>{category.name}</option>)}
               </select>
+              {guessed && form.category && <small className="wizard-hint">Predloženo prema naslovu — promijeni ako ne odgovara.</small>}
             </label>
             <label className="wizard-field">
               <span>Opis posla</span>
@@ -320,7 +346,7 @@ function PostTaskPage() {
       <footer className="wizard-footer">
         {step > 0 && <button type="button" className="ghost-button" onClick={() => setStep((s) => s - 1)}>Nazad</button>}
         {step < STEPS.length - 1 && (
-          <button type="button" className="primary-button wizard-next" disabled={!canContinue()} onClick={() => setStep((s) => s + 1)}>
+          <button type="button" className="primary-button wizard-next" disabled={!canContinue()} onClick={goNext}>
             Nastavi
           </button>
         )}

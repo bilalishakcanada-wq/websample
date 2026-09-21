@@ -16,7 +16,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, myBid, acceptedBid, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -64,6 +64,7 @@ function JobDetail(props) {
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>Pošalji ponudu</button>}
+        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
         {isOwner && acceptedBid && !payment && listing.status === 'published' && (
           <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
         )}
@@ -116,7 +117,7 @@ function JobDetail(props) {
         )}
 
         {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
-          <Link to="/messages" className="ap-btn ap-btn-light jd-messages"><MessageCircle size={18} /> Otvori poruke</Link>
+          <Link to={`/messages?listing=${listing.id}`} className="ap-btn ap-btn-light jd-messages"><MessageCircle size={18} /> Otvori poruke</Link>
         )}
 
         <div className="jd-tabs" role="tablist">
@@ -187,7 +188,8 @@ function JobDetail(props) {
           </div>
         )}
 
-        {user && listing.status === 'completed' && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
+        {user && listing.status === 'completed' && myReview && <p className="jd-review-done">Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</p>}
+        {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
           <form className="jd-review" onSubmit={submitReview}>
             <h3>Ostavi recenziju</h3>
             <div className="rating-picker">

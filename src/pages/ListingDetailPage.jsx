@@ -162,7 +162,7 @@ function ListingDetailPage() {
     matchService.providersForListing(id, 4).then((rows) => active && setSuggested(rows))
     return () => { active = false }
   }, [isOwner, id])
-  const myBid = useMemo(() => bids.find((bid) => bid.bidder_id === user?.id), [bids, user])
+  const myBid = useMemo(() => bids.find((bid) => bid.bidder_id === user?.id && bid.status !== 'withdrawn'), [bids, user])
   const acceptedBid = useMemo(() => bids.find((bid) => bid.status === 'accepted'), [bids])
   const tags = useMemo(() => (listing?.listing_tags || []).map((item) => item.tags?.name).filter(Boolean), [listing])
 
@@ -191,6 +191,7 @@ function ListingDetailPage() {
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
+      bidService.listForListing(id).then((rows) => setBids(rows)).catch(() => {})
       setBidForm({ amount: '', message: '' })
       setSheetOpen(false)
       setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
@@ -226,6 +227,15 @@ function ListingDetailPage() {
     }
   }
 
+  // already reviewed this job → the form gives way to a thank-you line
+  const [myReview, setMyReview] = useState(null)
+  useEffect(() => {
+    if (!user || listing?.status !== 'completed') return undefined
+    let alive = true
+    reviewService.mineForListing(id, user.id).then((row) => alive && setMyReview(row)).catch(() => {})
+    return () => { alive = false }
+  }, [id, user, listing?.status])
+
   const submitReview = async (event) => {
     event.preventDefault()
     const contactScan = scanContactInfo(reviewForm.comment)
@@ -236,7 +246,8 @@ function ListingDetailPage() {
     setSubmittingReview(true)
     setMessage('')
     try {
-      await reviewService.createReview({ reviewerId: user.id, revieweeId: isOwner ? acceptedBid.bidder_id : listing.user_id, listingId: id, rating: reviewForm.rating, comment: reviewForm.comment })
+      const created = await reviewService.createReview({ reviewerId: user.id, revieweeId: isOwner ? acceptedBid.bidder_id : listing.user_id, listingId: id, rating: reviewForm.rating, comment: reviewForm.comment })
+      setMyReview(created)
       setReviewForm({ rating: 5, comment: '' })
       setMessage('Hvala na recenziji!'); toast('Hvala na recenziji!', { kind: 'success' })
     } catch (requestError) {
@@ -265,6 +276,18 @@ function ListingDetailPage() {
       setMessage(requestError.message)
     } finally {
       setOutcomeBusy(false)
+    }
+  }
+
+  const withdrawBid = async () => {
+    if (!myBid || myBid.status !== 'pending') return
+    if (!window.confirm('Povući ponudu? Klijent je više neće vidjeti.')) return
+    try {
+      const updated = await bidService.setStatus(myBid.id, 'withdrawn')
+      setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
+      toast('Ponuda je povučena.', { kind: 'info' })
+    } catch (requestError) {
+      setMessage(requestError.message)
     }
   }
 
@@ -345,7 +368,7 @@ function ListingDetailPage() {
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} myBid={myBid} acceptedBid={acceptedBid} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={(bidId) => { if (window.confirm('Odbiti ovu ponudu?')) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
@@ -447,7 +470,7 @@ function ListingDetailPage() {
               )}
             </section>
 
-            {isOwner && suggested.length > 0 && (
+            {isOwner && listing.status === 'published' && !acceptedBid && suggested.length > 0 && (
               <section className="job-card">
                 <div className="rec-heading">
                   <h2>Predloženi izvođači</h2>
@@ -481,7 +504,10 @@ function ListingDetailPage() {
               </section>
             )}
 
-            {user && listing.status === 'completed' && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
+            {user && listing.status === 'completed' && myReview && (
+              <section className="job-card review-done"><CheckCircle2 size={18} /> Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</section>
+            )}
+            {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
               <section className="job-card">
                 <h2>Ostavi recenziju</h2>
                 <form className="auth-form" onSubmit={submitReview}>
@@ -510,10 +536,11 @@ function ListingDetailPage() {
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
+                  {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={withdrawBid}>Povuci ponudu</button>}
                 </div>
               )}
               {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
-                <Link to="/messages" className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
+                <Link to={`/messages?listing=${listing.id}`} className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
               )}
               {isOwner && acceptedBid && !payment && listing.status === 'published' && (
                 <div className="outcome-actions">

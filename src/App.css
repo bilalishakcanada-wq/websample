@@ -10160,6 +10160,7 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .account-shell {
+  width: 100%; /* the page shell is a centred grid: without this the shell shrinks to its content and the sidebar jumps between pages */
   max-width: 1180px;
   margin: 0 auto;
   display: grid;
@@ -12425,3 +12426,8 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 
 /* job page: review already left */
 .review-done { display: flex; align-items: center; gap: 8px; color: var(--success); font-weight: 700; }
+
+/* dashboard: offer status pills */
+.status-pill.bid-pending { background: rgba(245, 180, 0, 0.18); color: #7a5a00; }
+.status-pill.bid-accepted { background: rgba(25, 179, 123, 0.14); color: #0f7a54; }
+.status-pill.bid-rejected, .status-pill.bid-withdrawn { background: rgba(13, 42, 82, 0.08); color: var(--text-soft); }

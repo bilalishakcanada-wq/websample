@@ -79,7 +79,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
             <AlertTriangle size={16} />
             <div>
               <strong>Nedostaje {money(amount - balance)}</strong>
-              <span>Uplati na balans pa se vrati ovdje — ponuda te čeka. <Link to="/account/novcanik">Otvori balans →</Link></span>
+              <span>Uplata karticom stiže uskoro — do tada uplatu dogovaraš s timom (obično u roku od sat vremena), a ponuda te čeka. <Link to={`/pomoc?chat=1&msg=${encodeURIComponent(`Želim uplatiti ${money(amount - balance)} na balans da prihvatim ponudu. Kako da uplatim?`)}`}>Zatraži uplatu →</Link></span>
             </div>
           </div>
         )}

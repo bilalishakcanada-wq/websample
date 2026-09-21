@@ -109,6 +109,15 @@ function MessagesPage() {
     setSearchParams(id ? { c: id } : {}, { replace: !id })
   }
 
+  // "Otvori poruke" on a job: ?listing=… opens that job's thread as soon as the inbox is in
+  const listingParam = searchParams.get('listing') || ''
+  useEffect(() => {
+    if (!listingParam || loading) return
+    const row = inbox.find((item) => item.listing_id === listingParam)
+    if (row) setSearchParams({ c: row.id }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingParam, loading, inbox])
+
   // deep links (?c=…) from notifications while the page is already open, and the back button
   const paramId = searchParams.get('c') || ''
   useEffect(() => {

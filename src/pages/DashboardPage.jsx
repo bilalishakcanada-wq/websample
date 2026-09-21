@@ -7,6 +7,11 @@ import { matchService } from '../services/matchService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import CountUp from '../components/CountUp'
 import PushPrompt from '../components/PushPrompt'
+import { bidService } from '../services/bidService'
+import { useAccount } from './account/AccountLayout'
+
+const BID_LABELS = { pending: 'Čeka odgovor', accepted: 'Dodijeljen tebi', rejected: 'Nije prošla', withdrawn: 'Povučena' }
+const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 
 const STATUS_LABELS = {
   published: 'Objavljen',
@@ -29,6 +34,16 @@ function DashboardPage() {
   const [message, setMessage] = useState('')
   const [recommended, setRecommended] = useState([])
   const [recommendedLoading, setRecommendedLoading] = useState(true)
+  // the dashboard has two faces: what I posted (client) and what I offered on (provider); "both" sees both
+  const { profile, isProvider } = useAccount()
+  const isClient = !isProvider || profile?.account_type === 'both'
+  const [bids, setBids] = useState(null)
+  useEffect(() => {
+    if (!isProvider) return undefined
+    let active = true
+    bidService.listMine(user.id, 20).then((rows) => active && setBids(rows)).catch(() => active && setBids([]))
+    return () => { active = false }
+  }, [isProvider, user.id])
 
   const loadListings = () => {
     setLoading(true)
@@ -76,18 +91,55 @@ function DashboardPage() {
           </button>
         </div>
 
-        <div className="dashboard-grid">
-          <div className="stat-card"><strong><CountUp value={listings.length} /></strong><span>Objavljeni poslovi</span></div>
-          <div className="stat-card"><strong><CountUp value={listings.reduce((sum, item) => sum + (item.bids?.[0]?.count || 0), 0)} /></strong><span>Primljene ponude</span></div>
-          <div className="stat-card"><strong><CountUp value={listings.filter((item) => item.status === 'published').length} /></strong><span>Aktivni oglasi</span></div>
-        </div>
+        {isProvider ? (
+          <div className="dashboard-grid">
+            <div className="stat-card"><strong><CountUp value={(bids || []).filter((item) => item.status === 'pending').length} /></strong><span>Ponude koje čekaju</span></div>
+            <div className="stat-card"><strong><CountUp value={(bids || []).filter((item) => item.status === 'accepted').length} /></strong><span>Dodijeljeni poslovi</span></div>
+            <div className="stat-card"><strong>{money(profile?.balance ?? 0)}</strong><span>Balans</span></div>
+          </div>
+        ) : (
+          <div className="dashboard-grid">
+            <div className="stat-card"><strong><CountUp value={listings.length} /></strong><span>Objavljeni poslovi</span></div>
+            <div className="stat-card"><strong><CountUp value={listings.reduce((sum, item) => sum + (item.bids?.[0]?.count || 0), 0)} /></strong><span>Primljene ponude</span></div>
+            <div className="stat-card"><strong><CountUp value={listings.filter((item) => item.status === 'published').length} /></strong><span>Aktivni oglasi</span></div>
+          </div>
+        )}
 
         <PushPrompt />
 
         {message && <div className="form-success">{message}</div>}
         {error && <div className="form-error">{error}</div>}
 
-        {!recommendedLoading && recommended.length > 0 && (
+        {isProvider && bids && bids.length > 0 && (
+          <section className="dashboard-section">
+            <div className="rec-heading">
+              <h2>Moje ponude</h2>
+              <p>Poslovi na koje si poslao/la ponudu.</p>
+            </div>
+            {bids.slice(0, 6).map((bid) => (
+              <article className="dashboard-listing" key={bid.id}>
+                <div className="dashboard-listing-main">
+                  <span className={`status-pill bid-${bid.status}`}>{bid.status === 'accepted' && bid.listing?.status === 'completed' ? 'Završen' : BID_LABELS[bid.status] || bid.status}</span>
+                  <h3><Link to={`/listings/${bid.listing_id}`}>{bid.listing?.title || 'Posao'}</Link></h3>
+                  <div className="dashboard-listing-meta">
+                    <span><MapPin size={14} /> {bid.listing?.location || 'Online'}</span>
+                    <span>Poslano {formatBosnianDate(bid.created_at)}</span>
+                  </div>
+                </div>
+                <div className="dashboard-listing-actions">
+                  <strong>{money(bid.amount)}</strong>
+                  <div className="dashboard-listing-buttons">
+                    <Link className="ghost-button" to={`/listings/${bid.listing_id}`}><Eye size={15} /> Otvori posao</Link>
+                    {bid.status === 'accepted' && <Link className="ghost-button" to={`/messages?listing=${bid.listing_id}`}>Poruke</Link>}
+                  </div>
+                </div>
+              </article>
+            ))}
+            {bids.length > 6 && <Link to="/moji-poslovi?tab=ponude" className="ghost-button">Sve ponude</Link>}
+          </section>
+        )}
+
+        {isProvider && !recommendedLoading && recommended.length > 0 && (
           <section className="dashboard-section">
             <div className="rec-heading">
               <h2>Preporučeno za tebe</h2>
@@ -118,6 +170,7 @@ function DashboardPage() {
           </section>
         )}
 
+        {isClient && (
         <section className="dashboard-section">
           <h2>Moji oglasi</h2>
           {loading && <div className="skeleton-list">{[1, 2].map((item) => <div className="skeleton-card" key={item} />)}</div>}
@@ -155,6 +208,7 @@ function DashboardPage() {
             </article>
           ))}
         </section>
+        )}
     </div>
   )
 }

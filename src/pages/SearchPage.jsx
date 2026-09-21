@@ -15,6 +15,8 @@ import { serviceCategories } from '../data/categories'
 import { bosniaCities } from '../data/cities'
 import { cityCoordinates, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
 import { listingService } from '../services/listingService'
+import { profileService } from '../services/profileService'
+import { useAuth } from '../context/AuthContext'
 import { FindMascot } from '../app/Mascots'
 import { formatBosnianDate } from '../utils/dateFormat'
 
@@ -160,6 +162,16 @@ function SearchPage() {
     }
   }, [openMenu])
 
+  // the signed-in person's trades and city personalise "Preporučeno" (nothing is hidden, only ordered)
+  const { user } = useAuth()
+  const [me, setMe] = useState(null)
+  useEffect(() => {
+    if (!user) { setMe(null); return undefined }
+    let alive = true
+    profileService.getProfile(user.id).then((profile) => alive && setMe(profile ? { city: profile.city, trades: profile.trades || [] } : null)).catch(() => {})
+    return () => { alive = false }
+  }, [user])
+
   const origin = useMemo(() => {
     const coords = filters.city ? cityCoordinates[filters.city] : null
     return coords ? { lat: coords[0], lng: coords[1] } : null
@@ -192,10 +204,14 @@ function SearchPage() {
     if (filters.sort === 'closest' && origin) {
       items.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
     }
-    // relevance model: query match, freshness, few offers, completeness, distance
-    if (filters.sort === 'recommended') items = rankListings(items, { query: filters.query })
+    // relevance model: query match, freshness, few offers, completeness, distance, the searcher's trades
+    if (filters.sort === 'recommended') {
+      const home = !origin && me?.city ? cityCoordinates[me.city] : null
+      const homeDistance = home ? (item) => (item.lat != null ? distanceKm({ lat: home[0], lng: home[1] }, { lat: item.lat, lng: item.lng }) : null) : null
+      items = rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance })
+    }
     return items
-  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query])
+  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, me])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null

@@ -59,23 +59,39 @@ export function proximity(distanceKm, remote) {
   return Math.max(0, 1 - distanceKm / 120)
 }
 
-export const WEIGHTS = { text: 3.0, fresh: 1.6, opportunity: 1.1, complete: 0.8, proximity: 1.2 }
+/** 1 when the job's category is one of the searcher's trades, neutral when they have none. */
+export function skillMatch(listing, skills = []) {
+  if (!skills || skills.length === 0) return 0.5
+  const category = normalize(listing.category)
+  if (!category) return 0.3
+  return skills.some((skill) => { const s = normalize(skill); return s && (category.includes(s) || s.includes(category)) }) ? 1 : 0.2
+}
 
-export function rankScore(listing, { query = '', distanceKm = null, remote = false, now = Date.now() } = {}) {
+export const WEIGHTS = { text: 3.0, fresh: 1.6, opportunity: 1.1, complete: 0.8, proximity: 1.2, skills: 1.4 }
+
+export function rankScore(listing, { query = '', distanceKm = null, remote = false, skills = [], now = Date.now() } = {}) {
   return (
     WEIGHTS.text * textRelevance(query, listing) +
     WEIGHTS.fresh * freshness(listing.created_at, now) +
     WEIGHTS.opportunity * opportunity(listing.offers ?? listing.bids?.[0]?.count) +
     WEIGHTS.complete * completeness(listing) +
-    WEIGHTS.proximity * proximity(distanceKm, remote)
+    WEIGHTS.proximity * proximity(distanceKm, remote) +
+    WEIGHTS.skills * skillMatch(listing, skills)
   )
 }
 
-/** Sort a listing array by relevance (highest first). Items may carry `distance` and `remote`. */
-export function rankListings(items, { query = '' } = {}) {
+/**
+ * Sort a listing array by relevance (highest first). Items may carry `distance` and `remote`;
+ * `skills` are the signed-in provider's trades, `homeDistance(item)` a fallback distance from
+ * their own city when no city filter is set (personalised without hiding anything).
+ */
+export function rankListings(items, { query = '', skills = [], homeDistance = null } = {}) {
   const now = Date.now()
   return [...items]
-    .map((item) => ({ item, score: rankScore(item, { query, distanceKm: item.distance, remote: item.remote, now }) }))
+    .map((item) => {
+      const distanceKm = item.distance ?? (homeDistance ? homeDistance(item) : null)
+      return { item, score: rankScore(item, { query, distanceKm, remote: item.remote, skills, now }) }
+    })
     .sort((a, b) => b.score - a.score)
     .map(({ item, score }) => ({ ...item, rank_score: score }))
 }

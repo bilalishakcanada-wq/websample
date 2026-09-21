@@ -4711,7 +4711,10 @@ button:disabled {
   font-size: 1rem;
 }
 
-.auth-switch {
+.auth-switch,
+.auth-card .auth-switch,
+.page-card .auth-switch {
+  /* the generic ".auth-card p" bottom margin must not win: breathing room above, not below */
   margin: 18px 0 0;
   text-align: center;
   color: var(--text-soft);

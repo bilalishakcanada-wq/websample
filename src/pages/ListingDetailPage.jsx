@@ -91,6 +91,13 @@ function ListingDetailPage() {
   const [payment, setPayment] = useState(null)
   const [acceptBid, setAcceptBid] = useState(null)
   const [questions, setQuestions] = useState([])
+  const [feePercent, setFeePercent] = useState(null)
+  useEffect(() => {
+    if (!sheetOpen || !user || feePercent != null) return undefined
+    let alive = true
+    paymentService.feePercentFor(user.id).then((value) => alive && setFeePercent(value)).catch(() => {})
+    return () => { alive = false }
+  }, [sheetOpen, user, feePercent])
   const [metrics, setMetrics] = useState({})
   const isPhone = useMediaQuery('(max-width: 768px)')
   // the phone job screen draws its own top bar; the not-found state keeps the tab bar so people can leave
@@ -302,9 +309,12 @@ function ListingDetailPage() {
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
             <h2 id="offer-title">Pošalji ponudu</h2>
-            <p className="muted-text">Vlasnik je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možete ponuditi manje ili više uz obrazloženje.</p>
+            <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
             <form className="auth-form" onSubmit={submitBid}>
-              <label>Vaša ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              <label>Tvoja ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              {Number(bidForm.amount) > 0 && feePercent != null && (
+                <p className="offer-net">Tebi sjeda <strong>{formatPrice(Math.round(Number(bidForm.amount) * (1 - feePercent / 100) * 100) / 100)}</strong> <span>(naknada {feePercent}%)</span></p>
+              )}
               {priceStats && (
                 <div className="price-hint">
                   <span>Tipično za „{listing.category}“: <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> (raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM, {priceStats.count} poslova)</span>
@@ -315,7 +325,7 @@ function ListingDetailPage() {
                   </div>
                 </div>
               )}
-              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napišite zašto ste prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
+              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
               {bidError && <div className="form-error">{bidError}</div>}
               <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
@@ -499,7 +509,7 @@ function ListingDetailPage() {
               {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
-                  Vaša ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
+                  Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
                 </div>
               )}
               {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (

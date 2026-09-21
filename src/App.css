@@ -12390,3 +12390,8 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 @media (max-width: 768px) {
   .browse-list > .task-card, .listing-grid > *, .rec-grid > *, .dashboard-listing, .help-audiences > *, .chat-list-row { animation-name: page-enter; animation-duration: 0.3s; }
 }
+
+/* offer sheet: what the provider actually receives */
+.offer-net { margin: -6px 0 4px; font-size: 0.92rem; color: var(--text-soft); }
+.offer-net strong { color: var(--success); font-weight: 800; }
+.offer-sheet > .muted-text { margin: 0 0 14px; }

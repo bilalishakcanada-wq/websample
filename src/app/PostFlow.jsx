@@ -9,6 +9,7 @@ import { publishListing, timingLabel } from '../services/publishListing'
 import { listingService } from '../services/listingService'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
+import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
 import { haptic } from '../utils/native'
 import { toast } from '../components/Toaster'
 import { useBackToClose } from '../hooks/useBackToClose'
@@ -57,6 +58,7 @@ function PostFlow() {
   const [catOpen, setCatOpen] = useState(false)
   const fileRef = useRef(null)
   const priceStats = useCategoryPrice(form.category)
+  const footRef = useKeyboardAvoid()
 
   useBackToClose(cityOpen, () => setCityOpen(false))
   useBackToClose(catOpen, () => setCatOpen(false))
@@ -67,10 +69,13 @@ function PostFlow() {
     listingService.getById(editId).then((listing) => {
       if (!listing) return
       const remote = listing.location === 'Online / na daljinu'
+      // "Kada: Prije 2026-10-01" / "Na dan 2026-10-01" → timing + date
+      const kada = ((listing.description || '').split('\n\nKada:')[1] || '').trim()
+      const dateMatch = kada.match(/(\d{4}-\d{2}-\d{2})/)
       setForm({
         title: listing.title || '',
-        timing: 'flexible',
-        date: '',
+        timing: dateMatch ? (kada.startsWith('Prije') ? 'before' : 'date') : 'flexible',
+        date: dateMatch ? dateMatch[1] : '',
         mode: remote ? 'remote' : 'in-person',
         location: remote ? '' : (listing.location || ''),
         description: (listing.description || '').split('\n\nKada:')[0],
@@ -78,7 +83,11 @@ function PostFlow() {
         price: listing.price ?? '',
       })
       setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+      // land on the field the user tapped ("Uredi" next to the date / budget), otherwise on the review
+      const wanted = STEPS.indexOf(searchParams.get('step'))
+      setStep(wanted >= 0 ? wanted : STEPS.length - 1)
     }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId])
 
   // keep the draft on the device so a sign-in detour never loses the job
@@ -269,7 +278,7 @@ function PostFlow() {
         </section>
       )}
 
-      <div className="ap-foot">
+      <div className="ap-foot" ref={footRef}>
         {key === 'photos' && files.length === 0 && existingImages.length === 0 ? (
           <button type="button" className="ap-btn ap-btn-light" onClick={goNext}>Preskoči za sad</button>
         ) : key === 'review' ? (

@@ -1,3 +1,4 @@
+import { isNativeApp } from './native'
 import { supabase } from '../lib/supabase'
 
 // Public VAPID key (safe to ship); the private half lives in Supabase Vault.
@@ -9,6 +10,7 @@ export const pushSupported = () =>
 
 /** iOS Safari needs the PWA installed before push works. */
 export const pushNeedsInstall = () => {
+  if (isNativeApp()) return false // inside the app there is nothing to "install"
   const ua = navigator.userAgent
   const ios = /iPhone|iPad|iPod/.test(ua)
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true

@@ -92,12 +92,12 @@ function JobDetail(props) {
           <li>
             <CalendarDays size={20} />
             <span>{when}</span>
-            {isOwner && open && <Link to={`/objavi?edit=${listing.id}`} className="jd-link">Uredi</Link>}
+            {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=time`} className="jd-link">Uredi</Link>}
           </li>
           <li>
             <Coins size={20} />
             <span><strong>{money(listing.price, listing.currency)}</strong><small>Budžet</small></span>
-            {isOwner && open && <Link to={`/objavi?edit=${listing.id}`} className="jd-link">Uredi</Link>}
+            {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=budget`} className="jd-link">Uredi</Link>}
           </li>
         </ul>
 

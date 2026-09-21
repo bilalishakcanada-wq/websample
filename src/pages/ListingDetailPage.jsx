@@ -20,6 +20,7 @@ import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components
 import { paymentService } from '../services/paymentService'
 import { questionService } from '../services/questionService'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { shareLink } from '../utils/native'
 import { useFullscreen } from '../app/useFullscreen'
 import JobDetail from '../app/JobDetail'
 
@@ -107,8 +108,8 @@ function ListingDetailPage() {
   const share = async () => {
     const url = window.location.href
     try {
-      if (navigator.share) await navigator.share({ title: listing?.title, url })
-      else { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
+      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Poso.ba`, url })
+      if (!shared) { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
     } catch { /* user cancelled */ }
   }
 

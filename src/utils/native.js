@@ -25,6 +25,17 @@ export async function setupNative() {
     await plugin('StatusBar')?.setBackgroundColor?.({ color: '#0d2a52' })
   } catch { /* plugin not installed */ }
   try { await plugin('SplashScreen')?.hide() } catch { /* ignore */ }
+  // links to our own pages that ask for a new tab (admin console) stay inside the app
+  document.addEventListener('click', (event) => {
+    const anchor = event.target?.closest?.('a[target="_blank"]')
+    if (!anchor || !anchor.href) return
+    let target
+    try { target = new URL(anchor.href) } catch { return }
+    if (target.origin !== window.location.origin) return
+    event.preventDefault()
+    window.history.pushState({}, '', target.pathname + target.search + target.hash)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
   // Android hardware back button follows the browser history
   try { plugin('App')?.addListener?.('backButton', ({ canGoBack }) => (canGoBack ? window.history.back() : plugin('App')?.exitApp?.())) } catch { /* ignore */ }
   // OAuth round trip: the system browser hands us ba.poso.app://auth/callback?code=… → session
@@ -47,6 +58,14 @@ export async function setupNative() {
       window.location.assign(withBase('/'))
     })
   } catch { /* ignore */ }
+}
+
+/** System share sheet: Capacitor Share in the app (WKWebView has no navigator.share), Web Share elsewhere. Returns false when neither exists. */
+export async function shareLink({ title, text, url }) {
+  const share = plugin('Share')
+  if (share) { await share.share({ title, text, url, dialogTitle: title }); return true }
+  if (navigator.share) { await navigator.share({ title, text, url }); return true }
+  return false
 }
 
 /** Short tap feedback on important actions (accept offer, release payment). */

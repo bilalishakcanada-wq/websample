@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Download, Share, X } from 'lucide-react'
+import { isNativeApp } from '../utils/native'
 
 const DISMISS_KEY = 'poso:install-dismissed'
 const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream
@@ -16,7 +17,7 @@ function InstallPrompt() {
   useEffect(() => {
     let dismissed = false
     try { dismissed = localStorage.getItem(DISMISS_KEY) === '1' } catch { /* private mode */ }
-    if (dismissed || isStandalone()) return undefined
+    if (dismissed || isStandalone() || isNativeApp()) return undefined // already an app
     const onPrompt = (event) => { event.preventDefault(); setDeferred(event); setShow(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
     // iOS never fires the event — show the hint after a short while on the first visit

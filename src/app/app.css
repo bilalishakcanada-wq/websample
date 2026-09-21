@@ -497,3 +497,4 @@
 .mt-state.s-off { color: #b93c3c; }
 .mt-card-foot small { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-soft); }
 .mt-avatar { margin-left: auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eef2f8; color: var(--primary); }
+.ap-foot.is-keyboard { padding: 8px var(--ap-x); background: var(--surface); box-shadow: 0 -8px 20px rgba(6, 21, 48, 0.08); }

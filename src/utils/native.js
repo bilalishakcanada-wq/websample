@@ -32,12 +32,19 @@ export async function setupNative() {
     plugin('App')?.addListener?.('appUrlOpen', async ({ url }) => {
       if (!url?.startsWith(NATIVE_AUTH_CALLBACK)) return
       try { await plugin('Browser')?.close?.() } catch { /* already closed */ }
-      const params = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://poso.ba/auth/callback')).searchParams
-      const code = params.get('code')
-      if (!code) return
+      const parsed = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://poso.ba/auth/callback'))
+      const hash = new URLSearchParams(parsed.hash.replace(/^#/, ''))
       const { supabase } = await import('../lib/supabase')
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      if (!error) window.location.assign(withBase('/'))
+      let error = null
+      if (hash.get('access_token') && hash.get('refresh_token')) {
+        ({ error } = await supabase.auth.setSession({ access_token: hash.get('access_token'), refresh_token: hash.get('refresh_token') }))
+      } else if (parsed.searchParams.get('code')) {
+        ({ error } = await supabase.auth.exchangeCodeForSession(parsed.searchParams.get('code')))
+      } else {
+        error = new Error(hash.get('error_description') || parsed.searchParams.get('error_description') || 'no session in callback')
+      }
+      if (error) { console.error('native sign-in failed', error.message); window.location.assign(withBase('/login?oauth=failed')); return }
+      window.location.assign(withBase('/'))
     })
   } catch { /* ignore */ }
 }

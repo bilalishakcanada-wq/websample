@@ -16,6 +16,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
   const verificationPending = searchParams.get('verification') === 'pending'
+  const oauthFailed = searchParams.get('oauth') === 'failed'
   const isPhone = useMediaQuery('(max-width: 768px)')
 
   // ?next=/objavi (phone flows) or the guarded page that sent us here
@@ -50,6 +51,11 @@ function LoginPage() {
       {verificationPending && (
         <div className="form-success">
           Nalog je napravljen! Provjeri email (i spam folder) i klikni na link za potvrdu prije prijave.
+        </div>
+      )}
+      {oauthFailed && (
+        <div className="form-error">
+          Google prijava nije uspjela. Pokušaj ponovo — ili se prijavi emailom i lozinkom.
         </div>
       )}
       <form onSubmit={handleSubmit} className="auth-form">

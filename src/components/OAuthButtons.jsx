@@ -37,6 +37,15 @@ function OAuthButtons({ verb = 'Nastavi', onError }) {
     return () => { active = false }
   }, [])
 
+  // in the installed app the consent screen opens in the system browser; when the user comes
+  // back without finishing, the button must not stay stuck on "Otvaram…"
+  useEffect(() => {
+    if (!pending) return undefined
+    const reset = () => { if (document.visibilityState === 'visible') setTimeout(() => setPending(''), 1500) }
+    document.addEventListener('visibilitychange', reset)
+    return () => document.removeEventListener('visibilitychange', reset)
+  }, [pending])
+
   if (enabled.length === 0) return null
 
   const handleClick = async (providerId) => {

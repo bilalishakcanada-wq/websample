@@ -15,8 +15,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Poso.ba" />
     <title>Poso.ba — Marketplace za usluge</title>
+    <script>
+      // OAuth return for the installed app: the system browser lands here with the session in the
+      // hash; hand it straight to the app (ba.poso.app://…) and leave a plain "back to app" note.
+      (function () {
+        try {
+          if (location.search.indexOf('native=1') === -1 || location.hash.indexOf('access_token=') === -1 && location.search.indexOf('code=') === -1) return
+          var target = 'ba.poso.app://auth/callback' + (location.search.indexOf('code=') !== -1 ? '?code=' + new URLSearchParams(location.search).get('code') : '') + location.hash
+          history.replaceState(null, '', location.pathname)
+          document.documentElement.setAttribute('data-native-return', '1')
+          location.replace(target)
+          setTimeout(function () {
+            var note = document.getElementById('native-return')
+            if (note) { note.style.display = 'grid'; note.querySelector('a').href = target }
+          }, 1200)
+        } catch (e) { /* ignore */ }
+      })()
+    </script>
     <style>
       /* branded boot screen until the app mounts (replaced by React) */
+      #native-return { display: none; position: fixed; inset: 0; z-index: 9999; place-items: center; text-align: center; padding: 24px; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+      #native-return a { display: inline-block; margin-top: 14px; padding: 14px 24px; border-radius: 999px; background: #f5b400; color: #0d2a52; font-weight: 800; text-decoration: none; }
       .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
       .boot-splash div { display: grid; justify-items: center; gap: 14px; animation: boot-in 0.6s ease both; }
       .boot-splash svg { width: 84px; height: 84px; }
@@ -25,6 +44,7 @@
     </style>
   </head>
   <body>
+    <div id="native-return"><div><p>Prijava je uspjela — vraćamo te u aplikaciju.</p><a href="#">Otvori Poso.ba aplikaciju</a></div></div>
     <div id="root"><div class="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><rect x="248" y="190" width="150" height="598" rx="75" fill="#f5b400"/><circle cx="560" cy="418" r="228" fill="#f5b400"/><circle cx="560" cy="418" r="150" fill="#0d2a52"/><path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Poso.ba</strong></div></div></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

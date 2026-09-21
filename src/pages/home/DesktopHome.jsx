@@ -12,9 +12,8 @@ import {
   UserRound,
   Users,
   Wallet,
-  Zap,
 } from 'lucide-react'
-import { mockCredits, mockPlans, mockProfessionals, mockServiceCategories } from '../../data/mockData'
+import { mockProfessionals, mockServiceCategories } from '../../data/mockData'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import TrustArt from '../../components/TrustArt'
 import EarnArt from '../../components/EarnArt'
@@ -43,13 +42,10 @@ const categoryCards = [
 
 function DesktopHome() {
   const navigate = useNavigate()
-  const [selectedPlan, setSelectedPlan] = useState('plus')
-  const [selectedCredit, setSelectedCredit] = useState('50')
   const [searchTerm, setSearchTerm] = useState('')
   const [city, setCity] = useState('Sarajevo')
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [savedTasks, setSavedTasks] = useLocalStorage('poso-saved-tasks', [])
-  const [notice, setNotice] = useState('')
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
@@ -94,11 +90,6 @@ function DesktopHome() {
   }, [hasLiveProviders, providers])
 
   useRevealOnScroll()
-
-  const showNotice = (message) => {
-    setNotice(message)
-    window.setTimeout(() => setNotice(''), 3000)
-  }
 
   return (
     <div className="marketplace-shell">
@@ -487,107 +478,43 @@ function DesktopHome() {
         <section className="pricing-section reveal" id="cijene">
           <div className="section-heading centered">
             <div>
-              <span className="eyebrow small-eyebrow">Planovi i krediti</span>
-              <h2>Odaberite plan koji odgovara vašem načinu korištenja</h2>
+              <span className="eyebrow small-eyebrow">Cijene</span>
+              <h2>Za klijente besplatno. Izvođač plaća samo kad je posao plaćen.</h2>
             </div>
           </div>
 
-          <div className="plans-grid reveal-stagger reveal">
-            {mockPlans.map((plan) => (
-              <div
-                key={plan.id}
-                className={`plan-card ${plan.featured ? 'featured' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
-                onClick={() => setSelectedPlan(plan.id)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    setSelectedPlan(plan.id)
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                {plan.featured && <span className="plan-badge">Najpopularnije</span>}
-                <div className="plan-header">
-                  <h3>{plan.name}</h3>
-                  <div className="plan-price">
-                    <span>{plan.price}</span>
-                    {plan.suffix && <small>{plan.suffix}</small>}
-                  </div>
-                </div>
-                <p>{plan.description}</p>
-                <ul>
-                  {plan.perks.map((perk) => (
-                    <li key={perk}>
-                      <Check size={15} /> {perk}
-                    </li>
-                  ))}
-                </ul>
-                <button type="button" className="secondary-button plan-button" onClick={(event) => { event.stopPropagation(); setSelectedPlan(plan.id); showNotice(`${plan.name} plan je odabran.`) }}>
-                  {selectedPlan === plan.id ? 'Odabrano' : 'Odaberi plan'}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="paywall-panel">
-            <div className="paywall-copy">
-              <span className="eyebrow small-eyebrow">RevenueCat ready</span>
-              <h3>Usklađenost s app store pravilima i Google Play zahtjevima</h3>
-              <p>
-                Model pretplate je dizajniran za jasno prikazivanje vrijednosti, transparentne
-                cijene i jednostavnu uslugu automatske naplate. Uključuje 3 nivoa pretplate i
-                opciju kupovine kredita za dodatnu promociju oglasa.
-              </p>
-              <div className="compliance-list">
-                <div className="compliance-item">
-                  <ShieldCheck size={18} />
-                  <span>Jasni uslovi korištenja i pravila objave</span>
-                </div>
-                <div className="compliance-item">
-                  <ShieldCheck size={18} />
-                  <span>Sigurnost plaćanja i verifikacija profila</span>
-                </div>
-                <div className="compliance-item">
-                  <ShieldCheck size={18} />
-                  <span>Transparentne cijene i usluge</span>
-                </div>
-                <div className="compliance-item">
-                  <ShieldCheck size={18} />
-                  <span>Moderacija oglasa i prijava za sporove</span>
-                </div>
-              </div>
+          <div className="fee-grid reveal-stagger reveal">
+            <div className="fee-card">
+              <span className="fee-card-eyebrow">Klijenti</span>
+              <strong className="fee-card-big">0 KM</strong>
+              <p>Objava posla, primanje ponuda, poruke i recenzije — sve bez naknade i bez pretplate.</p>
+              <ul>
+                <li><Check size={15} /> Neograničen broj poslova</li>
+                <li><Check size={15} /> Cijenu biraš iz ponuda</li>
+                <li><Check size={15} /> Uplata se čuva dok posao ne potvrdiš</li>
+              </ul>
             </div>
-
-            <div className="credit-box">
-              <div className="credit-box-header">
-                <h4>Kupi kredite</h4>
-                <Wallet size={18} />
-              </div>
-
-              <div className="credit-grid">
-                {mockCredits.map((pack) => (
-                  <button
-                    key={pack.id}
-                    type="button"
-                    className={`credit-pack ${selectedCredit === pack.id ? 'selected' : ''} ${pack.popular ? 'popular' : ''}`}
-                    onClick={() => setSelectedCredit(pack.id)}
-                  >
-                    {pack.popular && <span className="popular-label">Najprodavanije</span>}
-                    <strong>{pack.label}</strong>
-                    <span>{pack.price}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="highlight-box">
-                <div>
-                  <div className="highlight-label">Istaknuti oglas</div>
-                  <div className="highlight-price">15 KM / 24h</div>
-                </div>
-                <button type="button" className="primary-button small-button" onClick={() => showNotice('Plaćanje i isticanje oglasa biće dostupni nakon povezivanja payment providera.')}>
-                  <Zap size={15} /> Istakni oglas
-                </button>
-              </div>
+            <div className="fee-card featured">
+              <span className="fee-card-eyebrow">Izvođači</span>
+              <strong className="fee-card-big">9–15%</strong>
+              <p>Naknada platforme samo od plaćenog posla — nikad za slanje ponuda. Što više radiš, niža je: Bronza 15%, Srebro 13%, Zlato 11%, Platina 9%.</p>
+              <ul>
+                <li><Check size={15} /> Ponude i profil besplatni</li>
+                <li><Check size={15} /> Zarada sjeda na Balans</li>
+                <li><Check size={15} /> Nivo raste sa prometom</li>
+              </ul>
+              <Link to="/nivoi" className="secondary-button plan-button">Kako rade nivoi</Link>
+            </div>
+            <div className="fee-card">
+              <span className="fee-card-eyebrow">Sigurno plaćanje</span>
+              <strong className="fee-card-big">Balans</strong>
+              <p>Klijent uplati unaprijed, novac stoji na Poso.ba dok posao nije završen, pa se oslobađa izvođaču. Spor? Tim pregleda i odluči.</p>
+              <ul>
+                <li><Check size={15} /> Nema plaćanja unaprijed „na ruke“</li>
+                <li><Check size={15} /> Povrat kod otkaza prije početka</li>
+                <li><Check size={15} /> Historija svake uplate</li>
+              </ul>
+              <Link to="/cijene" className="secondary-button plan-button">Sve o cijenama</Link>
             </div>
           </div>
         </section>
@@ -618,7 +545,6 @@ function DesktopHome() {
         </section>
       </main>
 
-      {notice && <div className="form-success homepage-notice" role="status">{notice}</div>}
       {cityPickerOpen && <CityPicker value={city} onChange={setCity} onClose={() => setCityPickerOpen(false)} />}
 
     </div>

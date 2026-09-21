@@ -45,9 +45,11 @@ function RulesPage() {
         <section className="info-section reveal">
           <h2>4. Plaćanja</h2>
           <p>
-            Sistem pretplata i kredita je pripremljen za buduću integraciju sa provajderom plaćanja.
-            Trenutno se naplata ne vrši. Kada plaćanje bude aktivirano, uslovi naplate biće jasno
-            prikazani prije svake transakcije.
+            Objava posla, slanje ponuda i poruke su besplatni. Kad klijent prihvati ponudu, iznos se
+            rezerviše sa njegovog Balansa i čuva na platformi dok posao nije završen; nakon potvrde se
+            oslobađa izvođaču, umanjen za naknadu platforme prema nivou izvođača (9–15%). Uplata karticom
+            i isplata na bankovni račun aktiviraju se sa procesorom plaćanja; uslovi svake transakcije
+            prikazuju se prije potvrde.
           </p>
         </section>
 

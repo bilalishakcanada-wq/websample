@@ -149,7 +149,7 @@ function SiteHeader() {
                 <Link to="/login" className="site-nav-link">Prijavi se</Link>
               </>
             )}
-            <Link to="/zaradi" className="site-header-secondary">Postani izvođač</Link>
+            {!user && <Link to="/zaradi" className="site-header-secondary">Postani izvođač</Link>}
           </div>
 
           {user && <div className="site-mobile-bell"><NotificationBell /></div>}

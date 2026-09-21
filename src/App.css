@@ -7526,7 +7526,11 @@ body:has(.profile-cta-bar) .support-chat {
   background: var(--stroke);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1280px) {
+  .site-nav-link { padding: 0 9px; font-size: 0.92rem; }
+}
+
+@media (max-width: 1180px) {
   .site-header-right .site-nav-link {
     display: none;
   }
@@ -12395,3 +12399,26 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .offer-net { margin: -6px 0 4px; font-size: 0.92rem; color: var(--text-soft); }
 .offer-net strong { color: var(--success); font-weight: 800; }
 .offer-sheet > .muted-text { margin: 0 0 14px; }
+
+/* ---------- pricing band on the home page and /cijene: the real model (free for clients, provider fee by level, Balans) ---------- */
+.fee-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
+.fee-card { display: flex; flex-direction: column; gap: 10px; padding: 24px 22px; border-radius: 24px; background: var(--surface); border: 1px solid var(--stroke); }
+.fee-card.featured { background: linear-gradient(180deg, var(--surface-alt) 0%, #ffffff 100%); border-color: rgba(245, 180, 0, 0.45); }
+.fee-card-eyebrow { font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); }
+.fee-card-big { font-family: var(--font-display); font-stretch: 85%; font-weight: 900; font-size: 2.4rem; line-height: 1; color: var(--primary-strong); }
+.fee-card p { margin: 0; color: var(--text-soft); line-height: 1.5; }
+.fee-card ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; }
+.fee-card li { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.fee-card li svg { color: var(--success); flex-shrink: 0; }
+.fee-card .plan-button { margin-top: auto; text-align: center; }
+@media (max-width: 900px) { .fee-grid { grid-template-columns: 1fr; } }
+.steps-list { margin: 0; padding-left: 22px; display: grid; gap: 10px; line-height: 1.5; }
+.steps-list li::marker { font-weight: 800; color: var(--primary); }
+
+/* own offer on the job page: withdraw link */
+.my-bid-withdraw { display: block; margin-top: 6px; background: none; padding: 0; min-height: 0; color: var(--primary); font-weight: 700; font-size: 0.86rem; text-decoration: underline; }
+/* desktop: the offer / accept sheets sit centred like a dialog, not glued to the bottom edge */
+@media (min-width: 769px) {
+  .sheet-backdrop { align-items: center; justify-items: center; }
+  .sheet-backdrop .offer-sheet { width: min(100% - 32px, 560px); max-height: calc(100vh - 48px); border-radius: 24px; }
+}

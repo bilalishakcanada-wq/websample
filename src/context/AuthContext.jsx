@@ -31,9 +31,20 @@ export function AuthProvider({ children }) {
     const initSession = async () => {
       try {
         const data = await authService.getSession()
-        const sessionUser = data?.session?.user || null
+        let sessionUser = data?.session?.user || null
         setUser(sessionUser)
         await refreshAdminStatus(sessionUser)
+        // the stored token is checked against the server once: a deleted account (or a revoked
+        // session) must not keep browsing as a ghost until the token expires
+        if (sessionUser) {
+          const { error: userError } = await supabase.auth.getUser()
+          if (userError && [401, 403].includes(userError.status)) {
+            await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+            sessionUser = null
+            setUser(null)
+            setStaffRole(null)
+          }
+        }
       } catch (sessionError) {
         setError(sessionError.message)
       } finally {

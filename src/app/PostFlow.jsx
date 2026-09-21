@@ -15,6 +15,7 @@ import { toast } from '../components/Toaster'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
+import { scrollToTop } from '../utils/scroll'
 
 const DRAFT_KEY = 'poso-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
@@ -113,7 +114,7 @@ function PostFlow() {
       if (guess) update({ category: guess })
     }
     setStep((s) => Math.min(STEPS.length - 1, s + 1))
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    scrollToTop()
   }
   const goBack = () => {
     if (step === 0) { navigate(-1); return }

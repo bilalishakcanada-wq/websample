@@ -28,12 +28,14 @@
 
 html {
   scroll-behavior: smooth;
+  /* the canvas colour: what shows when a page over-scrolls / rubber-bands — always the page colour */
+  background: var(--bg);
 }
 
 body {
   margin: 0;
   font-family: 'Manrope', sans-serif;
-  background: linear-gradient(180deg, #faf8f2 0%, #f6f4ee 100%);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -12354,3 +12356,26 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 /* tab bar: unread badge on Poruke */
 .mobile-nav-icon { position: relative; display: inline-grid; place-items: center; }
 .mobile-nav-badge { position: absolute; top: -6px; right: -10px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #e0463c; color: #fff; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+
+/* =========================================================================
+   Phone app shell (≤768px): the document never scrolls — #root does.
+   The browser toolbar stays put, nothing rubber-bands into another colour,
+   and every screen's top bar is pinned like in a native app.
+   ========================================================================= */
+@media (max-width: 768px) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  #root { height: 100%; overflow-y: auto; overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+
+  /* tab screens: the site header is replaced by each screen's own pinned bar */
+  body[data-page='home'] .site-header, body[data-page='home'] .site-header-spacer { display: none; }
+
+  /* browse: the title bar and the filter row are pinned together (the rest of the pinned bars live in app/app.css) */
+  .ap-browse-top { position: sticky; top: 0; z-index: 30; padding-top: calc(12px + env(safe-area-inset-top, 0px)); background: var(--surface); }
+  .browse-page .filter-bar { top: calc(60px + env(safe-area-inset-top, 0px)); }
+}
+
+/* a page whose code did not arrive: honest card with a reload (keeps the tab bar) */
+.route-retry { display: grid; gap: 8px; justify-items: center; text-align: center; margin: 24px auto; padding: 22px 20px; width: min(100% - 32px, 420px); border-radius: 18px; background: var(--surface); border: 1px solid var(--stroke); }
+.route-retry strong { font-size: 1.05rem; color: var(--primary-strong); }
+.route-retry p { margin: 0 0 6px; color: var(--text-soft); }
+.route-retry .primary-button { display: inline-flex; align-items: center; gap: 8px; }

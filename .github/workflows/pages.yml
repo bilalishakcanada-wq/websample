@@ -35,6 +35,21 @@ jobs:
         run: npm run build
       - name: SPA fallback + no Jekyll
         run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      # GitHub's CDN keeps index.html for ~10 minutes: someone who loads a stale copy right after a
+      # deploy must still find the chunks it names — so the previous build's files ride along once.
+      - name: Keep the previous build's chunks
+        run: |
+          git fetch --depth=1 origin gh-pages 2>/dev/null || exit 0
+          prev=$(mktemp -d)
+          for f in sw.js index.html; do git show "origin/gh-pages:$f" > "$prev/$f" 2>/dev/null || true; done
+          # only the previous build's own entry chunk (not chunks it carried over itself — that would grow forever)
+          entry=$(grep -oE 'assets/index-[A-Za-z0-9_-]+\.js' "$prev/index.html" | head -1)
+          [ -n "$entry" ] && git show "origin/gh-pages:$entry" > "$prev/entry.js" 2>/dev/null || true
+          cat "$prev"/* 2>/dev/null | grep -oE '[A-Za-z0-9._-]+-[A-Za-z0-9_-]{8}\.(js|css|woff2)' | sort -u | while read -r name; do
+            [ -e "dist/assets/$name" ] && continue
+            git show "origin/gh-pages:assets/$name" > "dist/assets/$name" 2>/dev/null || rm -f "dist/assets/$name"
+          done
+          echo "carried over: $(ls dist/assets | wc -l) files in assets/"
       # publishes dist to the gh-pages branch; GitHub serves that branch as the site
       - uses: peaceiris/actions-gh-pages@v4
         with:

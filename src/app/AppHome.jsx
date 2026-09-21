@@ -12,6 +12,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { prefetchRoute } from '../utils/prefetch'
 import PushPrompt from '../components/PushPrompt'
+import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 
 const QUICK_IDEAS = [
@@ -51,7 +52,7 @@ function PosterHome({ firstName }) {
   return (
     <div className="ap ap-home">
       <section className="ap-hero">
-        <span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span>
+        <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
         <h1>Objavi posao. Riješeno.</h1>
         <form className="ap-hero-form" onSubmit={(event) => { event.preventDefault(); start(title) }}>
           <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={70} placeholder="U par riječi, šta ti treba?" enterKeyHint="go" onFocus={() => prefetchRoute('/objavi')} />
@@ -109,7 +110,7 @@ function TaskerHome({ user, firstName }) {
   return (
     <div className="ap ap-home">
       <section className="ap-hero ap-hero-tasker">
-        <span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span>
+        <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
         <h1>Pronađi posao. Zaradi.</h1>
         <button type="button" className="ap-hero-btn" onClick={() => { haptic('light'); navigate('/search') }} onPointerDown={() => prefetchRoute('/search')}>
           <Search size={18} /> <span>Pregledaj poslove u blizini</span> <ArrowRight size={18} />

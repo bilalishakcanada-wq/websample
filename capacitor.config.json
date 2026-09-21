@@ -2,7 +2,7 @@
   "appId": "ba.poso.app",
   "appName": "Poso.ba",
   "webDir": "dist",
-  "backgroundColor": "#0d2a52",
+  "backgroundColor": "#f6f4ee",
   "ios": {
     "contentInset": "always",
     "scheme": "Poso.ba",
@@ -10,7 +10,7 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#0d2a52"
+    "backgroundColor": "#f6f4ee"
   },
   "server": {
     "url": "https://bilalishakcanada-wq.github.io/websample/",

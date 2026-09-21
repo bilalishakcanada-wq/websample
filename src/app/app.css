@@ -498,3 +498,30 @@
 .mt-card-foot small { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-soft); }
 .mt-avatar { margin-left: auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #eef2f8; color: var(--primary); }
 .ap-foot.is-keyboard { padding: 8px var(--ap-x); background: var(--surface); box-shadow: 0 -8px 20px rgba(6, 21, 48, 0.08); }
+
+/* unread count on the bell of the pinned top bars */
+.ap-icon-btn { position: relative; }
+.ap-bell-count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #e0463c; color: white; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; border: 2px solid var(--bg); }
+
+/* ---------- pinned top bars (phone app shell: #root scrolls, these stay put) ---------- */
+@media (max-width: 768px) {
+  .ap-sticky, .ap-page-head, .ap-subbar, .ap-top, .jd-top { position: sticky; top: 0; z-index: 30; background: var(--bg); }
+  .ap-sticky { margin: 0 calc(-1 * var(--ap-x)); padding: calc(10px + env(safe-area-inset-top, 0px)) var(--ap-x) 10px; }
+  .ap-sticky .ap-page-head { position: static; margin: 0; padding: 0 0 10px; }
+  .ap-sticky > :last-child { margin-bottom: 0; }
+  .ap-sticky .ch-search { margin-top: 0; }
+  .ap-page-head { margin: 0 calc(-1 * var(--ap-x)); padding: calc(12px + env(safe-area-inset-top, 0px)) var(--ap-x) 10px; }
+  .ap-page-head h1 { font-size: 1.55rem; }
+  .ap-subbar { margin: 0 calc(-1 * var(--ap-x)); padding-left: var(--ap-x); padding-right: var(--ap-x); }
+  .ap-top { background: var(--surface); }
+  .jd-top { background: #f3f5f9; }
+  .pv .jd-top { background: var(--surface); }
+  .jd-top::after, .ap-page-head::after, .ap-sticky::after, .ap-subbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: rgba(13, 42, 82, 0.06); }
+
+  /* home: the hero starts under the status bar and carries the bell itself */
+  .ap-hero { padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  .ap-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .ap-hero-top .ap-hero-greet { margin-bottom: 0; }
+  .ap-hero-bell { position: relative; display: grid; place-items: center; width: 40px; height: 40px; min-height: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.12); color: white; }
+  .ap-hero-bell .ap-bell-count, .ap-account-bell .ap-bell-count { border-color: var(--primary-strong); }
+}

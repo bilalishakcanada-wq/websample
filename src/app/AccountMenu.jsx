@@ -5,6 +5,7 @@ import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
 import { haptic } from '../utils/native'
 import './app.css'
+import NotifBellLink from '../components/NotifBellLink'
 
 /** Phone account screen: who you are, which face of the app you use, and plain rows to everything else. */
 function AccountMenu({ onPickAvatar, uploadingAvatar }) {
@@ -58,7 +59,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
   return (
     <div className="ap ap-page ap-account">
       <header className="ap-account-head">
-        <Link to="/account/obavijesti" className="ap-account-bell" aria-label="Obavijesti"><Bell size={20} /></Link>
+        <NotifBellLink className="ap-account-bell" />
         <button type="button" className="ap-account-avatar" onClick={onPickAvatar} disabled={uploadingAvatar} aria-label="Promijeni profilnu sliku">
           {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={36} />}
           <span><Camera size={13} /></span>

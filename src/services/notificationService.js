@@ -18,6 +18,13 @@ export const notificationService = {
     if (!ids.length) return
     const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).in('id', ids)
     if (error) console.error('Supabase notifications mark-read failed', { message: error.message, code: error.code })
+    else window.dispatchEvent(new CustomEvent('poso:notifications-read')) // badges on the tab screens refresh
+  },
+
+  /** Unread count for the signed-in user (RLS scopes the table to them). */
+  async unreadCount() {
+    const { count, error } = await supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null)
+    return error ? 0 : count || 0
   },
 
   /** Realtime: new notifications for this user. Returns an unsubscribe function. */

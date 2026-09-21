@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Bell, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
+import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 
@@ -26,16 +27,18 @@ function Chat(props) {
   if (!active) {
     return (
       <div className="ap ap-page ch">
-        <header className="ap-page-head"><h1>Poruke</h1><Link to="/account/obavijesti" className="ap-icon-btn" aria-label="Obavijesti"><Bell size={20} /></Link></header>
-        <label className="ch-search">
-          <Search size={18} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pretraži" />
-          {query && <button type="button" onClick={() => setQuery('')} aria-label="Obriši"><X size={16} /></button>}
-        </label>
-        <div className="ch-filters">
-          {[['inbox', 'Sve'], ['unread', `Nepročitane${unreadTotal ? ` · ${unreadTotal}` : ''}`], ['saved', 'Spašene'], ['archived', 'Arhiva']].map(([id, label]) => (
-            <button key={id} type="button" className={filter === id ? 'active' : ''} onClick={() => setFilter(id)}>{label}</button>
-          ))}
+        <div className="ap-sticky">
+          <header className="ap-page-head"><h1>Poruke</h1><NotifBellLink /></header>
+          <label className="ch-search">
+            <Search size={18} />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pretraži" />
+            {query && <button type="button" onClick={() => setQuery('')} aria-label="Obriši"><X size={16} /></button>}
+          </label>
+          <div className="ch-filters">
+            {[['inbox', 'Sve'], ['unread', `Nepročitane${unreadTotal ? ` · ${unreadTotal}` : ''}`], ['saved', 'Spašene'], ['archived', 'Arhiva']].map(([id, label]) => (
+              <button key={id} type="button" className={filter === id ? 'active' : ''} onClick={() => setFilter(id)}>{label}</button>
+            ))}
+          </div>
         </div>
 
         {loading && <div className="ap-skeleton" />}

@@ -63,6 +63,7 @@ import MobileNav from './components/MobileNav'
 import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
+import { RouteFallback, RouteGuard } from './components/RouteBoundary'
 import SupportChat from './components/SupportChat'
 import { useMediaQuery } from './hooks/useMediaQuery'
 
@@ -88,7 +89,8 @@ function App() {
       <SiteHeader />
       <SupportChat />
       <InstallPrompt />
-      <Suspense fallback={<div className="route-loading" aria-busy="true"><span /></div>}>
+      <RouteGuard>
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
@@ -143,6 +145,7 @@ function App() {
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
       </Suspense>
+      </RouteGuard>
       <SiteFooter />
       <MobileNav />
       <Toaster />

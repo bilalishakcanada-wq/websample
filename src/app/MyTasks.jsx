@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Bell, CalendarDays, Check, ChevronDown, MapPin, Plus, UserRound, Users } from 'lucide-react'
+import { CalendarDays, Check, ChevronDown, MapPin, Plus, UserRound, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
@@ -8,6 +8,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { EmptyBoxMascot } from './Mascots'
+import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 
 const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
@@ -44,10 +45,12 @@ function MyTasks() {
 
   return (
     <div className="ap ap-page mt">
-      <header className="ap-page-head"><h1>Moji poslovi</h1><Link to="/account/obavijesti" className="ap-icon-btn" aria-label="Obavijesti"><Bell size={20} /></Link></header>
-      <div className="ap-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavio/la sam {jobs ? `(${jobs.length})` : ''}</button>
-        <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => switchTab('ponude')}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
+      <div className="ap-sticky">
+        <header className="ap-page-head"><h1>Moji poslovi</h1><NotifBellLink /></header>
+        <div className="ap-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavio/la sam {jobs ? `(${jobs.length})` : ''}</button>
+          <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => switchTab('ponude')}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
+        </div>
       </div>
 
       <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>

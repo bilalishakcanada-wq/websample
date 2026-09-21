@@ -6,6 +6,7 @@ import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck,
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import NotificationBell from './NotificationBell'
+import { onScroll, scrollOffset } from '../utils/scroll'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password']
 
@@ -41,10 +42,9 @@ function SiteHeader() {
 
   // Subtle elevation once the page is scrolled.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const update = () => setScrolled(scrollOffset() > 8)
+    update()
+    return onScroll(update)
   }, [])
 
   // Outside click / Escape closes the categories panel and the mobile drawer.

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { isNativeApp } from '../utils/native'
 
 /**
  * Keeps a bottom action bar visible above the on-screen keyboard on phones.
@@ -11,8 +10,7 @@ export function useKeyboardAvoid() {
   useEffect(() => {
     const vv = window.visualViewport
     const el = ref.current
-    // the Capacitor web view shrinks with the keyboard by itself, so the sticky bar already sits above it
-    if (!vv || !el || isNativeApp()) return undefined
+    if (!vv || !el) return undefined
     const place = () => {
       const keyboardOpen = window.innerHeight - vv.height > 120
       if (!keyboardOpen) {

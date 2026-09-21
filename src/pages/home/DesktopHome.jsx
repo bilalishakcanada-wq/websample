@@ -184,7 +184,7 @@ function DesktopHome() {
                     </div>
                     <strong>{task.title}</strong>
                     <div className="ticker-foot">
-                      <span className="rating-box"><Star size={12} fill="currentColor" /> {task.rating ?? '5.0'}</span>
+                      <span className="rating-box"><MapPin size={12} /> {(task.location || '').split(',')[0] || 'Online'}</span>
                       <span className="ticker-price">{task.price}</span>
                     </div>
                   </div>

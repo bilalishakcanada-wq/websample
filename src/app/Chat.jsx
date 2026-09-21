@@ -20,7 +20,7 @@ function Chat(props) {
   const {
     user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation,
     grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading,
-    error, notice, togglePref, reportConversation, timeOf, shortDate,
+    error, notice, togglePref, reportConversation, timeOf, shortDate, retry,
   } = props
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
@@ -44,7 +44,14 @@ function Chat(props) {
         </div>
 
         {loading && <div className="ap-skeleton" />}
-        {!loading && visible.length === 0 && (
+        {!loading && error && inbox.length === 0 && (
+          <div className="ap-empty">
+            <strong>Poruke se nisu učitale</strong>
+            <span>{error}</span>
+            <button type="button" className="ap-btn ap-btn-primary ap-btn-inline" onClick={retry}>Pokušaj ponovo</button>
+          </div>
+        )}
+        {!loading && !(error && inbox.length === 0) && visible.length === 0 && (
           <div className="ap-empty ap-empty-art">
             <MailMascot />
             <strong>{inbox.length === 0 ? 'Još nemaš poruka' : 'Nema razgovora u ovom filteru'}</strong>

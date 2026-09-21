@@ -68,7 +68,7 @@ function MessagesPage() {
   const [uploading, setUploading] = useState(false)
   const isPhone = useMediaQuery('(max-width: 768px)')
 
-  const loadInbox = () => messageService.inbox().then(setInbox).catch((requestError) => setError(requestError.message))
+  const loadInbox = () => messageService.inbox().then((rows) => { setInbox(rows); setError('') }).catch((requestError) => setError(requestError.message))
 
   useEffect(() => {
     loadInbox().finally(() => setLoading(false))
@@ -218,6 +218,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
+        retry={() => { setLoading(true); loadInbox().finally(() => setLoading(false)) }}
       />
     )
   }

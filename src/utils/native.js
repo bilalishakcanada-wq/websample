@@ -22,7 +22,7 @@ export async function setupNative() {
   try {
     document.documentElement.classList.add('is-native')
     await plugin('StatusBar')?.setStyle({ style: 'DARK' })
-    await plugin('StatusBar')?.setBackgroundColor?.({ color: '#0d2a52' })
+    await plugin('StatusBar')?.setBackgroundColor?.({ color: '#081b38' }) // same navy as the home hero and account head
   } catch { /* plugin not installed */ }
   try { await plugin('SplashScreen')?.hide() } catch { /* ignore */ }
   // links to our own pages that ask for a new tab (admin console) stay inside the app

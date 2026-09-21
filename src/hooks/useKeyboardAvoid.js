@@ -5,6 +5,12 @@ import { useEffect, useRef } from 'react'
  * iOS does not shrink the layout viewport when the keyboard opens (it pans it), so a sticky footer
  * ends up under the keys. While the keyboard is up we pin the bar to the visual viewport instead.
  */
+/**
+ * How much of the screen the keyboard covers. iOS shrinks window.innerHeight together with the
+ * visual viewport, so the stable reference is the initial containing block (html's height: 100%).
+ */
+const keyboardHeight = (vv) => Math.max(document.documentElement.clientHeight, window.innerHeight) - vv.height
+
 export function useKeyboardAvoid() {
   const ref = useRef(null)
   useEffect(() => {
@@ -12,7 +18,7 @@ export function useKeyboardAvoid() {
     const el = ref.current
     if (!vv || !el) return undefined
     const place = () => {
-      const keyboardOpen = window.innerHeight - vv.height > 120
+      const keyboardOpen = keyboardHeight(vv) > 120
       if (!keyboardOpen) {
         el.style.position = ''; el.style.top = ''; el.style.bottom = ''; el.style.left = ''; el.style.right = ''; el.style.zIndex = ''; el.style.paddingBottom = ''
         el.classList.remove('is-keyboard')
@@ -51,7 +57,7 @@ export function useKeyboardFit(active = true) {
       el.classList.remove('is-keyboard')
     }
     const place = () => {
-      const keyboardOpen = window.innerHeight - vv.height > 120
+      const keyboardOpen = keyboardHeight(vv) > 120
       if (!keyboardOpen) { reset(); return }
       el.classList.add('is-keyboard')
       el.style.position = 'fixed'

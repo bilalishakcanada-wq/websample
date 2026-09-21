@@ -93,7 +93,8 @@ function ListingDetailPage() {
   const [questions, setQuestions] = useState([])
   const [metrics, setMetrics] = useState({})
   const isPhone = useMediaQuery('(max-width: 768px)')
-  useFullscreen(isPhone)
+  // the phone job screen draws its own top bar; the not-found state keeps the tab bar so people can leave
+  useFullscreen(isPhone && (loading || Boolean(listing)))
   const tab = searchParams.get('tab') === 'pitanja' ? 'pitanja' : 'ponude'
   const setTab = (value) => setSearchParams((params) => { if (value === 'pitanja') params.set('tab', 'pitanja'); else params.delete('tab'); return params }, { replace: true })
   const images = useMemo(() => [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position), [listing])

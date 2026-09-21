@@ -28,14 +28,25 @@ function MyTasks() {
   const [bids, setBids] = useState(null)
   const [filter, setFilter] = useState('all')
   const [pick, setPick] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   useBackToClose(pick, () => setPick(false))
 
   useEffect(() => {
     let alive = true
-    listingService.listAll({ status: 'published', pageSize: 50, ownerId: user.id }).then((result) => alive && setJobs(result.data || [])).catch(() => alive && setJobs([]))
-    bidService.listMine(user.id).then((rows) => alive && setBids(rows)).catch(() => alive && setBids([]))
+    setFailed(false)
+    listingService.listAll({ status: 'published', pageSize: 50, ownerId: user.id }).then((result) => alive && setJobs(result.data || [])).catch(() => { if (alive) { setJobs([]); setFailed(true) } })
+    bidService.listMine(user.id).then((rows) => alive && setBids(rows)).catch(() => { if (alive) { setBids([]); setFailed(true) } })
     return () => { alive = false }
-  }, [user.id])
+  }, [user.id, attempt])
+  // a failed load says so (with a retry) instead of pretending the list is empty
+  const retryCard = failed && (
+    <div className="ap-empty">
+      <strong>Nije se učitalo</strong>
+      <span>Provjeri internet i pokušaj ponovo.</span>
+      <button type="button" className="ap-btn ap-btn-primary ap-btn-inline" onClick={() => { setJobs(null); setBids(null); setAttempt((n) => n + 1) }}>Pokušaj ponovo</button>
+    </div>
+  )
 
   const switchTab = (next) => { setParams({ tab: next }, { replace: true }); setFilter('all') }
   const filters = tab === 'objavljeni' ? JOB_FILTERS : BID_FILTERS
@@ -68,7 +79,8 @@ function MyTasks() {
       {tab === 'objavljeni' && (
         <section className="ap-section">
           {jobs === null && <div className="ap-skeleton" />}
-          {jobs && jobs.length === 0 && (
+          {retryCard}
+          {jobs && jobs.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
               <EmptyBoxMascot />
               <strong>Još nemaš objavljenih poslova</strong>
@@ -101,7 +113,8 @@ function MyTasks() {
       {tab === 'ponude' && (
         <section className="ap-section">
           {bids === null && <div className="ap-skeleton" />}
-          {bids && bids.length === 0 && (
+          {retryCard}
+          {bids && bids.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
               <EmptyBoxMascot />
               <strong>Još nisi poslao/la nijednu ponudu</strong>

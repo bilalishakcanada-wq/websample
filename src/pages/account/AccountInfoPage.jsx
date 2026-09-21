@@ -8,7 +8,7 @@ function AccountInfoPage() {
     ['/account/postavke#lozinka', 'Promijeni lozinku', KeyRound],
     ['/account/profil#telefon', 'Broj telefona', Phone],
     ['/account/znacke', 'Značke i verifikacija', Award],
-    ['/account/postavke#brisanje', 'Obriši nalog', Trash2],
+    ['/account/profil#brisanje', 'Obriši nalog', Trash2],
   ]
   return (
     <div className="account-section">

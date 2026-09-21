@@ -23,6 +23,13 @@ const splitDate = (value) => {
 function VerificationMeter() {
   const [progress, setProgress] = useState(null)
   useEffect(() => { accountService.verificationProgress().then(setProgress) }, [])
+  // deep links from "Informacije o nalogu" (#telefon, #brisanje)
+  useEffect(() => {
+    const id = window.location.hash.replace('#', '')
+    if (!id) return undefined
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
+    return () => window.clearTimeout(timer)
+  }, [])
   if (!progress) return null
   return (
     <div className="verif-meter" title={progress.items.map((item) => `${item.done ? '✓' : '○'} ${item.label}`).join('\n')}>
@@ -136,7 +143,7 @@ function ProfileSettingsPage() {
           <input value={user.email} readOnly className="is-readonly" />
         </label>
         <label className="account-field">
-          <span>Telefon (privatno)</span>
+          <span id="telefon">Telefon (privatno)</span>
           <input value={form.phone} onChange={set('phone')} type="tel" inputMode="tel" placeholder="061 234 567" autoComplete="tel" />
           <small className={!phoneOk ? 'is-error' : ''}>{!phoneOk ? 'Oblik: 061 234 567 ili +387 61 234 567.' : profile.phone_verified_at ? '✓ Verifikovan SMS kodom' : 'Verifikuj ga u Značkama za značku "Telefon verifikovan".'}</small>
         </label>
@@ -205,7 +212,7 @@ function ProfileSettingsPage() {
       </div>
 
       {searchParams.get('setup') !== '1' && (
-        <div className="account-danger">
+        <div className="account-danger" id="brisanje">
           <button type="button" className="danger-button" onClick={removeAccount} disabled={deleting}><Trash2 size={15} /> {deleting ? 'Brišem…' : 'Obriši moj nalog'}</button>
         </div>
       )}

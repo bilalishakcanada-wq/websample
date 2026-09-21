@@ -47,6 +47,12 @@ function SettingsPage() {
   }
 
   const isOAuth = (user.app_metadata?.providers || []).some((provider) => provider !== 'email')
+  useEffect(() => {
+    const id = window.location.hash.replace('#', '')
+    if (!id) return undefined
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   return (
     <div className="account-section">
@@ -81,7 +87,7 @@ function SettingsPage() {
         {isOAuth ? (
           <div className="settings-row"><div><strong>Lozinka</strong><span>Prijavljuješ se preko Google naloga — lozinka se mijenja kod Googlea.</span></div></div>
         ) : (
-          <form className="settings-row" onSubmit={changePassword}>
+          <form className="settings-row" id="lozinka" onSubmit={changePassword}>
             <div><strong>Nova lozinka</strong><span>Najmanje 8 znakova.</span></div>
             <div className="settings-inline"><input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" /><button type="submit" className="ghost-button" disabled={busy === 'pw' || password.length < 8}>Promijeni</button></div>
           </form>

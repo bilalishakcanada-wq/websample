@@ -36,6 +36,15 @@ export async function setupNative() {
     window.history.pushState({}, '', target.pathname + target.search + target.hash)
     window.dispatchEvent(new PopStateEvent('popstate'))
   })
+  // the shell shows the live site: after a long time in the background, come back with a fresh copy
+  try {
+    let hiddenAt = 0
+    plugin('App')?.addListener?.('appStateChange', ({ isActive }) => {
+      if (!isActive) { hiddenAt = Date.now(); return }
+      const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+      if (hiddenAt && Date.now() - hiddenAt > 30 * 60 * 1000 && !typing) window.location.reload()
+    })
+  } catch { /* ignore */ }
   // Android hardware back button follows the browser history
   try { plugin('App')?.addListener?.('backButton', ({ canGoBack }) => (canGoBack ? window.history.back() : plugin('App')?.exitApp?.())) } catch { /* ignore */ }
   // OAuth round trip: the system browser hands us ba.poso.app://auth/callback?code=… → session

@@ -260,7 +260,7 @@
 }
 
 /* ---------- job page (phone): status band → white sheet → offers | questions ---------- */
-.jd { min-height: 100dvh; background: #f3f5f9; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.jd { min-height: 100dvh; display: flex; flex-direction: column; background: #f3f5f9; }
 .jd-top { position: relative; display: flex; align-items: center; justify-content: space-between; padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 4px; }
 .jd-menu { position: absolute; right: 12px; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 5; display: grid; min-width: 180px; padding: 6px; border-radius: 14px; background: var(--surface); box-shadow: 0 16px 40px rgba(6, 21, 48, 0.18); }
 .jd-menu > * { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; font-weight: 700; color: var(--text); background: none; text-align: left; }
@@ -271,7 +271,9 @@
 .jd-band .ap-btn { width: 100%; margin-top: 16px; }
 .jd-progress { height: 4px; margin: 4px 0 18px; border-radius: 999px; background: #dfe5ef; overflow: hidden; }
 .jd-progress span { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width 0.4s ease; }
-.jd-sheet { padding: 26px var(--ap-x) 24px; border-radius: 28px 28px 0 0; background: var(--surface); min-height: 60dvh; box-shadow: 0 -10px 30px rgba(6, 21, 48, 0.05); }
+/* the white sheet runs to the bottom of the screen (flex: 1), with room for the sticky CTA when there is one */
+.jd:has(.jd-sticky) .jd-sheet { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+.jd-sheet { flex: 1; padding: 26px var(--ap-x) calc(32px + env(safe-area-inset-bottom, 0px)); border-radius: 28px 28px 0 0; background: var(--surface); min-height: 60dvh; box-shadow: 0 -10px 30px rgba(6, 21, 48, 0.05); }
 .jd-title { margin: 0 0 18px; font-family: var(--font-display); font-stretch: 85%; font-weight: 900; font-size: 2.1rem; line-height: 1.02; letter-spacing: -0.02em; color: var(--primary-strong); overflow-wrap: anywhere; }
 .jd-avatar { display: grid; place-items: center; border-radius: 50%; object-fit: cover; background: #e8eef8; color: var(--primary); flex-shrink: 0; }
 .jd-poster { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; color: var(--text); }
@@ -284,7 +286,7 @@
 .jd-facts li > svg { color: #8a97ab; flex-shrink: 0; }
 .jd-facts li > span { flex: 1; display: grid; }
 .jd-facts li > span small { font-size: 0.86rem; color: var(--text-soft); }
-.jd-link { font-weight: 800; color: var(--primary); font-size: 0.98rem; }
+.jd-link { display: inline-flex; align-items: center; min-height: 42px; padding: 0 12px; border-radius: 12px; font-weight: 800; color: var(--primary); font-size: 0.98rem; }
 .jd-desc { margin: 12px 0 18px; white-space: pre-wrap; line-height: 1.55; font-size: 1.02rem; overflow-wrap: anywhere; }
 .jd-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 20px; }
 .jd-photos button { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #eef2f8; padding: 0; }
@@ -525,3 +527,12 @@
   .ap-hero-bell { position: relative; display: grid; place-items: center; width: 40px; height: 40px; min-height: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.12); color: white; }
   .ap-hero-bell .ap-bell-count, .ap-account-bell .ap-bell-count { border-color: var(--primary-strong); }
 }
+
+/* home: "Tvoji poslovi" — compact cards under the hero */
+.ap-row-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ap-row-head .ap-h2 { margin: 0; }
+.ap-row-head .ap-more { margin: 0; }
+.ap-myjobs { margin: 4px 0 18px; }
+.ap-myjobs .mt-list { margin-top: 10px; }
+.mt-card-compact { padding: 12px 14px; }
+.mt-card-compact .mt-card-foot { margin-top: 2px; }

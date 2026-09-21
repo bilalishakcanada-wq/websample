@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
 import { bidService } from '../services/bidService'
+import { listingService } from '../services/listingService'
 import { matchService } from '../services/matchService'
 import { useLiveListings } from '../hooks/useLiveListings'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -38,8 +39,44 @@ function AppHome() {
   return mode === 'tasker' ? <TaskerHome user={user} firstName={firstName} /> : <PosterHome firstName={firstName} />
 }
 
+const STATE = { published: ['Čekaš ponude', 'open'], assigned: ['Dodijeljen', 'assigned'] }
+
+/** The poster's open jobs, right under the hero — one tap to the offers (like "Your tasks" in the apps people know). */
+function MyOpenJobs({ userId }) {
+  const [jobs, setJobs] = useState(null)
+  useEffect(() => {
+    let alive = true
+    listingService.listAll({ status: 'published', pageSize: 3, ownerId: userId })
+      .then((result) => alive && setJobs((result.data || []).filter((job) => job.status === 'published' || job.status === 'assigned')))
+      .catch(() => alive && setJobs([]))
+    return () => { alive = false }
+  }, [userId])
+  if (!jobs || jobs.length === 0) return null
+  return (
+    <section className="ap-section ap-myjobs">
+      <div className="ap-row-head"><h2 className="ap-h2">Tvoji poslovi</h2><Link to="/moji-poslovi" className="ap-more">Svi <ChevronRight size={16} /></Link></div>
+      <div className="mt-list">
+        {jobs.map((job) => {
+          const [label, tone] = STATE[job.status] || STATE.published
+          const offers = job.bids?.[0]?.count || 0
+          return (
+            <Link key={job.id} to={`/listings/${job.id}`} className="mt-card mt-card-compact" onClick={() => haptic('light')}>
+              <div className="mt-card-head"><strong>{job.title}</strong><em>{job.price == null ? 'Po dogovoru' : `${Number(job.price).toLocaleString('bs-BA')} KM`}</em></div>
+              <div className="mt-card-foot">
+                <b className={`mt-state s-${tone}`}>{label}</b>
+                <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function PosterHome({ firstName }) {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
 
   const start = (text) => {
@@ -65,6 +102,7 @@ function PosterHome({ firstName }) {
 
       <div className="ap-home-body">
         <PushPrompt compact />
+        <MyOpenJobs userId={user.id} />
         <Link to="/account/profil" className="ap-promo" onClick={() => haptic('light')}>
           <div>
             <span className="ap-promo-eyebrow">Poso.ba za izvođače</span>
@@ -135,7 +173,7 @@ function TaskerHome({ user, firstName }) {
                 <div className="ap-job-main">
                   <strong>{job.title}</strong>
                   <span><MapPin size={13} /> {job.location || 'Bez lokacije'}</span>
-                  <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.match_score != null ? ` · ${Math.round(job.match_score)}% match` : ''}</span>
+                  <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.match_score != null ? ` · ${Math.round(job.match_score)}% za tebe` : ''}</span>
                 </div>
                 <em className="ap-price">{typeof job.price === 'string' ? job.price : money(job.price)}</em>
               </Link>

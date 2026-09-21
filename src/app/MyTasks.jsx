@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Check, ChevronDown, MapPin, Plus, UserRound, Users } from 'lucide-react'
+import { CalendarDays, Check, ChevronDown, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
@@ -100,8 +100,7 @@ function MyTasks() {
                   <span><CalendarDays size={14} /> {when(job.description)}</span>
                   <div className="mt-card-foot">
                     <b className={`mt-state s-${tone}`}>{label}</b>
-                    <small><Users size={13} /> {offers} {offers === 1 ? 'ponuda' : 'ponuda'}</small>
-                    <i className="mt-avatar"><UserRound size={16} /></i>
+                    <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>
                   </div>
                 </Link>
               )
@@ -134,7 +133,6 @@ function MyTasks() {
                   <div className="mt-card-foot">
                     <b className={`mt-state s-${tone}`}>{label}</b>
                     <small>Tvoja cijena</small>
-                    <i className="mt-avatar"><UserRound size={16} /></i>
                   </div>
                 </Link>
               )

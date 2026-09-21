@@ -4,6 +4,7 @@ import { ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, Archi
 import { MailMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
+import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import './app.css'
 
 const Avatar = ({ src, name, size = 48 }) => (src
@@ -22,6 +23,7 @@ function Chat(props) {
     error, notice, togglePref, reportConversation, timeOf, shortDate,
   } = props
   useFullscreen(Boolean(active))
+  const fitRef = useKeyboardFit(Boolean(active))
   const [menu, setMenu] = useState(false)
 
   if (!active) {
@@ -71,7 +73,7 @@ function Chat(props) {
   }
 
   return (
-    <div className="ap ch ch-thread-page">
+    <div className="ap ch ch-thread-page" ref={fitRef}>
       <header className="ch-head">
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">
@@ -95,7 +97,7 @@ function Chat(props) {
         </Link>
       )}
 
-      <div className="ch-thread" ref={listRef}>
+      <div className="ch-thread" ref={listRef} data-scroll-end>
         <p className="ch-safety">{active.contacts_allowed ? <><Unlock size={13} /> Ponuda je prihvaćena — možete razmijeniti kontakt.</> : <><Lock size={13} /> Brojevi i kontakti se dijele tek kad ponuda bude prihvaćena.</>}</p>
         {thread.length === 0 && <p className="ch-intro">Ovo je početak razgovora sa <strong>{active.other_name}</strong>. Budi konkretan/na: šta, kada i gdje.</p>}
         {grouped.map((group) => (

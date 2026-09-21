@@ -237,7 +237,7 @@ function SearchPage() {
             {mobileView === 'map' ? <List size={20} /> : <MapIcon size={20} />}
           </button>
           <h1>Pretraži poslove</h1>
-          <button type="button" className={`ap-icon-btn ${phoneSearchOpen || filters.query ? 'active' : ''}`} onClick={() => setPhoneSearchOpen((open) => !open)} aria-label="Traži"><SearchIcon size={20} /></button>
+          <button type="button" className={`ap-icon-btn ${phoneSearchOpen || filters.query ? 'active' : ''}`} onClick={() => setPhoneSearchOpen((open) => { if (!open) window.setTimeout(() => filterBarRef.current?.querySelector('.filter-search input')?.focus(), 30); return !open })} aria-label="Traži"><SearchIcon size={20} /></button>
         </div>
       )}
       <header className="app-page-header browse-header">

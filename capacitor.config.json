@@ -4,7 +4,7 @@
   "webDir": "dist",
   "backgroundColor": "#f6f4ee",
   "ios": {
-    "contentInset": "always",
+    "contentInset": "never",
     "scheme": "Poso.ba",
     "limitsNavigationsToAppBoundDomains": false
   },
@@ -27,7 +27,7 @@
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#0d2a52",
+      "backgroundColor": "#081b38",
       "overlaysWebView": false
     }
   }

@@ -34,3 +34,38 @@ export function useKeyboardAvoid() {
   }, [])
   return ref
 }
+
+/**
+ * Full-screen chat: while the keyboard is up, the whole screen (header, thread, composer) is fitted
+ * to the visual viewport, so the header stays visible and the composer sits right above the keys —
+ * instead of iOS panning the page and cutting the top off.
+ */
+export function useKeyboardFit(active = true) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const vv = window.visualViewport
+    const el = ref.current
+    if (!active || !vv || !el) return undefined
+    const reset = () => {
+      el.style.position = ''; el.style.top = ''; el.style.left = ''; el.style.width = ''; el.style.height = ''; el.style.zIndex = ''
+      el.classList.remove('is-keyboard')
+    }
+    const place = () => {
+      const keyboardOpen = window.innerHeight - vv.height > 120
+      if (!keyboardOpen) { reset(); return }
+      el.classList.add('is-keyboard')
+      el.style.position = 'fixed'
+      el.style.top = `${Math.round(vv.offsetTop)}px`
+      el.style.left = `${Math.round(vv.offsetLeft)}px`
+      el.style.width = `${Math.round(vv.width)}px`
+      el.style.height = `${Math.round(vv.height)}px`
+      el.style.zIndex = '50'
+      el.querySelector('[data-scroll-end]')?.scrollTo({ top: 1e9 })
+    }
+    vv.addEventListener('resize', place)
+    vv.addEventListener('scroll', place)
+    place()
+    return () => { vv.removeEventListener('resize', place); vv.removeEventListener('scroll', place); reset() }
+  }, [active])
+  return ref
+}

@@ -12084,6 +12084,8 @@ button { touch-action: manipulation; }
 /* hover-only effects stay off on touch screens */
 @media (hover: none) {
   .listing-card:hover, .task-card:hover, .help-audience:hover, .adm-user-row:hover, .job-gallery-main:hover img { transform: none; }
+  /* touch screens keep :hover stuck on the last thing tapped — no highlighted card after a scroll */
+  .task-card:hover, .listing-card:hover, .mt-card:hover { border-color: var(--stroke); box-shadow: none; }
 }
 
 @media (max-width: 768px) {
@@ -12310,7 +12312,8 @@ button { touch-action: manipulation; }
   .ap-browse-top .ap-icon-btn.active { background: var(--primary-strong); color: white; }
   .browse-page .browse-header, .browse-page .mobile-view-toggle { display: none; }
   .browse-page .filter-search { display: none; }
-  .browse-page.search-open .filter-search { display: flex; }
+  .browse-page.search-open .filter-search { display: flex; flex: 1 0 auto; min-height: 46px; }
+  .browse-page.search-open .filter-bar > :not(.filter-search) { display: none; }
   .browse-page .filter-bar { top: 0; padding-top: 6px; padding-bottom: 8px; }
   .browse-page .task-card { border-radius: 14px; }
   .browse-page .task-card-facts li { font-size: 0.78rem; }
@@ -12379,3 +12382,8 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .route-retry strong { font-size: 1.05rem; color: var(--primary-strong); }
 .route-retry p { margin: 0 0 6px; color: var(--text-soft); }
 .route-retry .primary-button { display: inline-flex; align-items: center; gap: 8px; }
+
+/* phones: lists fade in without sliding — nothing on the screen drifts */
+@media (max-width: 768px) {
+  .browse-list > .task-card, .listing-grid > *, .rec-grid > *, .dashboard-listing, .help-audiences > *, .chat-list-row { animation-name: page-enter; animation-duration: 0.3s; }
+}

@@ -34,7 +34,8 @@ Sve ide u zvono u aplikaciji + push (kad je uključen) + link na pravi ekran:
 - **VAŽNO za registracije:** Supabase-ov ugrađeni email servis šalje samo ~2 emaila na sat, pa testeri neće dobiti potvrdu registracije. Za beta uradi jedno od dvoje:
   - *Auth → Providers → Email → isključi „Confirm email“* (najbrže), ili
   - *Auth → SMTP Settings → Custom SMTP* (npr. Resend besplatni plan) — tada radi i potvrda emaila i reset lozinke bez limita.
-- **Auth → URL Configuration:** dodaj `https://bilalishakcanada-wq.github.io/websample/` u *Site URL* i *Redirect URLs* (inače Google prijava i reset lozinke vraćaju na pogrešnu adresu). Za **Google/Facebook prijavu u native aplikaciji** (iOS/Android) dodaj u *Redirect URLs* i `ba.poso.app://auth/callback` — aplikacija otvara prijavu u sistemskom pregledniku i vraća se kroz tu adresu.
+- **Auth → URL Configuration:** dodaj `https://bilalishakcanada-wq.github.io/websample/` u *Site URL* i *Redirect URLs* (inače Google prijava i reset lozinke vraćaju na pogrešnu adresu). Google prijava u native aplikaciji (iOS/Android) ide kroz sistemski preglednik i vraća se preko sajta (`/dashboard?native=1` → `ba.poso.app://…`), pa **ne treba** dodatni unos u Redirect URLs.
+- **Google prijava za druge ljude:** u [Google Cloud Console](https://console.cloud.google.com/apis/credentials/consent) → *OAuth consent screen* → ako piše **Testing**, klikni **Publish app** (inače Google pušta samo emailove sa liste „Test users“ — svi ostali dobiju „Access blocked“).
 - **Facebook prijava:** App ID + App Secret u *Auth → Providers → Facebook* (dugme već postoji).
 - **AI podrška / AI provjera profila:** Anthropic nalog treba kredite (`ANTHROPIC_API_KEY` je već postavljen kao secret). Do tada radi ugrađeni odgovarač i ručno preuzimanje razgovora.
 - **Email/Telegram za admina:** `RESEND_API_KEY` + `ADMIN_EMAIL` ili `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` kao Edge Function secrets.

@@ -18,6 +18,7 @@ import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../util
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
 import { paymentService } from '../services/paymentService'
+import { setPageTitle } from '../utils/pageTitle'
 import { questionService } from '../services/questionService'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { shareLink } from '../utils/native'
@@ -128,6 +129,7 @@ function ListingDetailPage() {
       .then(async ([result, listingBids]) => {
         if (!active) return
         setListing(result)
+        if (result?.title) setPageTitle(result.title)
         setBids(listingBids)
         if (result) {
           paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
@@ -202,13 +204,18 @@ function ListingDetailPage() {
     }
   }
 
+  const [qaDraft, setQaDraft] = useState('')
+  const [qaError, setQaError] = useState('')
+  const [asking, setAsking] = useState(false)
   const askQuestion = async (body) => {
     if (!user) { navigate(`/login?next=${encodeURIComponent(`/listings/${id}?tab=pitanja`)}`); return }
     if (findProhibitedTerm(body)) throw new Error('Pitanje sadrži sadržaj koji krši Pravila korištenja.')
     const scan = scanContactInfo(body)
     if (!scan.clean) throw new Error(contactInfoMessage(scan, 'pitanje'))
     const created = await questionService.ask({ listingId: id, userId: user.id, body })
-    setQuestions((current) => [...current, { ...created, author: { display_name: user.user_metadata?.full_name || 'Ti', avatar_url: user.user_metadata?.avatar_url || null } }])
+    const parts = String(user.user_metadata?.full_name || '').trim().split(/\s+/)
+    const shortName = parts[0] ? `${parts[0]}${parts[1] ? ` ${parts[1].charAt(0).toUpperCase()}.` : ''}` : 'Ti'
+    setQuestions((current) => [...current, { ...created, author: { display_name: shortName, avatar_url: user.user_metadata?.avatar_url || null } }])
     toast(isOwner ? 'Odgovor je objavljen.' : 'Pitanje je poslano vlasniku.', { kind: 'success' })
   }
 
@@ -467,6 +474,36 @@ function ListingDetailPage() {
                     </article>
                   ))}
                 </div>
+              )}
+            </section>
+
+            <section className="job-card" id="pitanja">
+              <div className="section-heading"><h2>Pitanja</h2><span className="muted-text">{questions.length}</span></div>
+              {questions.length === 0 && <p className="muted-text">{isOwner ? 'Niko još nije postavio pitanje.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.'}</p>}
+              {questions.length > 0 && (
+                <div className="qa-list">
+                  {questions.map((item) => {
+                    const fromOwner = item.user_id === listing.user_id
+                    return (
+                      <div key={item.id} className={`qa-row ${fromOwner ? 'is-owner' : ''}`}>
+                        {item.author?.avatar_url ? <img src={item.author.avatar_url} alt="" className="poster-avatar poster-avatar-photo" /> : <div className="poster-avatar"><UserRound size={16} /></div>}
+                        <div>
+                          <strong>{item.author?.display_name || (fromOwner ? 'Vlasnik' : 'Korisnik')}{fromOwner && <span className="qa-owner-tag">vlasnik</span>} <small>{formatBosnianDate(item.created_at)}</small></strong>
+                          <p>{item.body}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              {user ? (
+                <form className="qa-form" onSubmit={async (event) => { event.preventDefault(); setQaError(''); setAsking(true); try { await askQuestion(qaDraft); setQaDraft('') } catch (requestError) { setQaError(requestError.message) } finally { setAsking(false) } }}>
+                  <input value={qaDraft} onChange={(event) => setQaDraft(event.target.value)} maxLength={1000} placeholder={isOwner ? 'Odgovori…' : 'Postavi pitanje…'} />
+                  <button type="submit" className="primary-button" disabled={asking || qaDraft.trim().length < 3}>{isOwner ? 'Odgovori' : 'Pitaj'}</button>
+                  {qaError && <span className="form-error qa-error">{qaError}</span>}
+                </form>
+              ) : (
+                <Link to={`/login?next=${encodeURIComponent(`/listings/${listing.id}#pitanja`)}`} className="ghost-button">Prijavi se da pitaš</Link>
               )}
             </section>
 

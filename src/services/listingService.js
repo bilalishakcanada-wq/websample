@@ -120,6 +120,37 @@ export const listingService = {
     return { data, count }
   },
 
+  /**
+   * Ranked search, computed in Postgres (search_listings): text relevance with typo tolerance,
+   * distance from the searcher, freshness, competition, completeness, the poster's track record
+   * and — when signed in — the searcher's trades. One round trip, paged, ~tens of ms.
+   */
+  async search({
+    query = '', category = '', lat = null, lng = null, radiusKm = 0, includeRemote = true,
+    minPrice = '', maxPrice = '', hasBudget = false, noOffers = false, sort = 'recommended', limit = 50, offset = 0,
+  } = {}) {
+    const { data, error } = await supabase.rpc('search_listings', {
+      p_query: sanitizeText(query).slice(0, 80),
+      p_category: category || '',
+      p_lat: lat, p_lng: lng,
+      p_radius_km: radiusKm || 0,
+      p_include_remote: Boolean(includeRemote),
+      p_min_price: minPrice === '' || minPrice == null ? null : Number(minPrice),
+      p_max_price: maxPrice === '' || maxPrice == null ? null : Number(maxPrice),
+      p_has_budget: Boolean(hasBudget),
+      p_no_offers: Boolean(noOffers),
+      p_sort: sort,
+      p_limit: limit,
+      p_offset: offset,
+    })
+    if (error) {
+      console.error('Supabase search failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    const rows = data || []
+    return { data: rows, count: rows[0]?.total_count ?? 0 }
+  },
+
   /** First photo of a listing row (from the embedded listing_images), or null. */
   coverImage(listing) {
     const images = [...(listing?.listing_images || [])].sort((a, b) => a.position - b.position)

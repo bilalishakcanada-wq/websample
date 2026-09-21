@@ -122,30 +122,56 @@ function SearchPage() {
     setSearchParams(next, { replace: true })
   }, [filters, setSearchParams])
 
-  // Server-side: text, category, price, remote/budget. Location + radius + sort
-  // by distance/offers happen client-side over the full result set.
-  const serverSort = ['price_asc', 'price_desc', 'oldest'].includes(filters.sort) ? filters.sort : 'newest'
+  // the signed-in person's trades and city personalise "Preporučeno" (nothing is hidden, only ordered)
+  const { user } = useAuth()
+  const [me, setMe] = useState(null)
+  useEffect(() => {
+    if (!user) { setMe(null); return undefined }
+    let alive = true
+    profileService.getProfile(user.id).then((profile) => alive && setMe(profile ? { city: profile.city, trades: profile.trades || [] } : null)).catch(() => {})
+    return () => { alive = false }
+  }, [user])
+
+  const origin = useMemo(() => {
+    const coords = filters.city ? cityCoordinates[filters.city] : null
+    return coords ? { lat: coords[0], lng: coords[1] } : null
+  }, [filters.city])
+
+  // Everything — text relevance, distance, competition, the searcher's trades — is ranked in
+  // Postgres (search_listings) in one round trip. If that ever fails, the plain query + the
+  // client-side ranker below keep the page working.
+  const [serverRanked, setServerRanked] = useState(true)
   useEffect(() => {
     let active = true
     setLoading(true)
     setError('')
     const timeout = setTimeout(() => {
-      listingService.listAll({
-        search: filters.query,
+      const home = !origin && me?.city ? cityCoordinates[me.city] : null
+      listingService.search({
+        query: filters.query,
         category: filters.category,
+        lat: origin?.lat ?? home?.[0] ?? null,
+        lng: origin?.lng ?? home?.[1] ?? null,
+        // a chosen city filters by radius; the signed-in person's home city only informs the ranking
+        radiusKm: origin ? filters.radius : 0,
+        includeRemote: origin ? filters.includeRemote : true,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
-        remoteOnly: filters.remoteOnly,
         hasBudget: filters.hasBudget,
-        sort: serverSort,
-        pageSize: 200,
+        noOffers: filters.noOffers,
+        sort: filters.remoteOnly ? 'newest' : filters.sort,
+        limit: 200,
       })
-        .then((result) => active && setRows(result.data || []))
-        .catch((requestError) => active && setError(requestError.message))
+        .then((result) => { if (active) { setServerRanked(true); setRows(result.data || []) } })
+        .catch(() => listingService.listAll({
+          search: filters.query, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice,
+          remoteOnly: filters.remoteOnly, hasBudget: filters.hasBudget, sort: 'newest', pageSize: 200,
+        }).then((result) => { if (active) { setServerRanked(false); setRows(result.data || []) } })
+          .catch((requestError) => active && setError(requestError.message)))
         .finally(() => active && setLoading(false))
     }, 200)
     return () => { active = false; clearTimeout(timeout) }
-  }, [filters.query, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, serverSort])
+  }, [filters.query, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.sort, filters.radius, filters.includeRemote, origin, me])
 
   useEffect(() => {
     if (!openMenu) return undefined
@@ -162,34 +188,21 @@ function SearchPage() {
     }
   }, [openMenu])
 
-  // the signed-in person's trades and city personalise "Preporučeno" (nothing is hidden, only ordered)
-  const { user } = useAuth()
-  const [me, setMe] = useState(null)
-  useEffect(() => {
-    if (!user) { setMe(null); return undefined }
-    let alive = true
-    profileService.getProfile(user.id).then((profile) => alive && setMe(profile ? { city: profile.city, trades: profile.trades || [] } : null)).catch(() => {})
-    return () => { alive = false }
-  }, [user])
-
-  const origin = useMemo(() => {
-    const coords = filters.city ? cityCoordinates[filters.city] : null
-    return coords ? { lat: coords[0], lng: coords[1] } : null
-  }, [filters.city])
-
   const listings = useMemo(() => {
     let items = rows.map((row) => {
-      const remote = isRemoteLocation(row.location)
+      const remote = row.is_remote ?? isRemoteLocation(row.location)
       const point = row.lat != null ? { lat: row.lat, lng: row.lng } : null
       return {
         ...row,
         remote,
-        offers: row.bids?.[0]?.count ?? 0,
-        photo: [...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null,
-        photoCount: (row.listing_images || []).length,
-        distance: origin && point ? distanceKm(origin, point) : null,
+        offers: row.offers ?? row.bids?.[0]?.count ?? 0,
+        photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
+        photoCount: row.image_count ?? (row.listing_images || []).length,
+        distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
       }
     })
+    if (serverRanked && !filters.remoteOnly) return items
+    if (filters.remoteOnly) items = items.filter((item) => item.remote)
 
     if (origin) {
       items = items.filter((item) => {
@@ -211,7 +224,7 @@ function SearchPage() {
       items = rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance })
     }
     return items
-  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, me])
+  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, me, serverRanked])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null

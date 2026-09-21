@@ -98,6 +98,23 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
           'circle-stroke-color': '#ffffff',
         },
       })
+      // the price rides next to each single pin, like the apps people know
+      map.addLayer({
+        id: 'point-price',
+        type: 'symbol',
+        source: 'tasks',
+        filter: ['!', ['has', 'point_count']],
+        layout: {
+          'text-field': ['get', 'price'],
+          'text-size': 12,
+          'text-font': ['Noto Sans Bold'],
+          'text-offset': [0.9, 0],
+          'text-anchor': 'left',
+          'text-allow-overlap': false,
+          'text-optional': true,
+        },
+        paint: { 'text-color': NAVY, 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+      })
 
       map.on('click', 'clusters', (event) => {
         const feature = event.features?.[0]

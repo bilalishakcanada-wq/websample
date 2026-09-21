@@ -3403,7 +3403,7 @@ select {
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
 .reveal-visible {
@@ -6290,7 +6290,8 @@ body:has(.profile-cta-bar) .support-chat {
   gap: 12px;
   align-content: start;
   padding: 4px 14px 24px 4px;
-  max-height: calc(100vh - 200px);
+  /* list and map end above the fold on first paint (header + breadcrumb + title + filter bar ≈ 300px) */
+  max-height: max(420px, calc(100vh - 300px));
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -6298,8 +6299,7 @@ body:has(.profile-cta-bar) .support-chat {
 .browse-map {
   position: sticky;
   top: calc(var(--header-h) + 88px);
-  height: calc(100vh - var(--header-h) - 110px);
-  min-height: 420px;
+  height: max(420px, calc(100vh - 300px));
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid var(--stroke);
@@ -12422,3 +12422,6 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   .sheet-backdrop { align-items: center; justify-items: center; }
   .sheet-backdrop .offer-sheet { width: min(100% - 32px, 560px); max-height: calc(100vh - 48px); border-radius: 24px; }
 }
+
+/* job page: review already left */
+.review-done { display: flex; align-items: center; gap: 8px; color: var(--success); font-weight: 700; }

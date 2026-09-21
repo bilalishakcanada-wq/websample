@@ -279,6 +279,9 @@ export const listingService = {
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'DELETE' })
 
     const { error } = await supabase.from('listings').delete().eq('id', id)
-    if (error) throw publicError()
+    if (error) {
+      if (String(error.message || '').includes('PAYMENT_IN_PROGRESS')) throw new Error('Ovaj posao ima osiguranu uplatu — prvo je oslobodi ili otkaži na stranici posla, pa ga onda obriši.')
+      throw publicError()
+    }
   },
 }

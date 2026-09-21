@@ -14,9 +14,68 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
+  # the anon key is a public client key (it ships inside the JS bundle either way)
+  VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
+
 jobs:
+  # The gate: the whole job flow (post → offer → escrow → realtime chat → release → review)
+  # runs in a real browser against the real backend. Nothing deploys if it fails.
+  # Needs the E2E_* secrets (Settings → Secrets → Actions); without them the gate is
+  # skipped with a warning, so add them to arm it.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_CLIENT_EMAIL: ${{ secrets.E2E_CLIENT_EMAIL }}
+      E2E_CLIENT_PASSWORD: ${{ secrets.E2E_CLIENT_PASSWORD }}
+      E2E_PROVIDER_EMAIL: ${{ secrets.E2E_PROVIDER_EMAIL }}
+      E2E_PROVIDER_PASSWORD: ${{ secrets.E2E_PROVIDER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check test accounts
+        id: gate
+        run: |
+          if [ -z "$E2E_CLIENT_EMAIL" ] || [ -z "$E2E_PROVIDER_EMAIL" ]; then
+            echo "::warning title=E2E gate not armed::Add E2E_CLIENT_EMAIL/PASSWORD and E2E_PROVIDER_EMAIL/PASSWORD secrets to run the end-to-end tests before every deploy."
+            echo "armed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "armed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build for tests (no service worker)
+        if: steps.gate.outputs.armed == 'true'
+        run: npm run build
+        env:
+          VITE_NO_PWA: '1'
+          VITE_APP_NAME: Poso.ba
+          VITE_DEFAULT_LOCALE: bs
+      - name: Install Chromium
+        if: steps.gate.outputs.armed == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Run end-to-end tests
+        if: steps.gate.outputs.armed == 'true'
+        run: npx playwright test
+        env:
+          CI: 'true'
+      - name: Upload report
+        if: always() && steps.gate.outputs.armed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
   build:
     runs-on: ubuntu-latest
+    needs: e2e
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

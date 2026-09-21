@@ -66,3 +66,10 @@ Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ →
 4. Za svoj iPhone odmah (bez TestFlight-a): spoji kabl, odaberi telefon u Xcodeu → ▶ Run (na telefonu: *Settings → General → VPN & Device Management → Trust*).
 
 Detalji i rješavanje problema: `MOBILE.md`.
+
+## Automatski testovi (Playwright)
+Cijeli tok posla — objava → ponuda → prihvatanje i osiguranje uplate → poruke u realnom vremenu → oslobađanje → recenzija → brisanje — vrti se u pravom pregledniku na pravoj bazi (`e2e/job-flow.spec.js`). Na GitHubu se pokreće **prije svakog deploya** (`pages.yml`, job `e2e`); ako padne, sajt se ne objavljuje.
+
+- Nalozi za testove: `e2e.client@posoba.dev` (klijent, unaprijed napunjen Balans) i `e2e.provider@posoba.dev` (izvođač). Oglasi koje robot objavi počinju sa `[E2E]` i ne šalju alarme drugim majstorima; brišu se na kraju testa.
+- **Da bi gate radio na GitHubu:** repo → *Settings → Secrets and variables → Actions → New repository secret* — dodaj `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`, `E2E_PROVIDER_EMAIL`, `E2E_PROVIDER_PASSWORD` (vrijednosti su u lokalnom `.env.e2e`, koji se ne commituje). Bez njih job samo upozori i deploy prođe.
+- Lokalno (dok dev server radi): `set -a && source .env.e2e && set +a && E2E_BASE_URL=http://localhost:54971 npm run test:e2e`.

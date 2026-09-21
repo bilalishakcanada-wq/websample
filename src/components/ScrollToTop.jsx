@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { scrollToTop } from '../utils/scroll'
+import { titleFor } from '../utils/pageTitle'
 
 /**
  * New page = start at the top (browsers keep the old scroll position in SPAs).
@@ -12,6 +13,7 @@ function ScrollToTop() {
   useEffect(() => {
     scrollToTop()
     document.body.dataset.page = pathname.split('/')[1] || 'home'
+    document.title = titleFor(pathname)
   }, [pathname])
   return null
 }

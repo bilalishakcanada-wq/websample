@@ -11,6 +11,7 @@ import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import ProfileView from '../app/ProfileView'
+import { setPageTitle } from '../utils/pageTitle'
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
@@ -77,7 +78,7 @@ function PublicProfilePage() {
     setLoading(true)
     setError('')
     profileService.getPublicBundle(userId)
-      .then((data) => active && setBundle(data))
+      .then((data) => { if (!active) return; setBundle(data); if (data?.profile?.display_name) setPageTitle(data.profile.display_name) })
       .catch((requestError) => active && setError(requestError.message))
       .finally(() => active && setLoading(false))
     return () => { active = false }

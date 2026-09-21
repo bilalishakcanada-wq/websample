@@ -16,19 +16,39 @@
     <meta name="apple-mobile-web-app-title" content="Poso.ba" />
     <title>Poso.ba — Marketplace za usluge</title>
     <script>
-      // OAuth return for the installed app: the system browser lands here with the session in the
-      // hash; hand it straight to the app (ba.poso.app://…) and leave a plain "back to app" note.
+      // OAuth return for the installed app / installed web app. The system browser lands here with
+      // the session in the hash:
+      //  - ?native=1  → hand it straight to the app (ba.poso.app://…)
+      //  - ?handoff=n → park it for the home-screen web app (it claims it when it regains focus)
       (function () {
         try {
-          if (location.search.indexOf('native=1') === -1 || location.hash.indexOf('access_token=') === -1 && location.search.indexOf('code=') === -1) return
-          var target = 'ba.poso.app://auth/callback' + (location.search.indexOf('code=') !== -1 ? '?code=' + new URLSearchParams(location.search).get('code') : '') + location.hash
-          history.replaceState(null, '', location.pathname)
-          document.documentElement.setAttribute('data-native-return', '1')
-          location.replace(target)
-          setTimeout(function () {
-            var note = document.getElementById('native-return')
-            if (note) { note.style.display = 'grid'; note.querySelector('a').href = target }
-          }, 1200)
+          var hash = location.hash || ''
+          var q = new URLSearchParams(location.search)
+          if (hash.indexOf('access_token=') === -1 && !q.get('code')) return
+          if (q.get('native') === '1') {
+            var target = 'ba.poso.app://auth/callback' + (q.get('code') ? '?code=' + q.get('code') : '') + hash
+            history.replaceState(null, '', location.pathname)
+            document.documentElement.setAttribute('data-native-return', '1')
+            location.replace(target)
+            setTimeout(function () {
+              var note = document.getElementById('native-return')
+              if (note) { note.style.display = 'grid'; note.querySelector('a').href = target }
+            }, 1200)
+            return
+          }
+          var nonce = q.get('handoff')
+          if (nonce && hash.indexOf('access_token=') !== -1) {
+            var h = new URLSearchParams(hash.replace(/^#/, ''))
+            var body = JSON.stringify({ p_nonce: nonce, p_access: h.get('access_token'), p_refresh: h.get('refresh_token') })
+            var key = '%VITE_SUPABASE_ANON_KEY%'
+            fetch('%VITE_SUPABASE_URL%/rest/v1/rpc/store_auth_handoff', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: key, Authorization: 'Bearer ' + key }, body: body })
+              .then(function () {
+                // only when this page is the in-app browser view, not the installed app itself
+                var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true
+                var note = document.getElementById('native-return')
+                if (note && !standalone) { note.style.display = 'grid'; note.querySelector('p').textContent = 'Prijava je uspjela — vrati se u Poso.ba aplikaciju na početnom ekranu.'; note.querySelector('a').style.display = 'none' }
+              }).catch(function () {})
+          }
         } catch (e) { /* ignore */ }
       })()
     </script>

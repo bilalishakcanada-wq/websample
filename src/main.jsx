@@ -7,10 +7,12 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { setupNative } from './utils/native'
 import { watchServiceWorkerUpdates } from './utils/appUpdates'
 import { installErrorReporter } from './utils/errorReporter'
+import { watchHandoff } from './utils/authHandoff'
 
 setupNative()
 watchServiceWorkerUpdates()
 installErrorReporter()
+watchHandoff()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

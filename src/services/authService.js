@@ -1,4 +1,5 @@
 import { isNativeApp, openInSystemBrowser } from '../utils/native'
+import { isStandaloneWebApp, startHandoff } from '../utils/authHandoff'
 import { supabase } from '../lib/supabase'
 import { isStrongPassword, isValidEmail, publicError, sanitizeText } from '../utils/validation'
 import { withBase } from '../utils/paths'
@@ -89,11 +90,13 @@ export const authService = {
     // index.html immediately hands the session over to the app (ba.poso.app://auth/callback,
     // handled in utils/native.js).
     const native = isNativeApp()
+    // installed web app: the callback lands in an in-app browser view, so park the session under a nonce
+    const handoff = !native && isStandaloneWebApp() ? startHandoff() : ''
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: native
         ? { redirectTo: `${window.location.origin}${withBase('/dashboard')}?native=1`, skipBrowserRedirect: true }
-        : { redirectTo: `${window.location.origin}${withBase(window.matchMedia?.('(max-width: 768px)').matches ? '/' : '/dashboard')}` },
+        : { redirectTo: `${window.location.origin}${withBase(window.matchMedia?.('(max-width: 768px)').matches ? '/' : '/dashboard')}${handoff ? `?handoff=${handoff}` : ''}` },
     })
     if (!error && native && data?.url) await openInSystemBrowser(data.url)
 

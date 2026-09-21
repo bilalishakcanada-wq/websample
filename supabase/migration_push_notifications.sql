@@ -115,3 +115,10 @@ returns text language sql security definer set search_path = public, vault as $$
 $$;
 revoke execute on function public.vapid_private_jwk() from public, anon, authenticated;
 grant execute on function public.vapid_private_jwk() to service_role;
+
+-- ---------------------------------------------------------------------------
+-- OAuth hand-off for the installed web app (home-screen PWA): see src/utils/authHandoff.js
+-- (applied 2026-09-21 as migration auth_handoff_for_installed_web_app)
+-- ---------------------------------------------------------------------------
+-- create table public.auth_handoffs (nonce text primary key, access_token text not null, refresh_token text not null, created_at timestamptz not null default now());
+-- functions: store_auth_handoff(p_nonce, p_access, p_refresh), claim_auth_handoff(p_nonce) — security definer, 10-minute lifetime

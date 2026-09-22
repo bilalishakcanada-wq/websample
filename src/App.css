@@ -12525,3 +12525,12 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 }
 @keyframes vt-out { to { opacity: 0; transform: translateX(-6%); } }
 @keyframes vt-in { from { opacity: 0; transform: translateX(6%); } }
+
+/* phones: calmer browse cards — no empty avatar circle, lighter facts, more air */
+@media (max-width: 768px) {
+  .browse-page .task-card-avatar { display: none; }
+  .browse-page .task-card-link { padding: 16px 16px 14px; }
+  .browse-page .task-card-facts { gap: 6px; margin: 10px 0 12px; }
+  .browse-page .task-card-facts li { color: var(--text-soft); }
+  .browse-page .task-card-foot { padding-top: 10px; }
+}

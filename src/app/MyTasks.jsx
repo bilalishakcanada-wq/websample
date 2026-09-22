@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Check, ChevronDown, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useMyBids, useMyListings } from '../hooks/queries'
-import { formatBosnianDate } from '../utils/dateFormat'
+import { timeAgo } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { EmptyBoxMascot } from './Mascots'
@@ -125,7 +125,7 @@ function MyTasks() {
                 <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="mt-card">
                   <div className="mt-card-head"><strong>{bid.listing?.title || 'Posao'}</strong><em>{money(bid.amount)}</em></div>
                   <span><MapPin size={14} /> {bid.listing?.location || 'Online'}</span>
-                  <span><CalendarDays size={14} /> Ponuda poslana {formatBosnianDate(bid.created_at)}</span>
+                  <span><CalendarDays size={14} /> Ponuda poslana {timeAgo(bid.created_at)}</span>
                   <div className="mt-card-foot">
                     <b className={`mt-state s-${tone}`}>{label}</b>
                     <small>Tvoja cijena</small>

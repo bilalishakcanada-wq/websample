@@ -20,7 +20,7 @@ import { listingService } from '../services/listingService'
 import { profileService } from '../services/profileService'
 import { useAuth } from '../context/AuthContext'
 import { FindMascot } from '../app/Mascots'
-import { formatBosnianDate } from '../utils/dateFormat'
+import { timeAgo } from '../utils/dateFormat'
 import { SkeletonTaskCard } from '../components/Skeleton'
 
 const RADIUS_OPTIONS = [
@@ -398,8 +398,8 @@ function SearchPage() {
                   <strong className="task-card-price">{formatPrice(item.price, item.currency)}</strong>
                 </div>
                 <ul className="task-card-facts">
-                  <li>{item.remote ? <><Laptop size={14} /> Online</> : <><MapPin size={14} /> {item.location}{item.distance != null && <em> · {Math.round(item.distance)} km</em>}</>}</li>
-                  <li><CalendarDays size={14} /> Objavljeno {formatBosnianDate(item.created_at)}</li>
+                  <li>{item.remote ? <><Laptop size={14} /> Online</> : <><MapPin size={14} /> {item.location}{item.distance != null && item.distance >= 1 && <em> · {Math.round(item.distance)} km</em>}</>}</li>
+                  <li><CalendarDays size={14} /> Objavljeno {timeAgo(item.created_at)}</li>
                   <li><SlidersHorizontal size={14} /> Fleksibilan termin</li>
                 </ul>
                 <div className="task-card-foot">

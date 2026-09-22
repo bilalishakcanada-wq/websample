@@ -9,6 +9,7 @@ import PushPrompt from '../components/PushPrompt'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useMyBids, useMyListings, useRecommendedListings } from '../hooks/queries'
 import { useAccount } from './account/AccountLayout'
+import { confirmDialog } from '../utils/dialog'
 
 const BID_LABELS = { pending: 'Čeka odgovor', accepted: 'Dodijeljen tebi', rejected: 'Nije prošla', withdrawn: 'Povučena' }
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
@@ -46,7 +47,7 @@ function DashboardPage() {
   useEffect(() => { if (listingsQuery.error) setError(listingsQuery.error.message) }, [listingsQuery.error])
 
   const deleteListing = async (listing) => {
-    if (!window.confirm(`Obrisati oglas "${listing.title}"?`)) return
+    if (!(await confirmDialog({ title: 'Obrisati oglas?', text: `„${listing.title}“ nestaje sa Poso.ba zajedno sa ponudama.`, confirmLabel: 'Obriši', danger: true }))) return
     setDeletingId(listing.id)
     setError('')
     try {

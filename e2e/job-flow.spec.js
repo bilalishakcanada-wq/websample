@@ -97,6 +97,7 @@ test.describe.serial('Posao od objave do recenzije', () => {
   test('klijent oslobađa uplatu i ostavlja recenziju', async () => {
     await client.goto(listingUrl)
     await client.getByRole('button', { name: /Oslobodi/ }).click()
+    await client.getByRole('dialog').getByRole('button', { name: /Oslobodi/ }).click() // in-app confirm sheet
     await expect(client.getByText('Posao završen').first()).toBeVisible({ timeout: 20_000 })
 
     await client.getByRole('button', { name: '5 zvjezdica' }).click()
@@ -114,6 +115,7 @@ test.describe.serial('Posao od objave do recenzije', () => {
     const row = client.locator('article.dashboard-listing', { hasText: title })
     await expect(row).toBeVisible()
     await row.getByRole('button', { name: /Obriši/ }).click()
+    await client.getByRole('dialog').getByRole('button', { name: 'Obriši', exact: true }).click()
     await expect(row).toHaveCount(0, { timeout: 15_000 })
   })
 })

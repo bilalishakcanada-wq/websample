@@ -538,3 +538,18 @@
 .mt-card-compact .mt-card-foot { margin-top: 2px; }
 
 .jd-review-done { margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: rgba(25, 179, 123, 0.1); color: #0f7a54; font-weight: 700; }
+
+/* ---------- touch targets: nothing tappable under 44×44 on phones (Apple HIG / Material) ---------- */
+.ap-back, .ap-icon-btn { width: 48px; height: 48px; }
+.ap-hero-bell, .ap-account-bell { width: 48px; height: 48px; }
+.ap-account-bell { top: calc(10px + env(safe-area-inset-top, 0px)); right: 12px; }
+.ap-tabs button, .ap-mode button { min-height: 48px; }
+.ap-cancel { min-height: 44px; padding: 8px 12px; }
+.mt-filter { min-height: 44px; padding: 0 6px; }
+.ch-filters button { min-height: 40px; padding: 0 16px; }
+.ch-filters { padding-top: 2px; padding-bottom: 2px; }
+.ap-more { min-height: 44px; padding: 0 2px; }
+.ap-account-links { gap: 4px; }
+.ap-account-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; margin-left: -8px; border-radius: 10px; }
+.ap-account-links a + a { margin-left: 2px; }
+.jd-link { min-height: 44px; }

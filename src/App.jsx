@@ -66,6 +66,8 @@ import SwBridge from './components/SwBridge'
 import { RouteFallback, RouteGuard } from './components/RouteBoundary'
 import SupportChat from './components/SupportChat'
 import { useMediaQuery } from './hooks/useMediaQuery'
+import DialogHost from './components/DialogHost'
+import ViewTransitions from './components/ViewTransitions'
 
 // phone app screens (welcome, goal, intro, post flow, my tasks); desktop keeps its pages
 const StartGoal = lazy(lazyImport(() => import('./app/StartGoal')))
@@ -85,6 +87,7 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
+      <ViewTransitions />
       <SwBridge />
       <SiteHeader />
       <SupportChat />
@@ -149,6 +152,7 @@ function App() {
       <SiteFooter />
       <MobileNav />
       <Toaster />
+      <DialogHost />
     </BrowserRouter>
   )
 }

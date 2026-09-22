@@ -6,6 +6,7 @@ import { accountService } from '../services/accountService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { toast } from './Toaster'
+import { confirmDialog, promptDialog } from '../utils/dialog'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -109,12 +110,17 @@ export function JobPaymentCard({ payment, role, onChanged }) {
     try { await fn(); haptic('medium'); toast(DONE[key] || 'Sačuvano.', { kind: 'success' }); onChanged?.() } catch (requestError) { setError(requestError.message); toast(requestError.message, { kind: 'error' }) } finally { setBusy('') }
   }
 
-  const release = () => {
-    if (!window.confirm(`Potvrdi da je posao završen i oslobodi ${money(payment.amount)} izvođaču. Ovo se ne može poništiti.`)) return
+  const release = async () => {
+    const ok = await confirmDialog({ title: 'Posao je završen?', text: `Oslobađaš ${money(payment.amount)} izvođaču. Ovo se ne može poništiti.`, confirmLabel: `Oslobodi ${money(payment.amount)}` })
+    if (!ok) return
     run('release', () => paymentService.releasePayment(payment.listing_id))
   }
-  const cancel = () => {
-    const why = window.prompt(role === 'client' ? 'Zašto otkazuješ? (novac se vraća na tvoj balans)' : 'Zašto odustaješ od posla? (klijentu se vraća novac; računa se u tvoju uspješnost)')
+  const cancel = async () => {
+    const why = await promptDialog({
+      title: role === 'client' ? 'Zašto otkazuješ?' : 'Zašto odustaješ od posla?',
+      text: role === 'client' ? 'Novac se vraća na tvoj balans.' : 'Klijentu se vraća novac; računa se u tvoju uspješnost.',
+      placeholder: 'Kratko objašnjenje…', confirmLabel: 'Otkaži posao',
+    })
     if (why === null) return
     run('cancel', () => paymentService.cancelJob(payment.listing_id, why))
   }

@@ -21,6 +21,7 @@ import { profileService } from '../services/profileService'
 import { useAuth } from '../context/AuthContext'
 import { FindMascot } from '../app/Mascots'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { SkeletonTaskCard } from '../components/Skeleton'
 
 const RADIUS_OPTIONS = [
   { value: 10, label: '10 km' },
@@ -373,7 +374,7 @@ function SearchPage() {
       <main className={`browse-layout view-${mobileView}`}>
         <section className="browse-list">
           {error && <div className="form-error">{error}</div>}
-          {loading && <div className="skeleton-list">{[1, 2, 3].map((item) => <div className="skeleton-card" key={item} />)}</div>}
+          {loading && <>{[1, 2, 3, 4].map((item) => <SkeletonTaskCard key={item} />)}</>}
           {!loading && listings.length === 0 && (
             <div className="empty-state">
               <FindMascot className="empty-state-art" />

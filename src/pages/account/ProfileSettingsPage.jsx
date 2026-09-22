@@ -10,6 +10,7 @@ import { formatBosnianPhone, isValidBosnianPhone } from '../../utils/phone'
 import CityField from '../../components/CityField'
 import RuleOneNotice from '../../components/RuleOneNotice'
 import { withBase } from '../../utils/paths'
+import { confirmDialog } from '../../utils/dialog'
 
 const splitName = (fullName) => {
   const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean)
@@ -101,7 +102,7 @@ function ProfileSettingsPage() {
   }
 
   const removeAccount = async () => {
-    if (!window.confirm('Ovo trajno briše tvoj nalog i sve lične podatke. Nastaviti?')) return
+    if (!(await confirmDialog({ title: 'Obrisati nalog?', text: 'Trajno briše tvoj nalog, oglase, poruke i sve lične podatke. Ovo se ne može poništiti.', confirmLabel: 'Obriši nalog', danger: true }))) return
     setDeleting(true)
     try { await deleteAccount(); window.location.assign(withBase('/')) } catch (requestError) { setError(requestError.message); setDeleting(false) }
   }

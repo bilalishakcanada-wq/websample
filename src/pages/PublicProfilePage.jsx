@@ -12,6 +12,7 @@ import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import ProfileView from '../app/ProfileView'
 import { setPageTitle } from '../utils/pageTitle'
+import { promptDialog } from '../utils/dialog'
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
@@ -108,7 +109,7 @@ function PublicProfilePage() {
   const tier = isProvider ? (trust?.tier || 'unverified') : 'client'
 
   const reportProfile = async () => {
-    const reason = window.prompt('Zašto prijavljuješ ovaj profil? (npr. dijeli broj telefona, lažni identitet, prevara)')
+    const reason = await promptDialog({ title: 'Prijavi profil', text: 'Zašto prijavljuješ ovaj profil? (npr. dijeli broj telefona, lažni identitet, uznemiravanje)', placeholder: 'Opiši ukratko…', confirmLabel: 'Prijavi' })
     if (!reason) return
     try {
       await reportService.createReport({ reporterId: user.id, targetType: 'profile', targetId: userId, reason })

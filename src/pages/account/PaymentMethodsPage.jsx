@@ -4,6 +4,7 @@ import { CreditCard, Lock, PlusCircle, Trash2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
+import { confirmDialog } from '../../utils/dialog'
 
 const maskIban = (iban) => (iban ? `${iban.slice(0, 4)} •••• •••• ${iban.slice(-4)}` : '')
 
@@ -47,7 +48,7 @@ function PaymentMethodsPage() {
   }
 
   const remove = async () => {
-    if (!window.confirm('Ukloniti podatke za isplatu? Značka će biti uklonjena.')) return
+    if (!(await confirmDialog({ title: 'Ukloniti podatke za isplatu?', text: 'Značka „Podaci za isplatu“ će biti uklonjena.', confirmLabel: 'Ukloni', danger: true }))) return
     try { await accountService.deletePayoutAccount(user.id); setAccount(null); setEditing(false); await reload() } catch (requestError) { setError(requestError.message) }
   }
 

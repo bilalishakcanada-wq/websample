@@ -7,7 +7,7 @@ import { MailMascot } from '../../app/Mascots'
 import { Award, BadgeCheck, Bell, Bot, ChevronRight, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
 import { notificationService } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
-import { SkeletonRows } from '../../components/Skeleton'
+import { SkeletonNotifRow } from '../../components/Skeleton'
 
 const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Award, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles }
 
@@ -29,7 +29,7 @@ function NotificationsPage() {
   return (
     <div className="account-section">
       <div className="account-section-head"><h1>Obavijesti</h1></div>
-      {items === null && <SkeletonRows n={5} />}
+      {items === null && <ul className="notif-list">{[1, 2, 3, 4].map((i) => <SkeletonNotifRow key={i} />)}</ul>}
       {items?.length === 0 && (
         <div className="account-empty">
           <div className="account-empty-art notif-art"><MailMascot /></div>

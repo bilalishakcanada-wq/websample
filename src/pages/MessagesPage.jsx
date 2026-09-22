@@ -15,6 +15,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import Chat from '../app/Chat'
 import { SkeletonRows } from '../components/Skeleton'
+import { promptDialog } from '../utils/dialog'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -205,7 +206,7 @@ function MessagesPage() {
 
   const reportConversation = async () => {
     if (!active) return
-    const reason = window.prompt('Šta nije u redu u ovom razgovoru? (npr. prevara, uznemiravanje, zabranjen sadržaj)')
+    const reason = await promptDialog({ title: 'Prijavi razgovor', text: 'Šta nije u redu? (npr. prevara, uznemiravanje, zabranjen sadržaj)', placeholder: 'Opiši ukratko…', confirmLabel: 'Prijavi' })
     if (!reason) return
     try {
       await reportService.createReport({ reporterId: user.id, targetType: 'conversation', targetId: active.id, reason })

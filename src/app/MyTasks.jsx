@@ -9,6 +9,7 @@ import { useBackToClose } from '../hooks/useBackToClose'
 import { EmptyBoxMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
+import { SkeletonMtCard } from '../components/Skeleton'
 
 const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
 const BID_STATUS = { pending: ['Ponuda poslana', 'open'], accepted: ['Dodijeljen tebi', 'done'], rejected: ['Nije prošla', 'off'], withdrawn: ['Povučena', 'off'] }
@@ -73,7 +74,7 @@ function MyTasks() {
 
       {tab === 'objavljeni' && (
         <section className="ap-section">
-          {jobs === null && <><div className="ap-skeleton" style={{ height: 120 }} /><div className="ap-skeleton" style={{ height: 120 }} /></>}
+          {jobs === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
           {retryCard}
           {jobs && jobs.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
@@ -106,7 +107,7 @@ function MyTasks() {
 
       {tab === 'ponude' && (
         <section className="ap-section">
-          {bids === null && <><div className="ap-skeleton" style={{ height: 120 }} /><div className="ap-skeleton" style={{ height: 120 }} /></>}
+          {bids === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
           {retryCard}
           {bids && bids.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">

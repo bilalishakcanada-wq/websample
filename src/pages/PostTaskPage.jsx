@@ -143,7 +143,7 @@ function PostTaskPage() {
         await listingService.uploadImages(user.id, listing.id, photos.files, kept)
         const outcome = await profileService.checkMyMedia()
         const flagged = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
-        if (flagged > 0) window.alert(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`)
+        if (flagged > 0) toast(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       }
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }

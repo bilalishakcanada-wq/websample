@@ -14,6 +14,7 @@ import { prefetchRoute } from '../utils/prefetch'
 import PushPrompt from '../components/PushPrompt'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
+import { SkeletonApJob } from '../components/Skeleton'
 
 const QUICK_IDEAS = [
   ['Pomozi mi sa selidbom', Truck], ['Generalno čišćenje stana', Sparkles], ['Popravi slavinu', Wrench], ['Sastavi namještaj', Armchair],
@@ -154,7 +155,7 @@ function TaskerHome({ user, firstName }) {
         <section className="ap-section">
           <h2 className="ap-h2">{recommended.length > 0 ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
           <p className="ap-p">{recommended.length > 0 ? 'Odabrani prema tvojim vještinama i gradu' : 'Najnovije objavljeno'}</p>
-          {loading && feed.length === 0 && <><div className="ap-skeleton" /><div className="ap-skeleton" /><div className="ap-skeleton" /></>}
+          {loading && feed.length === 0 && <div className="ap-list">{[1, 2, 3].map((i) => <SkeletonApJob key={i} />)}</div>}
           {!loading && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
             {feed.map((job) => (

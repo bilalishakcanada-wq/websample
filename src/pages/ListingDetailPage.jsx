@@ -26,6 +26,8 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import { shareLink } from '../utils/native'
 import { useFullscreen } from '../app/useFullscreen'
 import JobDetail from '../app/JobDetail'
+import { confirmDialog, promptDialog } from '../utils/dialog'
+import { SkeletonJobPhone } from '../components/Skeleton'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -237,7 +239,7 @@ function ListingDetailPage() {
       navigate('/login', { state: { from: { pathname: `/listings/${id}` } } })
       return
     }
-    const reason = window.prompt('Opišite zašto prijavljujete ovaj oglas (npr. zabranjen sadržaj, prevara):')
+    const reason = await promptDialog({ title: 'Prijavi oglas', text: 'Zašto prijavljuješ ovaj oglas? (npr. zabranjen sadržaj, prevara)', placeholder: 'Opiši ukratko…', confirmLabel: 'Prijavi' })
     if (!reason) return
     try {
       await reportService.createReport({ reporterId: user.id, targetType: 'listing', targetId: id, reason })
@@ -281,10 +283,16 @@ function ListingDetailPage() {
   const setOutcome = async (status) => {
     let reason = null
     if (status === 'cancelled') {
-      const answer = window.prompt('Zašto se posao otkazuje?\n1 — izvođač nije došao / odustao\n2 — ja sam odustao\n3 — nešto drugo', '1')
-      if (answer == null) return
-      reason = answer.trim() === '1' ? 'provider' : answer.trim() === '2' ? 'client' : 'other'
-    } else if (!window.confirm('Potvrdi da je posao završen. Nakon toga možeš ostaviti recenziju izvođaču.')) {
+      reason = await promptDialog({
+        title: 'Zašto se posao otkazuje?',
+        options: [
+          { value: 'provider', label: 'Izvođač nije došao / odustao', hint: 'Računa se u njegovu uspješnost' },
+          { value: 'client', label: 'Ja sam odustao/la' },
+          { value: 'other', label: 'Nešto drugo' },
+        ],
+      })
+      if (reason == null) return
+    } else if (!(await confirmDialog({ title: 'Posao je završen?', text: 'Nakon potvrde možeš ostaviti recenziju izvođaču.', confirmLabel: 'Da, završen je' }))) {
       return
     }
     setOutcomeBusy(true)
@@ -304,7 +312,7 @@ function ListingDetailPage() {
 
   const withdrawBid = async () => {
     if (!myBid || myBid.status !== 'pending') return
-    if (!window.confirm('Povući ponudu? Klijent je više neće vidjeti.')) return
+    if (!(await confirmDialog({ title: 'Povući ponudu?', text: 'Klijent je više neće vidjeti. Možeš poslati novu.', confirmLabel: 'Povuci', danger: true }))) return
     try {
       const updated = await bidService.setStatus(myBid.id, 'withdrawn')
       setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
@@ -332,7 +340,7 @@ function ListingDetailPage() {
     }
   }
 
-  if (loading) return <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
+  if (loading) return isPhone ? <SkeletonJobPhone /> : <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
   if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
   const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
@@ -396,7 +404,7 @@ function ListingDetailPage() {
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
-          onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={(bidId) => { if (window.confirm('Odbiti ovu ponudu?')) setBidStatus(bidId, 'rejected') }}
+          onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
           tab={tab} setTab={setTab}
@@ -486,7 +494,7 @@ function ListingDetailPage() {
                         {isOwner && bid.status === 'pending' && (
                           <div className="bid-owner-actions">
                             <button type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
-                            <button type="button" className="ghost-button danger-button" onClick={() => setBidStatus(bid.id, 'rejected')}><XCircle size={16} /> Odbij</button>
+                            <button type="button" className="ghost-button danger-button" onClick={async () => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bid.id, 'rejected') }}><XCircle size={16} /> Odbij</button>
                           </div>
                         )}
                       </div>

@@ -82,7 +82,7 @@ function Chat(props) {
 
   return (
     <div className="ap ch ch-thread-page" ref={fitRef}>
-      <header className="ch-head">
+      <header className="ch-head" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">
           <Avatar src={active.other_avatar} name={active.other_name} size={40} />

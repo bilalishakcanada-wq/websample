@@ -46,7 +46,7 @@ function JobDetail(props) {
 
   return (
     <div className="ap jd">
-      <header className="jd-top">
+      <header className="jd-top" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
         <button type="button" className="ap-back" onClick={onBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više" aria-expanded={menu}><MoreHorizontal size={22} /></button>
         {menu && (

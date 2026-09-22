@@ -30,7 +30,7 @@ function ProfileView({ bundle, user, onReport }) {
 
   return (
     <div className="ap pv">
-      <header className="jd-top">
+      <header className="jd-top" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
         <button type="button" className="ap-back" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign('/'))} aria-label="Nazad"><ArrowLeft size={22} /></button>
         {!isOwn && user && (
           <>

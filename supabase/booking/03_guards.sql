@@ -24,16 +24,29 @@ alter table public.messages
   add column if not exists hidden_by uuid references auth.users(id),
   add column if not exists hidden_reason text;
 
+-- DVIJE GREŠKE UHVAĆENE PRI PRIMJENI NA PRODUKCIJU (obje ispravljene ovdje):
+--  1. kolona se zove `content`, ne `body` — trigger bi pucao pri svakom označavanju
+--     poruke pročitanom, dakle pri normalnom korištenju chata;
+--  2. listings → conversations → messages su svi ON DELETE CASCADE, pa je brisanje
+--     vlastitog oglasa rušilo cijelu naredbu. Korisnici nisu mogli obrisati oglas
+--     koji ima razgovor. Uhvatio E2E test, ne pregled koda.
 create or replace function public.guard_message_immutable() returns trigger
 language plpgsql set search_path = public as $fn$
 begin
   if tg_op = 'DELETE' then
-    raise exception 'PORUKE_SE_NE_BRISU: prepiska je dokaz u sporu' using errcode = 'P0001';
+    -- kaskada (obrisan razgovor/oglas) je dozvoljena: roditelj je već nestao u
+    -- istoj naredbi. Direktno brisanje poruke od korisnika nije.
+    if exists (select 1 from public.conversations c where c.id = old.conversation_id) then
+      raise exception 'PORUKE_SE_NE_BRISU: prepiska je dokaz u sporu' using errcode = 'P0001';
+    end if;
+    return old;
   end if;
-  -- dozvoljeno je samo označiti poruku skrivenom i označiti je pročitanom
-  if new.body is distinct from old.body
+  -- dozvoljeno je samo označiti poruku pročitanom i sakriti je (moderacija)
+  if new.content is distinct from old.content
      or new.sender_id is distinct from old.sender_id
      or new.receiver_id is distinct from old.receiver_id
+     or new.conversation_id is distinct from old.conversation_id
+     or new.attachment_url is distinct from old.attachment_url
      or new.created_at is distinct from old.created_at then
     raise exception 'PORUKE_SE_NE_MIJENJAJU: prepiska je dokaz u sporu' using errcode = 'P0001';
   end if;
@@ -48,6 +61,9 @@ create trigger messages_immutable before update or delete on public.messages
 -- NALAZ: `listings_update_own` dozvoljava vlasniku UPDATE bilo koje kolone,
 -- uključujući `status`. Vlasnik je mogao poslati posao nazad u 'published' dok
 -- novac stoji u escrowu, ili ga proglasiti 'completed' bez isplate.
+-- NIJE PRIMIJENJENO NA PRODUKCIJU (22.09.2026.): listingService.setOutcome()
+-- mijenja listings.status direktno s klijenta (dugme "Označi kao završeno"), pa bi
+-- ova zaštita tiho slomila tu funkciju. Primijeniti tek kad taj poziv pređe na RPC.
 create or replace function public.protect_listing_system_fields() returns trigger
 language plpgsql set search_path = public as $fn$
 begin

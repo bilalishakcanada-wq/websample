@@ -2,6 +2,7 @@ import { listingService } from './listingService'
 import { tagService } from './tagService'
 import { profileService } from './profileService'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
+import { queryClient } from '../lib/queryClient'
 
 export const timingLabel = (timing, date) => {
   if (timing === 'flexible' || !date) return 'Fleksibilan termin'
@@ -40,5 +41,9 @@ export async function publishListing({ user, form, photos = { files: [], removed
     const outcome = await profileService.checkMyMedia()
     flaggedPhotos = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
   }
+  // every cached list that could show this job is refreshed on next paint
+  queryClient.invalidateQueries({ queryKey: ['search'] })
+  queryClient.invalidateQueries({ queryKey: ['me'] })
+  if (editId) queryClient.invalidateQueries({ queryKey: ['listing', editId] })
   return { listing, flaggedPhotos }
 }

@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronRight, MapPin, Search, Users, Truck, Sparkles, Wrench, Armchair, PaintRoller, Laptop, Dog, Package } from 'lucide-react'
 import { EarnMascot } from './Mascots'
 import { useAuth } from '../context/AuthContext'
 import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
-import { bidService } from '../services/bidService'
-import { listingService } from '../services/listingService'
-import { matchService } from '../services/matchService'
+import { useMyBids, useMyListings, useRecommendedListings } from '../hooks/queries'
 import { useLiveListings } from '../hooks/useLiveListings'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
@@ -43,15 +41,9 @@ const STATE = { published: ['Čekaš ponude', 'open'], assigned: ['Dodijeljen', 
 
 /** The poster's open jobs, right under the hero — one tap to the offers (like "Your tasks" in the apps people know). */
 function MyOpenJobs({ userId }) {
-  const [jobs, setJobs] = useState(null)
-  useEffect(() => {
-    let alive = true
-    listingService.listAll({ status: 'published', pageSize: 3, ownerId: userId })
-      .then((result) => alive && setJobs((result.data || []).filter((job) => job.status === 'published' || job.status === 'assigned')))
-      .catch(() => alive && setJobs([]))
-    return () => { alive = false }
-  }, [userId])
-  if (!jobs || jobs.length === 0) return null
+  const { data } = useMyListings(userId)
+  const jobs = (data || []).filter((job) => job.status === 'published' || job.status === 'assigned').slice(0, 3)
+  if (jobs.length === 0) return null
   return (
     <section className="ap-section ap-myjobs">
       <div className="ap-row-head"><h2 className="ap-h2">Tvoji poslovi</h2><Link to="/moji-poslovi" className="ap-more">Svi <ChevronRight size={16} /></Link></div>
@@ -133,15 +125,10 @@ function PosterHome({ firstName }) {
 function TaskerHome({ user, firstName }) {
   const navigate = useNavigate()
   const { combined: jobs, loading } = useLiveListings({ limit: 8, fallbackToDemo: false })
-  const [recommended, setRecommended] = useState([])
-  const [bids, setBids] = useState(null)
-
-  useEffect(() => {
-    let alive = true
-    matchService.recommendedListings(6).then((rows) => alive && setRecommended(rows || [])).catch(() => {})
-    bidService.listMine(user.id, 3).then((rows) => alive && setBids(rows)).catch(() => alive && setBids([]))
-    return () => { alive = false }
-  }, [user.id])
+  const recommendedQuery = useRecommendedListings(user.id, 6)
+  const bidsQuery = useMyBids(user.id, 3)
+  const recommended = recommendedQuery.data || []
+  const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
 
   const feed = recommended.length > 0 ? recommended : jobs
 
@@ -165,7 +152,7 @@ function TaskerHome({ user, firstName }) {
         <section className="ap-section">
           <h2 className="ap-h2">{recommended.length > 0 ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
           <p className="ap-p">{recommended.length > 0 ? 'Odabrani prema tvojim vještinama i gradu' : 'Najnovije objavljeno'}</p>
-          {loading && feed.length === 0 && <div className="ap-skeleton" />}
+          {loading && feed.length === 0 && <><div className="ap-skeleton" /><div className="ap-skeleton" /><div className="ap-skeleton" /></>}
           {!loading && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
             {feed.map((job) => (

@@ -4,6 +4,7 @@ import { WalletMascot } from '../../app/Mascots'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import { SkeletonList } from '../../components/Skeleton'
 
 const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
 const STATUS = { funded: ['Uplata osigurana', 'funded'], requested: ['Čeka oslobađanje', 'requested'], released: ['Isplaćeno', 'released'], refunded: ['Vraćeno', 'refunded'], disputed: ['Spor', 'disputed'] }
@@ -36,7 +37,7 @@ function PaymentHistoryPage() {
         ))}
       </div>
 
-      {rows === null && <div className="skeleton-card" />}
+      {rows === null && <SkeletonList n={3} h={72} />}
       {rows !== null && visible.length === 0 && (
         <div className="account-empty">
           <div className="account-empty-art notif-art"><WalletMascot /></div>

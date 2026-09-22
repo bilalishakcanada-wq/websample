@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { AiVerdict, SuspendDialog, useStaff } from './shared'
 import { withBase } from '../../utils/paths'
+import { SkeletonList } from '../../components/Skeleton'
 
 const FEED_KINDS = [
   ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
@@ -19,7 +20,7 @@ function ClientErrors({ openUser }) {
     adminService.clientErrors().then(setRows).catch((requestError) => setError(requestError.message))
   }, [])
   if (error) return <div className="form-error">{error}</div>
-  if (rows === null) return <div className="page-state">Učitavanje...</div>
+  if (rows === null) return <SkeletonList n={4} h={96} />
   if (rows.length === 0) return <p className="muted-text">Nema prijavljenih grešaka — aplikacija radi bez padova. 🎉</p>
   return rows.map((row) => (
     <div key={row.id} className="admin-row feed-error">
@@ -95,7 +96,7 @@ function OversightTab() {
       </div>
       {error && <div className="form-error">{error}</div>}
       {kind === 'errors' && <ClientErrors openUser={openUser} />}
-      {kind !== 'errors' && (loading && rows.length === 0 ? <div className="page-state">Učitavanje...</div> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
+      {kind !== 'errors' && (loading && rows.length === 0 ? <SkeletonList n={4} h={96} /> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
         <div key={`${row.kind}-${row.id}`} className={`admin-row feed-${row.kind}`}>
           <div className="admin-feed-main">
             <span className="admin-feed-kind">{KIND_ICON[row.kind] || '•'}</span>

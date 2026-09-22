@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
-import { matchService } from '../services/matchService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import CountUp from '../components/CountUp'
 import PushPrompt from '../components/PushPrompt'
-import { bidService } from '../services/bidService'
+import { useQueryClient } from '@tanstack/react-query'
+import { keys, useMyBids, useMyListings, useRecommendedListings } from '../hooks/queries'
 import { useAccount } from './account/AccountLayout'
 
 const BID_LABELS = { pending: 'Čeka odgovor', accepted: 'Dodijeljen tebi', rejected: 'Nije prošla', withdrawn: 'Povučena' }
@@ -27,42 +27,23 @@ const STATUS_LABELS = {
 function DashboardPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [listings, setListings] = useState([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [deletingId, setDeletingId] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [recommended, setRecommended] = useState([])
-  const [recommendedLoading, setRecommendedLoading] = useState(true)
   // the dashboard has two faces: what I posted (client) and what I offered on (provider); "both" sees both
   const { profile, isProvider } = useAccount()
   const isClient = !isProvider || profile?.account_type === 'both'
-  const [bids, setBids] = useState(null)
-  useEffect(() => {
-    if (!isProvider) return undefined
-    let active = true
-    bidService.listMine(user.id, 20).then((rows) => active && setBids(rows)).catch(() => active && setBids([]))
-    return () => { active = false }
-  }, [isProvider, user.id])
-
-  const loadListings = () => {
-    setLoading(true)
-    setError('')
-    listingService.listAll({ status: 'published', pageSize: 50, ownerId: user.id })
-      .then((result) => setListings(result.data || []))
-      .catch((requestError) => setError(requestError.message))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { loadListings() }, [])
-
-  useEffect(() => {
-    let active = true
-    matchService.recommendedListings(6)
-      .then((rows) => active && setRecommended(rows))
-      .finally(() => active && setRecommendedLoading(false))
-    return () => { active = false }
-  }, [])
+  // all three reads are cached: the dashboard paints from cache and refreshes behind the scenes
+  const listingsQuery = useMyListings(user.id)
+  const bidsQuery = useMyBids(user.id, 20)
+  const recommendedQuery = useRecommendedListings(user.id, 6)
+  const listings = listingsQuery.data || []
+  const loading = listingsQuery.isPending
+  const bids = isProvider ? (bidsQuery.data ?? null) : null
+  const recommended = recommendedQuery.data || []
+  const recommendedLoading = recommendedQuery.isPending
+  useEffect(() => { if (listingsQuery.error) setError(listingsQuery.error.message) }, [listingsQuery.error])
 
   const deleteListing = async (listing) => {
     if (!window.confirm(`Obrisati oglas "${listing.title}"?`)) return
@@ -71,7 +52,8 @@ function DashboardPage() {
     try {
       await listingService.deleteListing(listing.id)
       setMessage('Oglas je obrisan.')
-      setListings((current) => current.filter((item) => item.id !== listing.id))
+      queryClient.setQueryData(keys.myListings(user.id), (current) => (current || []).filter((item) => item.id !== listing.id))
+      queryClient.invalidateQueries({ queryKey: ['search'] })
     } catch (requestError) {
       setError(requestError.message)
     } finally {

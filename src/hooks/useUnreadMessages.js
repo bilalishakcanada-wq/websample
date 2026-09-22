@@ -1,26 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { messageService } from '../services/messageService'
+import { keys } from './queries'
 
-/** Number of unread messages for the signed-in user — live (new message in, or a thread marked read). */
+const countUnread = async (userId) => {
+  const { count, error } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', userId).is('read_at', null)
+  if (error) throw error
+  return count || 0
+}
+
+/** Number of unread messages for the signed-in user — cached, live (new message in, or a thread marked read). */
 export function useUnreadMessages(userId) {
-  const [count, setCount] = useState(0)
-
+  const queryClient = useQueryClient()
+  const { data } = useQuery({
+    queryKey: keys.unreadMessages(userId),
+    queryFn: () => countUnread(userId),
+    enabled: Boolean(userId),
+    staleTime: 15 * 1000,
+    meta: { persist: false },
+  })
   useEffect(() => {
-    if (!userId) { setCount(0); return undefined }
-    let alive = true
-    const load = async () => {
-      const { count: n, error } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', userId).is('read_at', null)
-      if (alive && !error) setCount(n || 0)
+    if (!userId) return undefined
+    const bump = () => {
+      queryClient.invalidateQueries({ queryKey: keys.unreadMessages(userId) })
+      queryClient.invalidateQueries({ queryKey: keys.inbox(userId) })
     }
-    load()
-    const stop = messageService.subscribeToMine(userId, () => load())
-    const onRead = () => load()
-    window.addEventListener('poso:messages-read', onRead)
-    const onVisible = () => { if (document.visibilityState === 'visible') load() }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => { alive = false; stop(); window.removeEventListener('poso:messages-read', onRead); document.removeEventListener('visibilitychange', onVisible) }
-  }, [userId])
-
-  return count
+    const stop = messageService.subscribeToMine(userId, bump)
+    window.addEventListener('poso:messages-read', bump)
+    return () => { stop(); window.removeEventListener('poso:messages-read', bump) }
+  }, [userId, queryClient])
+  return data || 0
 }

@@ -1,4 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { keys, useMyBundle } from '../../hooks/queries'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Award, Bell, Camera, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
@@ -36,26 +38,25 @@ function AccountLayout() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [bundle, setBundle] = useState(null)
-  const [loading, setLoading] = useState(true)
+  // the profile bundle is cached: coming back to any account page paints instantly, then refreshes
+  const queryClient = useQueryClient()
+  const bundleQuery = useMyBundle(user?.id)
+  const bundle = bundleQuery.data ?? null
+  const loading = bundleQuery.isPending
   const [error, setError] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarNotice, setAvatarNotice] = useState('')
   const avatarInputRef = useRef(null)
+  useEffect(() => { if (bundleQuery.error) setError(bundleQuery.error.message) }, [bundleQuery.error])
 
+  const setBundle = useCallback((next) => {
+    queryClient.setQueryData(keys.myBundle(user?.id), (current) => (typeof next === 'function' ? next(current) : next))
+  }, [queryClient, user?.id])
   const reload = useCallback(async () => {
     const data = await profileService.getMyBundle()
     setBundle(data)
     return data
-  }, [])
-
-  useEffect(() => {
-    let active = true
-    reload()
-      .catch((requestError) => active && setError(requestError.message))
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-  }, [reload])
+  }, [setBundle])
 
   // first visit after registration: profile must be filled in
   // On phones the nav is a horizontal strip: keep the active item in view.

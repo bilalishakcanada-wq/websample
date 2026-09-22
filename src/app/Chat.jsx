@@ -6,6 +6,7 @@ import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import './app.css'
+import { SkeletonRows } from '../components/Skeleton'
 
 const Avatar = ({ src, name, size = 48 }) => (src
   ? <img src={src} alt="" className="jd-avatar" style={{ width: size, height: size }} />
@@ -43,7 +44,7 @@ function Chat(props) {
           </div>
         </div>
 
-        {loading && <div className="ap-skeleton" />}
+        {loading && <SkeletonRows n={5} />}
         {!loading && error && inbox.length === 0 && (
           <div className="ap-empty">
             <strong>Poruke se nisu učitale</strong>

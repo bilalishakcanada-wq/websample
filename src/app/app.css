@@ -166,8 +166,8 @@
 .ap-pill-off { background: #eef0f4; color: var(--text-soft); }
 .ap-empty { display: grid; gap: 4px; padding: 20px; border-radius: 16px; background: #f3f5f9; text-align: center; color: var(--text-soft); }
 .ap-empty strong { color: var(--primary-strong); }
-.ap-skeleton { height: 72px; border-radius: 16px; background: linear-gradient(90deg, #eef1f6 25%, #f7f9fc 50%, #eef1f6 75%); background-size: 200% 100%; animation: mh-shimmer 1.3s ease-in-out infinite; }
-@keyframes mh-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.ap-skeleton { height: 72px; border-radius: 16px; } /* shimmer: shared .sk rules in App.css */
+.ap-skeleton + .ap-skeleton { margin-top: 12px; }
 .ap-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .ap-steps li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; }
 .ap-steps li > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--primary-strong); color: var(--accent); font-weight: 800; font-size: 0.9rem; }

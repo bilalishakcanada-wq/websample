@@ -19,6 +19,8 @@ import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
 import { paymentService } from '../services/paymentService'
 import { setPageTitle } from '../utils/pageTitle'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keys } from '../hooks/queries'
 import { questionService } from '../services/questionService'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { shareLink } from '../utils/native'
@@ -101,6 +103,7 @@ function ListingDetailPage() {
   }, [sheetOpen, user, feePercent])
   const [metrics, setMetrics] = useState({})
   const isPhone = useMediaQuery('(max-width: 768px)')
+  const queryClient = useQueryClient()
   // the phone job screen draws its own top bar; the not-found state keeps the tab bar so people can leave
   useFullscreen(isPhone && (loading || Boolean(listing)))
   const tab = searchParams.get('tab') === 'pitanja' ? 'pitanja' : 'ponude'
@@ -122,27 +125,33 @@ function ListingDetailPage() {
     } catch { /* user cancelled */ }
   }
 
+  // the job + its offers come from the query cache (a job opened from the list paints at once);
+  // the rest (payment, questions, metrics, related, poster) loads behind it
+  const core = useQuery({
+    queryKey: keys.listing(id),
+    queryFn: async () => { const [listing, bids] = await Promise.all([listingService.getById(id), bidService.listForListing(id)]); return { listing, bids } },
+    // paint from cache at once, but a job page always re-checks the server (offers move fast)
+    staleTime: 0,
+    refetchOnMount: 'always',
+  })
   useEffect(() => {
+    if (!core.data) return undefined
     let active = true
-    setLoading(true)
-    Promise.all([listingService.getById(id), bidService.listForListing(id)])
-      .then(async ([result, listingBids]) => {
-        if (!active) return
-        setListing(result)
-        if (result?.title) setPageTitle(result.title)
-        setBids(listingBids)
-        if (result) {
-          paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
-          questionService.list(id).then((rows) => active && setQuestions(rows)).catch(() => {})
-          bidService.bidderMetrics(id).then((rows) => active && setMetrics(rows)).catch(() => {})
-          setRelated(await listingService.listRelated({ id, category: result.category, location: result.location }))
-          profileService.getPublicProfile(result.user_id).then((profile) => active && setPoster(profile)).catch(() => {})
-        }
-      })
-      .catch((requestError) => active && setError(requestError.message))
-      .finally(() => active && setLoading(false))
+    const result = core.data.listing
+    setListing(result)
+    setBids(core.data.bids)
+    setLoading(false)
+    if (result?.title) setPageTitle(result.title)
+    if (result) {
+      paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
+      questionService.list(id).then((rows) => active && setQuestions(rows)).catch(() => {})
+      bidService.bidderMetrics(id).then((rows) => active && setMetrics(rows)).catch(() => {})
+      listingService.listRelated({ id, category: result.category, location: result.location }).then((rows) => active && setRelated(rows)).catch(() => {})
+      profileService.getPublicProfile(result.user_id).then((profile) => active && setPoster(profile)).catch(() => {})
+    }
     return () => { active = false }
-  }, [id])
+  }, [core.data, id])
+  useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
 
@@ -152,6 +161,9 @@ function ListingDetailPage() {
     setPayment(row)
     if (fresh) setListing(fresh)
     setBids(listingBids)
+    queryClient.setQueryData(keys.listing(id), (current) => ({ listing: fresh || current?.listing, bids: listingBids }))
+    queryClient.invalidateQueries({ queryKey: ['search'] })
+    queryClient.invalidateQueries({ queryKey: ['me'] })
   }
   useEffect(() => {
     if (!user || !id) return undefined
@@ -193,7 +205,8 @@ function ListingDetailPage() {
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
-      bidService.listForListing(id).then((rows) => setBids(rows)).catch(() => {})
+      bidService.listForListing(id).then((rows) => { setBids(rows); queryClient.setQueryData(keys.listing(id), (cur) => ({ listing: cur?.listing || listing, bids: rows })) }).catch(() => {})
+      queryClient.invalidateQueries({ queryKey: ['me'] })
       setBidForm({ amount: '', message: '' })
       setSheetOpen(false)
       setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
@@ -278,6 +291,9 @@ function ListingDetailPage() {
     try {
       const updated = await listingService.setOutcome(id, status, reason)
       setListing((current) => ({ ...current, ...updated }))
+      queryClient.invalidateQueries({ queryKey: keys.listing(id) })
+      queryClient.invalidateQueries({ queryKey: ['search'] })
+      queryClient.invalidateQueries({ queryKey: ['me'] })
       setMessage(status === 'completed' ? 'Posao je označen kao završen. Hvala — ovo se računa u uspješnost izvođača.' : 'Posao je otkazan.')
     } catch (requestError) {
       setMessage(requestError.message)
@@ -292,6 +308,8 @@ function ListingDetailPage() {
     try {
       const updated = await bidService.setStatus(myBid.id, 'withdrawn')
       setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
+      queryClient.invalidateQueries({ queryKey: keys.listing(id) })
+      queryClient.invalidateQueries({ queryKey: ['me'] })
       toast('Ponuda je povučena.', { kind: 'info' })
     } catch (requestError) {
       setMessage(requestError.message)
@@ -306,7 +324,8 @@ function ListingDetailPage() {
     }
     try {
       const updated = await bidService.setStatus(bidId, status)
-      setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : status === 'accepted' && item.id !== updated.id && item.status === 'pending' ? item : item)))
+      setBids((current) => current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)))
+      queryClient.invalidateQueries({ queryKey: keys.listing(id) })
       setMessage(status === 'accepted' ? 'Ponuda je prihvaćena. Sada možete razmjenjivati poruke i kontakt.' : 'Ponuda je odbijena.')
     } catch (requestError) {
       setMessage(requestError.message)

@@ -5,6 +5,7 @@ import { alertService } from '../../services/alertService'
 import { serviceCategories } from '../../data/categories'
 import { POPULAR_CITIES } from '../../data/siteMap'
 import { toast } from '../../components/Toaster'
+import { SkeletonList } from '../../components/Skeleton'
 
 /** "Alarmi za poslove": be the first to know when a matching job is posted. */
 function TaskAlertsPage() {
@@ -60,7 +61,7 @@ function TaskAlertsPage() {
       </form>
 
       <h3 className="account-sub">Tvoji alarmi</h3>
-      {alerts === null && <div className="skeleton-card" />}
+      {alerts === null && <SkeletonList n={2} h={64} />}
       {alerts && alerts.length === 0 && <p className="muted-text">Još nemaš alarma.</p>}
       <div className="alert-list">
         {(alerts || []).map((alert) => (

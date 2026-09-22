@@ -11,6 +11,7 @@ import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../util
 import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
+import { queryClient } from '../lib/queryClient'
 import ImagePicker from '../components/ImagePicker'
 import { profileService } from '../services/profileService'
 
@@ -146,6 +147,9 @@ function PostTaskPage() {
       }
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
+      queryClient.invalidateQueries({ queryKey: ['search'] })
+      queryClient.invalidateQueries({ queryKey: ['me'] })
+      if (editId) queryClient.invalidateQueries({ queryKey: ['listing', editId] })
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError.message)

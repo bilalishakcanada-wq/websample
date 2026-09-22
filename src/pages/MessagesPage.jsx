@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { keys, useInbox, useThread } from '../hooks/queries'
 import {
   Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
@@ -12,6 +14,7 @@ import { contactInfoMessage, scanChatMessage } from '../utils/moderation'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import Chat from '../app/Chat'
+import { SkeletonRows } from '../components/Skeleton'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -49,16 +52,25 @@ function Avatar({ src, name, size = 44 }) {
     : <div className="chat-avatar chat-avatar-fallback" style={{ width: size, height: size }}>{(name || '?').charAt(0).toUpperCase()}</div>
 }
 
+const EMPTY = []
+
 function MessagesPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [inbox, setInbox] = useState([])
+  // inbox and the open thread live in the query cache: switching threads (or coming back to the
+  // page) paints instantly; Realtime rows are appended straight into the cache
+  const queryClient = useQueryClient()
+  const inboxQuery = useInbox(user.id)
+  const inbox = inboxQuery.data || EMPTY
+  const setInbox = (next) => queryClient.setQueryData(keys.inbox(user.id), (current) => (typeof next === 'function' ? next(current || []) : next))
   const [activeId, setActiveId] = useState(searchParams.get('c') || '')
   const [filter, setFilter] = useState('inbox')
   const [query, setQuery] = useState('')
-  const [thread, setThread] = useState([])
+  const threadQuery = useThread(activeId)
+  const thread = threadQuery.data || EMPTY
+  const setThread = (next) => queryClient.setQueryData(keys.thread(activeId), (current) => (typeof next === 'function' ? next(current || []) : next))
   const [draft, setDraft] = useState('')
-  const [loading, setLoading] = useState(true)
+  const loading = inboxQuery.isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('poso-chat-tips') !== 'hidden' } catch { return true } })
@@ -68,32 +80,30 @@ function MessagesPage() {
   const [uploading, setUploading] = useState(false)
   const isPhone = useMediaQuery('(max-width: 768px)')
 
-  const loadInbox = () => messageService.inbox().then((rows) => { setInbox(rows); setError('') }).catch((requestError) => setError(requestError.message))
-
-  useEffect(() => {
-    loadInbox().finally(() => setLoading(false))
-  }, [])
+  const loadInbox = () => inboxQuery.refetch().then((result) => { if (result.error) setError(result.error.message); else setError('') })
+  useEffect(() => { if (inboxQuery.error) setError(inboxQuery.error.message) }, [inboxQuery.error])
 
   // any message to me refreshes the inbox (unread counts, ordering)
-  useEffect(() => messageService.subscribeToMine(user.id, () => { loadInbox() }), [user.id])
+  useEffect(() => messageService.subscribeToMine(user.id, () => { queryClient.invalidateQueries({ queryKey: keys.inbox(user.id) }) }), [user.id, queryClient])
 
   const active = inbox.find((item) => item.id === activeId)
 
+  // the thread arrives from the cache/query; unread rows addressed to me are marked read
+  useEffect(() => {
+    if (!activeId || !threadQuery.data) return
+    if (threadQuery.data.some((row) => row.receiver_id === user.id && !row.read_at)) {
+      messageService.markRead(activeId).then(() => { loadInbox(); queryClient.invalidateQueries({ queryKey: keys.thread(activeId) }) })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, threadQuery.data, user.id])
+  useEffect(() => { if (threadQuery.error) setError(threadQuery.error.message) }, [threadQuery.error])
   useEffect(() => {
     if (!activeId) return undefined
-    let alive = true
-    messageService.listMessages(activeId).then((rows) => {
-      if (!alive) return
-      setThread(rows)
-      if (rows.some((row) => row.receiver_id === user.id && !row.read_at)) {
-        messageService.markRead(activeId).then(loadInbox)
-      }
-    }).catch((requestError) => setError(requestError.message))
     const unsubscribe = messageService.subscribeToConversation(activeId, (row) => {
-      setThread((current) => (current.some((item) => item.id === row.id) ? current : [...current, row]))
+      queryClient.setQueryData(keys.thread(activeId), (current) => ((current || []).some((item) => item.id === row.id) ? current : [...(current || []), row]))
       if (row.receiver_id === user.id) messageService.markRead(activeId).then(loadInbox)
     })
-    return () => { alive = false; unsubscribe() }
+    return () => { unsubscribe() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId, user.id])
 
@@ -227,7 +237,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
-        retry={() => { setLoading(true); loadInbox().finally(() => setLoading(false)) }}
+        retry={() => loadInbox()}
       />
     )
   }
@@ -257,7 +267,7 @@ function MessagesPage() {
               ))}
             </div>
             <div className="chat-list">
-              {loading && <div className="page-state">Učitavanje...</div>}
+              {loading && <SkeletonRows n={4} />}
               {!loading && visible.length === 0 && (
                 <div className="chat-list-empty">
                   <MailMascot className="chat-list-mascot" />

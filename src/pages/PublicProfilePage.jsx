@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+import { usePublicProfile } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Sparkles, Star, UserRound } from 'lucide-react'
-import { profileService } from '../services/profileService'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
@@ -66,23 +66,16 @@ function PublicProfilePage() {
   const { userId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [bundle, setBundle] = useState(null)
+  const profileQuery = usePublicProfile(userId)
+  const bundle = profileQuery.data ?? null
+  const loading = profileQuery.isPending
   const [showAllReviews, setShowAllReviews] = useState(false)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const isPhone = useMediaQuery('(max-width: 768px)')
 
-  useEffect(() => {
-    let active = true
-    setLoading(true)
-    setError('')
-    profileService.getPublicBundle(userId)
-      .then((data) => { if (!active) return; setBundle(data); if (data?.profile?.display_name) setPageTitle(data.profile.display_name) })
-      .catch((requestError) => active && setError(requestError.message))
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-  }, [userId])
+  useEffect(() => { if (bundle?.profile?.display_name) setPageTitle(bundle.profile.display_name) }, [bundle])
+  useEffect(() => { setError(profileQuery.error ? profileQuery.error.message : '') }, [profileQuery.error])
 
   if (loading) {
     return (

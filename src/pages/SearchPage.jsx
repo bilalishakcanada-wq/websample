@@ -2,6 +2,8 @@ import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { rankListings } from '../utils/ranking'
+import { useSearchListings } from '../hooks/queries'
+import { useDebounced } from '../hooks/useDebounced'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
@@ -28,6 +30,7 @@ const RADIUS_OPTIONS = [
   { value: 0, label: 'Cijela BiH' },
 ]
 
+const EMPTY = []
 const SORT_OPTIONS = [
   { value: 'recommended', label: 'Preporučeno' },
   { value: 'newest', label: 'Najnovije' },
@@ -89,8 +92,6 @@ function SearchPage() {
   const [openMenu, setOpenMenu] = useState('')
   useBackToClose(Boolean(openMenu), () => setOpenMenu(''))
   const [citySearch, setCitySearch] = useState('')
-  const [rows, setRows] = useState([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeId, setActiveId] = useState(null)
   const [mobileView, setMobileView] = useState('list')
@@ -138,40 +139,44 @@ function SearchPage() {
   }, [filters.city])
 
   // Everything — text relevance, distance, competition, the searcher's trades — is ranked in
-  // Postgres (search_listings) in one round trip. If that ever fails, the plain query + the
-  // client-side ranker below keep the page working.
-  const [serverRanked, setServerRanked] = useState(true)
+  // Postgres (search_listings) in one round trip, cached by TanStack Query: revisiting a search
+  // paints instantly and refreshes in the background; while a new filter loads, the previous
+  // list stays on screen. If the RPC ever fails, the plain query + the client-side ranker below
+  // keep the page working.
+  const debouncedQuery = useDebounced(filters.query, 200)
+  const searchParamsForServer = useMemo(() => {
+    const home = !origin && me?.city ? cityCoordinates[me.city] : null
+    return {
+      query: debouncedQuery,
+      category: filters.category,
+      lat: origin?.lat ?? home?.[0] ?? null,
+      lng: origin?.lng ?? home?.[1] ?? null,
+      // a chosen city filters by radius; the signed-in person's home city only informs the ranking
+      radiusKm: origin ? filters.radius : 0,
+      includeRemote: origin ? filters.includeRemote : true,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      hasBudget: filters.hasBudget,
+      noOffers: filters.noOffers,
+      sort: filters.remoteOnly ? 'newest' : filters.sort,
+      limit: 200,
+    }
+  }, [debouncedQuery, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.sort, filters.radius, filters.includeRemote, origin, me])
+  const searchQuery = useSearchListings(searchParamsForServer)
+  const [fallbackRows, setFallbackRows] = useState(null)
+  const serverRanked = !searchQuery.isError
   useEffect(() => {
+    if (!searchQuery.isError) { setFallbackRows(null); return undefined }
     let active = true
-    setLoading(true)
-    setError('')
-    const timeout = setTimeout(() => {
-      const home = !origin && me?.city ? cityCoordinates[me.city] : null
-      listingService.search({
-        query: filters.query,
-        category: filters.category,
-        lat: origin?.lat ?? home?.[0] ?? null,
-        lng: origin?.lng ?? home?.[1] ?? null,
-        // a chosen city filters by radius; the signed-in person's home city only informs the ranking
-        radiusKm: origin ? filters.radius : 0,
-        includeRemote: origin ? filters.includeRemote : true,
-        minPrice: filters.minPrice,
-        maxPrice: filters.maxPrice,
-        hasBudget: filters.hasBudget,
-        noOffers: filters.noOffers,
-        sort: filters.remoteOnly ? 'newest' : filters.sort,
-        limit: 200,
-      })
-        .then((result) => { if (active) { setServerRanked(true); setRows(result.data || []) } })
-        .catch(() => listingService.listAll({
-          search: filters.query, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice,
-          remoteOnly: filters.remoteOnly, hasBudget: filters.hasBudget, sort: 'newest', pageSize: 200,
-        }).then((result) => { if (active) { setServerRanked(false); setRows(result.data || []) } })
-          .catch((requestError) => active && setError(requestError.message)))
-        .finally(() => active && setLoading(false))
-    }, 200)
-    return () => { active = false; clearTimeout(timeout) }
-  }, [filters.query, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.sort, filters.radius, filters.includeRemote, origin, me])
+    listingService.listAll({
+      search: filters.query, category: filters.category, minPrice: filters.minPrice, maxPrice: filters.maxPrice,
+      remoteOnly: filters.remoteOnly, hasBudget: filters.hasBudget, sort: 'newest', pageSize: 200,
+    }).then((result) => active && setFallbackRows(result.data || []))
+      .catch((requestError) => active && setError(requestError.message))
+    return () => { active = false }
+  }, [searchQuery.isError, filters.query, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget])
+  const rows = useMemo(() => (searchQuery.isError ? (fallbackRows || EMPTY) : (searchQuery.data?.data || EMPTY)), [searchQuery.isError, fallbackRows, searchQuery.data])
+  const loading = searchQuery.isPending || (searchQuery.isError && fallbackRows === null)
 
   useEffect(() => {
     if (!openMenu) return undefined

@@ -1,26 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../../context/AuthContext'
+import { keys, useNotifications } from '../../hooks/queries'
 import { Link } from 'react-router-dom'
 import { MailMascot } from '../../app/Mascots'
 import { Award, BadgeCheck, Bell, Bot, ChevronRight, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
 import { notificationService } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import { SkeletonRows } from '../../components/Skeleton'
 
 const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Award, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles }
 
 function NotificationsPage() {
-  const [items, setItems] = useState(null)
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const query = useNotifications(user?.id, 50)
+  const items = query.isPending ? null : (query.data || [])
+  // opening the page reads everything: mark unread rows read (once per fresh list)
   useEffect(() => {
-    notificationService.listMine(50).then(async (rows) => {
-      setItems(rows)
-      const unread = rows.filter((row) => !row.read_at).map((row) => row.id)
-      if (unread.length) await notificationService.markRead(unread)
+    const unread = (query.data || []).filter((row) => !row.read_at).map((row) => row.id)
+    if (!unread.length) return
+    notificationService.markRead(unread).then(() => {
+      queryClient.setQueryData([...keys.notifications(user?.id), 50], (rows) => (rows || []).map((row) => (unread.includes(row.id) ? { ...row, read_at: row.read_at || new Date().toISOString() } : row)))
+      queryClient.invalidateQueries({ queryKey: keys.unreadNotifications(user?.id) })
     })
-  }, [])
+  }, [query.data, queryClient, user?.id])
 
   return (
     <div className="account-section">
       <div className="account-section-head"><h1>Obavijesti</h1></div>
-      {items === null && <div className="skeleton-card" />}
+      {items === null && <SkeletonRows n={5} />}
       {items?.length === 0 && (
         <div className="account-empty">
           <div className="account-empty-art notif-art"><MailMascot /></div>

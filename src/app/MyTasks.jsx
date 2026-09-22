@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Check, ChevronDown, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { listingService } from '../services/listingService'
-import { bidService } from '../services/bidService'
+import { useMyBids, useMyListings } from '../hooks/queries'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
@@ -15,6 +14,7 @@ const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'ass
 const BID_STATUS = { pending: ['Ponuda poslana', 'open'], accepted: ['Dodijeljen tebi', 'done'], rejected: ['Nije prošla', 'off'], withdrawn: ['Povučena', 'off'] }
 const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani']]
 const BID_FILTERS = [['all', 'Sve ponude'], ['pending', 'Čekaju odgovor'], ['accepted', 'Dodijeljeni meni'], ['rejected', 'Nisu prošle']]
+const EMPTY = []
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 const when = (description) => ((description || '').split('\n\nKada:')[1] || '').trim() || 'Fleksibilan termin'
 
@@ -24,27 +24,22 @@ function MyTasks() {
   const [mode] = useMode()
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') || (mode === 'tasker' ? 'ponude' : 'objavljeni')
-  const [jobs, setJobs] = useState(null)
-  const [bids, setBids] = useState(null)
   const [filter, setFilter] = useState('all')
   const [pick, setPick] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const [attempt, setAttempt] = useState(0)
   useBackToClose(pick, () => setPick(false))
 
-  useEffect(() => {
-    let alive = true
-    setFailed(false)
-    listingService.listAll({ status: 'published', pageSize: 50, ownerId: user.id }).then((result) => alive && setJobs(result.data || [])).catch(() => { if (alive) { setJobs([]); setFailed(true) } })
-    bidService.listMine(user.id).then((rows) => alive && setBids(rows)).catch(() => { if (alive) { setBids([]); setFailed(true) } })
-    return () => { alive = false }
-  }, [user.id, attempt])
+  // cached reads: the tab opens instantly with what was there, then refreshes
+  const jobsQuery = useMyListings(user.id)
+  const bidsQuery = useMyBids(user.id)
+  const jobs = useMemo(() => (jobsQuery.isPending ? null : (jobsQuery.data || EMPTY)), [jobsQuery.isPending, jobsQuery.data])
+  const bids = useMemo(() => (bidsQuery.isPending ? null : (bidsQuery.data || EMPTY)), [bidsQuery.isPending, bidsQuery.data])
+  const failed = jobsQuery.isError || bidsQuery.isError
   // a failed load says so (with a retry) instead of pretending the list is empty
   const retryCard = failed && (
     <div className="ap-empty">
       <strong>Nije se učitalo</strong>
       <span>Provjeri internet i pokušaj ponovo.</span>
-      <button type="button" className="ap-btn ap-btn-primary ap-btn-inline" onClick={() => { setJobs(null); setBids(null); setAttempt((n) => n + 1) }}>Pokušaj ponovo</button>
+      <button type="button" className="ap-btn ap-btn-primary ap-btn-inline" onClick={() => { jobsQuery.refetch(); bidsQuery.refetch() }}>Pokušaj ponovo</button>
     </div>
   )
 
@@ -78,7 +73,7 @@ function MyTasks() {
 
       {tab === 'objavljeni' && (
         <section className="ap-section">
-          {jobs === null && <div className="ap-skeleton" />}
+          {jobs === null && <><div className="ap-skeleton" style={{ height: 120 }} /><div className="ap-skeleton" style={{ height: 120 }} /></>}
           {retryCard}
           {jobs && jobs.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
@@ -111,7 +106,7 @@ function MyTasks() {
 
       {tab === 'ponude' && (
         <section className="ap-section">
-          {bids === null && <div className="ap-skeleton" />}
+          {bids === null && <><div className="ap-skeleton" style={{ height: 120 }} /><div className="ap-skeleton" style={{ height: 120 }} /></>}
           {retryCard}
           {bids && bids.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">

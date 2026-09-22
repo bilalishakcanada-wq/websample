@@ -4,6 +4,7 @@ import { BookOpen, LifeBuoy, Send, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supportService } from '../services/supportService'
 import { HELP_ARTICLES, findHelpAnswer } from '../data/helpArticles'
+import { SkeletonLines } from './Skeleton'
 
 const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
 
@@ -137,7 +138,7 @@ function SupportChat() {
           ) : (
             <>
               <div className="support-chat-messages" ref={listRef}>
-                {loading && <p className="muted-text">Učitavanje...</p>}
+                {loading && <SkeletonLines n={2} />}
                 {!loading && (
                   <div className="support-bubble from-admin support-bubble-assistant">
                     <small>Poso asistent</small>

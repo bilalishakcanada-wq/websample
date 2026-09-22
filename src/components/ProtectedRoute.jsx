@@ -1,12 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { SkeletonPage } from './Skeleton'
 
 function ProtectedRoute({ children, allowedRoles = [] }) {
   const { user, isAdmin, isModerator, loading } = useAuth()
   const location = useLocation()
 
   if (loading) {
-    return <div className="page-state">Učitavanje...</div>
+    return <SkeletonPage />
   }
 
   if (!user) {

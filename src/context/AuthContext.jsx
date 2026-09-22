@@ -3,6 +3,7 @@ import { disablePush, syncPush } from '../utils/push'
 import { authService } from '../services/authService'
 import { trustService } from '../services/trustService'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
+import { queryClient } from '../lib/queryClient'
 
 const AuthContext = createContext(null)
 
@@ -61,6 +62,7 @@ export function AuthProvider({ children }) {
       refreshAdminStatus(sessionUser).finally(() => setLoading(false))
       // a device that already allowed push gets (re)attached to this account
       if (sessionUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) syncPush()
+      if (event === 'SIGNED_IN') queryClient.invalidateQueries({ queryKey: ['me'] })
     })
 
     return () => listener.subscription.unsubscribe()
@@ -91,6 +93,9 @@ export function AuthProvider({ children }) {
     await disablePush({ keepDevice: true }).catch(() => {})
     await authService.signOut()
     setUser(null)
+    // nothing of this account stays cached for the next person on this device
+    queryClient.clear()
+    try { localStorage.removeItem('poso-query-cache') } catch { /* ignore */ }
   }
 
   const refreshSession = async () => {

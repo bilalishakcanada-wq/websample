@@ -8,6 +8,8 @@ const base = process.env.VITE_BASE || '/'
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  // a build id busts the persisted query cache and lets the app tell versions apart
+  define: { 'import.meta.env.VITE_BUILD_ID': JSON.stringify(process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())) },
   optimizeDeps: {
     // maplibre-gl ships its own worker bundle; pre-bundling breaks it.
     exclude: ['maplibre-gl'],

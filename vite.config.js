@@ -16,6 +16,24 @@ export default defineConfig({
   },
   // the desktop app may assign a port via PORT when 5173 is already taken
   server: { port: Number(process.env.PORT) || 5173 },
+  build: {
+    target: 'es2022',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 600,
+    rolldownOptions: {
+      output: {
+        // vendor code changes rarely → long-lived cache; app code changes often → small hashed chunks
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/, priority: 30 },
+            { name: 'query', test: /node_modules[\\/]@tanstack[\\/]/, priority: 25 },
+            { name: 'supabase', test: /node_modules[\\/]@supabase[\\/]/, priority: 25 },
+            { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 20 },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     process.env.VITE_NO_PWA ? null : VitePWA({

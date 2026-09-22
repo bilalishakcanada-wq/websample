@@ -1,4 +1,4 @@
-/* Fonts (Manrope, Archivo) are linked from index.html so they load in parallel with this stylesheet. */
+/* Fonts (Manrope, Archivo) are self-hosted: @font-face lives in index.css, preloads in index.html. */
 
 :root {
   --bg: #f6f4ee;
@@ -18,7 +18,7 @@
   --warning: #ffb703;
   --danger: #ef4444;
   --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-  --font-display: 'Archivo', 'Manrope', sans-serif;
+  --font-display: 'Archivo', 'Archivo Fallback', 'Manrope', 'Manrope Fallback', sans-serif;
   --header-h: 72px;
 }
 
@@ -34,7 +34,7 @@ html {
 
 body {
   margin: 0;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Manrope', 'Manrope Fallback', sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -12461,3 +12461,6 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .sk-rows { display: grid; }
 .sk-page { display: grid; gap: 14px; padding-top: 24px; }
 @media (prefers-reduced-motion: reduce) { .sk::after, .skeleton-card::after, .detail-skeleton::after, .ap-skeleton::after { animation: none; } }
+
+/* lazy route loading: hold the page's height so nothing below jumps */
+.route-placeholder { min-height: 100vh; }

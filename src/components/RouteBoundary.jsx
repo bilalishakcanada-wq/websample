@@ -2,6 +2,7 @@ import { Component, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { reportClientError } from '../utils/errorReporter'
+import { SkeletonPage } from './Skeleton'
 
 /** Drops every runtime cache and reloads: the cure for a page whose code did not arrive (stale build, flaky network). */
 export async function hardReload() {
@@ -31,7 +32,10 @@ export function RouteFallback() {
   return (
     <>
       <div className="route-loading" aria-busy="true"><span /></div>
-      {slow && <RetryCard title="Učitavanje traje duže nego obično" text="Provjeri internet ili osvježi stranicu." />}
+      {/* a full-height placeholder keeps the footer below the fold — no layout jump when the page lands */}
+      <div className="route-placeholder">
+        {slow ? <RetryCard title="Učitavanje traje duže nego obično" text="Provjeri internet ili osvježi stranicu." /> : <SkeletonPage />}
+      </div>
     </>
   )
 }

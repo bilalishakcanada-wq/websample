@@ -10,12 +10,13 @@ const DesktopHome = lazy(() => import('./home/DesktopHome'))
 function HomePage() {
   const isPhone = useMediaQuery('(max-width: 768px)')
   const { user, loading } = useAuth()
+  // placeholders hold the page height while code/session load, so the footer never jumps into view
   if (isPhone) {
-    if (loading) return <div className="route-loading"><span /></div>
+    if (loading) return <><div className="route-loading"><span /></div><div className="route-placeholder" /></>
     return user ? <AppHome /> : <Welcome />
   }
   return (
-    <Suspense fallback={<div className="route-loading"><span /></div>}>
+    <Suspense fallback={<><div className="route-loading"><span /></div><div className="route-placeholder" /></>}>
       <DesktopHome />
     </Suspense>
   )

@@ -1,0 +1,29 @@
+# Cloudflare Pages headers (ignored by GitHub Pages).
+# Hashed build output never changes → cache for a year; the HTML shell and the service worker are
+# revalidated on every load so a new version is live the moment it is deployed.
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+/icons/*
+  Cache-Control: public, max-age=604800
+
+/images/*
+  Cache-Control: public, max-age=604800
+
+/sw.js
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), geolocation=(self), microphone=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains

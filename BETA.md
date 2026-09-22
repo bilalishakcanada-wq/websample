@@ -73,3 +73,17 @@ Cijeli tok posla — objava → ponuda → prihvatanje i osiguranje uplate → p
 - Nalozi za testove: `e2e.client@posoba.dev` (klijent, unaprijed napunjen Balans) i `e2e.provider@posoba.dev` (izvođač). Oglasi koje robot objavi počinju sa `[E2E]` i ne šalju alarme drugim majstorima; brišu se na kraju testa.
 - **Da bi gate radio na GitHubu:** repo → *Settings → Secrets and variables → Actions → New repository secret* — dodaj `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`, `E2E_PROVIDER_EMAIL`, `E2E_PROVIDER_PASSWORD` (vrijednosti su u lokalnom `.env.e2e`, koji se ne commituje). Bez njih job samo upozori i deploy prođe.
 - Lokalno (dok dev server radi): `set -a && source .env.e2e && set +a && E2E_BASE_URL=http://localhost:54971 npm run test:e2e`.
+
+## Produkcija: Cloudflare Pages + poso.ba
+Sajt je spreman za pravi domen: `public/_headers` daje ispravne cache/security zaglavlja, `public/_redirects` SPA rute, `robots.txt` + `sitemap.xml` su za `https://poso.ba`. Deploy ide iz GitHub Actions-a (`pages.yml`, job `deploy-cloudflare`) **tek nakon što E2E testovi prođu**, čim postoje tajne.
+
+Koraci (samo vlasnik, ~30 min):
+1. **Domena:** `.ba` domene se registruju kod ovlaštenih BiH registrara (npr. preko UTIC-a / lokalnih hosting firmi). Ako je već imaš, preskoči.
+2. **Cloudflare nalog** → *Add a site* → `poso.ba` (Free plan) → kod registrara promijeni nameservere na one koje Cloudflare pokaže (propagacija do 24 h).
+3. Cloudflare → *My Profile → API Tokens → Create Token* → predložak **„Edit Cloudflare Workers“** (dovoljan za Pages) → kopiraj token. *Account ID* je na naslovnoj strani domene (desno).
+4. GitHub repo → *Settings → Secrets and variables → Actions* → `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+5. Pokreni workflow (Actions → *Deploy to GitHub Pages* → *Run workflow*). Job `deploy-cloudflare` sam napravi Pages projekat `poso-ba` i objavi build (privremeni link: `https://poso-ba.pages.dev`).
+6. Cloudflare → *Workers & Pages → poso-ba → Custom domains → Set up a custom domain* → `poso.ba` (i `www.poso.ba`). SSL je automatski.
+7. Supabase → *Auth → URL Configuration*: Site URL `https://poso.ba`, u Redirect URLs dodaj `https://poso.ba/**`. Google Cloud → OAuth client → *Authorized JavaScript origins*: dodaj `https://poso.ba`.
+8. Supabase → Edge Functions → secrets: `SITE_URL=https://poso.ba` (linkovi u push obavijestima).
+9. Javi mi kad je domen živ: prebacujem `capacitor.config.json` (`server.url`) na `https://poso.ba`, README/BETA linkove i pravim novi build aplikacija; GitHub Pages ostaje kao rezerva.

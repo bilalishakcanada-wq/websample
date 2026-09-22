@@ -7,10 +7,16 @@ import { queryClient } from '../lib/queryClient'
 
 const AuthContext = createContext(null)
 
+const hasStoredSession = () => {
+  try { return Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')) } catch { return true }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [staffRole, setStaffRole] = useState(null) // 'admin' | 'moderator' | null
-  const [loading, setLoading] = useState(true)
+  // a device with no stored session is signed out for sure: the first screen renders at once
+  // instead of waiting for the session check (the check still runs and can only sign someone in)
+  const [loading, setLoading] = useState(() => hasStoredSession())
   const [error, setError] = useState('')
 
   const refreshAdminStatus = async (currentUser) => {

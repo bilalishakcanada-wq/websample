@@ -6,29 +6,14 @@ import { messageService } from '../services/messageService'
 import { notificationService } from '../services/notificationService'
 import { profileService } from '../services/profileService'
 import { matchService } from '../services/matchService'
+import { keys } from './queryKeys'
 
 /**
  * Every server read goes through here, so screens share one cache: a list someone scrolled
  * a minute ago paints instantly (stale-while-revalidate), pages invalidate what they change,
  * and Realtime events only invalidate — the refetch is deduped by the cache.
  */
-export const keys = {
-  search: (params) => ['search', params],
-  listing: (id) => ['listing', id],
-  listingExtras: (id) => ['listing', id, 'extras'],
-  related: (id) => ['listing', id, 'related'],
-  suggested: (id) => ['listing', id, 'suggested'],
-  myBundle: (userId) => ['me', userId, 'bundle'],
-  myListings: (userId) => ['me', userId, 'listings'],
-  myBids: (userId) => ['me', userId, 'bids'],
-  inbox: (userId) => ['me', userId, 'inbox'],
-  thread: (conversationId) => ['thread', conversationId],
-  notifications: (userId) => ['me', userId, 'notifications'],
-  unreadNotifications: (userId) => ['me', userId, 'unread-notifications'],
-  unreadMessages: (userId) => ['me', userId, 'unread-messages'],
-  recommended: (userId) => ['me', userId, 'recommended'],
-  publicProfile: (userId) => ['profile', userId],
-}
+export { keys } from './queryKeys'
 
 export const useSearchListings = (params, options = {}) => useQuery({
   queryKey: keys.search(params),

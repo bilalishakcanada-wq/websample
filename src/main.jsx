@@ -22,7 +22,20 @@ const DataProvider = persister
   ? ({ children }) => <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>{children}</PersistQueryClientProvider>
   : ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 
-createRoot(document.getElementById('root')).render(
+// the stylesheet loads without blocking the boot screen; React mounts only once it has applied
+const cssReady = () => {
+  const links = [...document.querySelectorAll('link[rel="preload"][as="style"], link[rel="stylesheet"]')].filter((link) => /\/assets\/.*\.css/.test(link.href))
+  return Promise.all(links.map((link) => (link.sheet && link.rel === 'stylesheet' ? Promise.resolve() : new Promise((resolve) => {
+    link.addEventListener('load', resolve, { once: true })
+    link.addEventListener('error', resolve, { once: true })
+    window.setTimeout(resolve, 4000) // never wait forever on a stalled stylesheet
+  }))))
+}
+
+// safety net: whatever happens, the pre-rendered overlay never outlives the first seconds
+window.setTimeout(() => document.getElementById('boot-welcome')?.remove(), 6000)
+
+cssReady().then(() => createRoot(document.getElementById('root')).render(
   <StrictMode>
     <DataProvider>
       <AuthProvider>
@@ -32,4 +45,4 @@ createRoot(document.getElementById('root')).render(
       </AuthProvider>
     </DataProvider>
   </StrictMode>,
-)
+))

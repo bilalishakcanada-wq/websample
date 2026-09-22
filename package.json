@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "node server/index.js",
-    "build": "vite build",
+    "build": "node scripts/prerender.mjs && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "start": "NODE_ENV=production node server/index.js",
@@ -16,7 +16,8 @@
     "app:assets": "capacitor-assets generate --ios --android --iconBackgroundColor '#0d2a52' --iconBackgroundColorDark '#0d2a52' --splashBackgroundColor '#0d2a52' --splashBackgroundColorDark '#0d2a52'",
     "deploy:pages": "./scripts/deploy-pages.sh",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "prerender": "node scripts/prerender.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

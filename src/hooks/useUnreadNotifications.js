@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { notificationService } from '../services/notificationService'
-import { keys } from './queries'
+import { keys } from './queryKeys'
 
 /** Number of unread notifications for the signed-in user — cached, live (new one in, or some marked read). */
 export function useUnreadNotifications(userId) {

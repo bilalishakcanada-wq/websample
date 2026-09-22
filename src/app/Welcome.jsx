@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { ArcHeadline } from '../components/HeroArt'
 import { BroomMascot, WrenchMascot, BoxMascot, RollerMascot, LaptopMascot } from './Mascots'
 import { haptic } from '../utils/native'
+import { dropBootScreen } from '../utils/boot'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 
@@ -20,6 +21,8 @@ const SCENES = [
 function Welcome() {
   useFullscreen()
   const [index, setIndex] = useState(0)
+  // the pre-rendered copy of this screen (index.html) has done its job once we are on screen
+  useEffect(() => { dropBootScreen() }, [])
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches

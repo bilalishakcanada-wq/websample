@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronRight, MapPin, Search, Users, Truck, Sparkles, Wrench, Armchair, PaintRoller, Laptop, Dog, Package } from 'lucide-react'
 import { EarnMascot } from './Mascots'
@@ -9,6 +9,7 @@ import { useMyBids, useMyListings, useRecommendedListings } from '../hooks/queri
 import { useLiveListings } from '../hooks/useLiveListings'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
+import { dropBootScreen } from '../utils/boot'
 import { prefetchRoute } from '../utils/prefetch'
 import PushPrompt from '../components/PushPrompt'
 import NotifBellLink from '../components/NotifBellLink'
@@ -33,6 +34,7 @@ const greeting = () => {
 function AppHome() {
   const { user } = useAuth()
   const [mode] = useMode()
+  useEffect(() => { dropBootScreen() }, [])
   const firstName = (user?.user_metadata?.full_name || '').split(' ')[0]
   return mode === 'tasker' ? <TaskerHome user={user} firstName={firstName} /> : <PosterHome firstName={firstName} />
 }

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { messageService } from '../services/messageService'
-import { keys } from './queries'
+import { keys } from './queryKeys'
 
 const countUnread = async (userId) => {
   const { count, error } = await supabase.from('messages').select('id', { count: 'exact', head: true }).eq('receiver_id', userId).is('read_at', null)

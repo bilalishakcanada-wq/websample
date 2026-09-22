@@ -69,7 +69,7 @@ test.describe.serial('Posao od objave do recenzije', () => {
     await client.goto(listingUrl)
     await client.getByRole('button', { name: 'Prihvati i plati' }).click()
     await client.getByRole('button', { name: /Prihvati i osiguraj/ }).click()
-    await expect(client.getByText(/osigurano na Poso\.ba/)).toBeVisible({ timeout: 20_000 })
+    await expect(client.getByText(/osigurano na Poso\.ba/).first()).toBeVisible({ timeout: 20_000 })
     await expect(client.getByText('Prihvaćena').first()).toBeVisible()
   })
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { scrollToTop } from '../utils/scroll'
 import { dropBootScreen } from '../utils/boot'
@@ -11,10 +11,13 @@ import { titleFor } from '../utils/pageTitle'
  */
 function ScrollToTop() {
   const { pathname } = useLocation()
-  useEffect(() => {
-    scrollToTop()
+  // before paint: screens that hide the site header (search, inbox, wizard…) must never show it for one frame
+  useLayoutEffect(() => {
     document.body.dataset.page = pathname.split('/')[1] || 'home'
     document.title = titleFor(pathname)
+  }, [pathname])
+  useEffect(() => {
+    scrollToTop()
     // the pre-rendered welcome overlay only belongs to the visitor home; any other screen drops it
     if (pathname !== '/') dropBootScreen()
   }, [pathname])

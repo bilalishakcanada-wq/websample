@@ -19,6 +19,7 @@
   --danger: #ef4444;
   --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
   --font-display: 'Archivo', 'Archivo Fallback', 'Manrope', 'Manrope Fallback', sans-serif;
+  --font-display-narrow: 'Archivo', 'Archivo Fallback Narrow', 'Manrope', 'Manrope Fallback', sans-serif; /* for font-stretch ≤ 80% */
   --header-h: 72px;
 }
 
@@ -48,6 +49,7 @@ h1, h2, h3,
 }
 
 h1 {
+  font-family: var(--font-display-narrow);
   font-stretch: 80%;
 }
 
@@ -7306,7 +7308,7 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .site-logo-text {
-  font-family: var(--font-display);
+  font-family: var(--font-display-narrow);
   font-stretch: 80%;
   font-weight: 900;
   font-size: 1.35rem;
@@ -7607,7 +7609,7 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .hero-arc-line {
-  font-family: var(--font-display);
+  font-family: var(--font-display-narrow);
   font-stretch: 75%;
   font-weight: 900;
   font-size: 150px;
@@ -8887,6 +8889,7 @@ body:has(.profile-cta-bar) .support-chat {
 .is-provider .meet-card-top h1,
 .is-client .meet-card-top h1 {
   font-size: clamp(2rem, 3.2vw, 2.9rem);
+  font-family: var(--font-display-narrow);
   font-stretch: 75%;
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -9320,6 +9323,7 @@ body:has(.profile-cta-bar) .support-chat {
   margin: 0;
   color: white;
   font-size: clamp(2.6rem, 6vw, 4.6rem);
+  font-family: var(--font-display-narrow);
   font-stretch: 75%;
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -9480,7 +9484,7 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .earn-calc-result strong {
-  font-family: var(--font-display);
+  font-family: var(--font-display-narrow);
   font-stretch: 80%;
   font-size: 2.4rem;
   color: var(--primary-strong);
@@ -10298,6 +10302,7 @@ body:has(.profile-cta-bar) .support-chat {
 .account-section-head h1 {
   margin: 0;
   font-size: clamp(2rem, 3.4vw, 2.7rem);
+  font-family: var(--font-display-narrow);
   font-stretch: 78%;
   font-weight: 900;
 }
@@ -11079,6 +11084,7 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .account-home .dashboard-topline h1 {
+  font-family: var(--font-display-narrow);
   font-stretch: 80%;
 }
 
@@ -12508,6 +12514,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 
 /* shape-matched skeletons: the real containers, hollow */
 .sk-task .task-card-facts li, .sk-task .task-card-foot, .sk-task .task-card-head { align-items: center; }
+/* route-shell skeletons: a line box keeps the text line's height around a thinner bar; chips keep their width in the scrolling row; static tabs/chips are display only */
+.sk-line { display: flex; align-items: center; flex-shrink: 0; }
+.sk-line > .sk { flex-shrink: 0; }
+.sk-filter-bar > .sk { flex: 0 0 auto; }
+.sk-mt .mt-card-head { align-items: center; }
+.sk-chrow .ch-row-top { align-items: center; }
+.ch-search .sk { flex-shrink: 0; }
+.ap-page[aria-busy='true'] .ap-tabs button, .ap-page[aria-busy='true'] .ch-filters button { pointer-events: none; }
 .sk-task .task-card-head { display: flex; justify-content: space-between; gap: 12px; }
 .sk-task .task-card-foot { display: flex; gap: 12px; }
 .sk-task .sk-avatar { margin-left: auto; background: none; }

@@ -30,18 +30,18 @@ export const useMyBundle = (userId) => useQuery({
   meta: { persist: false }, // private
 })
 
+// the poster's own jobs, the tasker's offers and the recommended feed are persisted (user-scoped keys, cleared on
+// logout): the home and "Moji poslovi" open with content on a warm start instead of popping sections in
 export const useMyListings = (userId) => useQuery({
   queryKey: keys.myListings(userId),
   queryFn: () => listingService.listAll({ status: 'published', pageSize: 50, ownerId: userId }).then((r) => r.data || []),
   enabled: Boolean(userId),
-  meta: { persist: false },
 })
 
 export const useMyBids = (userId, limit = 50) => useQuery({
   queryKey: [...keys.myBids(userId), limit],
   queryFn: () => bidService.listMine(userId, limit),
   enabled: Boolean(userId),
-  meta: { persist: false },
 })
 
 export const useRecommendedListings = (userId, limit = 6) => useQuery({
@@ -49,7 +49,6 @@ export const useRecommendedListings = (userId, limit = 6) => useQuery({
   queryFn: () => matchService.recommendedListings(limit),
   enabled: Boolean(userId),
   staleTime: 2 * 60 * 1000,
-  meta: { persist: false },
 })
 
 export const useInbox = (userId) => useQuery({

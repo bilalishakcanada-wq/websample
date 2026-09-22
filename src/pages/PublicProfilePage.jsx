@@ -11,6 +11,8 @@ import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import ProfileView from '../app/ProfileView'
+import { useFullscreen } from '../app/useFullscreen'
+import { SkeletonProfilePhone } from '../components/Skeleton'
 import { setPageTitle } from '../utils/pageTitle'
 import { promptDialog } from '../utils/dialog'
 
@@ -75,10 +77,13 @@ function PublicProfilePage() {
   const [notice, setNotice] = useState('')
   const isPhone = useMediaQuery('(max-width: 768px)')
 
+  // the phone profile screen draws its own top bar (skeleton included); the not-found state keeps the tab bar
+  useFullscreen(isPhone && (loading || Boolean(bundle?.profile)))
   useEffect(() => { if (bundle?.profile?.display_name) setPageTitle(bundle.profile.display_name) }, [bundle])
   useEffect(() => { setError(profileQuery.error ? profileQuery.error.message : '') }, [profileQuery.error])
 
   if (loading) {
+    if (isPhone) return <SkeletonProfilePhone />
     return (
       <div className="app-shell page-with-mobile-nav">
         <main className="content-container"><div className="skeleton-card" /><div className="skeleton-card" /></main>

@@ -81,8 +81,40 @@ ubaciti poruku u bilo čiji razgovor** i, birajući `receiver_id`, poslati
 obavijest bilo kome na platformi. Dokazano pozivom API-ja (HTTP 201), zatvoreno,
 pa ponovo provjereno (HTTP 403 `NISI_UCESNIK_RAZGOVORA`).
 
-## Ostaje za frontend
+## Frontend (gotov)
 
-Baza je spremna, UI još nije: treba pročitati `chat_state` i prikazati zaključano
-polje umjesto forme, te dodati dugmad za poziv koja koriste `src/lib/webrtc.js`.
-Prije uključivanja poziva treba odabrati i platiti TURN.
+| Dio | Gdje |
+|---|---|
+| Stanje chata u inboxu | `my_inbox()` vraća `chat_state` — bez dodatnog poziva po razgovoru |
+| Zaključano / read-only umjesto forme | [`ChatStateNotice.jsx`](../../src/components/ChatStateNotice.jsx) |
+| Dugmad za poziv (samo kad je otvoreno) | `MessagesPage.jsx` (desktop) i `Chat.jsx` (telefon) |
+| Ekran poziva | [`CallPanel.jsx`](../../src/components/CallPanel.jsx) |
+| Logika poziva | [`useCalls.js`](../../src/hooks/useCalls.js) + [`webrtc.js`](../../src/lib/webrtc.js) |
+| TURN kredencijali | Edge funkcija `turn-credentials` (bez podešenog provajdera vraća STUN) |
+
+Testovi: [`e2e/calls.spec.js`](../../e2e/calls.spec.js) — Chromium dobija lažni
+mikrofon i kameru (`--use-fake-device-for-media-stream`), pa poziv prolazi bez
+hardvera. **8/8 E2E prolazi.**
+
+### Tri greške nađene tokom uvezivanja
+
+1. **Hook za pozive se montirao dvaput.** `MessagesPage` na telefonu renderuje
+   `Chat`, pa su oba zvala `useCalls` → dvije pretplate na isti Realtime kanal →
+   `cannot add postgres_changes callbacks after subscribe()` i **cijela stranica
+   Poruke je pucala na telefonu**. Riješeno: hook se zove jednom, prosljeđuje se
+   kroz props; kanal je dobio i jedinstveno ime za svaki slučaj.
+2. **Propušten poziv se gubio bez traga.** Realtime ne ponavlja događaje: poziv
+   upućen dok se pretplata uspostavljala (ili dok je veza pala) nikad ne bi
+   stigao. Dodata jednokratna provjera pri otvaranju — traži poziv koji upravo
+   zvoni (zadnjih 45 s).
+3. **Poziv koji niko ne javi zvonio je zauvijek.** Zapis je ostajao `ringing`,
+   pozivaocu je stajalo „Zvoni…", a pozvanom se poziv javljao pri svakom
+   otvaranju aplikacije. Sada ističe nakon 45 s na klijentu i nakon 60 s u bazi
+   (cron `expire-stale-calls`, svake minute); „aktivan" poziv stariji od 6 sati
+   se zatvara kao prekinuta veza.
+
+## Prije puštanja poziva u rad
+
+TURN mora biti plaćen i podešen (`TURN_URLS` + `TURN_SECRET`, ili
+`CF_TURN_KEY_ID` + `CF_TURN_API_TOKEN` u Supabase Secrets). Bez toga pozivi rade
+na većini mreža, ali padaju iza simetričnog NAT-a.

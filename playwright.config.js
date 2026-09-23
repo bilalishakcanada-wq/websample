@@ -24,6 +24,15 @@ export default defineConfig({
     video: 'retain-on-failure',
     locale: 'bs-BA',
     ...devices['Desktop Chrome'],
+    // lažni mikrofon i kamera: WebRTC testovi rade bez pravog hardvera i bez
+    // dijaloga za dozvolu
+    launchOptions: {
+      args: [
+        '--use-fake-device-for-media-stream',
+        '--use-fake-ui-for-media-stream',
+        '--autoplay-policy=no-user-gesture-required',
+      ],
+    },
   },
   webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npx vite preview --port 4173 --strictPort',

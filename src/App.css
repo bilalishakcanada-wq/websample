@@ -12548,3 +12548,45 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   .browse-page .task-card-facts li { color: var(--text-soft); }
   .browse-page .task-card-foot { padding-top: 10px; }
 }
+
+/* ---- Pozivi u aplikaciji ------------------------------------------------ */
+/* Preko cijelog ekrana: poziv je jedina stvar koja se u tom trenutku radi. */
+.call-panel { position: fixed; inset: 0; z-index: 120; display: grid; grid-template-rows: 1fr auto;
+  background: #06152f; color: white; animation: fade-in .18s ease both; }
+.call-stage { position: relative; display: grid; place-items: center; overflow: hidden; }
+.call-remote { width: 100%; height: 100%; object-fit: cover; background: #0a1e3d; }
+.call-local { position: absolute; right: 16px; bottom: 16px; width: 104px; height: 148px; object-fit: cover;
+  border-radius: 14px; border: 2px solid rgba(255,255,255,.35); background: #0a1e3d; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.call-person { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 24px; }
+.call-person strong { font-size: 1.5rem; font-family: var(--font-display-narrow); font-stretch: 80%; }
+.call-person span { color: rgba(255,255,255,.72); }
+.call-avatar { border-radius: 50%; object-fit: cover; }
+.call-avatar-empty { display: grid; place-items: center; background: rgba(255,255,255,.14);
+  font-size: 2.2rem; font-weight: 800; color: white; }
+.call-actions { display: flex; justify-content: center; gap: 18px;
+  padding: 22px 18px calc(28px + env(safe-area-inset-bottom, 0px)); }
+.call-btn { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%;
+  border: none; color: white; transition: transform .12s ease, opacity .2s ease; }
+.call-btn:active { transform: scale(.94); }
+.call-answer { background: #2e9e5b; }
+.call-decline { background: #e0463c; }
+.call-toggle { background: rgba(255,255,255,.16); }
+.call-toggle.off { background: white; color: #06152f; }
+
+/* dugmad za poziv u zaglavlju razgovora */
+.chat-call { color: var(--primary-strong); }
+.ch-call-btn svg { color: var(--primary-strong); }
+
+/* objašnjenje umjesto polja za pisanje */
+.ch-state-notice { display: flex; gap: 12px; align-items: flex-start; margin: 0 var(--ap-x, 16px) 16px;
+  padding: 14px 16px; border-radius: 16px; background: var(--surface-soft, #eef2f8); border: 1px solid var(--stroke); }
+.ch-state-notice svg { flex-shrink: 0; margin-top: 2px; color: var(--text-soft); }
+.ch-state-notice strong { display: block; font-size: .98rem; color: var(--primary-strong); }
+.ch-state-notice p { margin: 4px 0 10px; font-size: .88rem; color: var(--text-soft); line-height: 1.45; }
+.ch-state-notice .ghost-button { min-height: 40px; padding: 0 14px; font-size: .88rem; }
+
+@media (max-width: 768px) {
+  .call-local { width: 84px; height: 120px; }
+  .call-btn { width: 60px; height: 60px; }
+  .ch-state-notice { margin: 0 0 12px; border-radius: 0; border-left: none; border-right: none; }
+}

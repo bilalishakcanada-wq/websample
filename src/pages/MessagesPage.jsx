@@ -5,8 +5,11 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Phone, Search, Send, ShieldCheck, Unlock, UserRound, Video, X,
 } from 'lucide-react'
+import { useCalls } from '../hooks/useCalls'
+import CallPanel from '../components/CallPanel'
+import ChatStateNotice from '../components/ChatStateNotice'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
 import { reportService } from '../services/reportService'
@@ -88,6 +91,8 @@ function MessagesPage() {
   useEffect(() => messageService.subscribeToMine(user.id, () => { queryClient.invalidateQueries({ queryKey: keys.inbox(user.id) }) }), [user.id, queryClient])
 
   const active = inbox.find((item) => item.id === activeId)
+  const calls = useCalls(user, active)
+  const chatState = active?.chat_state || 'open'
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read
   useEffect(() => {
@@ -238,7 +243,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
-        retry={() => loadInbox()}
+        retry={() => loadInbox()} calls={calls} chatState={chatState}
       />
     )
   }
@@ -331,6 +336,12 @@ function MessagesPage() {
                     {active.contacts_allowed ? <><Unlock size={13} /> Kontakt otključan</> : <><Lock size={13} /> Kontakt zaštićen</>}
                   </span>
                   <div className="chat-head-actions">
+                    {chatState === 'open' && (
+                      <>
+                        <button type="button" className="chat-call" onClick={() => calls.dial('audio')} title="Audio poziv"><Phone size={16} /></button>
+                        <button type="button" className="chat-call" onClick={() => calls.dial('video')} title="Video poziv"><Video size={16} /></button>
+                      </>
+                    )}
                     <button type="button" className={active.saved ? 'on' : ''} onClick={() => togglePref(active, 'saved')} title={active.saved ? 'Ukloni iz spašenih' : 'Spasi'}><Heart size={16} fill={active.saved ? 'currentColor' : 'none'} /></button>
                     <button type="button" onClick={() => togglePref(active, 'archived')} title={active.archived ? 'Vrati iz arhive' : 'Arhiviraj'}>{active.archived ? <ArchiveRestore size={16} /> : <Archive size={16} />}</button>
                     <button type="button" onClick={reportConversation} title="Prijavi razgovor"><Flag size={16} /></button>
@@ -367,27 +378,40 @@ function MessagesPage() {
                 </div>
 
                 {error && <div className="form-error chat-alert">{error}</div>}
+                {calls.error && <div className="form-error chat-alert">{calls.error}</div>}
                 {notice && <div className="form-success chat-alert">{notice}</div>}
 
-                <form className="chat-composer" onSubmit={sendMessage}>
-                  <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
-                  <button type="button" className="chat-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={20} /></button>
-                  <textarea
-                    ref={inputRef}
-                    value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
-                    onKeyDown={onKeyDown}
-                    placeholder="Napiši poruku…"
-                    rows={1}
-                    maxLength={2000}
-                  />
-                  <button type="submit" className="chat-send" aria-label="Pošalji" disabled={!draft.trim()}><Send size={18} /></button>
-                </form>
-                <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
+                {chatState === 'open' ? (
+                  <>
+                  <form className="chat-composer" onSubmit={sendMessage}>
+                    <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
+                    <button type="button" className="chat-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={20} /></button>
+                    <textarea
+                      ref={inputRef}
+                      value={draft}
+                      onChange={(event) => setDraft(event.target.value)}
+                      onKeyDown={onKeyDown}
+                      placeholder="Napiši poruku…"
+                      rows={1}
+                      maxLength={2000}
+                    />
+                    <button type="submit" className="chat-send" aria-label="Pošalji" disabled={!draft.trim()}><Send size={18} /></button>
+                  </form>
+                  <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
+                  </>
+                ) : (
+                  <ChatStateNotice state={chatState} listingId={active.listing_id} />
+                )}
               </>
             )}
           </section>
         </div>
+        <CallPanel
+          call={calls.call} other={active} muted={calls.muted} cameraOff={calls.cameraOff}
+          localRef={calls.localRef} remoteRef={calls.remoteRef}
+          onAnswer={calls.answer} onDecline={calls.decline} onHangUp={calls.hangUp}
+          onToggleMute={calls.toggleMute} onToggleCamera={calls.toggleCamera}
+        />
       </main>
     </div>
   )

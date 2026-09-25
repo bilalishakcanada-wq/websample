@@ -342,7 +342,13 @@ function ListingDetailPage() {
   }
 
   if (loading) return isPhone ? <SkeletonJobPhone /> : <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
-  if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
+  // a failed request is not a missing job: on a weak mobile connection people need a retry, not a dead end
+  if (error) {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
+    const retry = () => { setError(''); setLoading(true); core.refetch() }
+    return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Posao se nije učitao</h1><p>{offline ? 'Nema internet veze. Provjeri vezu i pokušaj ponovo.' : 'Veza sa serverom je prekinuta. Pokušaj ponovo.'}</p><button type="button" className="primary-button" onClick={retry}>Pokušaj ponovo</button><Link to="/search" className="secondary-button">Nazad na pretragu</Link></main></div>
+  }
+  if (!listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>Oglas više nije dostupan ili je privatan.</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
   const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
   const when = (whenLine || '').trim() || 'Fleksibilan termin'

@@ -16,6 +16,7 @@ import { useBackToClose } from '../hooks/useBackToClose'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 import { scrollToTop } from '../utils/scroll'
+import { recordInterest } from '../utils/interests'
 
 const DRAFT_KEY = 'poso-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
@@ -139,6 +140,7 @@ function PostFlow() {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       clearDraft()
+      if (!editId) recordInterest('post', { category: listing.category ?? form.category })
       haptic('medium')
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`, { replace: true })

@@ -29,6 +29,7 @@ import { useFullscreen } from '../app/useFullscreen'
 import JobDetail from '../app/JobDetail'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
+import { recordInterest } from '../utils/interests'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -157,6 +158,10 @@ function ListingDetailPage() {
   useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+  // opening someone else's job teaches the feed what this person is into (kept on this device)
+  useEffect(() => {
+    if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
+  }, [listing?.id, isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // the other side moves the job forward -> refresh payment + bids + listing status
   const refreshJob = async () => {
@@ -208,6 +213,7 @@ function ListingDetailPage() {
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
+      recordInterest('bid', { category: listing?.category })
       bidService.listForListing(id).then((rows) => { setBids(rows); queryClient.setQueryData(keys.listing(id), (cur) => ({ listing: cur?.listing || listing, bids: rows })) }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['me'] })
       setBidForm({ amount: '', message: '' })

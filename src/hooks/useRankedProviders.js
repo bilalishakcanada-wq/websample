@@ -1,18 +1,11 @@
-import { useEffect, useState } from 'react'
-import { providerService } from '../services/providerService'
+import { useAuth } from '../context/AuthContext'
+import { useProviderFeed } from './useFeed'
 import { mockProfessionals } from '../data/mockData'
 
+/** Suggested providers, ranked for the viewer's interests and city (see useFeed). */
 export function useRankedProviders(limit = 6) {
-  const [providers, setProviders] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let active = true
-    providerService.listRanked({ limit })
-      .then((rows) => active && setProviders(rows))
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-  }, [limit])
+  const { user } = useAuth()
+  const { providers, loading } = useProviderFeed({ userId: user?.id ?? null, limit })
 
   const hasLive = providers.length > 0
   const combined = hasLive

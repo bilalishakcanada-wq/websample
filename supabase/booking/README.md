@@ -101,3 +101,22 @@ update public.job_payments set work_state = 'cancelled' where status = 'refunded
 **Napomena o E2E testovima:** `cancel_job_payment` više ne prolazi jednostrano, a
 `e2e/job-flow.spec.js` koristi direktno oslobađanje — test treba dopuniti korakom
 predaje rada prije odobrenja.
+
+## Naknadni nalazi (25.09.2026.)
+
+**`work_transitions` je bila bez RLS-a i sa pravom pisanja za `authenticated`.**
+Ta tabela JESTE sigurnosno pravilo — `job_transition()` je čita da odluči smije li
+prelaz. Svaki prijavljeni korisnik mogao je upisati vlastito pravilo, npr.
+`('in_progress','completed','client')` i odobriti isplatu bez ijednog predanog
+rada, ili `('disputed','completed','client')` i izaći iz spora. Zatvoreno:
+RLS uključen, samo čitanje, dozvole oduzete, provjereno pozivom API-ja
+(HTTP 403 `permission denied`). Isto je preventivno urađeno i za `job_events`,
+`work_submissions`, `cancellation_requests`, `disputes` i `calls` — njih puni
+isključivo SECURITY DEFINER funkcija, pa im direktne dozvole ne trebaju.
+
+**Stanje ugovora se razilazilo sa novcem.** `release_job_payment` i
+`cancel_job_payment` mijenjali su samo `status`, ne i `work_state`: klijent
+oslobodi uplatu ranije → novac ode, a kartica i dalje piše „Izvođač radi posao"
+i nudi „Predaj rad" za plaćen posao. Umjesto krpljenja svake funkcije posebno,
+stanje sada prati novac trigerom `job_payments_sync_work_state` — vrijedi i za
+funkcije koje se dodaju kasnije. Postojeći redovi su usklađeni.

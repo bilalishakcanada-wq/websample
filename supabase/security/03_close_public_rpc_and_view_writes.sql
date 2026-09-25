@@ -1,6 +1,6 @@
--- Zatvaranje rupa pronađenih 25.09.2026. Isprobano na produkcijskoj bazi u
--- transakciji koja je vraćena (rollback); primjenjuje se kao migracija
--- close_public_rpc_and_view_writes.
+-- Zatvaranje rupa pronađenih 25.09.2026. Primijenjeno na produkciju 25.09.2026.
+-- kao migracija close_public_rpc_and_view_writes (uz odobrenje vlasnika) i
+-- provjereno: anon dobija 42501 na upis u view, jmbg_key i identity_risk.
 --
 -- 1) public.public_profiles je jednostavan view nad profiles, pa ga Postgres
 --    smatra "auto-updatable". Uz SECURITY DEFINER (vlasnik postgres zaobilazi RLS)

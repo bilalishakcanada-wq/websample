@@ -12719,3 +12719,9 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .verif-nalaz li { padding: 9px 12px; border-radius: 10px; font-size: .87rem; line-height: 1.45; }
 .verif-nalaz li.lose { background: #fde8e8; color: #9b1c1c; }
 .verif-nalaz li.pazi { background: #fff4d6; color: #8a6100; }
+
+/* greška koja nudi izlaz */
+.action-error { display: flex; gap: 10px; align-items: flex-start; }
+.action-error svg { flex-shrink: 0; margin-top: 2px; }
+.action-error-link { display: inline-block; margin-top: 8px; font-weight: 700;
+  color: inherit; text-decoration: underline; text-underline-offset: 3px; }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
+import ActionError from '../components/ActionError'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
@@ -152,7 +153,7 @@ function PostTaskPage() {
       if (editId) queryClient.invalidateQueries({ queryKey: ['listing', editId] })
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
     } catch (requestError) {
-      setError(requestError.message)
+      setError(requestError)
       setSaving(false)
     }
   }
@@ -344,7 +345,7 @@ function PostTaskPage() {
           </section>
         )}
 
-        {error && <div className="form-error">{error}</div>}
+        <ActionError error={error} />
       </main>
 
       <footer className="wizard-footer">

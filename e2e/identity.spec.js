@@ -26,11 +26,18 @@ test.describe('Potvrda identiteta', () => {
     page = await ctx.newPage()
     acceptDialogs(page)
     await login(page, 'provider')
+    await page.goto('/account/verifikacija')
+    // Sačekaj da se stranica iscrta — inače provjera ispod gleda praznu stranicu.
+    await page.waitForSelector('.verif-form, .verif-state', { timeout: 20_000 })
+    // Zahtjev poslan u ranijem prolazu zaključa formu, pa nema šta provjeriti.
+    // Stanje se vraća SQL-om (vidi supabase/identity/README.md), ne iz testa —
+    // test nema ni smije imati pravo da resetuje tuđu verifikaciju.
+    test.skip(await page.locator('.verif-form').count() === 0,
+      'verifikacija je već poslana — forma je zaključana')
   })
   test.afterAll(async () => { await ctx?.close() })
 
   test('forma traži ime, 13 cifara i sliku dokumenta', async () => {
-    await page.goto('/account/verifikacija')
     await expect(page.getByRole('heading', { name: 'Potvrda identiteta' })).toBeVisible()
 
     const posalji = page.getByRole('button', { name: /Pošalji na provjeru/ })

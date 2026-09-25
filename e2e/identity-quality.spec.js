@@ -21,8 +21,8 @@ test.describe('Kvalitet slike i otisak dokumenta', () => {
     acceptDialogs(page)
     await login(page, 'client')
     await page.goto('/account/verifikacija')
-    // ako je raniji zahtjev još na čekanju, forma je zaključana i test nema šta provjeriti
-    test.skip(await page.locator('.verif-state').count() > 0 && await page.locator('.verif-form').count() === 0,
+    await page.waitForSelector('.verif-form, .verif-state', { timeout: 20_000 })
+    test.skip(await page.locator('.verif-form').count() === 0,
       'verifikacija je već poslana — forma je zaključana')
   })
   test.afterAll(async () => { await ctx?.close() })

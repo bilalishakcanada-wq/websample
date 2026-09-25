@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { publicError, sanitizeText } from '../utils/validation'
+import { prepoznajGresku, publicError, sanitizeText } from '../utils/validation'
 
 export const bidService = {
   async listForListing(listingId) {
@@ -21,7 +21,7 @@ export const bidService = {
 
     if (plainError) {
       console.error('Supabase bids fetch failed', { message: plainError.message, code: plainError.code })
-      throw publicError()
+      throw prepoznajGresku(error) || publicError()
     }
 
     const bidderIds = [...new Set((bids || []).map((bid) => bid.bidder_id))]
@@ -70,7 +70,7 @@ export const bidService = {
 
     if (error) {
       console.error('Supabase bid insert failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw prepoznajGresku(error) || publicError()
     }
     return data
   },
@@ -85,7 +85,7 @@ export const bidService = {
 
     if (error) {
       console.error('Supabase bid status update failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw prepoznajGresku(error) || publicError()
     }
     return data
   },

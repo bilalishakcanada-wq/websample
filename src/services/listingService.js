@@ -3,6 +3,7 @@ import { publicError, sanitizeText } from '../utils/validation'
 import { apiRequest } from './api'
 import { appConfig } from '../config/appConfig'
 import { listingInputSchema, parseInput } from '../utils/inputSchemas'
+import { prepoznajGresku } from '../utils/validation'
 import { coordsForLocation } from '../data/cityCoordinates'
 
 export const listingService = {
@@ -222,7 +223,8 @@ export const listingService = {
       .single()
 
     if (error) {
-      console.error('CREATE LISTING ERROR:', error)
+      const poznata = prepoznajGresku(error)
+      if (poznata) throw poznata
       console.error('Supabase listing insert failed', {
         message: error.message,
         code: error.code,

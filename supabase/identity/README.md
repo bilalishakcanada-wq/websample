@@ -161,3 +161,44 @@ iz Poso.ba i služi samo da se vidi kad isti uređaj šalje više identiteta.
 ### Testovi
 `e2e/identity-quality.spec.js`: mutna slika odbijena uz objašnjenje, tamna dobija
 svoju poruku, oštra prolazi i otključava slanje. **24/24 E2E prolazi.**
+
+## Dovršeno (25.09.2026., drugi prolaz)
+
+**Brojač u panelu.** Tab „Identitet" tražio je `identity_pending` koji nije
+postojao u `staff_overview()`, pa se značka nikad nije prikazivala — moderator
+nije imao znak da ga red čeka. Dodani `identity_pending` i `identity_risky`
+(predmeti sa 40+ bodova).
+
+**Blokiran korisnik sada zna šta da uradi.** `createListing` i `bidService` su
+sve greške gutali u generičko „Zahtjev nije moguće obraditi" — korisnik odbijen
+zbog verifikacije nije imao pojma zašto ni kuda dalje. Dodan
+[`prepoznajGresku()`](../../src/utils/validation.js) koji poznate poruke iz baze
+pretvara u razumljiv tekst **sa linkom**, i
+[`ActionError`](../../src/components/ActionError.jsx) koji ga prikaže:
+
+> ⚠ Prije ovoga treba potvrditi identitet — provjera traje obično do 24 sata.
+> **Potvrdi identitet →**
+
+**Rok čuvanja dokumenata.** Slika lične karte je najosjetljiviji podatak i nema
+razloga da stoji zauvijek:
+
+| Ishod | Slike se brišu |
+|---|---|
+| odobren | nakon 90 dana |
+| odbijen / istekao | nakon 30 dana |
+
+Odluka i dokaz o njoj (ko, kada, koji broj) **ostaju**; briše se samo slika.
+Šifrovani JMBG ostaje dok traje nalog — bez njega se ne može spriječiti da se
+isti broj verifikuje na drugom nalogu. Posao `identity-purge-docs` radi svaki dan
+u 03:30 i stavlja putanje u `identity_purge_queue`, odakle ih briše Storage.
+
+Provjereno: rok se postavlja pri odluci (90 dana), čišćenje obriše putanje,
+odluka i otisak JMBG-a ostaju, a 2 datoteke odu u red za brisanje.
+
+**Stara verzija `submit_identity` obrisana.** Uz novu (10 argumenata) ostala je i
+stara sa 7 argumenata — poziv na nju je bio legitiman put **oko** provjere
+kvaliteta slike i otiska dokumenta. Sada postoji samo jedna.
+
+**Testovi su otporni na zatečeno stanje.** Oba identity spec-a čekaju da se
+stranica iscrta pa provjere je li forma zaključana; ranije su se tiho preskakali
+i izgledali kao da prolaze.

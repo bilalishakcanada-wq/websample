@@ -9,6 +9,7 @@ import { adminService } from '../services/adminService'
 import { desktopNotify } from '../services/notificationService'
 import { StaffContext } from './admin/shared'
 import OversightTab from './admin/OversightTab'
+import IdentityTab from './admin/IdentityTab'
 import MessagesTab from './admin/MessagesTab'
 import UsersTab from './admin/UsersTab'
 import TeamTab from './admin/TeamTab'
@@ -21,6 +22,8 @@ const TABS = [
   { id: 'users', label: 'Korisnici', icon: Users, hint: 'Pretraga i dosije svakog naloga' },
   { id: 'support', label: 'Podrška', icon: LifeBuoy, hint: 'Razgovori sa korisnicima', counter: 'support_unread' },
   { id: 'moderation', label: 'Moderacija', icon: ScanEye, hint: 'Pravilo #1, slike, suspenzije', counter: 'strikes_24h' },
+  // identitet smiju provjeravati i moderatori, ne samo admin
+  { id: 'identity', label: 'Identitet', icon: IdCard, hint: 'JMBG i dokumenti na provjeri', counter: 'identity_pending' },
   { id: 'reports', label: 'Prijave', icon: ShieldAlert, hint: 'Šta korisnici prijavljuju', counter: 'reports_open' },
   { id: 'messages', label: 'Poruke', icon: MessageSquare, hint: 'Svi razgovori na platformi', adminOnly: true },
   { id: 'verification', label: 'Verifikacija', icon: ShieldCheck, hint: 'Dokumenti i licence', counter: 'verifications_pending', adminOnly: true },
@@ -139,6 +142,7 @@ function AdminPage({ mode = 'admin' }) {
             {tab === 'users' && <UsersTab openUserId={openUserId} onOpenUser={openUser} onCloseUser={() => setTab('users')} initialTerm={quickTerm} />}
             {tab === 'support' && <SupportTab />}
             {tab === 'moderation' && <ModerationTab />}
+            {tab === 'identity' && <IdentityTab />}
             {tab === 'reports' && <ReportsTab />}
             {isAdminMode && tab === 'messages' && <MessagesTab />}
             {isAdminMode && tab === 'verification' && <VerificationTab />}

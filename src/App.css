@@ -12631,3 +12631,73 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   .wf-actions { flex-direction: column; align-items: stretch; }
   .wf-actions button { width: 100%; justify-content: center; min-height: 48px; }
 }
+
+/* ---- Verifikacija identiteta (korisnik) --------------------------------- */
+.verif-page { max-width: 640px; }
+.verif-state { display: flex; gap: 12px; align-items: flex-start; padding: 16px;
+  border-radius: 16px; border: 1px solid var(--stroke); margin-bottom: 20px; }
+.verif-state strong { display: block; margin-bottom: 4px; }
+.verif-state p { margin: 0 0 4px; color: var(--text-soft); line-height: 1.5; }
+.verif-state.ok { background: #e6f6ec; border-color: #bfe3cc; color: #1f7a42; }
+.verif-state.ok p { color: #2b6c47; }
+.verif-state.wait { background: #fff4d6; border-color: #f0dca8; color: #8a6100; }
+.verif-state.wait p { color: #7a5a14; }
+.verif-state.bad { background: #fde8e8; border-color: #f3c9c9; color: #9b1c1c; }
+.verif-state.bad p { color: #8a3a3a; }
+
+.verif-form { display: grid; gap: 18px; }
+.verif-field { display: grid; gap: 6px; }
+.verif-field label { font-weight: 700; font-size: .92rem; }
+.verif-field .req { color: #e0463c; }
+.verif-field input, .verif-field select { width: 100%; min-height: 48px; padding: 0 14px;
+  border: 1px solid var(--stroke); border-radius: 12px; background: var(--surface);
+  font: inherit; color: var(--text); }
+.verif-field input:focus, .verif-field select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.verif-field small { color: var(--text-soft); font-size: .84rem; line-height: 1.45; }
+
+.verif-uploads { display: grid; gap: 10px; }
+.verif-upload { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px;
+  padding: 12px 14px; border: 1.5px dashed var(--stroke); border-radius: 14px;
+  background: var(--surface); text-align: left; color: var(--text); }
+.verif-upload span { flex: 1; display: grid; }
+.verif-upload strong { font-size: .95rem; }
+.verif-upload small { color: var(--text-soft); font-size: .82rem; }
+.verif-upload.ima { border-style: solid; border-color: #2e9e5b; background: #f2fbf5; }
+
+.verif-privacy { display: flex; gap: 8px; align-items: flex-start; margin: 0;
+  color: var(--text-soft); font-size: .86rem; line-height: 1.5; }
+.verif-privacy svg { flex-shrink: 0; margin-top: 2px; }
+.verif-submit { min-height: 52px; }
+.verif-hint { display: flex; align-items: center; gap: 6px; font-size: .85rem; margin: 0; }
+
+/* ---- Provjera identiteta (tim) ------------------------------------------ */
+.idv-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.idv-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.1rem; }
+.idv-row { display: grid; gap: 12px; }
+.idv-row.otvoren { border-color: var(--primary); }
+.idv-main { display: flex; gap: 12px; align-items: flex-start; }
+.idv-ikona { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 10px; background: var(--surface-soft, #eef2f8); color: var(--primary-strong); }
+.idv-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--text-soft); font-size: .85rem; margin-top: 3px; }
+.idv-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.idv-flag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+  background: #fff4d6; color: #8a6100; font-size: .78rem; font-weight: 600; }
+
+.idv-detalji { display: grid; gap: 14px; padding-top: 12px; border-top: 1px solid var(--stroke); }
+.idv-podaci { display: flex; flex-wrap: wrap; gap: 18px; }
+.idv-podaci small { display: block; color: var(--text-soft); font-size: .78rem; }
+.idv-jmbg { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; font-size: 1.05rem; }
+.idv-slike { display: flex; gap: 10px; flex-wrap: wrap; }
+.idv-doc { display: grid; gap: 4px; }
+.idv-doc img { width: 150px; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid var(--stroke); }
+.idv-doc small { color: var(--text-soft); font-size: .78rem; }
+.idv-doc-loading { display: block; width: 150px; height: 100px; border-radius: 10px; background: #e9ecf1; }
+.idv-doc-missing { color: var(--text-soft); font-size: .85rem; }
+.idv-uputa { margin: 0; font-size: .86rem; }
+.idv-akcije { display: flex; gap: 10px; flex-wrap: wrap; }
+.idv-akcije button { min-height: 44px; }
+
+@media (max-width: 768px) {
+  .idv-akcije button, .verif-upload { width: 100%; justify-content: center; }
+  .idv-akcije { flex-direction: column; }
+}

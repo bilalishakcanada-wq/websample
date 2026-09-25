@@ -38,6 +38,7 @@ const PaymentHistoryPage = lazy(lazyImport(() => import('./pages/account/Payment
 const PaymentMethodsPage = lazy(lazyImport(() => import('./pages/account/PaymentMethodsPage')))
 const WalletPage = lazy(lazyImport(() => import('./pages/account/WalletPage')))
 const NotificationsPage = lazy(lazyImport(() => import('./pages/account/NotificationsPage')))
+const VerificationPage = lazy(lazyImport(() => import('./pages/account/VerificationPage')))
 const SettingsPage = lazy(lazyImport(() => import('./pages/account/SettingsPage')))
 const PaymentOptionsPage = lazy(lazyImport(() => import('./pages/account/PaymentOptionsPage')))
 const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
@@ -123,6 +124,7 @@ function App() {
           <Route path="vjestine" element={<SkillsPage />} />
           <Route path="znacke" element={<BadgesPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
+          <Route path="verifikacija" element={<VerificationPage />} />
           <Route path="postavke" element={<SettingsPage />} />
           <Route path="alarmi" element={<TaskAlertsPage />} />
           <Route path="informacije" element={<AccountInfoPage />} />

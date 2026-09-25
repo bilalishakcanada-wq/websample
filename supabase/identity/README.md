@@ -77,8 +77,30 @@ Bez `grandfather_before` platforma bi se preko noći zaključala svima — uklju
 vlasnika. Kad odlučite da svi moraju proći verifikaciju, pomjerite taj datum
 naprijed (migracijom) i najavite korisnicima rok.
 
-## Što još nije urađeno
+## Sučelje (gotovo)
 
-Sučelje: forma za korisnika (`/account/verifikacija`) i ekran za moderatore.
-Dok njih nema, RPC-ovi rade ali korisnik nema gdje unijeti podatke — zato su
-prekidači postavljeni tako da **postojeći korisnici nisu pogođeni**.
+| Dio | Gdje |
+|---|---|
+| Forma za korisnika | `/account/verifikacija` — [VerificationPage.jsx](../../src/pages/account/VerificationPage.jsx) |
+| Ekran za tim | tab **Identitet** u `/admin` i `/mod` — [IdentityTab.jsx](../../src/pages/admin/IdentityTab.jsx) |
+| Servis | [identityService.js](../../src/services/identityService.js) |
+| Slike | privatni bucket `identity`, potpisani link traje 60 s |
+
+Korisnik: JMBG se formatira dok se kuca, broji cifre, dugme ostaje zaključano dok
+ne unese ime i prezime, 13 cifara i sliku prednje strane. Poslije slanja forma se
+zaključa i pokaže stanje (na čekanju / potvrđeno / odbijeno sa razlogom).
+
+Tim: red po redoslijedu prijave, signali uz svaki predmet, a **broj i slike se ne
+prikazuju dok moderator izričito ne klikne „Otvori podatke"** — svako otvaranje
+ostaje zapisano u `staff_actions`.
+
+**Slike ne može pročitati ni sam korisnik.** Jednom poslanu ličnu kartu vidi samo
+tim — ako neko preuzme tuđi nalog, ne može izvući dokument.
+
+### Provjereno kroz sučelje
+`e2e/identity.spec.js` (3 testa): dugme zaključano dok podaci nisu potpuni,
+pogrešna kontrolna cifra vraća jasnu poruku, ispravan unos ide na provjeru i
+forma se zaključa. Ručno provjeren i put moderatora: predmet se pojavi u redu sa
+signalom „ime se razlikuje od profila", otvaranje otkrije broj i sliku, potvrda
+postavi profil na `approved`, korisnik dobije obavijest, a u `staff_actions`
+ostanu `identity_reveal` i `identity_approve`. **21/21 E2E prolazi.**

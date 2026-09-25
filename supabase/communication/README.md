@@ -24,22 +24,20 @@ autorizacija koju prompt traži bi u ovom stacku bila ukras, ne brana.
 
 Razgovori bez oglasa (podrška) ostaju otvoreni. Osoblje smije pisati uvijek.
 
-## Modul 2 — pozivi u aplikaciji
+## Modul 2 — pozivi u aplikaciji (UKINUTO 26.09.2026.)
 
-`start_call()` / `update_call()` + tabela `calls` (ko, kada, trajanje, je li išlo
-preko releja). Poziv se može započeti **samo dok je `chat_state = 'open'`**, uz
-ograničenje od 5 poziva u 5 minuta protiv uznemiravanja.
+Pozivi su bili napravljeni i radili su (WebRTC preko Supabase Realtime kanala),
+ali **vlasnik ne želi tu opciju na platformi**, pa je modul uklonjen u cjelini:
+tabela `calls`, `start_call()`, `update_call()`, `expire_stale_calls()`, cron
+`expire-stale-calls`, tipovi `call_kind`/`call_state`, Edge funkcija
+`turn-credentials` i sav frontend (`CallPanel`, `CallBubble`, `useCalls`,
+`webrtc.js`, `ringtone.js`, `e2e/calls.spec.js`).
 
-Signalizacija ide preko **Supabase Realtime broadcast kanala**
-([`src/lib/webrtc.js`](../../src/lib/webrtc.js)), ne preko zasebnog Socket.io
-servera: SDP i ICE poruke su prolazne, kanal već postoji i već je autentifikovan
-istim JWT-om. Jedan servis manje za držati i osiguravati.
+Uklonjena je i serverska strana, ne samo dugmad — inače bi se poziv i dalje mogao
+pokrenuti direktnim pozivom RPC-a, mimo sučelja. Migracija: `remove_in_app_calls`.
+Kod stoji u istoriji (`git show 9360ca8`) ako se ikad zatraži nazad.
 
-**Što ovo ne rješava:** peer-to-peer ne prolazi iza simetričnog NAT-a (dio
-mobilnih mreža). Za to treba **TURN relej** — plaćen servis (Cloudflare Calls,
-Twilio, Metered) ili vlastiti coturn. Bez njega oko 10–20 % poziva neće uspjeti.
-Kredencijali TURN-a moraju se izdavati kratkoročno iz Edge funkcije
-(`turn-credentials`), nikad upisivati u frontend build.
+Komunikacija ostaje na porukama, vezanim za životni ciklus posla (Modul 1).
 
 ## Modul 3 — sprječavanje zaobilaženja platforme
 
@@ -87,34 +85,6 @@ pa ponovo provjereno (HTTP 403 `NISI_UCESNIK_RAZGOVORA`).
 |---|---|
 | Stanje chata u inboxu | `my_inbox()` vraća `chat_state` — bez dodatnog poziva po razgovoru |
 | Zaključano / read-only umjesto forme | [`ChatStateNotice.jsx`](../../src/components/ChatStateNotice.jsx) |
-| Dugmad za poziv (samo kad je otvoreno) | `MessagesPage.jsx` (desktop) i `Chat.jsx` (telefon) |
-| Ekran poziva | [`CallPanel.jsx`](../../src/components/CallPanel.jsx) |
-| Logika poziva | [`useCalls.js`](../../src/hooks/useCalls.js) + [`webrtc.js`](../../src/lib/webrtc.js) |
-| TURN kredencijali | Edge funkcija `turn-credentials` (bez podešenog provajdera vraća STUN) |
 
-Testovi: [`e2e/calls.spec.js`](../../e2e/calls.spec.js) — Chromium dobija lažni
-mikrofon i kameru (`--use-fake-device-for-media-stream`), pa poziv prolazi bez
-hardvera. **8/8 E2E prolazi.**
-
-### Tri greške nađene tokom uvezivanja
-
-1. **Hook za pozive se montirao dvaput.** `MessagesPage` na telefonu renderuje
-   `Chat`, pa su oba zvala `useCalls` → dvije pretplate na isti Realtime kanal →
-   `cannot add postgres_changes callbacks after subscribe()` i **cijela stranica
-   Poruke je pucala na telefonu**. Riješeno: hook se zove jednom, prosljeđuje se
-   kroz props; kanal je dobio i jedinstveno ime za svaki slučaj.
-2. **Propušten poziv se gubio bez traga.** Realtime ne ponavlja događaje: poziv
-   upućen dok se pretplata uspostavljala (ili dok je veza pala) nikad ne bi
-   stigao. Dodata jednokratna provjera pri otvaranju — traži poziv koji upravo
-   zvoni (zadnjih 45 s).
-3. **Poziv koji niko ne javi zvonio je zauvijek.** Zapis je ostajao `ringing`,
-   pozivaocu je stajalo „Zvoni…", a pozvanom se poziv javljao pri svakom
-   otvaranju aplikacije. Sada ističe nakon 45 s na klijentu i nakon 60 s u bazi
-   (cron `expire-stale-calls`, svake minute); „aktivan" poziv stariji od 6 sati
-   se zatvara kao prekinuta veza.
-
-## Prije puštanja poziva u rad
-
-TURN mora biti plaćen i podešen (`TURN_URLS` + `TURN_SECRET`, ili
-`CF_TURN_KEY_ID` + `CF_TURN_API_TOKEN` u Supabase Secrets). Bez toga pozivi rade
-na većini mreža, ali padaju iza simetričnog NAT-a.
+Testovi: [`e2e/job-flow.spec.js`](../../e2e/job-flow.spec.js) pokriva dopisivanje
+u realnom vremenu. **19/19 E2E prolazi** nakon uklanjanja poziva.

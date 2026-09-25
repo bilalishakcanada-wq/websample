@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Phone, Video, ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
-import CallPanel from '../components/CallPanel'
 import ChatStateNotice from '../components/ChatStateNotice'
 import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
@@ -21,7 +20,7 @@ const Avatar = ({ src, name, size = 48 }) => (src
  */
 function Chat(props) {
   const {
-    user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, calls, chatState,
+    user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, chatState,
     grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading,
     error, notice, togglePref, reportConversation, timeOf, shortDate, retry,
   } = props
@@ -90,12 +89,6 @@ function Chat(props) {
           <Avatar src={active.other_avatar} name={active.other_name} size={40} />
           <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}{active.contacts_allowed ? '' : ' · kontakt zaštićen'}</small></span>
         </Link>
-        {chatState === 'open' && (
-          <>
-            <button type="button" className="ap-back ch-call-btn" onClick={() => calls.dial('audio')} aria-label="Audio poziv"><Phone size={20} /></button>
-            <button type="button" className="ap-back ch-call-btn" onClick={() => calls.dial('video')} aria-label="Video poziv"><Video size={20} /></button>
-          </>
-        )}
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>
         {menu && (
           <div className="jd-menu" onClick={() => setMenu(false)}>
@@ -134,7 +127,6 @@ function Chat(props) {
         {lastOwnRead && <div className="ch-seen">Pročitano {timeOf(lastOwnRead.read_at)}</div>}
       </div>
 
-      {calls.error && <div className="form-error ch-alert">{calls.error}</div>}
       {error && <div className="form-error ch-alert">{error}</div>}
       {notice && <div className="form-success ch-alert">{notice}</div>}
 
@@ -148,12 +140,6 @@ function Chat(props) {
       ) : (
         <ChatStateNotice state={chatState} listingId={active.listing_id} />
       )}
-      <CallPanel
-        call={calls.call} other={active} muted={calls.muted} cameraOff={calls.cameraOff}
-        localRef={calls.localRef} remoteRef={calls.remoteRef}
-        onAnswer={calls.answer} onDecline={calls.decline} onHangUp={calls.hangUp}
-        onToggleMute={calls.toggleMute} onToggleCamera={calls.toggleCamera}
-      />
     </div>
   )
 }

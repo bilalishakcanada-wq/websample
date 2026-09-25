@@ -5,10 +5,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Phone, Search, Send, ShieldCheck, Unlock, UserRound, Video, X,
+  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
-import { useCalls } from '../hooks/useCalls'
-import CallPanel from '../components/CallPanel'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
@@ -91,7 +89,6 @@ function MessagesPage() {
   useEffect(() => messageService.subscribeToMine(user.id, () => { queryClient.invalidateQueries({ queryKey: keys.inbox(user.id) }) }), [user.id, queryClient])
 
   const active = inbox.find((item) => item.id === activeId)
-  const calls = useCalls(user, active)
   const chatState = active?.chat_state || 'open'
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read
@@ -243,7 +240,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
-        retry={() => loadInbox()} calls={calls} chatState={chatState}
+        retry={() => loadInbox()} chatState={chatState}
       />
     )
   }
@@ -336,12 +333,6 @@ function MessagesPage() {
                     {active.contacts_allowed ? <><Unlock size={13} /> Kontakt otključan</> : <><Lock size={13} /> Kontakt zaštićen</>}
                   </span>
                   <div className="chat-head-actions">
-                    {chatState === 'open' && (
-                      <>
-                        <button type="button" className="chat-call" onClick={() => calls.dial('audio')} title="Audio poziv"><Phone size={16} /></button>
-                        <button type="button" className="chat-call" onClick={() => calls.dial('video')} title="Video poziv"><Video size={16} /></button>
-                      </>
-                    )}
                     <button type="button" className={active.saved ? 'on' : ''} onClick={() => togglePref(active, 'saved')} title={active.saved ? 'Ukloni iz spašenih' : 'Spasi'}><Heart size={16} fill={active.saved ? 'currentColor' : 'none'} /></button>
                     <button type="button" onClick={() => togglePref(active, 'archived')} title={active.archived ? 'Vrati iz arhive' : 'Arhiviraj'}>{active.archived ? <ArchiveRestore size={16} /> : <Archive size={16} />}</button>
                     <button type="button" onClick={reportConversation} title="Prijavi razgovor"><Flag size={16} /></button>
@@ -378,7 +369,6 @@ function MessagesPage() {
                 </div>
 
                 {error && <div className="form-error chat-alert">{error}</div>}
-                {calls.error && <div className="form-error chat-alert">{calls.error}</div>}
                 {notice && <div className="form-success chat-alert">{notice}</div>}
 
                 {chatState === 'open' ? (
@@ -406,12 +396,6 @@ function MessagesPage() {
             )}
           </section>
         </div>
-        <CallPanel
-          call={calls.call} other={active} muted={calls.muted} cameraOff={calls.cameraOff}
-          localRef={calls.localRef} remoteRef={calls.remoteRef}
-          onAnswer={calls.answer} onDecline={calls.decline} onHangUp={calls.hangUp}
-          onToggleMute={calls.toggleMute} onToggleCamera={calls.toggleCamera}
-        />
       </main>
     </div>
   )

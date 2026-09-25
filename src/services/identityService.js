@@ -8,12 +8,30 @@ import { publicError } from '../utils/validation'
  * jednom poslanu ličnu kartu vidi samo tim. Sam JMBG se u bazi čuva šifrovan i
  * nikad se ne vraća klijentu.
  */
+/**
+ * Gruba oznaka uređaja: platforma, jezik, rezolucija, vremenska zona.
+ * Nije praćenje po webu — ne izlazi iz Poso.ba i služi samo da se vidi kad isti
+ * uređaj šalje više različitih identiteta.
+ */
+function deviceFingerprint() {
+  try {
+    const d = [
+      navigator.platform, navigator.language, navigator.hardwareConcurrency,
+      screen.width, screen.height, screen.colorDepth,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    ].join('|')
+    let h = 0
+    for (let i = 0; i < d.length; i += 1) { h = ((h << 5) - h + d.charCodeAt(i)) | 0 }
+    return `d${(h >>> 0).toString(36)}`
+  } catch { return null }
+}
+
 const call = async (fn, args) => {
   const { data, error } = await supabase.rpc(fn, args)
   if (error) {
     const poruka = String(error.message || '')
     // poruke iz baze su već na našem jeziku i namijenjene korisniku
-    if (/JMBG_NEISPRAVAN|JMBG_VEC_KORISTEN|MALOLJETAN|IME_I_PREZIME|SLIKA_DOKUMENTA|VEC_RIJESENO|RAZLOG_ODBIJANJA/.test(poruka)) {
+    if (/JMBG_NEISPRAVAN|JMBG_VEC_KORISTEN|DOKUMENT_VEC_KORISTEN|SLIKA_MUTNA|MALOLJETAN|IME_I_PREZIME|SLIKA_DOKUMENTA|VEC_RIJESENO|RAZLOG_ODBIJANJA/.test(poruka)) {
       throw new Error(poruka.replace(/^[A-Z_]+:\s*/, ''))
     }
     console.error('Identity RPC failed', { fn, message: error.message, code: error.code })
@@ -55,18 +73,23 @@ export const identityService = {
     return path
   },
 
-  submit: ({ fullName, jmbg, docType, docNumber, front, back, selfie }) =>
+  submit: ({ fullName, jmbg, docType, docNumber, front, back, selfie, phash, quality }) =>
     call('submit_identity', {
       p_full_name: fullName, p_jmbg: jmbg, p_doc_type: docType,
       p_doc_number: docNumber || null, p_front: front, p_back: back || null, p_selfie: selfie || null,
+      p_phash: phash || null, p_quality: quality || null, p_device: deviceFingerprint(),
     }),
+
+  /** Bodovi rizika i razlozi — moderator ih vidi uz predmet. */
+  risk: (caseId) => call('identity_risk', { p_case: caseId }),
 
   // --- za tim ---------------------------------------------------------------
   async queue(limit = 50) {
     const { data, error } = await supabase
       .from('identity_verifications')
-      .select('id, user_id, state, full_name, birth_date, gender, region_code, doc_type, risk_flags, submitted_at, claimed_by, claimed_until')
+      .select('id, user_id, state, full_name, birth_date, gender, region_code, doc_type, risk_flags, risk_score, submitted_at, claimed_by, claimed_until')
       .in('state', ['submitted', 'in_review'])
+      .order('risk_score', { ascending: false })
       .order('submitted_at', { ascending: true })
       .limit(limit)
     if (error) throw publicError()

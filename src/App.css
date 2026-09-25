@@ -12701,3 +12701,21 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   .idv-akcije button, .verif-upload { width: 100%; justify-content: center; }
   .idv-akcije { flex-direction: column; }
 }
+
+/* rizik i nalaz kvaliteta u redu za provjeru */
+.idv-rizik { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px;
+  padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; vertical-align: middle; }
+.idv-rizik.nizak { background: #e6f6ec; color: #1f7a42; }
+.idv-rizik.srednji { background: #fff4d6; color: #8a6100; }
+.idv-rizik.visok { background: #fde8e8; color: #9b1c1c; }
+.idv-razlozi { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.idv-razlozi li { display: flex; align-items: center; gap: 7px; padding: 7px 10px;
+  border-radius: 9px; background: #fff4d6; color: #8a6100; font-size: .85rem; }
+.idv-kvalitet { margin: 0; font-size: .8rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* nalaz provjere slike kod korisnika */
+.verif-upload.lose { border-style: solid; border-color: #e0463c; background: #fef5f4; }
+.verif-nalaz { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.verif-nalaz li { padding: 9px 12px; border-radius: 10px; font-size: .87rem; line-height: 1.45; }
+.verif-nalaz li.lose { background: #fde8e8; color: #9b1c1c; }
+.verif-nalaz li.pazi { background: #fff4d6; color: #8a6100; }

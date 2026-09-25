@@ -5,6 +5,7 @@ import { identityService } from '../../services/identityService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { toast } from '../../components/Toaster'
 import { SkeletonPage } from '../../components/Skeleton'
+import { provjeriDokument } from '../../utils/imageQuality'
 
 const DOKUMENTI = [
   ['licna_karta', 'Lična karta'],
@@ -64,8 +65,9 @@ function VerificationPage() {
   const [jmbg, setJmbg] = useState('')
   const [tipDok, setTipDok] = useState('licna_karta')
   const [brojDok, setBrojDok] = useState('')
-  const [lice, setLice] = useState(null)
+  const [lice, setLice] = useState(null)       // { datoteka, otisak, mjere, problemi, upozorenja }
   const [nalicje, setNalicje] = useState(null)
+  const [analiza, setAnaliza] = useState('')   // koja slika se trenutno provjerava
   const [busy, setBusy] = useState(false)
   const [greska, setGreska] = useState('')
   const liceRef = useRef(null)
@@ -82,16 +84,32 @@ function VerificationPage() {
 
   const zakljucano = predmet && ['submitted', 'in_review', 'approved'].includes(predmet.state)
   const cifre = jmbg.replace(/\D/g, '')
-  const spremno = ime.trim().split(/\s+/).length >= 2 && cifre.length === 13 && lice
+  const spremno = ime.trim().split(/\s+/).length >= 2 && cifre.length === 13 && lice?.ok && !analiza
+
+  /** Slika se provjerava odmah: mutnu ili pretamnu nema smisla slati. */
+  const odaberi = async (file, koja) => {
+    if (!file) return
+    setAnaliza(koja); setGreska('')
+    try {
+      const nalaz = await provjeriDokument(file)
+      const vrijednost = { ...nalaz, ime: file.name }
+      if (koja === 'lice') setLice(vrijednost); else setNalicje(vrijednost)
+    } catch {
+      setGreska('Slika se nije mogla pročitati. Pokušaj sa drugom.')
+    } finally {
+      setAnaliza('')
+    }
+  }
 
   const posalji = async (event) => {
     event.preventDefault()
     setBusy(true); setGreska('')
     try {
-      const front = await identityService.uploadDoc(user.id, lice, 'lice')
-      const back = nalicje ? await identityService.uploadDoc(user.id, nalicje, 'nalicje') : null
+      const front = await identityService.uploadDoc(user.id, lice.datoteka, 'lice')
+      const back = nalicje?.datoteka ? await identityService.uploadDoc(user.id, nalicje.datoteka, 'nalicje') : null
       const row = await identityService.submit({
         fullName: ime.trim(), jmbg: cifre, docType: tipDok, docNumber: brojDok, front, back,
+        phash: lice.otisak, quality: lice.mjere,
       })
       setPredmet(row)
       toast('Podaci su poslani na provjeru.', { kind: 'success' })
@@ -145,19 +163,32 @@ function VerificationPage() {
           </div>
 
           <div className="verif-uploads">
-            <input ref={liceRef} type="file" accept="image/*" hidden onChange={(e) => setLice(e.target.files[0] || null)} />
-            <input ref={nalicjeRef} type="file" accept="image/*" hidden onChange={(e) => setNalicje(e.target.files[0] || null)} />
-            <button type="button" className={`verif-upload ${lice ? 'ima' : ''}`} onClick={() => liceRef.current?.click()}>
+            <input ref={liceRef} type="file" accept="image/*" hidden onChange={(e) => odaberi(e.target.files[0], 'lice')} />
+            <input ref={nalicjeRef} type="file" accept="image/*" hidden onChange={(e) => odaberi(e.target.files[0], 'nalicje')} />
+            <button type="button" className={`verif-upload ${lice?.ok ? 'ima' : ''} ${lice && !lice.ok ? 'lose' : ''}`} onClick={() => liceRef.current?.click()}>
               <IdCard size={22} />
-              <span><strong>Prednja strana <em className="req">*</em></strong>{lice ? <small>{lice.name.slice(0, 28)}</small> : <small>Slikaj ili izaberi</small>}</span>
+              <span><strong>Prednja strana <em className="req">*</em></strong>
+                {analiza === 'lice' ? <small>Provjeravam sliku…</small>
+                  : lice ? <small>{lice.ok ? `✓ ${lice.ime.slice(0, 22)}` : lice.problemi[0]}</small>
+                    : <small>Slikaj ili izaberi</small>}</span>
               <Upload size={16} />
             </button>
-            <button type="button" className={`verif-upload ${nalicje ? 'ima' : ''}`} onClick={() => nalicjeRef.current?.click()}>
+            <button type="button" className={`verif-upload ${nalicje?.ok ? 'ima' : ''} ${nalicje && !nalicje.ok ? 'lose' : ''}`} onClick={() => nalicjeRef.current?.click()}>
               <IdCard size={22} />
-              <span><strong>Zadnja strana</strong>{nalicje ? <small>{nalicje.name.slice(0, 28)}</small> : <small>Ako je dokument dvostran</small>}</span>
+              <span><strong>Zadnja strana</strong>
+                {analiza === 'nalicje' ? <small>Provjeravam sliku…</small>
+                  : nalicje ? <small>{nalicje.ok ? `✓ ${nalicje.ime.slice(0, 22)}` : nalicje.problemi[0]}</small>
+                    : <small>Ako je dokument dvostran</small>}</span>
               <Upload size={16} />
             </button>
           </div>
+
+          {(lice?.problemi?.length > 0 || lice?.upozorenja?.length > 0) && (
+            <ul className="verif-nalaz">
+              {lice.problemi.map((t) => <li key={t} className="lose">{t}</li>)}
+              {lice.upozorenja.map((t) => <li key={t} className="pazi">{t}</li>)}
+            </ul>
+          )}
 
           <p className="verif-privacy">
             <ShieldCheck size={15} />

@@ -104,3 +104,60 @@ forma se zaključa. Ručno provjeren i put moderatora: predmet se pojavi u redu 
 signalom „ime se razlikuje od profila", otvaranje otkrije broj i sliku, potvrda
 postavi profil na `approved`, korisnik dobije obavijest, a u `staff_actions`
 ostanu `identity_reveal` i `identity_approve`. **21/21 E2E prolazi.**
+
+## Napredni sloj (25.09.2026.)
+
+### 1. Provjera kvaliteta slike — u pregledniku, prije slanja
+[`src/utils/imageQuality.js`](../../src/utils/imageQuality.js), bez ijedne biblioteke:
+
+| Mjera | Kako | Prag |
+|---|---|---|
+| Oštrina | varijansa Laplacijana | < 55 odbija, < 110 upozorava |
+| Osvjetljenje | prosjek sivih vrijednosti | < 45 pretamno, > 225 presvijetlo |
+| Odsjaj | udio piksela > 250 | > 6 % odbija |
+| Veličina | izvorne dimenzije | < 640×400 odbija |
+
+Korisnik dobije odgovor **odmah** („Slika je mutna. Očisti objektiv…") umjesto da
+čeka 24 sata pa bude odbijen. Moderator dobija samo čitljive slike. Slika se uz to
+smanji na 1600 px prije slanja — manje podataka putuje i manje se čuva.
+
+Baza odbija predaju sa `ostrina < 55` i kad bi neko zaobišao sučelje.
+
+### 2. Otisak slike dokumenta (dHash u oba pravca)
+Hvata **istu ličnu kartu poslanu s dva naloga**. Jedinstveni indeks nad otiskom
+za odobrene predmete znači da ista slika ne može biti verifikovana dvaput.
+
+Dvije stvari naučene testiranjem:
+* klasični dHash poredi samo vodoravno, pa slika sa vodoravnim redovima teksta
+  ispadne bez ijednog bita — zato se računa 32 bita vodoravno + 32 uspravno;
+* jednolična slika daje otisak od samih nula, što bi lažno izgledalo kao duplikat
+  svake druge blijede slike — takav otisak se odbacuje (`null`) umjesto da se
+  upiše.
+
+Provjereno: ista slika → razlika 0 bita; različite slike → 16 bita.
+
+### 3. Bodovanje rizika — red ide po opasnosti, ne po vremenu
+`identity_risk(case)` sabira signale i vraća `brzo` / `pregled` / `oprez`:
+
+| Signal | Bodovi |
+|---|---|
+| Ista slika dokumenta s drugog naloga | 45 |
+| Isti JMBG pokušan drugdje | 40 |
+| S istog uređaja > 2 različita identiteta | 25 |
+| Ime se razlikuje od profila | 15 |
+| Više od 3 pokušaja u 24 h | 12 |
+| Nalog otvoren prije < 1 h | 10 |
+| Slika na granici oštrine | 10 |
+| Nedostaje zadnja strana lične karte | 8 |
+| Odsjaj na dokumentu | 8 |
+
+Bodovi **ne odlučuju umjesto čovjeka** — određuju redoslijed u redu i koliko se
+upozorenja prikaže. Odobrenje uvijek potpisuje moderator, koji uz predmet vidi i
+razloge i mjere kvaliteta.
+
+Oznaka uređaja je gruba (platforma, jezik, rezolucija, vremenska zona), ne izlazi
+iz Poso.ba i služi samo da se vidi kad isti uređaj šalje više identiteta.
+
+### Testovi
+`e2e/identity-quality.spec.js`: mutna slika odbijena uz objašnjenje, tamna dobija
+svoju poruku, oštra prolazi i otključava slanje. **24/24 E2E prolazi.**

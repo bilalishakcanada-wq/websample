@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AlertTriangle, BadgeCheck, Eye, IdCard, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, Eye, Gauge, IdCard, ShieldCheck, X } from 'lucide-react'
 import { identityService } from '../../services/identityService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { promptDialog } from '../../utils/dialog'
@@ -49,8 +49,11 @@ function IdentityTab() {
   const otkrij = async (predmet) => {
     setBusy('reveal'); setGreska('')
     try {
-      const podaci = await identityService.reveal(predmet.id)
-      setOtvoren({ predmet, podaci })
+      const [podaci, rizik] = await Promise.all([
+        identityService.reveal(predmet.id),
+        identityService.risk(predmet.id).catch(() => null),
+      ])
+      setOtvoren({ predmet, podaci, rizik })
     } catch (e) { setGreska(e.message) } finally { setBusy('') }
   }
 
@@ -95,6 +98,11 @@ function IdentityTab() {
               <span className="idv-ikona"><IdCard size={18} /></span>
               <div>
                 <strong>{predmet.full_name}</strong>
+                {typeof predmet.risk_score === 'number' && (
+                  <span className={`idv-rizik ${predmet.risk_score >= 40 ? 'visok' : predmet.risk_score >= 15 ? 'srednji' : 'nizak'}`}>
+                    <Gauge size={12} /> {predmet.risk_score >= 40 ? 'oprez' : predmet.risk_score >= 15 ? 'pregled' : 'brzo'} · {predmet.risk_score}
+                  </span>
+                )}
                 <div className="idv-meta">
                   <span>{predmet.birth_date ? formatBosnianDate(predmet.birth_date) : '—'}</span>
                   <span>{predmet.gender === 'M' ? 'muško' : 'žensko'}</span>
@@ -129,6 +137,16 @@ function IdentityTab() {
                   <Dokument path={otvoren.podaci.slike?.nalicje} naslov="Zadnja strana" />
                   <Dokument path={otvoren.podaci.slike?.selfi} naslov="Selfi" />
                 </div>
+                {otvoren.rizik?.razlozi?.length > 0 && (
+                  <ul className="idv-razlozi">
+                    {otvoren.rizik.razlozi.map((r) => <li key={r}><AlertTriangle size={13} /> {r}</li>)}
+                  </ul>
+                )}
+                {otvoren.podaci.kvalitet && (
+                  <p className="idv-kvalitet muted-text">
+                    Oštrina {otvoren.podaci.kvalitet.ostrina} · svjetlo {otvoren.podaci.kvalitet.svjetlo} · {otvoren.podaci.kvalitet.sirina}×{otvoren.podaci.kvalitet.visina}
+                  </p>
+                )}
                 <p className="idv-uputa muted-text">
                   Uporedi broj i ime sa slikom dokumenta. Odobri samo ako se poklapaju i slika je čitljiva.
                 </p>

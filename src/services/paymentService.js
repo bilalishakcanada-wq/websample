@@ -42,6 +42,58 @@ export const paymentService = {
   },
 
   acceptAndFund: (bidId) => call('accept_offer_and_fund', { p_bid_id: bidId }),
+
+  // --- tok posla (state machine u bazi: supabase/booking) ---------------------
+  /** Izvođač predaje rad. Dokaz je obavezan — baza odbija poruku bez njega. */
+  submitWork: (listingId, report, evidence = []) =>
+    call('submit_work', { p_listing: listingId, p_report: report, p_evidence: evidence }),
+  /** Klijent odobrava: prelaz u 'completed' + isplata, u jednoj transakciji. */
+  approveWork: (listingId) => call('approve_work', { p_listing: listingId }),
+  /** Klijent traži ispravku (najviše 3 puta). */
+  requestRevision: (listingId, reason) =>
+    call('request_revision', { p_listing: listingId, p_reason: reason }),
+  /** Sporazumni prekid: traži se pristanak druge strane. */
+  requestCancellation: (listingId, reasonCode, detail = null) =>
+    call('request_cancellation', { p_listing: listingId, p_reason_code: reasonCode, p_detail: detail }),
+  respondCancellation: (listingId, accept, note = null) =>
+    call('respond_cancellation', { p_listing: listingId, p_accept: accept, p_note: note }),
+  /** Spor zamrzava posao dok tim ne odluči. */
+  openWorkDispute: (listingId, reasonCode, claim, evidence = []) =>
+    call('open_dispute', { p_listing: listingId, p_reason_code: reasonCode, p_claim: claim, p_evidence: evidence }),
+
+  /** Predani rad (izvještaj + slike) — obje strane ga vide na stranici posla. */
+  async workSubmissions(paymentId) {
+    const { data, error } = await supabase
+      .from('work_submissions')
+      .select('id, revision_no, report, evidence_urls, submitted_at')
+      .eq('payment_id', paymentId)
+      .order('revision_no', { ascending: false })
+    if (error) return []
+    return data || []
+  },
+
+  /** Otvoren zahtjev za prekid, ako postoji. */
+  async pendingCancellation(paymentId) {
+    const { data } = await supabase
+      .from('cancellation_requests')
+      .select('id, requested_by, reason_code, detail, created_at')
+      .eq('payment_id', paymentId).eq('state', 'pending').maybeSingle()
+    return data || null
+  },
+
+  /** Slike kao dokaz idu u isti bucket kao i slike u porukama. */
+  async uploadEvidence(userId, files) {
+    const urls = []
+    for (const file of files) {
+      const path = `${userId}/work/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const { error } = await supabase.storage.from('media').upload(path, file, {
+        cacheControl: '31536000', contentType: file.type,
+      })
+      if (error) throw new Error('Slika se nije mogla poslati.')
+      urls.push(supabase.storage.from('media').getPublicUrl(path).data.publicUrl)
+    }
+    return urls
+  },
   requestPayment: (listingId) => call('request_job_payment', { p_listing_id: listingId }),
   releasePayment: (listingId) => call('release_job_payment', { p_listing_id: listingId }),
   cancelJob: (listingId, reason = null) => call('cancel_job_payment', { p_listing_id: listingId, p_reason: reason }),

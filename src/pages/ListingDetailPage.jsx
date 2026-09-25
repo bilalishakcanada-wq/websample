@@ -17,6 +17,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
+import WorkFlow from '../components/WorkFlow'
 import { paymentService } from '../services/paymentService'
 import { setPageTitle } from '../utils/pageTitle'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -459,7 +460,10 @@ function ListingDetailPage() {
             </section>
 
             {payment && (isOwner || user?.id === payment.provider_id) && (
-              <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} onChanged={refreshJob} />
+              <>
+                <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
+                <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+              </>
             )}
 
             <section className="job-card">

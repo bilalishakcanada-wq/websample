@@ -12590,3 +12590,44 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   .call-btn { width: 60px; height: 60px; }
   .ch-state-notice { margin: 0 0 12px; border-radius: 0; border-left: none; border-right: none; }
 }
+
+/* ---- Tok posla (predaja rada, rok, ispravke, prekid, spor) -------------- */
+.wf-card { display: grid; gap: 14px; }
+.wf-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.wf-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.05rem; }
+.pill.wf-in_progress { background: #eef2f8; color: var(--primary-strong); }
+.pill.wf-submitted { background: #fff4d6; color: #8a6100; }
+.pill.wf-revision { background: #ffe9e4; color: #9a3412; }
+.pill.wf-cancel_requested { background: #fde8e8; color: #9b1c1c; }
+.pill.wf-disputed { background: #f3e8ff; color: #6b21a8; }
+.pill.wf-completed { background: #e6f6ec; color: #1f7a42; }
+.pill.wf-cancelled { background: #eef2f8; color: var(--text-soft); }
+
+/* rok teče vidljivo: klijent mora znati da mu vrijeme ističe */
+.wf-clock { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border-radius: 10px;
+  background: #fff4d6; color: #8a6100; font-weight: 700; font-size: .9rem; }
+.wf-clock.soon { background: #ffe9e4; color: #9a3412; }
+.wf-clock.late { background: #e6f6ec; color: #1f7a42; }
+
+.wf-submission { padding: 14px 16px; border-radius: 14px; background: var(--surface-soft, #f6f8fb); border: 1px solid var(--stroke); }
+.wf-submission strong { display: block; font-size: .85rem; color: var(--text-soft); margin-bottom: 6px; }
+.wf-submission p { margin: 0; line-height: 1.5; white-space: pre-wrap; }
+.wf-evidence { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.wf-evidence img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--stroke); }
+.wf-note { margin: 0; color: var(--text-soft); line-height: 1.5; }
+.wf-note em { color: var(--text); font-style: italic; }
+
+.wf-form { display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: var(--surface-soft, #f6f8fb); border: 1px solid var(--stroke); }
+.wf-form label { font-size: .85rem; font-weight: 700; color: var(--text-soft); }
+.wf-form textarea, .wf-form select { width: 100%; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--stroke); background: var(--surface); font: inherit; color: var(--text); }
+.wf-form textarea { resize: vertical; min-height: 84px; }
+.wf-hint { font-size: .82rem; margin: 0; }
+.wf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.wf-actions-main { margin-top: 2px; }
+.wf-actions .primary-button, .wf-actions .ghost-button, .wf-actions .danger-button { min-height: 44px; }
+
+@media (max-width: 768px) {
+  .wf-actions { flex-direction: column; align-items: stretch; }
+  .wf-actions button { width: 100%; justify-content: center; min-height: 48px; }
+}

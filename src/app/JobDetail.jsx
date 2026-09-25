@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, CalendarDays, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
+import WorkFlow from '../components/WorkFlow'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import './app.css'
@@ -113,7 +114,10 @@ function JobDetail(props) {
         )}
 
         {payment && (isOwner || user?.id === payment.provider_id) && (
-          <div className="jd-payment"><JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} onChanged={refreshJob} /></div>
+          <div className="jd-payment">
+            <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
+            <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+          </div>
         )}
 
         {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (

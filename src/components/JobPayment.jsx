@@ -6,7 +6,6 @@ import { accountService } from '../services/accountService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { toast } from './Toaster'
-import { confirmDialog, promptDialog } from '../utils/dialog'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -97,34 +96,10 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
 }
 
 /** Payment card on the job page: timeline, breakdown and the right action for the viewer. */
-export function JobPaymentCard({ payment, role, onChanged }) {
-  const [busy, setBusy] = useState('')
-  const [error, setError] = useState('')
-  const [dispute, setDispute] = useState(null) // null | 'open' | text
+export function JobPaymentCard({ payment, role }) {
   const current = stepIndex(payment.status)
 
-  const DONE = { release: 'Uplata oslobođena — izvođač je dobio novac.', request: 'Zatraženo — klijent je obaviješten.', cancel: 'Posao otkazan, novac je vraćen.', dispute: 'Prijava poslana. Tim se javlja u roku 48 h.' }
-  const run = async (key, fn) => {
-    setBusy(key)
-    setError('')
-    try { await fn(); haptic('medium'); toast(DONE[key] || 'Sačuvano.', { kind: 'success' }); onChanged?.() } catch (requestError) { setError(requestError.message); toast(requestError.message, { kind: 'error' }) } finally { setBusy('') }
-  }
 
-  const release = async () => {
-    const ok = await confirmDialog({ title: 'Posao je završen?', text: `Oslobađaš ${money(payment.amount)} izvođaču. Ovo se ne može poništiti.`, confirmLabel: `Oslobodi ${money(payment.amount)}` })
-    if (!ok) return
-    run('release', () => paymentService.releasePayment(payment.listing_id))
-  }
-  const cancel = async () => {
-    const why = await promptDialog({
-      title: role === 'client' ? 'Zašto otkazuješ?' : 'Zašto odustaješ od posla?',
-      text: role === 'client' ? 'Novac se vraća na tvoj balans.' : 'Klijentu se vraća novac; računa se u tvoju uspješnost.',
-      placeholder: 'Kratko objašnjenje…', confirmLabel: 'Otkaži posao',
-    })
-    if (why === null) return
-    run('cancel', () => paymentService.cancelJob(payment.listing_id, why))
-  }
-  const sendDispute = () => run('dispute', async () => { await paymentService.openDispute(payment.listing_id, dispute); setDispute(null) })
 
   return (
     <section className="job-card pay-card">
@@ -166,34 +141,8 @@ export function JobPaymentCard({ payment, role, onChanged }) {
         {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)}. Uplata je zamrznuta; Poso.ba tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
       </p>
 
-      {error && <div className="form-error">{error}</div>}
-
-      {dispute !== null && (
-        <div className="pay-dispute">
-          <textarea value={dispute} onChange={(event) => setDispute(event.target.value)} rows={3} maxLength={1000} placeholder="Šta se desilo? Budi konkretan — tim gleda i poruke i slike." />
-          <div className="pay-sheet-actions">
-            <button type="button" className="ghost-button" onClick={() => setDispute(null)}>Odustani</button>
-            <button type="button" className="danger-button" onClick={sendDispute} disabled={busy === 'dispute' || dispute.trim().length < 5}><AlertTriangle size={15} /> Pošalji timu</button>
-          </div>
-        </div>
-      )}
-
-      {dispute === null && (
-        <div className="pay-actions">
-          {role === 'client' && ['funded', 'requested'].includes(payment.status) && (
-            <button type="button" className="primary-button" onClick={release} disabled={Boolean(busy)}><CircleDollarSign size={16} /> {busy === 'release' ? 'Oslobađam…' : `Oslobodi ${money(payment.amount)}`}</button>
-          )}
-          {role === 'provider' && payment.status === 'funded' && (
-            <button type="button" className="primary-button" onClick={() => run('request', () => paymentService.requestPayment(payment.listing_id))} disabled={Boolean(busy)}><BadgeCheck size={16} /> {busy === 'request' ? 'Šaljem…' : 'Posao je urađen — zatraži isplatu'}</button>
-          )}
-          {payment.status === 'funded' && (
-            <button type="button" className="ghost-button" onClick={cancel} disabled={Boolean(busy)}>{role === 'client' ? 'Otkaži i vrati novac' : 'Odustani od posla'}</button>
-          )}
-          {['funded', 'requested'].includes(payment.status) && (
-            <button type="button" className="ghost-button danger" onClick={() => setDispute('')} disabled={Boolean(busy)}><AlertTriangle size={15} /> Prijavi problem</button>
-          )}
-        </div>
-      )}
+      {/* Radnje su namjerno SAMO u kartici „Tok posla" (WorkFlow): dvije kartice
+          sa istim dugmadima su zbunjivale — ovdje ostaje samo stanje novca. */}
     </section>
   )
 }

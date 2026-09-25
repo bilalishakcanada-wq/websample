@@ -127,6 +127,11 @@ export default defineConfig({
     prerenderWelcome(),
     process.env.VITE_NO_PWA ? null : VitePWA({
       registerType: 'autoUpdate',
+      // registerSW.js se ubacuje kao OBIČNA skripta u <head>, bez defer — parser
+      // stane na njoj i čeka mrežni krug, a odmah iza nje je pre-renderovani prvi
+      // ekran. Rezultat: prvi paint kasni za cijeli round-trip. 'script-defer'
+      // dodaje defer, pa parser nastavi i odmah nacrta ekran.
+      injectRegister: 'script-defer',
       // custom service worker (src/sw.js): workbox precache + Web Push handlers
       strategies: 'injectManifest',
       srcDir: 'src',

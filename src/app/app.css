@@ -9,12 +9,12 @@
 .ap-back { display: grid; place-items: center; width: 42px; height: 42px; min-height: 0; border-radius: 12px; background: transparent; color: var(--primary-strong); }
 .ap-cancel { margin-left: auto; min-height: 0; padding: 8px 10px; background: transparent; color: var(--text-soft); font-weight: 700; font-size: 0.88rem; }
 .ap-progress { flex: 0 1 120px; height: 5px; border-radius: 999px; background: #e6eaf1; overflow: hidden; margin-left: 4px; }
-.ap-progress span { display: block; height: 100%; border-radius: 999px; background: #19b37b; transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.ap-progress span { display: block; height: 100%; border-radius: 999px; background: #19b37b; transition: width 0.35s var(--ease-out); }
 .ap-title { margin: 14px 0 6px; font-family: var(--font-display); font-stretch: 85%; font-size: 1.85rem; line-height: 1.05; letter-spacing: -0.02em; color: var(--primary-strong); }
 .ap-sub { margin: 0 0 18px; color: var(--text-soft); font-size: 0.95rem; }
 .ap-label { display: block; margin: 16px 0 8px; font-size: 0.82rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.04em; }
 .ap-hint { display: block; margin-top: 8px; text-align: right; font-size: 0.74rem; color: var(--text-soft); }
-.ap-body { flex: 1; animation: ap-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.ap-body { flex: 1; animation: ap-in 0.28s var(--ease-out) backwards; }
 @keyframes ap-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
 .ap-foot { position: sticky; bottom: 0; margin-top: auto; display: grid; gap: 10px; padding: 12px 0 calc(6px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(180deg, rgba(255, 255, 255, 0), var(--surface) 30%); }
 .ap-foot-split { grid-template-columns: 1fr 1fr; }
@@ -60,7 +60,7 @@
 .ap-goal:active { transform: scale(0.98); }
 
 /* intro slides */
-.ap-intro { flex: 1; display: grid; align-content: center; justify-items: center; text-align: center; gap: 8px; padding: 10px 6px 40px; animation: ap-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.ap-intro { flex: 1; display: grid; align-content: center; justify-items: center; text-align: center; gap: 8px; padding: 10px 6px 40px; animation: ap-in 0.3s var(--ease-out) backwards; }
 .ap-intro-art { width: min(72vw, 290px); aspect-ratio: 1; margin-bottom: 10px; }
 .ap-intro-art svg { width: 100%; height: 100%; }
 .ap-intro h1 { margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--primary-strong); }
@@ -94,7 +94,7 @@
 
 /* sheets */
 .ap-sheet-backdrop { position: fixed; inset: 0; z-index: 96; background: rgba(6, 21, 48, 0.45); display: flex; align-items: flex-end; animation: fade-in 0.2s ease both; }
-.ap-sheet { width: 100%; max-height: 78dvh; overflow-y: auto; padding: 8px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; background: var(--surface); animation: sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.ap-sheet { width: 100%; max-height: 78dvh; overflow-y: auto; padding: 8px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; background: var(--surface); animation: sheet-up 0.28s var(--ease-out) both; }
 .ap-sheet-handle { width: 44px; height: 5px; margin: 6px auto 12px; border-radius: 999px; background: #d5dce8; }
 .ap-sheet h2 { margin: 0 0 10px; font-size: 1.15rem; }
 .ap-sheet-list { display: grid; gap: 4px; }
@@ -111,7 +111,7 @@
 
 /* ---------- welcome ---------- */
 .wl { min-height: 100dvh; display: flex; flex-direction: column; background: var(--wl-color, #0d2a52); color: white; transition: background 0.6s ease; }
-.wl-stage { flex: 1; display: grid; justify-items: center; align-content: start; gap: 6px; padding: calc(12px + env(safe-area-inset-top, 0px)) 22px 12px; animation: wl-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.wl-stage { flex: 1; display: grid; justify-items: center; align-content: start; gap: 6px; padding: calc(12px + env(safe-area-inset-top, 0px)) 22px 12px; animation: wl-in 0.5s var(--ease-out) both; }
 @keyframes wl-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
 .wl-brand { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-display); font-stretch: 85%; font-weight: 800; font-size: 1.1rem; letter-spacing: 0.01em; opacity: 0.95; }
 .wl-arc { position: relative; z-index: 2; width: min(100%, 330px); margin: 0 0 -8px; line-height: 0; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.25)); }
@@ -556,7 +556,7 @@
 
 /* ---------- "Više" menus on phones are action sheets (backdrop, drag handle, big rows) ---------- */
 @media (max-width: 768px) {
-  .jd-menu { position: fixed; left: 0; right: 0; top: auto !important; bottom: 0; z-index: 96; min-width: 0; padding: 6px 12px calc(14px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; box-shadow: 0 -20px 60px rgba(6, 21, 48, 0.35); animation: sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .jd-menu { position: fixed; left: 0; right: 0; top: auto !important; bottom: 0; z-index: 96; min-width: 0; padding: 6px 12px calc(14px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; box-shadow: 0 -20px 60px rgba(6, 21, 48, 0.35); animation: sheet-up 0.28s var(--ease-out) both; }
   /* the dim backdrop lives on the toolbar (the animated sheet would trap a fixed child) */
   .jd-top:has(.jd-menu)::before, .ch-head:has(.jd-menu)::before { content: ''; position: fixed; inset: 0; z-index: 90; background: rgba(6, 21, 48, 0.45); animation: fade-in 0.2s ease both; }
   .jd-menu::after { content: ''; display: block; order: -1; width: 42px; height: 5px; margin: 6px auto 12px; border-radius: 999px; background: #d9dee8; }

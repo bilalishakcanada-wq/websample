@@ -34,9 +34,12 @@ function MobileNav() {
   useEffect(() => { warmMainRoutes() }, [])
 
   if (hidden) return null
+  const active = tabs.findIndex(([to]) => (to === '/' ? pathname === '/' : pathname.startsWith(to)))
 
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">
+      {/* one pill that glides to the active tab */}
+      {active >= 0 && <span className="mobile-nav-indicator" aria-hidden="true" style={{ '--tab': active }} />}
       {tabs.map(([to, label, Icon]) => (
         <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} onClick={() => haptic('light')} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">

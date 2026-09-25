@@ -11,21 +11,36 @@ import { useBackToClose } from '../hooks/useBackToClose'
 function DialogHost() {
   const [dialog, setDialog] = useState(null)
   const [value, setValue] = useState('')
+  const [closing, setClosing] = useState(false)
   const inputRef = useRef(null)
+  const closeTimer = useRef(0)
 
-  useEffect(() => registerDialogHost((request) => { setValue(request.defaultValue || ''); setDialog(request) }), [])
-  useBackToClose(Boolean(dialog), () => dismiss())
+  useEffect(() => registerDialogHost((request) => {
+    window.clearTimeout(closeTimer.current)
+    setClosing(false)
+    setValue(request.defaultValue || '')
+    setDialog(request)
+  }), [])
+  useEffect(() => () => window.clearTimeout(closeTimer.current), [])
+  useBackToClose(Boolean(dialog) && !closing, () => dismiss())
 
   useEffect(() => {
-    if (!dialog) return undefined
+    if (!dialog || closing) return undefined
     const onKey = (event) => { if (event.key === 'Escape') dismiss() }
     document.addEventListener('keydown', onKey)
     const timer = window.setTimeout(() => (inputRef.current || document.querySelector('.dlg-confirm'))?.focus?.(), 60)
     return () => { document.removeEventListener('keydown', onKey); window.clearTimeout(timer) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialog])
+  }, [dialog, closing])
 
-  const close = (result) => { const current = dialog; setDialog(null); current?.resolve(result) }
+  // resolve right away, then let the sheet/card play its way out before unmounting
+  const close = (result) => {
+    if (!dialog || closing) return
+    dialog.resolve(result)
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    setClosing(true)
+    closeTimer.current = window.setTimeout(() => { setDialog(null); setClosing(false) }, reduce ? 0 : 200)
+  }
   const dismiss = () => close(dialog?.kind === 'confirm' ? false : null)
 
   if (!dialog) return null
@@ -33,7 +48,7 @@ function DialogHost() {
   const canSubmit = !isPrompt || dialog.options || !dialog.required || value.trim().length > 0
 
   return (
-    <div className="dlg-backdrop" onClick={dismiss} role="presentation">
+    <div className={`dlg-backdrop ${closing ? 'is-closing' : ''}`} inert={closing || undefined} onClick={dismiss} role="presentation">
       <div className={`dlg ${dialog.danger ? 'is-danger' : ''}`} role="dialog" aria-modal="true" aria-labelledby="dlg-title" onClick={(event) => event.stopPropagation()}>
         <span className="dlg-handle" aria-hidden="true" />
         {dialog.danger && <span className="dlg-icon"><AlertTriangle size={22} /></span>}

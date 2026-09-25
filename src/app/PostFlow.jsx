@@ -13,6 +13,8 @@ import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
 import { haptic } from '../utils/native'
 import { toast } from '../components/Toaster'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
+import { useStepDirection } from '../hooks/useStepDirection'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 import { scrollToTop } from '../utils/scroll'
@@ -49,6 +51,7 @@ function PostFlow() {
   const editId = searchParams.get('edit')
   const draft = useMemo(() => (editId ? null : loadDraft()), [editId])
   const [step, setStep] = useState(() => (draft?.step ?? 0))
+  const stepDir = useStepDirection(step)
   const [form, setForm] = useState(() => ({ ...emptyForm, ...(draft?.form || {}) }))
   const [files, setFiles] = useState([])
   const [existingImages, setExistingImages] = useState([])
@@ -63,6 +66,7 @@ function PostFlow() {
 
   useBackToClose(cityOpen, () => setCityOpen(false))
   useBackToClose(catOpen, () => setCatOpen(false))
+  const catSheet = usePresence(catOpen, 220)
 
   // editing an existing job: load it into the flow
   useEffect(() => {
@@ -151,7 +155,7 @@ function PostFlow() {
   const progress = ((step + 1) / STEPS.length) * 100
 
   return (
-    <div className="ap ap-screen ap-post">
+    <div className="ap ap-screen ap-post" data-dir={stepDir}>
       <header className="ap-top">
         <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <div className="ap-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
@@ -290,8 +294,8 @@ function PostFlow() {
       </div>
 
       {cityOpen && <CitySheet value={form.location} onPick={(city) => { update({ location: city }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
-      {catOpen && (
-        <div className="ap-sheet-backdrop" onClick={() => setCatOpen(false)}>
+      {catSheet.mounted && (
+        <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>
           <div className="ap-sheet" onClick={(event) => event.stopPropagation()}>
             <div className="ap-sheet-handle" />
             <h2>Kategorija</h2>

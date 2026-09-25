@@ -40,7 +40,9 @@ A separate hole in production today should be fixed **before any of this**, beca
 > caller's own row, and `protect_profile_system_fields()` doesn't reset
 > `identity_state` or `identity_approved_at`. A signed-in user can most likely PATCH
 > their own profile to `identity_state = 'approved'` and pass `identity_ok()`.
-> (Inferred from grants, policy and trigger source. I didn't send the request.)
+> Confirmed 25.09 in a rolled-back transaction: a user PATCH set `approved` and
+> `identity_ok()` returned true. No profile is `approved` today, so it hasn't been
+> used. Fix: `supabase/migration_identity_state_protection.sql`.
 >
 > Related: `identity_ok(p_user)` returns true whenever the **caller** is staff
 > (`public.is_staff()` looks at `auth.uid()`, not `p_user`), so any check a staff

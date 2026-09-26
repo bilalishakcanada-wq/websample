@@ -30,7 +30,7 @@ function Stanje({ predmet }) {
         <BadgeCheck size={20} />
         <div>
           <strong>Identitet je potvrđen</strong>
-          <p>Potvrđeno {formatBosnianDate(predmet.reviewed_at)}. Možeš objavljivati poslove i slati ponude.</p>
+          <p>Potvrđeno {formatBosnianDate(predmet.reviewed_at)} Možeš objavljivati poslove i slati ponude.</p>
         </div>
       </div>
     )
@@ -41,7 +41,7 @@ function Stanje({ predmet }) {
         <Clock size={20} />
         <div>
           <strong>Provjera je u toku</strong>
-          <p>Poslano {formatBosnianDate(predmet.submitted_at)}. Naš tim provjerava podatke — obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
+          <p>Poslano {formatBosnianDate(predmet.submitted_at)} Naš tim provjerava podatke — obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
         </div>
       </div>
     )

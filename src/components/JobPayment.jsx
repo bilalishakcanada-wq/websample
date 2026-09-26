@@ -131,14 +131,14 @@ export function JobPaymentCard({ payment, role }) {
 
       <p className="pay-note muted-text">
         {payment.status === 'funded' && (role === 'client'
-          ? `Novac je rezervisan na Poso.ba od ${formatBosnianDate(payment.funded_at)}. Kad posao bude urađen, oslobodi uplatu — izvođač je dobija odmah.`
+          ? `Novac je rezervisan na Poso.ba od ${formatBosnianDate(payment.funded_at)} Kad posao bude urađen, oslobodi uplatu — izvođač je dobija odmah.`
           : `Klijent je platio i novac je sigurno rezervisan (${formatBosnianDate(payment.funded_at)}). Uradi posao, pa zatraži isplatu.`)}
         {payment.status === 'requested' && (role === 'client'
           ? `Izvođač javlja da je posao završen (${formatBosnianDate(payment.requested_at)}). Provjeri i oslobodi uplatu — ili prijavi problem.`
           : `Zatražio si isplatu ${formatBosnianDate(payment.requested_at)} Čeka se da klijent potvrdi.`)}
-        {payment.status === 'released' && `Uplata oslobođena ${formatBosnianDate(payment.released_at)}. ${role === 'provider' ? `${money(payment.net_amount)} je na tvom balansu.` : 'Hvala — ostavi recenziju izvođaču.'}`}
+        {payment.status === 'released' && `Uplata oslobođena ${formatBosnianDate(payment.released_at)} ${role === 'provider' ? `${money(payment.net_amount)} je na tvom balansu.` : 'Hvala — ostavi recenziju izvođaču.'}`}
         {payment.status === 'refunded' && `Posao otkazan ${formatBosnianDate(payment.refunded_at)} — ${money(payment.amount)} vraćeno klijentu. ${payment.resolution || ''}`}
-        {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)}. Uplata je zamrznuta; Poso.ba tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
+        {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)} Uplata je zamrznuta; Poso.ba tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
       </p>
 
       {/* Radnje su namjerno SAMO u kartici „Tok posla" (WorkFlow): dvije kartice

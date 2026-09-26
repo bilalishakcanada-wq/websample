@@ -12249,8 +12249,9 @@ button { touch-action: manipulation; }
 
 /* wallet: request top-up / payout via support */
 .wallet-cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; }
-.wallet-cta a { display: inline-flex; align-items: center; gap: 8px; }
-@media (max-width: 560px) { .wallet-cta a { flex: 1 1 auto; justify-content: center; } }
+.wallet-cta a, .wallet-cta button { display: inline-flex; align-items: center; gap: 8px; }
+@media (max-width: 560px) { .wallet-cta a, .wallet-cta button { flex: 1 1 auto; justify-content: center; } }
+.wallet-action { max-width: 420px; margin: 0 0 18px; }
 
 /* staff console: crash reports */
 .admin-stack { margin-top: 6px; }

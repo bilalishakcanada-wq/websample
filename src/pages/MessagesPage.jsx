@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
@@ -59,6 +59,8 @@ const EMPTY = []
 function MessagesPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   // inbox and the open thread live in the query cache: switching threads (or coming back to the
   // page) paints instantly; Realtime rows are appended straight into the cache
   const queryClient = useQueryClient()
@@ -115,11 +117,16 @@ function MessagesPage() {
   }, [thread])
 
   const openConversation = (id) => {
-    setActiveId(id)
+    const fromInbox = Boolean(location.state?.fromInbox)
     setError('')
     setNotice('')
-    // opening a thread is a new history entry so the phone's back button returns to the inbox
-    setSearchParams(id ? { c: id } : {}, { replace: !id })
+    // closing a thread opened from the inbox is a plain step back, so history never doubles up
+    if (!id && fromInbox) { navigate(-1); return }
+    setActiveId(id)
+    // opening a thread from the inbox is one new history entry (back returns to the inbox);
+    // switching to another thread, or closing one that came from a link, replaces it
+    if (id) setSearchParams({ c: id }, activeId ? { replace: true, state: { fromInbox } } : { state: { fromInbox: true } })
+    else setSearchParams({}, { replace: true })
   }
 
   // "Otvori poruke" on a job: ?listing=… opens that job's thread as soon as the inbox is in

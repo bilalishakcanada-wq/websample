@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import SuccessSplash from '../components/SuccessSplash'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { useGoBack } from '../hooks/useGoBack'
 import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
@@ -80,6 +81,7 @@ const BID_STATUS_LABEL = {
 function ListingDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const goBack = useGoBack()
   const [searchParams, setSearchParams] = useSearchParams()
   const justPublished = searchParams.get('published') === '1'
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
@@ -426,7 +428,7 @@ function ListingDetailPage() {
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -444,7 +446,7 @@ function ListingDetailPage() {
       )}
       <main className="content-container">
         <div className="job-top">
-          <button type="button" className="job-back" onClick={() => navigate(-1)}><ArrowLeft size={16} /> Nazad</button>
+          <button type="button" className="job-back" onClick={goBack}><ArrowLeft size={16} /> Nazad</button>
           <div className="job-top-actions">
             <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>
             {isOwner

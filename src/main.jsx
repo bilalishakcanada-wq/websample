@@ -8,11 +8,13 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { QueryClientProvider } from '@tanstack/react-query'
 import { persistOptions, persister, queryClient } from './lib/queryClient'
 import { setupNative } from './utils/native'
+import { seedHistory } from './utils/backNav'
 import { watchServiceWorkerUpdates } from './utils/appUpdates'
 import { installErrorReporter } from './utils/errorReporter'
 import { watchHandoff } from './utils/authHandoff'
 import { installImageFade } from './utils/imageFade'
 
+seedHistory()
 setupNative()
 watchServiceWorkerUpdates()
 installErrorReporter()

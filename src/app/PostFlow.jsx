@@ -12,7 +12,8 @@ import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
 import { haptic } from '../utils/native'
 import { toast } from '../components/Toaster'
-import { useBackToClose } from '../hooks/useBackToClose'
+import { useBackSteps, useBackToClose } from '../hooks/useBackToClose'
+import { useGoBack } from '../hooks/useGoBack'
 import { usePresence } from '../hooks/usePresence'
 import { useStepDirection } from '../hooks/useStepDirection'
 import { useFullscreen } from './useFullscreen'
@@ -72,6 +73,9 @@ function PostFlow() {
   const priceStats = useCategoryPrice(form.category)
   const footRef = useKeyboardAvoid()
 
+  const goBackOut = useGoBack('/')
+  // the phone's back button walks the steps like the arrow does, then leaves the flow
+  const leaveFlow = useBackSteps(step, 0, () => setStep((s) => Math.max(0, s - 1)))
   useBackToClose(cityOpen, () => setCityOpen(false))
   useBackToClose(catOpen, () => setCatOpen(false))
   const catSheet = usePresence(catOpen, 220)
@@ -129,7 +133,7 @@ function PostFlow() {
     scrollToTop()
   }
   const goBack = () => {
-    if (step === 0) { navigate(-1); return }
+    if (step === 0) { goBackOut(); return }
     setStep((s) => s - 1)
   }
 
@@ -168,7 +172,7 @@ function PostFlow() {
       <header className="ap-top">
         <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <div className="ap-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
-        <button type="button" className="ap-cancel" onClick={() => { clearDraft(); navigate('/') }}>Odustani</button>
+        <button type="button" className="ap-cancel" onClick={() => leaveFlow(() => { clearDraft(); goBackOut() })}>Odustani</button>
       </header>
 
       {/* ---------- 1. title ---------- */}

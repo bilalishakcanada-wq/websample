@@ -6,6 +6,9 @@ const friendly = (error) => {
   const text = error?.message || ''
   if (text.includes('INSUFFICIENT')) return 'Nemaš dovoljno sredstava na balansu za ovu ponudu.'
   if (text.includes('BID_NOT_PENDING')) return 'Ova ponuda više nije aktivna.'
+  if (text.includes('PONUDA_PROMIJENJENA')) return 'Izvođač je u međuvremenu promijenio iznos ponude. Osvježi stranicu i provjeri novi iznos prije plaćanja.'
+  if (text.includes('PONUDA_NA_SVOJ_OGLAS')) return 'Ne možeš prihvatiti ponudu na vlastiti posao.'
+  if (text.includes('JEDNOSTRANO_OTKAZIVANJE')) return 'Posao je u toku, pa ga ne možeš sam otkazati. Zatraži sporazumni prekid ili otvori spor.'
   if (text.includes('LISTING_NOT_OPEN')) return 'Posao više nije otvoren za ponude.'
   if (text.includes('ALREADY_FUNDED')) return 'Za ovaj posao je već osigurana uplata.'
   if (text.includes('BAD_STATUS')) return 'Ova radnja trenutno nije moguća — osvježi stranicu.'
@@ -41,7 +44,8 @@ export const paymentService = {
     return Number(data ?? 15)
   },
 
-  acceptAndFund: (bidId) => call('accept_offer_and_fund', { p_bid_id: bidId }),
+  // expectedAmount = iznos koji je klijent vidio; baza odbija ako se ponuda u međuvremenu promijenila
+  acceptAndFund: (bidId, expectedAmount) => call('accept_offer_and_fund', { p_bid_id: bidId, p_expected_amount: expectedAmount }),
 
   // --- tok posla (state machine u bazi: supabase/booking) ---------------------
   /** Izvođač predaje rad. Dokaz je obavezan — baza odbija poruku bez njega. */

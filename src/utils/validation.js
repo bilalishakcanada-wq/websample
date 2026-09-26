@@ -24,6 +24,9 @@ const POZNATE_GRESKE = [
   { test: /CHAT_JOS_NIJE_OTVOREN/i, poruka: 'Dopisivanje počinje kada klijent prihvati ponudu i osigura uplatu.' },
   { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },
   { test: /NISI_UCESNIK_RAZGOVORA/i, poruka: 'Nemaš pristup ovom razgovoru.' },
+  { test: /ROK_U_PROSLOSTI/i, poruka: 'Datum je već prošao — odaberi današnji ili neki kasniji dan.' },
+  { test: /POSAO_ISTEKAO/i, poruka: 'Rok za ovaj posao je prošao. Vlasnik ga mora objaviti ponovo s novim datumom.' },
+  { test: /POSAO_ZATVOREN/i, poruka: 'Ovaj posao više ne prima ponude.' },
 ]
 
 /** Vraća Error sa razumljivom porukom (i eventualno linkom), ili null. */

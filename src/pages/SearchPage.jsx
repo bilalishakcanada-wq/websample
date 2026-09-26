@@ -8,8 +8,8 @@ import { useDebounced } from '../hooks/useDebounced'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  ArrowUpDown, Banknote, CalendarDays, Check, ChevronDown, Laptop, List, MapPin,
-  Map as MapIcon, Search as SearchIcon, SlidersHorizontal, UserRound, Users, X,
+  ArrowUpDown, Banknote, Bookmark, CalendarDays, Clock3, Check, ChevronDown, Laptop, List, MapPin,
+  Map as MapIcon, Search as SearchIcon, Users, X,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
 // maplibre is ~0.8 MB: only fetched when the map is actually on screen
@@ -23,6 +23,9 @@ import { useAuth } from '../context/AuthContext'
 import { FindMascot } from '../app/Mascots'
 import { timeAgo } from '../utils/dateFormat'
 import { SkeletonTaskCard } from '../components/Skeleton'
+import { daysUntilDue, scheduleLabel } from '../utils/schedule'
+import { useSaved } from '../hooks/useSaved'
+import '../components/TaskExtras.css'
 
 const RADIUS_OPTIONS = [
   { value: 10, label: '10 km' },
@@ -39,6 +42,7 @@ const SORT_OPTIONS = [
   { value: 'oldest', label: 'Najstarije' },
   { value: 'price_desc', label: 'Cijena: veća prvo' },
   { value: 'price_asc', label: 'Cijena: manja prvo' },
+  { value: 'due_soon', label: 'Rok uskoro' },
   { value: 'offers', label: 'Najviše ponuda' },
   { value: 'closest', label: 'Najbliže', needsCity: true },
 ]
@@ -127,6 +131,7 @@ function SearchPage() {
 
   // the signed-in person's trades and city personalise "Preporučeno" (nothing is hidden, only ordered)
   const { user } = useAuth()
+  const saved = useSaved()
   const [me, setMe] = useState(null)
   useEffect(() => {
     if (!user) { setMe(null); return undefined }
@@ -225,7 +230,10 @@ function SearchPage() {
     }
     if (filters.noOffers) items = items.filter((item) => item.offers === 0)
 
+    // the plain fallback query has no due-date filter: hide jobs whose date has passed
+    items = items.filter((item) => (daysUntilDue(item) ?? 0) >= 0)
     if (filters.sort === 'offers') items.sort((a, b) => b.offers - a.offers)
+    if (filters.sort === 'due_soon') items.sort((a, b) => (daysUntilDue(a) ?? Infinity) - (daysUntilDue(b) ?? Infinity))
     if (filters.sort === 'closest' && origin) {
       items.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
     }
@@ -405,15 +413,25 @@ function SearchPage() {
                 </div>
                 <ul className="task-card-facts">
                   <li>{item.remote ? <><Laptop size={14} /> Online</> : <><MapPin size={14} /> {item.location}{item.distance != null && item.distance >= 1 && <em> · {Math.round(item.distance)} km</em>}</>}</li>
-                  <li><CalendarDays size={14} /> Objavljeno {timeAgo(item.created_at)}</li>
-                  <li><SlidersHorizontal size={14} /> Fleksibilan termin</li>
+                  <li className={daysUntilDue(item) != null && daysUntilDue(item) <= 1 ? 'is-due-soon' : ''}><CalendarDays size={14} /> {scheduleLabel(item)}{daysUntilDue(item) === 0 && <em> · danas</em>}{daysUntilDue(item) === 1 && <em> · sutra</em>}</li>
+                  <li><Clock3 size={14} /> Objavljeno {timeAgo(item.created_at)}</li>
                 </ul>
                 <div className="task-card-foot">
                   <span className="task-card-status">Otvoren</span>
                   <span className="task-card-offers"><Users size={13} /> {item.offers} {item.offers === 1 ? 'ponuda' : 'ponuda'}</span>
-                  <span className="task-card-avatar"><UserRound size={16} /></span>
+                  <span className="task-card-save-slot" aria-hidden="true" />
                 </div>
               </Link>
+              <button
+                type="button"
+                className={`task-card-save ${saved.isSaved(item.id) ? 'is-saved' : ''}`}
+                onClick={() => saved.toggle(item.id)}
+                aria-pressed={saved.isSaved(item.id)}
+                aria-label={saved.isSaved(item.id) ? 'Ukloni iz sačuvanih' : 'Sačuvaj posao'}
+                title={saved.isSaved(item.id) ? 'Sačuvano' : 'Sačuvaj'}
+              >
+                <Bookmark size={17} fill={saved.isSaved(item.id) ? 'currentColor' : 'none'} />
+              </button>
             </article>
           ))}
         </section>

@@ -1,0 +1,48 @@
+.tx-tod { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.tx-tod-chip { position: relative; display: grid; justify-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; border: 2px solid transparent; background: #eef2f8; color: var(--primary-strong); text-align: center; transition: background 0.15s ease, border-color 0.15s ease; }
+.tx-tod-chip strong { font-size: 0.92rem; }
+.tx-tod-chip span { font-size: 0.72rem; color: var(--text-soft); }
+.tx-tod-chip.is-on { border-color: var(--primary-strong); background: #e3eaff; }
+.tx-tod-check { position: absolute; top: 6px; right: 6px; }
+@media (max-width: 420px) { .tx-tod { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.tx-req { display: grid; gap: 8px; margin-top: 6px; }
+.tx-req-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tx-req-list li { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: #eef7f2; color: #14532d; font-weight: 600; font-size: 0.94rem; }
+.tx-req-list li > svg { flex: none; color: var(--success); }
+.tx-req-list li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.tx-req-list li button { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #14532d; background: transparent; }
+.tx-req-add { display: flex; gap: 8px; }
+.tx-req-add input { flex: 1; min-width: 0; min-height: 48px; padding: 10px 14px; border-radius: 12px; border: 2px solid #e6eaf1; background: #f6f8fb; font-size: 1rem; color: var(--text); }
+.tx-req-add button { flex: none; display: grid; place-items: center; width: 48px; border-radius: 12px; background: var(--primary-strong); color: white; }
+.tx-req-add button:disabled { opacity: 0.4; }
+.tx-req-hint { font-size: 0.76rem; color: var(--text-soft); }
+.tx-req-readonly li { background: #f3f6fa; color: var(--text); }
+
+/* job page bits that come with schedule / must-haves / saved */
+.job-icon.is-saved { border-color: var(--primary); color: var(--primary-strong); background: #eef3ff; }
+.job-expired { border: 1px solid #f3c5c5; background: #fff6f6; }
+.job-expired h2 { display: flex; align-items: center; gap: 8px; color: #9f1d1d; }
+.job-expired .primary-button { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; }
+.jd-reqs { margin: 4px 0 18px; }
+.jd-reqs h3 { margin: 0 0 8px; font-size: 1rem; font-weight: 800; color: var(--primary-strong); }
+.jd-band .jd-save { margin-top: 10px; }
+.jd-band a.ap-btn { text-decoration: none; }
+
+/* search cards: schedule line + save button */
+.task-card { position: relative; }
+.task-card-facts li.is-due-soon { color: #b45309; }
+.task-card-facts li.is-due-soon em { color: #b45309; }
+.task-card-save-slot { margin-left: auto; width: 40px; height: 40px; flex: none; }
+.task-card-save { position: absolute; right: 18px; bottom: 16px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--stroke); background: var(--surface); color: var(--text-soft); transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
+.task-card-save:hover { color: var(--primary-strong); border-color: var(--primary); }
+.task-card-save.is-saved { color: var(--primary-strong); border-color: var(--primary); background: #eef3ff; }
+
+/* My Tasks → Sačuvano */
+.mt-card-wrap { position: relative; }
+.mt-card-wrap .mt-card { padding-bottom: 14px; }
+.mt-unsave { position: absolute; right: 14px; bottom: 12px; padding: 4px 10px; border-radius: 999px; background: #f1f4f9; color: var(--text-soft); font-size: 0.8rem; font-weight: 700; }
+.mt-state.s-off { color: var(--text-soft); }
+.mt-card-wrap .mt-card-foot { padding-right: 76px; }
+.mt .ap-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mt .ap-tabs button { font-size: 0.84rem; line-height: 1.15; padding: 4px 6px; }

@@ -14,5 +14,8 @@ export const keys = {
   unreadNotifications: (userId) => ['me', userId, 'unread-notifications'],
   unreadMessages: (userId) => ['me', userId, 'unread-messages'],
   recommended: (userId) => ['me', userId, 'recommended'],
+  taste: (userId) => ['me', userId, 'taste'],
+  feedPool: (limit) => ['feed', 'latest', limit],
+  providerPool: (categories) => ['feed', 'providers', categories],
   publicProfile: (userId) => ['profile', userId],
 }

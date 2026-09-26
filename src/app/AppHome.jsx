@@ -5,8 +5,8 @@ import { EarnMascot } from './Mascots'
 import { useAuth } from '../context/AuthContext'
 import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
-import { useMyBids, useMyListings, useRecommendedListings } from '../hooks/queries'
-import { useLiveListings } from '../hooks/useLiveListings'
+import { useMyBids, useMyListings } from '../hooks/queries'
+import { useJobFeed } from '../hooks/useFeed'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { dropBootScreen } from '../utils/boot'
@@ -127,13 +127,9 @@ function PosterHome({ firstName }) {
 
 function TaskerHome({ user, firstName }) {
   const navigate = useNavigate()
-  const { combined: jobs, loading } = useLiveListings({ limit: 8, fallbackToDemo: false })
-  const recommendedQuery = useRecommendedListings(user.id, 6)
+  const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
-  const recommended = recommendedQuery.data || []
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
-
-  const feed = recommended.length > 0 ? recommended : jobs
 
   return (
     <div className="ap ap-home">
@@ -153,8 +149,8 @@ function TaskerHome({ user, firstName }) {
       <div className="ap-home-body">
         <PushPrompt compact reason="Javit ćemo ti čim se pojavi posao za tebe." />
         <section className="ap-section">
-          <h2 className="ap-h2">{recommended.length > 0 ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
-          <p className="ap-p">{recommended.length > 0 ? 'Odabrani prema tvojim vještinama i gradu' : 'Najnovije objavljeno'}</p>
+          <h2 className="ap-h2">{personalised ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
+          <p className="ap-p">{personalised ? 'Prema tvojim vještinama, gradu i onome što pregledaš' : 'Svježe i s malo ponuda na vrhu'}</p>
           {loading && feed.length === 0 && <div className="ap-list">{[1, 2, 3].map((i) => <SkeletonApJob key={i} />)}</div>}
           {!loading && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
@@ -163,7 +159,7 @@ function TaskerHome({ user, firstName }) {
                 <div className="ap-job-main">
                   <strong>{job.title}</strong>
                   <span><MapPin size={13} /> {job.location || 'Bez lokacije'}</span>
-                  <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.match_score != null ? ` · ${Math.round(job.match_score)}% za tebe` : ''}</span>
+                  <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.reasons?.[0] ? ` · ${job.reasons[0]}` : ''}</span>
                 </div>
                 <em className="ap-price">{typeof job.price === 'string' ? job.price : money(job.price)}</em>
               </Link>

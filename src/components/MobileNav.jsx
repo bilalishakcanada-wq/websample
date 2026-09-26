@@ -40,17 +40,23 @@ function MobileNav() {
     <nav className="mobile-nav" aria-label="Mobilna navigacija">
       {/* one pill that glides to the active tab */}
       {active >= 0 && <span className="mobile-nav-indicator" aria-hidden="true" style={{ '--tab': active }} />}
-      {tabs.map(([to, label, Icon]) => (
-        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} onClick={() => haptic('light')} onPointerDown={() => prefetchRoute(to)}>
+      {tabs.map(([to, label, Icon], index) => (
+        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} onClick={() => { haptic('light'); if (index === active) scrollHome() }} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">
             <Icon size={22} strokeWidth={isActiveStroke(to, pathname)} />
-            {to === '/messages' && unread > 0 && <b className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}
+            {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}
           </span>
           <span>{label}</span>
         </NavLink>
       ))}
     </nav>
   )
+}
+
+// tapping the tab you're already on jumps back to the top, like every social app
+const scrollHome = () => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
 }
 
 const isActiveStroke = (to, pathname) => ((to === '/' ? pathname === '/' : pathname.startsWith(to)) ? 2.4 : 1.8)

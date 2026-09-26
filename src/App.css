@@ -12820,3 +12820,13 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* ---------- small feedback touches ---------- */
+/* a new unread count pops in on the tab bar (the badge is keyed by its number) */
+@keyframes badge-pop { 0% { transform: scale(0.4); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.mobile-nav-badge { animation: badge-pop var(--dur-slow) var(--ease-spring) both; }
+/* picking an option gives a short squeeze, so the tap clearly registered */
+@keyframes select-pop { 0% { transform: scale(0.96); } 55% { transform: scale(1.03); } 100% { transform: scale(1); } }
+.ap-option.active, .ap-card.active, .wizard-option.selected, .trade-chip.active, .check-pill.active, .dlg-option:active { animation: select-pop var(--dur-slow) var(--ease-spring); }
+/* the toast's icon lands a beat after the toast itself */
+.toast > svg:first-child { animation: check-pop var(--dur-slow) var(--ease-spring) 80ms backwards; }

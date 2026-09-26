@@ -6,7 +6,7 @@ import WorkFlow from '../components/WorkFlow'
 import { RequirementsList } from '../components/TaskExtras'
 import ReachRadar from '../components/ReachRadar'
 import { QuoteRequestCard } from '../components/QuoteRequest'
-import { travelLabel } from '../utils/reach'
+import { reachFor, travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import './app.css'
@@ -31,6 +31,9 @@ function JobDetail(props) {
   const [askError, setAskError] = useState('')
 
   const open = listing.status === 'published' && !acceptedBid
+  // a provider outside this job's reach is told so up front, not invited to offer
+  const reach = !isOwner && user && myCity ? reachFor(listing, myCity) : null
+  const tooFar = reach?.status === 'too_far'
   const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
   const band = expired
@@ -43,6 +46,7 @@ function JobDetail(props) {
             : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
     : myBid ? [`Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
+      : open && tooFar ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko.`]
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
 

@@ -32,6 +32,7 @@ import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
 import { identityService } from '../services/identityService'
 import { prepoznajGresku } from '../utils/validation'
+import { recordInterest } from '../utils/interests'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -160,6 +161,10 @@ function ListingDetailPage() {
   useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+  // opening someone else's job teaches the feed what this person is into (kept on this device)
+  useEffect(() => {
+    if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
+  }, [listing?.id, isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // the other side moves the job forward -> refresh payment + bids + listing status
   const refreshJob = async () => {
@@ -215,6 +220,7 @@ function ListingDetailPage() {
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
+      recordInterest('bid', { category: listing?.category })
       bidService.listForListing(id).then((rows) => { setBids(rows); queryClient.setQueryData(keys.listing(id), (cur) => ({ listing: cur?.listing || listing, bids: rows })) }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['me'] })
       setBidForm({ amount: '', message: '' })
@@ -350,7 +356,13 @@ function ListingDetailPage() {
   }
 
   if (loading) return isPhone ? <SkeletonJobPhone /> : <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
-  if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
+  // a failed request is not a missing job: on a weak mobile connection people need a retry, not a dead end
+  if (error) {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
+    const retry = () => { setError(''); setLoading(true); core.refetch() }
+    return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Posao se nije učitao</h1><p>{offline ? 'Nema internet veze. Provjeri vezu i pokušaj ponovo.' : 'Veza sa serverom je prekinuta. Pokušaj ponovo.'}</p><button type="button" className="primary-button" onClick={retry}>Pokušaj ponovo</button><Link to="/search" className="secondary-button">Nazad na pretragu</Link></main></div>
+  }
+  if (!listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>Oglas više nije dostupan ili je privatan.</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
   const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
   const when = (whenLine || '').trim() || 'Fleksibilan termin'

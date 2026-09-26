@@ -86,7 +86,7 @@ function ListingDetailPage() {
   const justPublished = searchParams.get('published') === '1'
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
-  const offerGate = useOfferGate(user?.id)
+  const offerGate = useOfferGate(user?.id, id)
   const [listing, setListing] = useState(null)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
@@ -206,6 +206,14 @@ function ListingDetailPage() {
     // na verifikaciju (i nazad na ovaj posao), umjesto da piše ponudu uzalud.
     if (offerGate === 'needed' || offerGate === 'rejected') {
       navigate(`/account/verifikacija?next=${encodeURIComponent(`/listings/${id}`)}`)
+      return
+    }
+    if (offerGate === 'no_city') {
+      navigate(`/account/profil?next=${encodeURIComponent(`/listings/${id}`)}`)
+      return
+    }
+    if (offerGate === 'too_far') {
+      toast('Ovaj posao je predaleko od grada u tvom profilu za ovaj budžet. Pogledaj poslove bliže tebi.', { kind: 'info' })
       return
     }
     if (offerGate === 'pending') {

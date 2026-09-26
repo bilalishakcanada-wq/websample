@@ -19,4 +19,5 @@ export const keys = {
   providerPool: (categories) => ['feed', 'providers', categories],
   publicProfile: (userId) => ['profile', userId],
   offerGate: (userId) => ['me', userId, 'offer-gate'],
+  offerReach: (userId, listingId) => ['me', userId, 'offer-reach', listingId],
 }

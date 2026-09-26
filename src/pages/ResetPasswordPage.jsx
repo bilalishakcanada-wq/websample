@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../services/authService'
 import AuthLayout from '../components/AuthLayout'
+import PasswordField from '../components/PasswordField'
 
 function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -26,11 +27,7 @@ function ResetPasswordPage() {
   return (
     <AuthLayout title="Postavi novu lozinku">
       <form onSubmit={handleSubmit} className="auth-form">
-        <div className="field">
-          <input id="password" type="password" placeholder=" " value={password} onChange={(event) => setPassword(event.target.value)} required />
-          <label htmlFor="password">Nova lozinka</label>
-          <small>Najmanje 8 znakova, veliko i malo slovo i broj.</small>
-        </div>
+        <PasswordField label="Nova lozinka" value={password} onChange={(event) => setPassword(event.target.value)} isNew />
         {error && <div className="form-error">{error}</div>}
         <button type="submit" className="primary-button auth-submit" disabled={loading}>{loading ? 'Čuvam...' : 'Promijeni lozinku'}</button>
       </form>

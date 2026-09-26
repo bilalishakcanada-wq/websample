@@ -12830,3 +12830,24 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .ap-option.active, .ap-card.active, .wizard-option.selected, .trade-chip.active, .check-pill.active, .dlg-option:active { animation: select-pop var(--dur-slow) var(--ease-spring); }
 /* the toast's icon lands a beat after the toast itself */
 .toast > svg:first-child { animation: check-pop var(--dur-slow) var(--ease-spring) 80ms backwards; }
+
+/* ---------- password fields: show/hide eye + live rules ---------- */
+.field-password input { padding-right: 3.2rem; }
+.field-eye { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; border-radius: 10px; background: transparent; color: var(--text-soft); transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease; }
+.field-eye:hover { color: var(--primary); background: var(--primary-soft); }
+.field-eye svg { animation: check-pop var(--dur-base) var(--ease-spring); }
+.pw-rules { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.pw-rules li { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px 3px 6px; border-radius: 999px; background: var(--surface-soft); color: var(--text-soft); font-size: 0.74rem; font-weight: 700; transition: background-color var(--dur-base) ease, color var(--dur-base) ease; }
+.pw-rules li svg { opacity: 0.35; transition: opacity var(--dur-base) ease, transform var(--dur-slow) var(--ease-spring); transform: scale(0.8); }
+.pw-rules li.ok { background: rgba(25, 179, 123, 0.12); color: #0f7a53; }
+.pw-rules li.ok svg { opacity: 1; transform: scale(1); }
+
+/* lazy images fade in once loaded (utils/imageFade.js marks them .is-loaded) */
+.img-fade img[loading='lazy'] { transition: opacity 0.35s ease; }
+.img-fade img[loading='lazy']:not(.is-loaded) { opacity: 0; }
+
+/* info pages: the breadcrumb already links home, so the extra "← Početna" goes on every width;
+   plain (un-carded) sections get the same breathing room as the carded ones */
+.info-header .back-home-link { display: none; }
+.info-header .breadcrumbs { margin-top: 0; }
+.info-page .content-container > * + section:not(.info-section):not(.cta-strip):not(.related-pages) { margin-top: 34px; }

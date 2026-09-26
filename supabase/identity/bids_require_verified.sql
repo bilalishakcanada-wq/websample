@@ -9,9 +9,9 @@
 -- član tima. Objava posla (require_for_jobs) i dalje koristi identity_ok() s
 -- prelaznim rokom — to je posebna odluka.
 --
--- PREDUSLOV: prvo primijeniti ../migration_identity_state_protection.sql.
--- Bez nje korisnik sam sebi postavi identity_state = 'approved' i prođe i ovu
--- kapiju.
+-- Oslanja se na ../migration_identity_state_protection.sql (na produkciji od
+-- 25.09.2026. 22:54 UTC): bez nje bi korisnik sam sebi postavio
+-- identity_state = 'approved' i prošao i ovu kapiju.
 --
 -- Provjera ide samo na INSERT (restriktivna politika + trigger s jasnom
 -- porukom). Postojeći izvođači bez verifikacije i dalje mogu POVUĆI ponudu koju

@@ -72,8 +72,8 @@ Provjereno: novi nalog **ne može** ni objaviti posao ni poslati ponudu; postoje
 nalog radi normalno; poslije odobrenja novi nalog prolazi. 18/18 E2E prolazi.
 
 **Na čekanju:** [`bids_require_verified.sql`](bids_require_verified.sql) ukida prelazni
-rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; preduslov je
-`migration_identity_state_protection.sql`. Sučelje (`useOfferGate`) već pita
+rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; oslanja se na
+`migration_identity_state_protection.sql` (već na produkciji). Sučelje (`useOfferGate`) već pita
 `identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
 
 ## Zašto postojeći nalozi nisu zaključani

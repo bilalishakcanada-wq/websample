@@ -29,6 +29,9 @@ import { useFullscreen } from '../app/useFullscreen'
 import JobDetail from '../app/JobDetail'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
+import ActionError from '../components/ActionError'
+import { identityService } from '../services/identityService'
+import { prepoznajGresku } from '../utils/validation'
 import { recordInterest } from '../utils/interests'
 
 const formatDate = formatBosnianDate
@@ -195,6 +198,10 @@ function ListingDetailPage() {
     }
     setBidError('')
     setSheetOpen(true)
+    // Nepotvrđen izvođač saznaje odmah, a ne tek nakon što napiše cijelu ponudu.
+    identityService.blocks('bids').then((blokirano) => {
+      if (blokirano) setBidError(prepoznajGresku({ message: 'VERIFIKACIJA_POTREBNA' }))
+    })
   }
 
   const submitBid = async (event) => {
@@ -220,7 +227,8 @@ function ListingDetailPage() {
       setSheetOpen(false)
       setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
     } catch (requestError) {
-      setBidError(requestError.message)
+      // Cijeli Error, ne samo tekst: odbijanje zbog verifikacije nosi i link (akcija).
+      setBidError(requestError)
     } finally {
       setSending(false)
     }
@@ -397,7 +405,7 @@ function ListingDetailPage() {
               )}
               <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
-              {bidError && <div className="form-error">{bidError}</div>}
+              <ActionError error={bidError} />
               <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>

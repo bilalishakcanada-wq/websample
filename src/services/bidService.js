@@ -21,7 +21,7 @@ export const bidService = {
 
     if (plainError) {
       console.error('Supabase bids fetch failed', { message: plainError.message, code: plainError.code })
-      throw prepoznajGresku(error) || publicError()
+      throw prepoznajGresku(plainError) || publicError()
     }
 
     const bidderIds = [...new Set((bids || []).map((bid) => bid.bidder_id))]

@@ -32,6 +32,7 @@ import JobDetail from '../app/JobDetail'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
+import OfferReplies from '../components/OfferReplies'
 import { useOfferGate, OFFER_CTA } from '../hooks/useOfferGate'
 import { recordInterest } from '../utils/interests'
 
@@ -85,7 +86,7 @@ function ListingDetailPage() {
   const justPublished = searchParams.get('published') === '1'
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
-  const offerGate = useOfferGate(user?.id)
+  const offerGate = useOfferGate(user?.id, id)
   const [listing, setListing] = useState(null)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
@@ -93,6 +94,7 @@ function ListingDetailPage() {
   const [error, setError] = useState('')
   const [sheetOpen, setSheetOpen] = useState(false)
   const [bidForm, setBidForm] = useState({ amount: '', message: '' })
+  const [editingBid, setEditingBid] = useState(false)
   const [sending, setSending] = useState(false)
   const [bidError, setBidError] = useState('')
   const [message, setMessage] = useState('')
@@ -206,11 +208,29 @@ function ListingDetailPage() {
       navigate(`/account/verifikacija?next=${encodeURIComponent(`/listings/${id}`)}`)
       return
     }
+    if (offerGate === 'no_city') {
+      navigate(`/account/profil?next=${encodeURIComponent(`/listings/${id}`)}`)
+      return
+    }
+    if (offerGate === 'too_far') {
+      toast('Ovaj posao je predaleko od grada u tvom profilu za ovaj budžet. Pogledaj poslove bliže tebi.', { kind: 'info' })
+      return
+    }
     if (offerGate === 'pending') {
       toast('Identitet se još provjerava — obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
       return
     }
     setBidError('')
+    setEditingBid(false)
+    setSheetOpen(true)
+  }
+
+  // "Izmijeni ponudu": isti sheet, popunjen trenutnom ponudom, dok klijent nije odlučio.
+  const openEditBid = () => {
+    if (!myBid || myBid.status !== 'pending') return
+    setBidForm({ amount: String(myBid.amount ?? ''), message: myBid.message || '' })
+    setBidError('')
+    setEditingBid(true)
     setSheetOpen(true)
   }
 
@@ -228,6 +248,16 @@ function ListingDetailPage() {
     }
     setSending(true)
     try {
+      if (editingBid) {
+        const updated = await bidService.updateBid(myBid.id, bidForm)
+        setBids((current) => current.map((bid) => (bid.id === updated.id ? { ...bid, ...updated } : bid)))
+        queryClient.invalidateQueries({ queryKey: keys.listing(id) })
+        setBidForm({ amount: '', message: '' })
+        setEditingBid(false)
+        setSheetOpen(false)
+        toast('Ponuda je izmijenjena. Klijent vidi novu verziju.', { kind: 'success' })
+        return
+      }
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
       recordInterest('bid', { category: listing?.category })
@@ -396,7 +426,7 @@ function ListingDetailPage() {
         <div className={`sheet-backdrop ${offerSheet.closing ? 'is-closing' : ''}`} inert={offerSheet.closing || undefined} role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
-            <h2 id="offer-title">Pošalji ponudu</h2>
+            <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : 'Pošalji ponudu'}</h2>
             <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
             <form className="auth-form" onSubmit={submitBid}>
               <label>Tvoja ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
@@ -416,7 +446,7 @@ function ListingDetailPage() {
               <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
               <ActionError error={bidError} />
-              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
+              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>
           </section>
@@ -434,7 +464,7 @@ function ListingDetailPage() {
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} offerLabel={OFFER_CTA[offerGate]}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={OFFER_CTA[offerGate]}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -522,6 +552,7 @@ function ListingDetailPage() {
                         <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
                         <p>{bid.message}</p>
                         <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
+                        {(isOwner || bid.bidder_id === user?.id) && <OfferReplies bid={bid} userId={user?.id} canWrite={bid.status === 'pending'} />}
                       </div>
                       <div className="offer-actions">
                         <b>{formatPrice(bid.amount)}</b>
@@ -634,6 +665,7 @@ function ListingDetailPage() {
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
+                  {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={openEditBid}>Izmijeni</button>}
                   {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={withdrawBid}>Povuci ponudu</button>}
                 </div>
               )}

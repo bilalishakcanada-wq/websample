@@ -12829,3 +12829,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .info-header .back-home-link { display: none; }
 .info-header .breadcrumbs { margin-top: 0; }
 .info-page .content-container > * + section:not(.info-section):not(.cta-strip):not(.related-pages) { margin-top: 34px; }
+
+/* Privatni odgovori ispod ponude (OfferReplies) */
+.offer-replies { margin-top: 8px; }
+.offer-replies-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 4px 0; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.offer-replies-body { display: grid; gap: 8px; margin-top: 6px; }
+.offer-reply { margin: 0; max-width: 90%; padding: 8px 12px; border-radius: 12px; background: var(--surface-soft); line-height: 1.45; overflow-wrap: anywhere; }
+.offer-reply.mine { justify-self: end; background: var(--primary-soft); }
+.offer-reply span { display: block; white-space: pre-wrap; }
+.offer-reply small { display: block; margin-top: 2px; color: var(--text-soft); font-size: 0.75rem; }
+.offer-reply-form { display: flex; gap: 8px; }
+.offer-reply-form input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--stroke); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; font-size: 16px; }

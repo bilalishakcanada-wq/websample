@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, CalendarDays, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
+import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
@@ -18,7 +19,7 @@ const Avatar = ({ url, size = 48 }) => (url
 function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
-    onBack, onShare, onReport, onOpenBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
+    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
@@ -65,6 +66,7 @@ function JobDetail(props) {
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
+        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>Izmijeni ponudu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
         {isOwner && acceptedBid && !payment && listing.status === 'published' && (
           <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
@@ -151,6 +153,7 @@ function JobDetail(props) {
                     <em className="jd-offer-price">{money(bid.amount)}</em>
                   </div>
                   {bid.message && <p className="jd-offer-msg">{bid.message}</p>}
+                  {(isOwner || mine) && <OfferReplies bid={bid} userId={user?.id} canWrite={bid.status === 'pending'} />}
                   <span className={`jd-offer-state s-${bid.status}`}>{BID_LABEL[bid.status] || bid.status} <Clock size={13} /> {formatBosnianDate(bid.created_at)}</span>
                   {isOwner && bid.status === 'pending' && open && (
                     <div className="jd-offer-actions">

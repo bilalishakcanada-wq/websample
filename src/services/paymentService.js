@@ -4,7 +4,11 @@ import { publicError } from '../utils/validation'
 // SQL raises short codes; say what the person can do about it.
 const friendly = (error) => {
   const text = error?.message || ''
-  if (text.includes('INSUFFICIENT')) return 'Nemaš dovoljno sredstava na balansu za ovu ponudu.'
+  if (text.includes('INSUFFICIENT')) return 'Nemaš dovoljno sredstava na balansu. Dopuni balans pa pokušaj ponovo.'
+  if (text.includes('POVECANJE_IZNOS')) return 'Dodatni iznos mora biti između 1 i 2.000 KM.'
+  if (text.includes('POVECANJE_VEC_CEKA')) return 'Već postoji zahtjev za povećanje koji čeka odgovor klijenta.'
+  if (text.includes('POVECANJE_LIMIT')) return 'Za jedan posao možeš tražiti povećanje najviše 3 puta.'
+  if (text.includes('NEMA_ZAHTJEVA')) return 'Zahtjev više nije aktivan — osvježi stranicu.'
   if (text.includes('BID_NOT_PENDING')) return 'Ova ponuda više nije aktivna.'
   if (text.includes('PONUDA_PROMIJENJENA')) return 'Izvođač je u međuvremenu promijenio iznos ponude. Osvježi stranicu i provjeri novi iznos prije plaćanja.'
   if (text.includes('PONUDA_NA_SVOJ_OGLAS')) return 'Ne možeš prihvatiti ponudu na vlastiti posao.'
@@ -57,8 +61,13 @@ export const paymentService = {
   requestRevision: (listingId, reason) =>
     call('request_revision', { p_listing: listingId, p_reason: reason }),
   /** Sporazumni prekid: traži se pristanak druge strane. */
-  requestCancellation: (listingId, reasonCode, detail = null) =>
-    call('request_cancellation', { p_listing: listingId, p_reason_code: reasonCode, p_detail: detail }),
+  // responsible: 'me' (ja prekidam) ili 'other' (druga strana nije ispoštovala dogovor).
+  // Šalje se samo 'other', da poziv radi i na bazi bez pravila otkazivanja.
+  requestCancellation: (listingId, reasonCode, detail = null, responsible = 'me') =>
+    call('request_cancellation', {
+      p_listing: listingId, p_reason_code: reasonCode, p_detail: detail,
+      ...(responsible === 'other' ? { p_responsible: 'other' } : {}),
+    }),
   respondCancellation: (listingId, accept, note = null) =>
     call('respond_cancellation', { p_listing: listingId, p_accept: accept, p_note: note }),
   /** Spor zamrzava posao dok tim ne odluči. */
@@ -80,10 +89,26 @@ export const paymentService = {
   async pendingCancellation(paymentId) {
     const { data } = await supabase
       .from('cancellation_requests')
-      .select('id, requested_by, reason_code, detail, created_at')
+      .select('*')   // responsible i fee_km postoje tek s pravilima otkazivanja
       .eq('payment_id', paymentId).eq('state', 'pending').maybeSingle()
     return data || null
   },
+
+  // --- povećanje cijene tokom posla (supabase/payments/02) ------------------------
+  /** { available, request }: available=false dok pravila nisu u bazi, pa se dugme ne prikazuje. */
+  async pendingPriceIncrease(paymentId) {
+    const { data, error } = await supabase
+      .from('price_increase_requests')
+      .select('id, requested_by, amount_km, reason, created_at')
+      .eq('payment_id', paymentId).eq('state', 'pending').maybeSingle()
+    if (error) return { available: false, request: null }
+    return { available: true, request: data || null }
+  },
+  requestPriceIncrease: (listingId, amount, reason) =>
+    call('request_price_increase', { p_listing: listingId, p_amount: amount, p_reason: reason }),
+  respondPriceIncrease: (requestId, accept) =>
+    call('respond_price_increase', { p_request: requestId, p_accept: accept }),
+  cancelPriceIncrease: (requestId) => call('cancel_price_increase', { p_request: requestId }),
 
   /** Slike kao dokaz idu u isti bucket kao i slike u porukama. */
   async uploadEvidence(userId, files) {

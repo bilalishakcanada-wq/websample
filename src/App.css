@@ -12609,6 +12609,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   border: 1px solid var(--stroke); background: var(--surface); font: inherit; color: var(--text); }
 .wf-form textarea { resize: vertical; min-height: 84px; }
 .wf-hint { font-size: .82rem; margin: 0; }
+.wf-form input[type="number"] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface, #fff); color: var(--text); font: inherit; }
+.wf-form .wf-choice { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
+.wf-form .wf-choice legend { font-size: .85rem; font-weight: 700; color: var(--text-soft); margin-bottom: 6px; }
+.wf-form .wf-choice label { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); min-height: 32px; }
+.wf-note-line { display: block; margin-top: 6px; }
+.wf-increase { display: grid; gap: 6px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: var(--surface-soft, #f6f8fb); }
+.wf-increase strong { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+.wf-increase p { margin: 0; }
 .wf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .wf-actions-main { margin-top: 2px; }
 .wf-actions .primary-button, .wf-actions .ghost-button, .wf-actions .danger-button { min-height: 44px; }

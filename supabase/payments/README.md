@@ -59,3 +59,26 @@ Testirano 26.09.2026. na produkciji unutar transakcije koja je vraćena
 (22 slučaja: callback, ponovljeni callback, pogrešan iznos, direktan poziv bez
 prava, isplata bez verifikacije / bez računa / na tuđe ime / preko zarade / ispod
 minimuma / dvostruka, otkazivanje, odluka tima sa i bez reference).
+
+## Povećanje cijene i otkazivanje (`02_price_increase_and_cancellation_policy.sql`)
+
+Kao na Airtaskeru:
+
+- **Povećanje cijene:** izvođač dok radi traži dodatni iznos (1–2.000 KM) uz razlog.
+  Klijent odobri i iznos se odmah osigura s njegovog balansa, ili odbije. Jedan
+  zahtjev na čekanju, najviše 3 po poslu.
+- **Otkazivanje:** ko traži prekid kaže ko je odgovoran (on ili druga strana), a
+  druga strana prihvata ili odbija (tada spor). Odgovorna strana plaća 10 % cijene,
+  najviše 50 KM, osim u prvom satu nakon prihvatanja ponude. Klijentu se naknada
+  zadrži od povrata; izvođaču se skine s balansa, a ostatak od sljedeće zarade.
+  Na oglasu se upiše `cancel_reason = client | provider`, pa se izvođaču prekid
+  računa kao neuspješan posao (stopa uspješnosti u `provider_metrics`).
+
+Sučelje radi i prije nego što je ovaj SQL u bazi: dugme za povećanje i izbor
+odgovorne strane pojave se tek kad tabela `price_increase_requests` postoji.
+
+Testirano 26.09.2026. na produkciji unutar transakcije koja je vraćena: povećanje
+(odobreno, odbijeno, povučeno, limit, samo izvođač traži, samo klijent odobrava,
+dvostruko odobravanje), otkazivanje izvođača nakon sat vremena (naknada 25 KM
+dugovana, naplaćena od sljedeće zarade, neuspješan posao), otkazivanje u prvom satu
+(bez naknade) i otkazivanje klijenta (povrat 700 − 50 KM).

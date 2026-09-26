@@ -41,6 +41,7 @@ export const persister = storage ? createSyncStoragePersister({
 export const persistOptions = {
   persister,
   maxAge: 24 * 60 * 60 * 1000,
-  buster: import.meta.env.VITE_BUILD_ID || 'dev',
+  // the build id lives in index.html, not in the JS: baked into the entry it renamed ~70 unchanged chunks every deploy
+  buster: (typeof document !== 'undefined' && document.querySelector('meta[name="poso-build"]')?.content) || 'dev',
   dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && query.meta?.persist !== false },
 }

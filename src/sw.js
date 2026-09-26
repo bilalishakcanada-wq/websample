@@ -23,9 +23,9 @@ if (manifest.length > 0) {
   }))
 }
 
-// hashed build assets that are not precached (the map chunk): immutable, cache first
+// hashed build assets that are not precached (the map chunk and its CSS): immutable, cache first
 registerRoute(
-  ({ url, request }) => (request.destination === 'script' || request.destination === 'worker') && url.origin === self.location.origin && /\/assets\/.*-[A-Za-z0-9_-]{8}\.js$/.test(url.pathname),
+  ({ url, request }) => ['script', 'worker', 'style'].includes(request.destination) && url.origin === self.location.origin && /\/assets\/.*-[A-Za-z0-9_-]{8}\.(js|css)$/.test(url.pathname),
   new CacheFirst({ cacheName: 'poso-assets', plugins: [new ExpirationPlugin({ maxEntries: 40, maxAgeSeconds: 30 * 24 * 3600 })] }),
 )
 

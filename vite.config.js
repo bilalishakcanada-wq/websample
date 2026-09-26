@@ -62,19 +62,31 @@ const prerenderWelcome = () => ({
 })
 
 /**
+ * A build id busts the persisted query cache (src/lib/queryClient.js). It goes into index.html as a
+ * meta tag, never into the JS, so chunks whose code did not change keep their names (and caches) across deploys.
+ */
+const buildId = () => ({
+  name: 'poso-build-id',
+  apply: 'build',
+  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="poso-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
+})
+
+/**
  * App.css has grown over many redesigns and still carries rules for screens that no longer exist.
  * At build time, drop every selector naming a class that appears nowhere in the source (any word in
  * src/ or index.html counts, as do dynamic prefixes like `wf-${step}` or 'tier-' + x), so the one
  * stylesheet the first paint waits for is ~10% smaller. The source files stay as they are.
  * Kept always: classes added by libraries at runtime (maplibre), :is()/:where() lists, and anything
  * inside :not(), which never makes a rule dead.
+ * Also: every :hover selector is moved under @media (hover: hover), so taps on phones don't leave
+ * cards lifted or buttons highlighted.
  */
 const pruneUnusedCss = () => ({
   name: 'poso-prune-css',
   apply: 'build',
   enforce: 'pre',
   transform(code, id) {
-    if (process.env.POSO_KEEP_CSS) return null // debug: ship the stylesheet unpruned
+    if (process.env.POSO_KEEP_CSS) return null // debug: ship the stylesheet as written
     if (!/src[\\/](App|index|app[\\/]app)\.css$/.test(id.split('?')[0])) return null
     const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
     const source = [...walk('src').filter((f) => /\.(jsx?|mjs|html)$/.test(f)), 'index.html'].map((f) => readFileSync(f, 'utf8')).join('\n')
@@ -97,7 +109,14 @@ const pruneUnusedCss = () => ({
         const head = prelude.trim()
         if (/^@(media|supports|layer|container)/.test(head)) { const kept = prune(inner); if (kept.trim()) out += `${prelude}{${kept}}` }
         else if (head.startsWith('@')) out += `${prelude}{${inner}}`
-        else { const kept = head.split(',').filter(live); if (kept.length) out += `${kept.join(',')}{${inner}}` }
+        else {
+          const kept = head.split(',').filter(live)
+          // on touch screens a tap leaves :hover stuck (lifted cards, shadows) until the next tap elsewhere
+          const plain = kept.filter((sel) => !sel.includes(':hover'))
+          const hover = kept.filter((sel) => sel.includes(':hover'))
+          if (plain.length) out += `${plain.join(',')}{${inner}}`
+          if (hover.length) out += `@media (hover:hover){${hover.join(',')}{${inner}}}`
+        }
       }
       return out
     }
@@ -141,8 +160,6 @@ function extractRules(css, wanted) {
 // https://vite.dev/config/
 export default defineConfig({
   base,
-  // a build id busts the persisted query cache and lets the app tell versions apart
-  define: { 'import.meta.env.VITE_BUILD_ID': JSON.stringify(process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())) },
   optimizeDeps: {
     // maplibre-gl ships its own worker bundle; pre-bundling breaks it.
     exclude: ['maplibre-gl'],
@@ -169,6 +186,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    buildId(),
     pruneUnusedCss(),
     asyncCss(),
     prerenderWelcome(),
@@ -185,8 +203,9 @@ export default defineConfig({
       filename: 'sw.js',
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        // the 1 MB map chunk is fetched (and runtime-cached) only when someone opens the map
-        globIgnores: ['**/TaskMap-*.js', '**/maplibre-gl-worker-*.js', '**/DesktopHome-*.js', '**/AdminPage-*.js', '**/node_modules/**'],
+        // the 1 MB map chunk (and its CSS) is fetched (and runtime-cached) only when someone opens the map;
+        // the large install icons are read once by the OS at install time, never by the offline app
+        globIgnores: ['**/TaskMap-*.js', '**/TaskMap-*.css', '**/icons/icon-512.png', '**/icons/icon-maskable-*.png', '**/maplibre-gl-worker-*.js', '**/DesktopHome-*.js', '**/AdminPage-*.js', '**/node_modules/**'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],

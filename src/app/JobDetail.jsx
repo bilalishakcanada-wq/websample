@@ -11,7 +11,7 @@ const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${N
 const BID_LABEL = { pending: 'Nova ponuda', accepted: 'Prihvaćena', rejected: 'Odbijena', withdrawn: 'Povučena' }
 
 const Avatar = ({ url, size = 48 }) => (url
-  ? <img src={url} alt="" className="jd-avatar" style={{ width: size, height: size }} />
+  ? <img loading="lazy" decoding="async" src={url} alt="" className="jd-avatar" style={{ width: size, height: size }} />
   : <span className="jd-avatar jd-avatar-empty" style={{ width: size, height: size }}><UserRound size={size * 0.5} /></span>)
 
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */

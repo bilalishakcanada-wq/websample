@@ -10,7 +10,7 @@ import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
 
 const Avatar = ({ src, name, size = 48 }) => (src
-  ? <img src={src} alt="" className="jd-avatar" style={{ width: size, height: size }} />
+  ? <img loading="lazy" decoding="async" src={src} alt="" className="jd-avatar" style={{ width: size, height: size }} />
   : <span className="jd-avatar jd-avatar-empty ch-avatar-letter" style={{ width: size, height: size }}>{(name || '?').charAt(0).toUpperCase() || <UserRound size={20} />}</span>)
 
 /**

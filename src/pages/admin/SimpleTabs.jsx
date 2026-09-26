@@ -130,7 +130,7 @@ export function ModerationTab() {
       {view === 'queue' && queue.map((item) => (
         <div key={item.id} className="admin-row">
           <div className="admin-queue-item">
-            <a href={item.media_url} target="_blank" rel="noreferrer"><img src={item.media_url} alt="" /></a>
+            <a href={item.media_url} target="_blank" rel="noreferrer"><img loading="lazy" decoding="async" src={item.media_url} alt="" /></a>
             <div>
               <strong>{{ avatar: 'Profilna slika', portfolio: 'Portfolio', listing: 'Slika oglasa' }[item.kind] || item.kind}</strong>
               <p className="muted-text">{formatBosnianDate(item.created_at)} · pokušaja: {item.attempts}{item.result?.reason ? ` · ${item.result.reason}` : ''}</p>

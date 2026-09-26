@@ -29,6 +29,12 @@ registerRoute(
   new CacheFirst({ cacheName: 'poso-assets', plugins: [new ExpirationPlugin({ maxEntries: 40, maxAgeSeconds: 30 * 24 * 3600 })] }),
 )
 
+// the app's own photos (categories, cities): not precached, so a repeat visit would re-download them
+registerRoute(
+  ({ url, request }) => request.destination === 'image' && url.origin === self.location.origin && url.pathname.startsWith(`${BASE}images/`),
+  new StaleWhileRevalidate({ cacheName: 'poso-images', plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 30 * 24 * 3600 })] }),
+)
+
 // user media from Supabase Storage: cache first, a week
 registerRoute(
   ({ url }) => url.hostname.endsWith('supabase.co') && url.pathname.startsWith('/storage/'),

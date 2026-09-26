@@ -57,7 +57,7 @@ export const relativeTime = (value) => {
 export function Avatar({ src, size = 40, className = '' }) {
   return (
     <span className={`adm-avatar ${className}`} style={{ '--size': `${size}px` }}>
-      {src ? <img src={src} alt="" /> : <UserRound size={Math.round(size * 0.5)} />}
+      {src ? <img loading="lazy" decoding="async" src={src} alt="" /> : <UserRound size={Math.round(size * 0.5)} />}
     </span>
   )
 }

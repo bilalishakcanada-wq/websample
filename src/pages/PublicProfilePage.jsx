@@ -223,7 +223,7 @@ function PublicProfilePage() {
                     <article className="review-card" key={review.id}>
                       <div className="review-card-head">
                         {review.reviewer?.avatar_url
-                          ? <img src={review.reviewer.avatar_url} alt="" className="review-avatar" />
+                          ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="review-avatar" />
                           : <div className="review-avatar review-avatar-fallback"><UserRound size={16} /></div>}
                         <div>
                           <strong>{review.reviewer?.display_name || 'Korisnik Poso.ba'}</strong>

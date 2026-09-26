@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { listingService } from '../services/listingService'
 import { mockServiceCategories, mockTasks } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -29,19 +29,15 @@ export const toCardListing = (listing) => ({
 })
 
 export function useLiveListings({ limit = 8, fallbackToDemo = true } = {}) {
-  const [listings, setListings] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let active = true
-    listingService.listLatestPublished(limit)
-      .then((rows) => {
-        if (!active) return
-        setListings(rows.map(toCardListing))
-      })
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-  }, [limit])
+  // shared, persisted cache: coming back to the home screen paints the last list at once and refreshes
+  // in the background; lives under 'search' so a new or edited listing refreshes it too
+  const { data, isPending } = useQuery({
+    queryKey: ['search', 'latest', limit],
+    queryFn: () => listingService.listLatestPublished(limit).then((rows) => rows.map(toCardListing)),
+    staleTime: 30 * 1000,
+  })
+  const listings = data || []
+  const loading = isPending
 
   const demoFill = fallbackToDemo ? mockTasks.slice(0, Math.max(0, limit - listings.length)) : []
 

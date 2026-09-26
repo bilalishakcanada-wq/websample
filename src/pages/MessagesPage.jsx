@@ -50,7 +50,7 @@ const shortDate = (value) => {
 
 function Avatar({ src, name, size = 44 }) {
   return src
-    ? <img src={src} alt="" className="chat-avatar" style={{ width: size, height: size }} />
+    ? <img loading="lazy" decoding="async" src={src} alt="" className="chat-avatar" style={{ width: size, height: size }} />
     : <div className="chat-avatar chat-avatar-fallback" style={{ width: size, height: size }}>{(name || '?').charAt(0).toUpperCase()}</div>
 }
 

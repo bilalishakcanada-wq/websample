@@ -49,14 +49,14 @@ function Gallery({ images, title, category, onOpen }) {
   return (
     <div className="job-gallery">
       <button type="button" className="job-gallery-main" onClick={() => onOpen(active)} aria-label="Uvećaj sliku">
-        <img src={current.url} alt={title} />
+        <img src={current.url} fetchPriority="high" alt={title} />
         <span className="job-gallery-count"><Images size={13} /> {active + 1}/{images.length}</span>
       </button>
       {images.length > 1 && (
         <div className="job-gallery-thumbs">
           {images.map((image, index) => (
             <button key={image.id || image.url} type="button" className={index === active ? 'active' : ''} onClick={() => setActive(index)} aria-label={`Slika ${index + 1}`}>
-              <img src={image.url} alt="" />
+              <img loading="lazy" decoding="async" src={image.url} alt="" />
             </button>
           ))}
         </div>
@@ -486,7 +486,7 @@ function ListingDetailPage() {
                   {bids.map((bid) => (
                     <article className={`offer-row bid-row status-${bid.status}`} key={bid.id}>
                       {bid.bidder?.avatar_url
-                        ? <img src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                        ? <img loading="lazy" decoding="async" src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                         : <div className="poster-avatar"><UserRound size={18} /></div>}
                       <div>
                         <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
@@ -517,7 +517,7 @@ function ListingDetailPage() {
                     const fromOwner = item.user_id === listing.user_id
                     return (
                       <div key={item.id} className={`qa-row ${fromOwner ? 'is-owner' : ''}`}>
-                        {item.author?.avatar_url ? <img src={item.author.avatar_url} alt="" className="poster-avatar poster-avatar-photo" /> : <div className="poster-avatar"><UserRound size={16} /></div>}
+                        {item.author?.avatar_url ? <img loading="lazy" decoding="async" src={item.author.avatar_url} alt="" className="poster-avatar poster-avatar-photo" /> : <div className="poster-avatar"><UserRound size={16} /></div>}
                         <div>
                           <strong>{item.author?.display_name || (fromOwner ? 'Vlasnik' : 'Korisnik')}{fromOwner && <span className="qa-owner-tag">vlasnik</span>} <small>{formatBosnianDate(item.created_at)}</small></strong>
                           <p>{item.body}</p>
@@ -549,7 +549,7 @@ function ListingDetailPage() {
                     <Link className="rec-card" key={provider.user_id} to={`/korisnik/${provider.user_id}`}>
                       <div className="rec-card-top">
                         {provider.avatar_url
-                          ? <img src={provider.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                          ? <img loading="lazy" decoding="async" src={provider.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                           : <div className="poster-avatar"><UserRound size={18} /></div>}
                         <span className="rec-score" title="Koliko izvođač odgovara ovom poslu">
                           <Sparkles size={13} /> {Math.round(provider.match_score)}
@@ -625,7 +625,7 @@ function ListingDetailPage() {
 
             <Link to={`/korisnik/${listing.user_id}`} className="job-poster">
               {poster?.avatar_url
-                ? <img src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
+                ? <img loading="lazy" decoding="async" src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                 : <div className="poster-avatar"><UserRound size={22} /></div>}
               <div>
                 <small>Objavio</small>

@@ -22,12 +22,12 @@ const HUMAN = /\b(tim(om|u|a)?|čovjek|covjek|operater|agent|osob[ae]|živ[aou]|
 const timeLabel = (value) => new Date(value).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' })
 
 /** Floating support: the assistant answers from the help centre instantly, the team takes over in the same thread. */
-function SupportChat() {
+function SupportChat({ openRequested = false }) {
   const { user } = useAuth()
   const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
   const onHelpPage = pathname.startsWith('/pomoc')
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(openRequested)
 
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')

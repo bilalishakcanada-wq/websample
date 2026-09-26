@@ -67,7 +67,7 @@ function ProfileView({ bundle, user, onReport }) {
           {(showAll ? reviews : reviews.slice(0, 3)).map((review) => (
             <article key={review.id} className="pv-review">
               <div className="pv-review-head">
-                {review.reviewer?.avatar_url ? <img src={review.reviewer.avatar_url} alt="" className="jd-avatar" style={{ width: 40, height: 40 }} /> : <span className="jd-avatar jd-avatar-empty" style={{ width: 40, height: 40 }}><UserRound size={18} /></span>}
+                {review.reviewer?.avatar_url ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="jd-avatar" style={{ width: 40, height: 40 }} /> : <span className="jd-avatar jd-avatar-empty" style={{ width: 40, height: 40 }}><UserRound size={18} /></span>}
                 <div><strong>{review.reviewer?.display_name || 'Korisnik'}</strong><span><Stars value={review.rating} /> <small>{formatBosnianDate(review.created_at)}</small></span></div>
               </div>
               {review.comment && <blockquote>{review.comment}</blockquote>}

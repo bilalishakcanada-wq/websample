@@ -75,3 +75,10 @@ button {
 #root {
   width: 100%;
 }
+
+/* Long result lists: cards far off screen skip layout and paint until they scroll near,
+   so the search list stays smooth on phones. The size is only a placeholder until measured. */
+.task-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 180px;
+}

@@ -1,0 +1,1 @@
+var e=`/websample/`.replace(/\/$/,``),t=t=>`${e}${t.startsWith(`/`)?t:`/${t}`}`;export{t};

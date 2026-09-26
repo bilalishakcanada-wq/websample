@@ -28,7 +28,7 @@ function ForgotPasswordPage() {
     <AuthLayout title="Zaboravljena lozinka" subtitle="Poslat ćemo ti link za postavljanje nove lozinke.">
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="field">
-          <input id="email" type="email" placeholder=" " value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input id="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={email} onChange={(event) => setEmail(event.target.value)} required />
           <label htmlFor="email">Email adresa</label>
         </div>
         {error && <div className="form-error">{error}</div>}

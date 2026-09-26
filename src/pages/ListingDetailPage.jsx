@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import SuccessSplash from '../components/SuccessSplash'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -29,6 +30,10 @@ import { useFullscreen } from '../app/useFullscreen'
 import JobDetail from '../app/JobDetail'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
+import ActionError from '../components/ActionError'
+import { identityService } from '../services/identityService'
+import { prepoznajGresku } from '../utils/validation'
+import { recordInterest } from '../utils/interests'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -117,6 +122,7 @@ function ListingDetailPage() {
 
   // phone back button closes overlays instead of leaving the job
   useBackToClose(sheetOpen, () => setSheetOpen(false))
+  const offerSheet = usePresence(sheetOpen, 220)
   useBackToClose(Boolean(acceptBid), () => setAcceptBid(null))
   useBackToClose(lightbox !== null, () => setLightbox(null))
 
@@ -157,6 +163,10 @@ function ListingDetailPage() {
   useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+  // opening someone else's job teaches the feed what this person is into (kept on this device)
+  useEffect(() => {
+    if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
+  }, [listing?.id, isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // the other side moves the job forward -> refresh payment + bids + listing status
   const refreshJob = async () => {
@@ -190,6 +200,10 @@ function ListingDetailPage() {
     }
     setBidError('')
     setSheetOpen(true)
+    // Nepotvrđen izvođač saznaje odmah, a ne tek nakon što napiše cijelu ponudu.
+    identityService.blocks('bids').then((blokirano) => {
+      if (blokirano) setBidError(prepoznajGresku({ message: 'VERIFIKACIJA_POTREBNA' }))
+    })
   }
 
   const submitBid = async (event) => {
@@ -208,13 +222,15 @@ function ListingDetailPage() {
     try {
       const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
+      recordInterest('bid', { category: listing?.category })
       bidService.listForListing(id).then((rows) => { setBids(rows); queryClient.setQueryData(keys.listing(id), (cur) => ({ listing: cur?.listing || listing, bids: rows })) }).catch(() => {})
       queryClient.invalidateQueries({ queryKey: ['me'] })
       setBidForm({ amount: '', message: '' })
       setSheetOpen(false)
       setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
     } catch (requestError) {
-      setBidError(requestError.message)
+      // Cijeli Error, ne samo tekst: odbijanje zbog verifikacije nosi i link (akcija).
+      setBidError(requestError)
     } finally {
       setSending(false)
     }
@@ -342,7 +358,13 @@ function ListingDetailPage() {
   }
 
   if (loading) return isPhone ? <SkeletonJobPhone /> : <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
-  if (error || !listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>{error || 'Oglas više nije dostupan ili je privatan.'}</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
+  // a failed request is not a missing job: on a weak mobile connection people need a retry, not a dead end
+  if (error) {
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
+    const retry = () => { setError(''); setLoading(true); core.refetch() }
+    return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Posao se nije učitao</h1><p>{offline ? 'Nema internet veze. Provjeri vezu i pokušaj ponovo.' : 'Veza sa serverom je prekinuta. Pokušaj ponovo.'}</p><button type="button" className="primary-button" onClick={retry}>Pokušaj ponovo</button><Link to="/search" className="secondary-button">Nazad na pretragu</Link></main></div>
+  }
+  if (!listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>Oglas više nije dostupan ili je privatan.</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
   const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
   const when = (whenLine || '').trim() || 'Fleksibilan termin'
@@ -362,8 +384,8 @@ function ListingDetailPage() {
           <span className="lightbox-count">{lightbox + 1} / {images.length}</span>
         </div>
       )}
-      {sheetOpen && (
-        <div className="sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
+      {offerSheet.mounted && (
+        <div className={`sheet-backdrop ${offerSheet.closing ? 'is-closing' : ''}`} inert={offerSheet.closing || undefined} role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
             <h2 id="offer-title">Pošalji ponudu</h2>
@@ -385,7 +407,7 @@ function ListingDetailPage() {
               )}
               <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
-              {bidError && <div className="form-error">{bidError}</div>}
+              <ActionError error={bidError} />
               <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>

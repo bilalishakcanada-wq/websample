@@ -92,12 +92,15 @@ function PublicProfilePage() {
   }
 
   if (error || !bundle?.profile) {
+    // a failed request is not a missing profile: offer a retry instead of a dead end
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false
     return (
       <div className="app-shell page-with-mobile-nav">
         <main className="content-container empty-state">
           <UserRound size={42} />
-          <h2>Profil nije pronađen</h2>
-          <p>{error || 'Ovaj profil ne postoji ili trenutno nije javan.'}</p>
+          <h2>{error ? 'Profil se nije učitao' : 'Profil nije pronađen'}</h2>
+          <p>{error ? (offline ? 'Nema internet veze. Provjeri vezu i pokušaj ponovo.' : 'Veza sa serverom je prekinuta. Pokušaj ponovo.') : 'Ovaj profil ne postoji ili trenutno nije javan.'}</p>
+          {error && <button type="button" className="primary-button" onClick={() => profileQuery.refetch()} disabled={profileQuery.isFetching}>{profileQuery.isFetching ? 'Učitavam…' : 'Pokušaj ponovo'}</button>}
         </main>
       </div>
     )

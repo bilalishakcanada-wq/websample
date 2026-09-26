@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { listingService } from '../services/listingService'
+import { useMemo } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { useJobFeed } from './useFeed'
 import { mockServiceCategories, mockTasks } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { withBase } from '../utils/paths'
@@ -23,21 +24,16 @@ export const toCardListing = (listing) => ({
   price: listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('bs-BA')} KM`,
   location: listing.location || 'Lokacija nije navedena',
   time: formatBosnianDate(listing.created_at),
-  offers: listing.bids?.[0]?.count ?? 0,
+  offers: listing.bid_count ?? listing.bids?.[0]?.count ?? 0,
   image: [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || categoryImage(listing.category),
   isLive: true,
 })
 
+/** The job feed as cards: ranked for whoever is looking (see useFeed), newest-first no longer. */
 export function useLiveListings({ limit = 8, fallbackToDemo = true } = {}) {
-  // shared, persisted cache: coming back to the home screen paints the last list at once and refreshes
-  // in the background; lives under 'search' so a new or edited listing refreshes it too
-  const { data, isPending } = useQuery({
-    queryKey: ['search', 'latest', limit],
-    queryFn: () => listingService.listLatestPublished(limit).then((rows) => rows.map(toCardListing)),
-    staleTime: 30 * 1000,
-  })
-  const listings = data || []
-  const loading = isPending
+  const { user } = useAuth()
+  const { feed, loading } = useJobFeed({ userId: user?.id ?? null, limit })
+  const listings = useMemo(() => feed.map(toCardListing), [feed])
 
   const demoFill = fallbackToDemo ? mockTasks.slice(0, Math.max(0, limit - listings.length)) : []
 

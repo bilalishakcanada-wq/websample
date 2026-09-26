@@ -1,6 +1,7 @@
 import BrandMark from './BrandMark'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -27,6 +28,7 @@ function SiteHeader() {
   const [navMode, setNavMode] = useState('client')
   const [mobileOpen, setMobileOpen] = useState(false)
   useBackToClose(mobileOpen, () => setMobileOpen(false))
+  const drawer = usePresence(mobileOpen, 180)
   const [scrolled, setScrolled] = useState(false)
   const headerRef = useRef(null)
   const megaMenuRef = useRef(null)
@@ -159,8 +161,8 @@ function SiteHeader() {
           </button>
         </div>
 
-        {mobileOpen && (
-          <div className="site-drawer">
+        {drawer.mounted && (
+          <div className={`site-drawer ${drawer.closing ? 'is-closing' : ''}`} inert={drawer.closing || undefined}>
             <Link to="/objavi" className="primary-button">Objavi posao</Link>
             <Link to="/search">Pretraži poslove</Link>
             <Link to="/kako-radi">Kako radi</Link>

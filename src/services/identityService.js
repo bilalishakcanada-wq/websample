@@ -59,6 +59,19 @@ export const identityService = {
     return data || { require_for_jobs: true, require_for_bids: true, require_for_chat: false }
   },
 
+  /**
+   * Da li baza trenutno traži verifikaciju za ovu radnju ('bids' ili 'jobs'), a
+   * korisnik je nema. Ista provjera kao u bazi; ako upit ne uspije, ne blokiramo
+   * ništa — baza svejedno ima zadnju riječ.
+   */
+  async blocks(radnja) {
+    try {
+      const [policy, ok] = await Promise.all([this.policy(), supabase.rpc('identity_ok')])
+      if (ok.error || !policy[`require_for_${radnja}`]) return false
+      return ok.data === false
+    } catch { return false }
+  },
+
   /** Slika dokumenta u privatni bucket. Vraća samo putanju, nikad javni URL. */
   async uploadDoc(userId, file, oznaka) {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()

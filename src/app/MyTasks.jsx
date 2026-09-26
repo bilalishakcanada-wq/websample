@@ -6,6 +6,7 @@ import { useMyBids, useMyListings } from '../hooks/queries'
 import { timeAgo } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
 import { EmptyBoxMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
@@ -28,6 +29,7 @@ function MyTasks() {
   const [filter, setFilter] = useState('all')
   const [pick, setPick] = useState(false)
   useBackToClose(pick, () => setPick(false))
+  const pickSheet = usePresence(pick, 220)
 
   // cached reads: the tab opens instantly with what was there, then refreshes
   const jobsQuery = useMyListings(user.id)
@@ -61,8 +63,8 @@ function MyTasks() {
       </div>
 
       <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>
-      {pick && (
-        <div className="ap-sheet-backdrop" onClick={() => setPick(false)}>
+      {pickSheet.mounted && (
+        <div className={`ap-sheet-backdrop ${pickSheet.closing ? 'is-closing' : ''}`} inert={pickSheet.closing || undefined} onClick={() => setPick(false)}>
           <div className="ap-sheet" role="listbox" onClick={(event) => event.stopPropagation()}>
             <span className="ap-sheet-handle" style={{ display: "block" }} />
             {filters.map(([id, label]) => (

@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
-import { rankListings } from '../utils/ranking'
+import { personaliseRanked, rankListings } from '../utils/ranking'
+import { readInterests, recordInterest } from '../utils/interests'
 import { useSearchListings } from '../hooks/queries'
 import { useDebounced } from '../hooks/useDebounced'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -134,6 +135,9 @@ function SearchPage() {
     return () => { alive = false }
   }, [user])
 
+  // picking a category is a strong hint about what someone wants to see more of
+  useEffect(() => { if (filters.category) recordInterest('search', { category: filters.category }) }, [filters.category])
+
   const origin = useMemo(() => {
     const coords = filters.city ? cityCoordinates[filters.city] : null
     return coords ? { lat: coords[0], lng: coords[1] } : null
@@ -207,7 +211,9 @@ function SearchPage() {
         distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
       }
     })
-    if (serverRanked && !filters.remoteOnly) return items
+    if (serverRanked && !filters.remoteOnly) {
+      return filters.sort === 'recommended' ? personaliseRanked(items, { interests: readInterests(), query: filters.query }) : items
+    }
     if (filters.remoteOnly) items = items.filter((item) => item.remote)
 
     if (origin) {
@@ -227,7 +233,7 @@ function SearchPage() {
     if (filters.sort === 'recommended') {
       const home = !origin && me?.city ? cityCoordinates[me.city] : null
       const homeDistance = home ? (item) => (item.lat != null ? distanceKm({ lat: home[0], lng: home[1] }, { lat: item.lat, lng: item.lng }) : null) : null
-      items = rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance })
+      items = personaliseRanked(rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance }), { interests: readInterests(), query: filters.query })
     }
     return items
   }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, me, serverRanked])

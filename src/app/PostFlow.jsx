@@ -13,9 +13,12 @@ import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
 import { haptic } from '../utils/native'
 import { toast } from '../components/Toaster'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
+import { useStepDirection } from '../hooks/useStepDirection'
 import { useFullscreen } from './useFullscreen'
 import './app.css'
 import { scrollToTop } from '../utils/scroll'
+import { recordInterest } from '../utils/interests'
 
 const DRAFT_KEY = 'poso-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
@@ -49,6 +52,7 @@ function PostFlow() {
   const editId = searchParams.get('edit')
   const draft = useMemo(() => (editId ? null : loadDraft()), [editId])
   const [step, setStep] = useState(() => (draft?.step ?? 0))
+  const stepDir = useStepDirection(step)
   const [form, setForm] = useState(() => ({ ...emptyForm, ...(draft?.form || {}) }))
   const [files, setFiles] = useState([])
   // one preview URL per picked photo, made once and released when the photo goes (not on every keystroke)
@@ -70,6 +74,7 @@ function PostFlow() {
 
   useBackToClose(cityOpen, () => setCityOpen(false))
   useBackToClose(catOpen, () => setCatOpen(false))
+  const catSheet = usePresence(catOpen, 220)
 
   // editing an existing job: load it into the flow
   useEffect(() => {
@@ -146,6 +151,7 @@ function PostFlow() {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       clearDraft()
+      if (!editId) recordInterest('post', { category: listing.category ?? form.category })
       haptic('medium')
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`, { replace: true })
@@ -158,7 +164,7 @@ function PostFlow() {
   const progress = ((step + 1) / STEPS.length) * 100
 
   return (
-    <div className="ap ap-screen ap-post">
+    <div className="ap ap-screen ap-post" data-dir={stepDir}>
       <header className="ap-top">
         <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <div className="ap-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
@@ -297,8 +303,8 @@ function PostFlow() {
       </div>
 
       {cityOpen && <CitySheet value={form.location} onPick={(city) => { update({ location: city }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
-      {catOpen && (
-        <div className="ap-sheet-backdrop" onClick={() => setCatOpen(false)}>
+      {catSheet.mounted && (
+        <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>
           <div className="ap-sheet" onClick={(event) => event.stopPropagation()}>
             <div className="ap-sheet-handle" />
             <h2>Kategorija</h2>

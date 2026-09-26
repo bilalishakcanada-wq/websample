@@ -60,16 +60,26 @@ export const identityService = {
   },
 
   /**
-   * Da li baza trenutno traži verifikaciju za ovu radnju ('bids' ili 'jobs'), a
-   * korisnik je nema. Ista provjera kao u bazi; ako upit ne uspije, ne blokiramo
-   * ništa — baza svejedno ima zadnju riječ.
+   * Može li prijavljeni korisnik slati ponude, i ako ne, u kojoj je fazi:
+   * 'ok' | 'needed' (nije poslao) | 'pending' (tim provjerava) | 'rejected'.
+   * Pita istu funkciju kao baza (identity_verified, stroga — bez prelaznog roka;
+   * dok ta migracija nije primijenjena, identity_ok). Ako upit ne uspije, vraća
+   * 'ok' — baza svejedno ima zadnju riječ, a korisnik ne ostane zaključan greškom.
    */
-  async blocks(radnja) {
+  async offerGate() {
     try {
-      const [policy, ok] = await Promise.all([this.policy(), supabase.rpc('identity_ok')])
-      if (ok.error || !policy[`require_for_${radnja}`]) return false
-      return ok.data === false
-    } catch { return false }
+      const [policy, predmet, strict] = await Promise.all([this.policy(), this.mine(), supabase.rpc('identity_verified')])
+      if (!policy.require_for_bids) return 'ok'
+      let ok = strict.error ? null : strict.data
+      if (ok === null) {
+        const blagi = await supabase.rpc('identity_ok')
+        ok = blagi.error ? true : blagi.data
+      }
+      if (ok) return 'ok'
+      if (predmet && ['submitted', 'in_review'].includes(predmet.state)) return 'pending'
+      if (predmet?.state === 'rejected') return 'rejected'
+      return 'needed'
+    } catch { return 'ok' }
   },
 
   /** Slika dokumenta u privatni bucket. Vraća samo putanju, nikad javni URL. */

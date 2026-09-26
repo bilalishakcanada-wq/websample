@@ -18,4 +18,5 @@ export const keys = {
   feedPool: (limit) => ['feed', 'latest', limit],
   providerPool: (categories) => ['feed', 'providers', categories],
   publicProfile: (userId) => ['profile', userId],
+  offerGate: (userId) => ['me', userId, 'offer-gate'],
 }

@@ -71,6 +71,11 @@ poruku `VERIFIKACIJA_POTREBNA` umjesto tihog RLS odbijanja.
 Provjereno: novi nalog **ne može** ni objaviti posao ni poslati ponudu; postojeći
 nalog radi normalno; poslije odobrenja novi nalog prolazi. 18/18 E2E prolazi.
 
+**Na čekanju:** [`bids_require_verified.sql`](bids_require_verified.sql) ukida prelazni
+rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; preduslov je
+`migration_identity_state_protection.sql`. Sučelje (`useOfferGate`) već pita
+`identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
+
 ## Zašto postojeći nalozi nisu zaključani
 
 Bez `grandfather_before` platforma bi se preko noći zaključala svima — uključujući

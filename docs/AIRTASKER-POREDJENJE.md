@@ -54,6 +54,31 @@ Kao na Airtaskeru: kad prođe datum posla, a nijedna ponuda nije prihvaćena, po
 
 Baza ovo provodi sama (ne samo ekran), a datum se računa po bosanskom vremenu.
 
+## 4a. Doseg ponuda i troškovi puta (novo pravilo)
+
+Slabo plaćen posao uživo mogu uzeti samo izvođači u blizini; što je posao bolje plaćen, to izdaleka
+izvođač smije poslati ponudu. Klijent može dodati novac za put („Platiću put“: gorivo, taksi,
+prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije ponude.
+
+| Plaća (budžet + put) | Ponude do |
+|---|---|
+| „Po dogovoru“ bez puta | 25 km |
+| do 49 KM | 15 km |
+| 50–99 KM | 25 km |
+| 100–199 KM | 40 km |
+| 200–399 KM | 70 km |
+| 400–799 KM | 120 km |
+| 800 KM i više, ili online | cijela BiH |
+
+- Na stranici posla je **radar**: posao u sredini, krug dosega i tvoj grad kao tačka („U dosegu si“
+  ili „Predaleko za ovaj posao“).
+- U pretrazi kartice pokazuju „U dosegu“ / „Predaleko“ / „Put 20 KM“, a filter „Samo u mom dosegu“
+  sakriva poslove koje ne možeš uzeti. Postojeći filter udaljenosti od grada (10–100 km) ostaje.
+- Baza odbija ponudu izvan dosega; izvođač bez grada u profilu mora ga dodati.
+- Preporučeni poslovi izvođaču ne nude poslove izvan dosega.
+- Novac za put je za sada dogovor koji izvođač vidi i uračuna u ponudu; da ide kroz Poso.ba Pay
+  kao poseban iznos → ➡️ nit „Plan rollout of enterprise modules“.
+
 ## 5. Dodjela, plaćanje, završetak
 
 | Airtasker | Poso.ba |

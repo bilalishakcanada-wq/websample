@@ -5,7 +5,7 @@ import { useBackToClose } from '../hooks/useBackToClose'
 import { useGoBack } from '../hooks/useGoBack'
 import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
-import { ArrowLeft, Bookmark, CalendarDays, Copy, History, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
+import { ArrowLeft, Bookmark, CalendarDays, Car, Copy, History, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
@@ -37,6 +37,9 @@ import { recordInterest } from '../utils/interests'
 import { scheduleLabel } from '../utils/schedule'
 import { useSaved } from '../hooks/useSaved'
 import { RequirementsList } from '../components/TaskExtras'
+import ReachRadar from '../components/ReachRadar'
+import { useMyCity } from '../hooks/useMyCity'
+import { travelLabel } from '../utils/reach'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -169,6 +172,7 @@ function ListingDetailPage() {
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
   const saved = useSaved()
+  const myCity = useMyCity()
   // opening someone else's job teaches the feed what this person is into (kept on this device)
   useEffect(() => {
     if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
@@ -439,7 +443,7 @@ function ListingDetailPage() {
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} expired={expired} requirements={requirements} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          isOwner={isOwner} expired={expired} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} offerLabel={OFFER_CTA[offerGate]}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
@@ -522,6 +526,13 @@ function ListingDetailPage() {
               </section>
             )}
 
+            {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+              <section className="job-card">
+                <h2>Doseg ponuda</h2>
+                <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} />
+              </section>
+            )}
+
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
                 <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
@@ -536,6 +547,7 @@ function ListingDetailPage() {
                 <div><span className="job-fact-icon"><MapPin size={17} /></span><div><small>Gdje</small><strong>{isRemote ? 'Online / na daljinu' : listing.location || '—'}</strong></div></div>
                 <div><span className="job-fact-icon"><Tag size={17} /></span><div><small>Kategorija</small><strong>{listing.category || 'Ostalo'}</strong></div></div>
                 <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
+                {travelLabel(listing) && <div><span className="job-fact-icon"><Car size={17} /></span><div><small>Put</small><strong>{travelLabel(listing)}</strong></div></div>}
               </div>
             </section>
 

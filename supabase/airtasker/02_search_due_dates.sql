@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Search returns the task schedule and can sort by "Rok uskoro" (due soonest).
 -- Same ranking as before (migration_search_ranking.sql); only additions:
---   * three extra output columns: date_type, due_date, time_of_day
+--   * extra output columns: date_type, due_date, time_of_day, travel_allowance
 --   * jobs whose date has passed never show up, even before the expiry job runs
 --   * p_sort = 'due_soon': dated jobs by nearest date first, flexible ones after
 -- The return type changes, so both functions are dropped and recreated.
@@ -12,7 +12,7 @@ drop function if exists public.search_listings(text, text, double precision, dou
 drop function if exists public.search_listings_core(text, text, double precision, double precision, double precision, boolean, numeric, numeric, boolean, boolean, text, integer, integer, boolean);
 
 create function public.search_listings_core(p_query text, p_category text, p_lat double precision, p_lng double precision, p_radius_km double precision, p_include_remote boolean, p_min_price numeric, p_max_price numeric, p_has_budget boolean, p_no_offers boolean, p_sort text, p_limit integer, p_offset integer, p_fuzzy boolean)
- returns table(id uuid, user_id uuid, title text, description text, category text, location text, price numeric, currency text, status text, created_at timestamp with time zone, lat double precision, lng double precision, is_remote boolean, cover_url text, image_count integer, offers integer, distance_km double precision, text_rank real, poster_rating numeric, poster_reviews integer, poster_completed integer, score numeric, total_count bigint, date_type text, due_date date, time_of_day text[])
+ returns table(id uuid, user_id uuid, title text, description text, category text, location text, price numeric, currency text, status text, created_at timestamp with time zone, lat double precision, lng double precision, is_remote boolean, cover_url text, image_count integer, offers integer, distance_km double precision, text_rank real, poster_rating numeric, poster_reviews integer, poster_completed integer, score numeric, total_count bigint, date_type text, due_date date, time_of_day text[], travel_allowance numeric)
  language sql stable security definer
  set search_path to 'public'
 as $function$
@@ -31,7 +31,7 @@ as $function$
     select coalesce(p.trades, '{}'::text[]) as trades from public.profiles p where p.user_id = auth.uid()
   ),
   pool as (
-    select l.id, l.user_id, l.title, l.description, l.category, l.location, l.price, l.currency, l.status, l.created_at, l.lat, l.lng, l.bid_count, l.search_tsv, l.date_type, l.due_date, l.time_of_day
+    select l.id, l.user_id, l.title, l.description, l.category, l.location, l.price, l.currency, l.status, l.created_at, l.lat, l.lng, l.bid_count, l.search_tsv, l.date_type, l.due_date, l.time_of_day, l.travel_allowance
     from public.listings l cross join params pa
     where not p_fuzzy and l.status = 'published'
       and (l.due_date is null or l.due_date >= pa.today)
@@ -45,7 +45,7 @@ as $function$
     limit 3000
   ),
   fuzzy_pool as (
-    select w.id, w.user_id, w.title, w.description, w.category, w.location, w.price, w.currency, w.status, w.created_at, w.lat, w.lng, w.bid_count, w.search_tsv, w.date_type, w.due_date, w.time_of_day
+    select w.id, w.user_id, w.title, w.description, w.category, w.location, w.price, w.currency, w.status, w.created_at, w.lat, w.lng, w.bid_count, w.search_tsv, w.date_type, w.due_date, w.time_of_day, w.travel_allowance
     from (
       select l.* from public.listings l cross join params pa
       where p_fuzzy and l.status = 'published'
@@ -63,7 +63,7 @@ as $function$
   ),
   filtered as (
     select l.id, l.user_id, l.title, l.description, l.category, l.location, l.price, l.currency, l.status, l.created_at,
-           l.lat, l.lng, l.bid_count, l.date_type, l.due_date, l.time_of_day,
+           l.lat, l.lng, l.bid_count, l.date_type, l.due_date, l.time_of_day, l.travel_allowance,
            (public.fold_text(coalesce(l.location, '')) like '%online%' or public.fold_text(coalesce(l.location, '')) like '%daljin%') as is_remote,
            case when pa.q is null then 0.5::real
                 else greatest(least(1, ts_rank_cd(l.search_tsv, pa.q) * 4), extensions.word_similarity(pa.folded, public.fold_text(l.title)) * 0.8)::real end as text_rank
@@ -109,7 +109,7 @@ as $function$
   select s.id, s.user_id, s.title, s.description, s.category, s.location, s.price, s.currency, s.status, s.created_at,
          s.lat, s.lng, s.is_remote, s.cover_url, s.image_count, s.bid_count as offers, s.distance_km, s.text_rank,
          s.poster_rating, s.poster_reviews, s.poster_completed, s.score, count(*) over () as total_count,
-         s.date_type, s.due_date, s.time_of_day
+         s.date_type, s.due_date, s.time_of_day, s.travel_allowance
   from scored s cross join params pa
   order by
     case when pa.sort = 'recommended' then s.score end desc nulls last,
@@ -124,7 +124,7 @@ as $function$
 $function$;
 
 create function public.search_listings(p_query text default ''::text, p_category text default ''::text, p_lat double precision default null::double precision, p_lng double precision default null::double precision, p_radius_km double precision default null::double precision, p_include_remote boolean default true, p_min_price numeric default null::numeric, p_max_price numeric default null::numeric, p_has_budget boolean default false, p_no_offers boolean default false, p_sort text default 'recommended'::text, p_limit integer default 50, p_offset integer default 0)
- returns table(id uuid, user_id uuid, title text, description text, category text, location text, price numeric, currency text, status text, created_at timestamp with time zone, lat double precision, lng double precision, is_remote boolean, cover_url text, image_count integer, offers integer, distance_km double precision, text_rank real, poster_rating numeric, poster_reviews integer, poster_completed integer, score numeric, total_count bigint, date_type text, due_date date, time_of_day text[])
+ returns table(id uuid, user_id uuid, title text, description text, category text, location text, price numeric, currency text, status text, created_at timestamp with time zone, lat double precision, lng double precision, is_remote boolean, cover_url text, image_count integer, offers integer, distance_km double precision, text_rank real, poster_rating numeric, poster_reviews integer, poster_completed integer, score numeric, total_count bigint, date_type text, due_date date, time_of_day text[], travel_allowance numeric)
  language plpgsql stable security definer
  set search_path to 'public'
 as $function$

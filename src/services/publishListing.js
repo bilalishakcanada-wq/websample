@@ -4,6 +4,7 @@ import { profileService } from './profileService'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import { queryClient } from '../lib/queryClient'
 import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
+import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
 
 // the "Kada:" line stays in the description so older app versions still show the date
 const kadaLine = (timing, date) => {
@@ -37,6 +38,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
     status: 'published',
     ...schedule,
     requirements,
+    // "Platiću put" only means something for jobs done in person
+    travel_allowance: form.mode !== 'remote' && Number(form.travel) > 0 ? Math.min(MAX_TRAVEL_ALLOWANCE, Math.round(Number(form.travel))) : null,
   }
   const listing = editId ? await listingService.updateListing(editId, payload) : await listingService.createListing(payload)
   if (tagList.length > 0) await tagService.createForListing(listing.id, tagList, user.id)

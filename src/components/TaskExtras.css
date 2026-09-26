@@ -46,3 +46,53 @@
 .mt-card-wrap .mt-card-foot { padding-right: 76px; }
 .mt .ap-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .mt .ap-tabs button { font-size: 0.84rem; line-height: 1.15; padding: 4px 6px; }
+
+/* Doseg ponuda (reach radar) */
+.reach { display: flex; gap: 18px; align-items: center; }
+.reach-radar { flex: none; width: 150px; height: 150px; }
+.reach-compact .reach-radar { width: 112px; height: 112px; }
+.reach-bg { fill: #f2f6fc; }
+.reach-grid { fill: none; stroke: #d9e2ef; stroke-width: 1; }
+.reach-ring { fill: rgba(29, 78, 216, 0.08); stroke: var(--primary); stroke-width: 2; stroke-dasharray: 5 4; }
+.reach-sweep { transform-origin: 90px 90px; animation: reach-spin 4s linear infinite; }
+.reach-sweep path { fill: rgba(29, 78, 216, 0.12); }
+.reach-job { fill: var(--primary-strong); stroke: white; stroke-width: 2; }
+.reach-me { fill: #16a34a; stroke: white; stroke-width: 2; }
+.reach-far .reach-me { fill: #dc2626; }
+.reach-km { font-size: 11px; font-weight: 800; fill: var(--primary-strong); }
+@keyframes reach-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .reach-sweep { animation: none; } }
+.reach-copy { min-width: 0; }
+.reach-copy strong { display: block; font-size: 1.02rem; color: var(--primary-strong); }
+.reach-ok .reach-copy strong { color: #15803d; }
+.reach-far .reach-copy strong { color: #b91c1c; }
+.reach-copy p { margin: 4px 0 0; color: var(--text-soft); font-size: 0.92rem; line-height: 1.45; }
+.reach-copy .reach-travel { display: flex; align-items: center; gap: 6px; color: #0f5132; font-weight: 700; }
+.reach-legend { display: flex; align-items: center; gap: 6px; font-size: 0.78rem !important; }
+.reach-legend span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.reach-legend-job { background: var(--primary-strong); }
+.reach-legend-me { background: #16a34a; margin-left: 8px; }
+.reach-far .reach-legend-me { background: #dc2626; }
+.reach-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: 800; font-size: 0.9rem; color: var(--primary-strong); }
+@media (max-width: 420px) { .reach { gap: 12px; } .reach-radar { width: 104px; height: 104px; } }
+
+/* travel allowance in the post flows */
+.tx-travel { display: grid; gap: 8px; margin-top: 14px; }
+.tx-travel-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; border: 2px solid #e6eaf1; background: #f6f8fb; font-weight: 700; color: var(--text); text-align: left; }
+.tx-travel-toggle.is-on { border-color: var(--primary-strong); background: #eef3ff; }
+.tx-travel-toggle small { display: block; font-weight: 500; color: var(--text-soft); font-size: 0.8rem; }
+.tx-travel-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tx-travel-chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #eef2f8; color: var(--primary-strong); font-weight: 800; }
+.tx-travel-chips button.active { background: var(--primary-strong); color: white; }
+.tx-travel-chips input { width: 96px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 2px solid #e6eaf1; font-size: 0.95rem; }
+.tx-reach-hint { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 0.86rem; color: var(--text-soft); }
+.tx-reach-hint strong { color: var(--primary-strong); }
+
+/* search cards: reach badge */
+.task-card-reach { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 0.74rem; font-weight: 800; }
+.task-card-reach.is-ok { background: #e8f7ee; color: #15803d; }
+.task-card-reach.is-far { background: #fdecec; color: #b91c1c; }
+.task-card-reach.is-travel { background: #eef3ff; color: var(--primary-strong); }
+.task-card.is-out-of-reach { opacity: 0.72; }
+.task-card-foot { flex-wrap: wrap; row-gap: 6px; }
+.mt-unsave { min-height: 30px; }

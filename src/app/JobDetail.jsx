@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, Bookmark, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
 import WorkFlow from '../components/WorkFlow'
 import { RequirementsList } from '../components/TaskExtras'
+import ReachRadar from '../components/ReachRadar'
+import { travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import './app.css'
@@ -18,7 +20,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, requirements = [], saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -110,6 +112,12 @@ function JobDetail(props) {
             <span><strong>{money(listing.price, listing.currency)}</strong><small>Budžet</small></span>
             {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=budget`} className="jd-link">Uredi</Link>}
           </li>
+          {travelLabel(listing) && (
+            <li>
+              <Car size={20} />
+              <span><strong>{travelLabel(listing)}</strong><small>Gorivo, taksi ili prevoz</small></span>
+            </li>
+          )}
         </ul>
 
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
@@ -118,6 +126,13 @@ function JobDetail(props) {
           <div className="jd-reqs">
             <h3>Obavezni uslovi</h3>
             <RequirementsList items={requirements} />
+          </div>
+        )}
+
+        {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+          <div className="jd-reqs">
+            <h3>Doseg ponuda</h3>
+            <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} compact />
           </div>
         )}
 

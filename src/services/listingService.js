@@ -7,9 +7,9 @@ import { prepoznajGresku } from '../utils/validation'
 import { coordsForLocation } from '../data/cityCoordinates'
 import { isExpired } from '../utils/schedule'
 
-// schedule + must-haves live in their own columns (supabase/airtasker/01); until that migration is
+// schedule, must-haves and the travel allowance live in their own columns (supabase/airtasker/01); until that migration is
 // on the database, a write that names them fails with "column not found" and is retried without
-const EXTRA_COLUMNS = ['date_type', 'due_date', 'time_of_day', 'requirements']
+const EXTRA_COLUMNS = ['date_type', 'due_date', 'time_of_day', 'requirements', 'travel_allowance']
 const isMissingColumn = (error) => error?.code === 'PGRST204' || error?.code === '42703'
 const pickExtras = (payload) => Object.fromEntries(EXTRA_COLUMNS.filter((key) => payload[key] !== undefined).map((key) => [key, payload[key]]))
 // an open job whose date has passed reads as 'expired' right away (the server flips it within minutes)

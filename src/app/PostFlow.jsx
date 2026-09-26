@@ -7,7 +7,7 @@ import { cityCoordinates } from '../data/cityCoordinates'
 import { POPULAR_CITIES } from '../data/siteMap'
 import { publishListing } from '../services/publishListing'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
-import { RequirementsEditor, TimeOfDayPicker } from '../components/TaskExtras'
+import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { listingService } from '../services/listingService'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
@@ -28,7 +28,7 @@ const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review
 const ALL_CITIES = Object.keys(cityCoordinates)
 const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
 
-const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], category: '', price: '' }
+const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], category: '', price: '', travel: '' }
 
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
@@ -100,6 +100,7 @@ function PostFlow() {
         requirements: listing.requirements || [],
         category: listing.category || '',
         price: listing.price ?? '',
+        travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
       })
       if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
       // land on the field the user tapped ("Uredi" next to the date / budget), otherwise on the review
@@ -277,6 +278,12 @@ function PostFlow() {
           {priceStats
             ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
             : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
+          {form.mode !== 'remote' && (
+            <>
+              <ReachHint price={form.price} travel={form.travel} />
+              <TravelPicker value={form.travel} onChange={(travel) => { update({ travel }); haptic('light') }} />
+            </>
+          )}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
               k === '' ? <span key={`sp-${i}`} />
@@ -302,6 +309,7 @@ function PostFlow() {
             {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
+            {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
           {error && <div className="form-error">{error}</div>}
         </section>

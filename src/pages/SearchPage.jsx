@@ -8,7 +8,7 @@ import { useDebounced } from '../hooks/useDebounced'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  ArrowUpDown, Banknote, Bookmark, CalendarDays, Clock3, Check, ChevronDown, Laptop, List, MapPin,
+  ArrowUpDown, Banknote, Bookmark, CalendarDays, Car, Clock3, Radar, Check, ChevronDown, Laptop, List, MapPin,
   Map as MapIcon, Search as SearchIcon, Users, X,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
@@ -25,6 +25,7 @@ import { timeAgo } from '../utils/dateFormat'
 import { SkeletonTaskCard } from '../components/Skeleton'
 import { daysUntilDue, scheduleLabel } from '../utils/schedule'
 import { useSaved } from '../hooks/useSaved'
+import { reachFor } from '../utils/reach'
 import '../components/TaskExtras.css'
 
 const RADIUS_OPTIONS = [
@@ -92,6 +93,8 @@ function SearchPage() {
     remoteOnly: false,
     hasBudget: false,
     noOffers: false,
+    // only jobs the signed-in provider may offer on (distance vs what the job pays)
+    inReach: searchParams.get('doseg') === '1',
     // a text search defaults to relevance; browsing defaults to newest
     sort: searchParams.get('sort') || (searchParams.get('q') ? 'recommended' : 'newest'),
   })
@@ -126,6 +129,7 @@ function SearchPage() {
     if (filters.minPrice !== '') next.set('min', String(filters.minPrice))
     if (filters.maxPrice !== '') next.set('max', String(filters.maxPrice))
     if (filters.sort !== 'newest') next.set('sort', filters.sort)
+    if (filters.inReach) next.set('doseg', '1')
     setSearchParams(next, { replace: true })
   }, [filters, setSearchParams])
 
@@ -214,8 +218,10 @@ function SearchPage() {
         photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
         photoCount: row.image_count ?? (row.listing_images || []).length,
         distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
+        reach: me?.city ? reachFor(row, me.city) : null,
       }
     })
+    if (filters.inReach && me?.city) items = items.filter((item) => item.reach?.status !== 'too_far')
     if (serverRanked && !filters.remoteOnly) {
       return filters.sort === 'recommended' ? personaliseRanked(items, { interests: readInterests(), query: filters.query }) : items
     }
@@ -244,7 +250,7 @@ function SearchPage() {
       items = personaliseRanked(rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance }), { interests: readInterests(), query: filters.query })
     }
     return items
-  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, me, serverRanked])
+  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, filters.inReach, me, serverRanked])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null
@@ -254,11 +260,11 @@ function SearchPage() {
 
   const activeCount = [
     filters.category, filters.city, filters.minPrice !== '' || filters.maxPrice !== '',
-    filters.remoteOnly, filters.hasBudget, filters.noOffers,
+    filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.inReach,
   ].filter(Boolean).length
 
   const resetAll = () => {
-    setFilters({ query: '', category: '', city: '', radius: 50, includeRemote: true, minPrice: '', maxPrice: '', remoteOnly: false, hasBudget: false, noOffers: false, sort: 'newest' })
+    setFilters({ query: '', category: '', city: '', radius: 50, includeRemote: true, minPrice: '', maxPrice: '', remoteOnly: false, hasBudget: false, noOffers: false, inReach: false, sort: 'newest' })
     setOpenMenu('')
   }
 
@@ -359,10 +365,16 @@ function SearchPage() {
           </div>
         </FilterMenu>
 
-        <FilterMenu id="other" label="Ostali filteri" active={filters.remoteOnly || filters.hasBudget || filters.noOffers} open={openMenu === 'other'} onToggle={toggleMenu} width={280}>
+        <FilterMenu id="other" label="Ostali filteri" active={filters.remoteOnly || filters.hasBudget || filters.noOffers || filters.inReach} open={openMenu === 'other'} onToggle={toggleMenu} width={280}>
           <label className="popover-check"><input type="checkbox" checked={filters.remoteOnly} onChange={(event) => update({ remoteOnly: event.target.checked })} /><Laptop size={15} /> Samo online poslovi</label>
           <label className="popover-check"><input type="checkbox" checked={filters.hasBudget} onChange={(event) => update({ hasBudget: event.target.checked })} /><Banknote size={15} /> Samo sa navedenim budžetom</label>
           <label className="popover-check"><input type="checkbox" checked={filters.noOffers} onChange={(event) => update({ noOffers: event.target.checked })} /><Users size={15} /> Još bez ponuda</label>
+          {user && (
+            <label className="popover-check" title={me?.city ? `Mjereno od grada u tvom profilu (${me.city})` : 'Dodaj grad u profil'}>
+              <input type="checkbox" checked={filters.inReach} disabled={!me?.city} onChange={(event) => update({ inReach: event.target.checked })} />
+              <Radar size={15} /> {me?.city ? `Samo u mom dosegu (${me.city})` : 'Samo u mom dosegu — dodaj grad u profil'}
+            </label>
+          )}
         </FilterMenu>
 
         <FilterMenu id="sort" label={<><ArrowUpDown size={14} /> {sortLabel}</>} active={filters.sort !== 'newest'} open={openMenu === 'sort'} onToggle={toggleMenu} width={240}>
@@ -401,7 +413,7 @@ function SearchPage() {
             <article
               key={item.id}
               ref={(node) => { cardRefs.current[item.id] = node }}
-              className={`task-card ${activeId === item.id ? 'active' : ''}`}
+              className={`task-card ${activeId === item.id ? 'active' : ''} ${item.reach?.status === 'too_far' ? 'is-out-of-reach' : ''}`}
               onMouseEnter={() => setActiveId(item.id)}
               onFocus={() => setActiveId(item.id)}
             >
@@ -419,6 +431,9 @@ function SearchPage() {
                 <div className="task-card-foot">
                   <span className="task-card-status">Otvoren</span>
                   <span className="task-card-offers"><Users size={13} /> {item.offers} {item.offers === 1 ? 'ponuda' : 'ponuda'}</span>
+                  {item.reach?.status === 'ok' && <span className="task-card-reach is-ok" title={`Oko ${Math.round(item.reach.distanceKm)} km od tebe`}><Radar size={12} /> U dosegu</span>}
+                  {item.reach?.status === 'too_far' && <span className="task-card-reach is-far" title={`Oko ${Math.round(item.reach.distanceKm)} km od tebe, ponude do ${item.reach.reachKm} km`}><Radar size={12} /> Predaleko</span>}
+                  {Number(item.travel_allowance) > 0 && <span className="task-card-reach is-travel"><Car size={12} /> Put {Math.round(item.travel_allowance)} KM</span>}
                   <span className="task-card-save-slot" aria-hidden="true" />
                 </div>
               </Link>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Check, Plus, X } from 'lucide-react'
+import { Car, Check, Plus, Radar, X } from 'lucide-react'
 import { MAX_REQUIREMENTS, REQUIREMENT_MAX_LENGTH, TIME_OF_DAY } from '../utils/schedule'
+import { MAX_TRAVEL_ALLOWANCE, TRAVEL_CHIPS, reachKm, reachLabel } from '../utils/reach'
 import './TaskExtras.css'
 
 /** "U koje doba dana?" — optional, several can be picked (empty = any time). */
@@ -69,5 +70,42 @@ export function RequirementsList({ items = [] }) {
     <ul className="tx-req-list tx-req-readonly">
       {items.map((item) => <li key={item}><Check size={15} aria-hidden="true" /> <span>{item}</span></li>)}
     </ul>
+  )
+}
+
+/** Live hint while setting the budget: how far away providers may be for this pay. */
+export function ReachHint({ price, travel }) {
+  const km = reachKm(price, travel)
+  return (
+    <p className="tx-reach-hint"><Radar size={15} /> Ponude mogu slati izvođači <strong>{reachLabel(km)}</strong></p>
+  )
+}
+
+/** "Platiću put": the poster adds money for the provider's travel (gorivo, taksi, prevoz). */
+export function TravelPicker({ value, onChange }) {
+  const amount = Number(value) > 0 ? Number(value) : 0
+  const on = amount > 0
+  const custom = on && !TRAVEL_CHIPS.includes(amount)
+  return (
+    <div className="tx-travel">
+      <button type="button" className={`tx-travel-toggle ${on ? 'is-on' : ''}`} aria-pressed={on} onClick={() => onChange(on ? '' : String(TRAVEL_CHIPS[1]))}>
+        <Car size={20} />
+        <span>Platiću put izvođaču<small>Gorivo, taksi ili prevoz. Izvođači izdaleka se češće jave.</small></span>
+        {on && <Check size={18} style={{ marginLeft: 'auto' }} />}
+      </button>
+      {on && (
+        <div className="tx-travel-chips" role="group" aria-label="Iznos za put">
+          {TRAVEL_CHIPS.map((chip) => (
+            <button key={chip} type="button" className={amount === chip ? 'active' : ''} onClick={() => onChange(String(chip))}>{chip} KM</button>
+          ))}
+          <input
+            type="number" inputMode="numeric" min="1" max={MAX_TRAVEL_ALLOWANCE} placeholder="Drugo"
+            aria-label="Drugi iznos za put (KM)"
+            value={custom ? amount : ''}
+            onChange={(event) => onChange(String(Math.min(MAX_TRAVEL_ALLOWANCE, Math.max(0, Math.round(Number(event.target.value) || 0))) || ''))}
+          />
+        </div>
+      )}
+    </div>
   )
 }

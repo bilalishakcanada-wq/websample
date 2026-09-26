@@ -15,7 +15,7 @@ import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
 import ImagePicker from '../components/ImagePicker'
-import { RequirementsEditor, TimeOfDayPicker } from '../components/TaskExtras'
+import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
 
 const STEPS = [
@@ -57,7 +57,7 @@ function PostTaskPage() {
   const [tagList, setTagList] = useState(draft?.tags || [])
   const [photos, setPhotos] = useState({ files: [], removed: [] })
   const [existingImages, setExistingImages] = useState([])
-  const [form, setForm] = useState({ timeOfDay: [], requirements: [], ...(draft?.form || {
+  const [form, setForm] = useState({ timeOfDay: [], requirements: [], travel: '', ...(draft?.form || {
     title: '',
     timing: 'flexible',
     date: '',
@@ -89,6 +89,7 @@ function PostTaskPage() {
           ...current,
           ...(stale ? { timing: 'flexible', date: '', timeOfDay: schedule.timeOfDay } : schedule),
           requirements: listing.requirements || [],
+          travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
           title: listing.title || '',
           category: listing.category || '',
           description: (listing.description || '').split('\n\nKada:')[0],
@@ -97,9 +98,11 @@ function PostTaskPage() {
           price: listing.price ?? '',
         }))
         if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
-        setStep(0)
+        // "Povećaj budžet ili dodaj put" on the job page lands on the budget step
+        setStep(!stale && searchParams.get('step') === 'budget' ? STEPS.length - 1 : 0)
       })
       .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId, copyId])
 
   const update = (changes) => setForm((current) => ({ ...current, ...changes }))
@@ -314,6 +317,14 @@ function PostTaskPage() {
               </div>
             )}
 
+            {form.mode !== 'remote' && (
+              <div className="wizard-field">
+                <span>Troškovi puta (opciono)</span>
+                <TravelPicker value={form.travel} onChange={(travel) => update({ travel })} />
+                <ReachHint price={form.price} travel={form.travel} />
+              </div>
+            )}
+
             <div className="wizard-summary">
               <h3>Pregled oglasa</h3>
               <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '—'}</strong></div>
@@ -323,6 +334,7 @@ function PostTaskPage() {
               {form.requirements.length > 0 && <div className="wizard-summary-row"><span>Uslovi</span><strong>{form.requirements.join(' · ')}</strong></div>}
               <div className="wizard-summary-row"><span>Slike</span><strong>{existingImages.filter((item) => !photos.removed.includes(item.id)).length + photos.files.length || 'Bez slika'}</strong></div>
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>
+              {form.mode !== 'remote' && Number(form.travel) > 0 && <div className="wizard-summary-row"><span>Put</span><strong>Plaćam do {form.travel} KM</strong></div>}
             </div>
           </section>
         )}

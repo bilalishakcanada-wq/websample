@@ -5,6 +5,7 @@
 --  * listings.due_date    the date (null when flexible)
 --  * listings.time_of_day subset of morning | midday | afternoon | evening (empty = any time)
 --  * listings.requirements up to 3 short "must-haves" (npr. "Ima svoj alat")
+--  * listings.travel_allowance KM the poster adds for the provider's travel (reach rule in 04)
 --  * status 'expired': an open job whose date has passed without an accepted offer.
 --    It leaves search, takes no new offers and no offer can be accepted until the
 --    owner picks a new date ("Objavi ponovo"), which puts it back to 'published'.
@@ -21,7 +22,13 @@ alter table public.listings
   add column if not exists date_type text,
   add column if not exists due_date date,
   add column if not exists time_of_day text[] not null default '{}',
-  add column if not exists requirements text[] not null default '{}';
+  add column if not exists requirements text[] not null default '{}',
+  add column if not exists travel_allowance numeric(8, 2);
+
+-- "Platiću put": what the poster adds for the provider's travel (gorivo, taksi, prevoz); see 04
+alter table public.listings drop constraint if exists listings_travel_allowance_check;
+alter table public.listings add constraint listings_travel_allowance_check
+  check (travel_allowance is null or (travel_allowance > 0 and travel_allowance <= 500));
 
 alter table public.listings drop constraint if exists listings_date_type_check;
 alter table public.listings add constraint listings_date_type_check

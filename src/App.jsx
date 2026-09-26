@@ -68,6 +68,7 @@ import { RouteFallback, RouteGuard } from './components/RouteBoundary'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import DialogHost from './components/DialogHost'
 import ViewTransitions from './components/ViewTransitions'
+import NativeBack from './components/NativeBack'
 
 // the support chat lives only on the help pages, so its code (and the help articles) load only there
 const SupportChat = lazy(lazyImport(() => import('./components/SupportChat')))
@@ -105,6 +106,7 @@ function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
       <ViewTransitions />
+      <NativeBack />
       <SwBridge />
       <SiteHeader />
       <SupportChatSlot />

@@ -33,7 +33,9 @@ export async function setupNative() {
     try { target = new URL(anchor.href) } catch { return }
     if (target.origin !== window.location.origin) return
     event.preventDefault()
-    window.history.pushState({}, '', target.pathname + target.search + target.hash)
+    // numbered like the router's own entries, so back from that page returns here
+    const idx = (window.history.state?.idx ?? 0) + 1
+    window.history.pushState({ usr: null, key: Math.random().toString(36).slice(2, 10), idx }, '', target.pathname + target.search + target.hash)
     window.dispatchEvent(new PopStateEvent('popstate'))
   })
   // the shell shows the live site: after a long time in the background, come back with a fresh copy
@@ -45,8 +47,7 @@ export async function setupNative() {
       if (hiddenAt && Date.now() - hiddenAt > 30 * 60 * 1000 && !typing) window.location.reload()
     })
   } catch { /* ignore */ }
-  // Android hardware back button follows the browser history
-  try { plugin('App')?.addListener?.('backButton', ({ canGoBack }) => (canGoBack ? window.history.back() : plugin('App')?.exitApp?.())) } catch { /* ignore */ }
+  // Android's back button is handled inside the router (components/NativeBack.jsx)
   // OAuth round trip: the system browser hands us ba.poso.app://auth/callback?code=… → session
   try {
     plugin('App')?.addListener?.('appUrlOpen', async ({ url }) => {

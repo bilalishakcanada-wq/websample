@@ -4,6 +4,8 @@ import ActionError from '../components/ActionError'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useStepDirection } from '../hooks/useStepDirection'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useBackSteps } from '../hooks/useBackToClose'
+import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
@@ -45,6 +47,9 @@ function PostTaskPage() {
   }, [editId])
   const [step, setStep] = useState(draft?.step || 0)
   const stepDir = useStepDirection(step)
+  const goBackOut = useGoBack('/')
+  // the browser's back button walks the steps like the arrow does, then leaves the wizard
+  const leaveFlow = useBackSteps(step, 0, () => setStep((s) => Math.max(0, s - 1)))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tagDraft, setTagDraft] = useState('')
@@ -174,11 +179,11 @@ function PostTaskPage() {
   return (
     <div className="wizard-shell" data-dir={stepDir}>
       <header className="wizard-header">
-        <button type="button" className="icon-button" onClick={() => (step === 0 ? navigate(-1) : setStep((s) => s - 1))} aria-label="Nazad">
+        <button type="button" className="icon-button" onClick={() => (step === 0 ? goBackOut() : setStep((s) => s - 1))} aria-label="Nazad">
           <ArrowLeft size={20} />
         </button>
         <span className="wizard-title">Objavi posao</span>
-        <button type="button" className="back-home-link" onClick={() => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } navigate('/') }}>Odustani</button>
+        <button type="button" className="back-home-link" onClick={() => leaveFlow(() => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } goBackOut() })}>Odustani</button>
       </header>
 
       <div className="wizard-progress">

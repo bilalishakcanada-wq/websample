@@ -5,6 +5,7 @@ import { LastSeen } from '../components/TrustBadge'
 import BadgeChip from '../components/BadgeChip'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useFullscreen } from './useFullscreen'
+import { useGoBack } from '../hooks/useGoBack'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -17,6 +18,7 @@ const Stars = ({ value, size = 15 }) => {
 
 /** Phone public profile: "UPOZNAJ" + big name, rating, review cards, then a sticky call to action. */
 function ProfileView({ bundle, user, onReport }) {
+  const goBack = useGoBack()
   useFullscreen()
   const [menu, setMenu] = useState(false)
   const [showAll, setShowAll] = useState(false)
@@ -31,7 +33,7 @@ function ProfileView({ bundle, user, onReport }) {
   return (
     <div className="ap pv">
       <header className="jd-top" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
-        <button type="button" className="ap-back" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign('/'))} aria-label="Nazad"><ArrowLeft size={22} /></button>
+        <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         {!isOwn && user && (
           <>
             <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>

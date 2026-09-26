@@ -58,7 +58,8 @@ function AdminPage({ mode = 'admin' }) {
   const [notifState, setNotifState] = useState(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission)
 
   const setTab = useCallback((next, extra = {}) => {
-    setSearchParams({ tab: next, ...extra })
+    // switching tabs is not a step to walk back through; opening a user is
+    setSearchParams({ tab: next, ...extra }, { replace: !extra.user })
   }, [setSearchParams])
 
   const openUser = useCallback((userId) => setSearchParams({ tab: 'users', user: userId }), [setSearchParams])

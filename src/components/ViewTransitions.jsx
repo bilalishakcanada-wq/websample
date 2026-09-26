@@ -2,19 +2,7 @@ import { useEffect } from 'react'
 import { flushSync } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { withBase } from '../utils/paths'
-
-// the tab bar's order: moving to a tab on the left slides the screen in from the left
-const TABS = ['/', '/search', '/moji-poslovi', '/messages', '/account']
-const tabIndex = (path) => (path === '/' ? 0 : TABS.findIndex((tab, index) => index > 0 && (path === tab || path.startsWith(`${tab}/`))))
-
-/** 'back' when the link leads up the hierarchy (/account/profil → /account) or to a tab on the left. */
-function directionOf(from, to) {
-  const a = tabIndex(from)
-  const b = tabIndex(to)
-  if (a >= 0 && b >= 0 && a !== b) return b < a ? 'back' : 'forward'
-  if (to !== '/' && from.startsWith(`${to}/`)) return 'back'
-  return 'forward'
-}
+import { directionOf } from '../utils/viewTransition'
 
 /**
  * Native-feeling page changes: every in-app link click runs through the View Transitions API
@@ -30,7 +18,8 @@ function ViewTransitions() {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null
-      if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download') || anchor.origin !== window.location.origin) return
+      // links that manage their own history (the tab bar) animate themselves
+      if (!anchor || anchor.dataset.ownNav != null || anchor.target === '_blank' || anchor.hasAttribute('download') || anchor.origin !== window.location.origin) return
       const base = withBase('/').replace(/\/$/, '')
       if (base && !anchor.pathname.startsWith(base)) return
       const toPath = anchor.pathname.slice(base.length) || '/'

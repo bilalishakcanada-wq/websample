@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useGoBack } from '../hooks/useGoBack'
+import { useBackSteps } from '../hooks/useBackToClose'
 import { ArrowLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useMode } from './mode'
@@ -28,6 +30,8 @@ function Intro() {
   const { user } = useAuth()
   const [mode] = useMode()
   const [index, setIndex] = useState(0)
+  const goBack = useGoBack('/start')
+  useBackSteps(index, 0, () => setIndex((i) => Math.max(0, i - 1)))
   const slides = SLIDES[mode] || SLIDES.poster
   const slide = slides[index]
   const Art = slide.Art
@@ -43,7 +47,7 @@ function Intro() {
   return (
     <div className="ap ap-screen">
       <header className="ap-top">
-        <button type="button" className="ap-back" onClick={() => (index === 0 ? navigate(-1) : setIndex(index - 1))} aria-label="Nazad"><ArrowLeft size={22} /></button>
+        <button type="button" className="ap-back" onClick={() => (index === 0 ? goBack() : setIndex(index - 1))} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <div className="ap-progress" aria-hidden="true"><span style={{ width: `${((index + 1) / slides.length) * 100}%` }} /></div>
       </header>
 

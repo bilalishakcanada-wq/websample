@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 import { profileService } from '../../services/profileService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
+import { useGoBack } from '../../hooks/useGoBack'
 import AccountMenu from '../../app/AccountMenu'
 import { ArrowLeft } from 'lucide-react'
 
@@ -37,6 +38,7 @@ function AccountLayout() {
   const isPhone = useMediaQuery('(max-width: 768px)')
   const { user } = useAuth()
   const navigate = useNavigate()
+  const goBack = useGoBack('/account')
   const { pathname } = useLocation()
   // the profile bundle is cached: coming back to any account page paints instantly, then refreshes
   const queryClient = useQueryClient()
@@ -152,7 +154,7 @@ function AccountLayout() {
         ) : (
           <div className="ap ap-page ap-sub">
             <div className="ap-subbar">
-              <button type="button" className="ap-back" onClick={() => navigate('/account')} aria-label="Nazad na nalog"><ArrowLeft size={22} /></button>
+              <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
               <strong>{current?.label || 'Nalog'}</strong>
             </div>
             {isSuspended && (

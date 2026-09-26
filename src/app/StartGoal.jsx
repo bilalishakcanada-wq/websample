@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft } from 'lucide-react'
 import { DoneMascot, EarnMascot } from './Mascots'
 import { setMode } from './mode'
@@ -16,6 +17,7 @@ const GOALS = [
 function StartGoal() {
   useFullscreen()
   const navigate = useNavigate()
+  const goBack = useGoBack('/')
   const [choice, setChoice] = useState('')
 
   const next = () => {
@@ -27,7 +29,7 @@ function StartGoal() {
   return (
     <div className="ap ap-screen">
       <header className="ap-top">
-        <button type="button" className="ap-back" onClick={() => navigate(-1)} aria-label="Nazad"><ArrowLeft size={22} /></button>
+        <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
       </header>
 
       <h1 className="ap-title">Šta ti je glavni cilj?</h1>

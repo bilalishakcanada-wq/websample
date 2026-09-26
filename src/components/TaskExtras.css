@@ -96,3 +96,22 @@
 .task-card.is-out-of-reach { opacity: 0.72; }
 .task-card-foot { flex-wrap: wrap; row-gap: 6px; }
 .mt-unsave { min-height: 30px; }
+
+/* Zatraži ponudu (private quote request) */
+.tx-invite { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #eef3ff; border: 1px solid #cfdcff; color: var(--primary-strong); }
+.tx-invite-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.tx-invite strong { font-size: 0.94rem; overflow-wrap: anywhere; }
+.tx-invite small { font-size: 0.8rem; color: var(--text-soft); }
+.tx-invite button { flex: none; padding: 6px 12px; border-radius: 999px; background: white; border: 1px solid #cfdcff; color: var(--primary-strong); font-size: 0.8rem; font-weight: 700; }
+.tx-invite-face { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: white; color: var(--primary-strong); }
+.tx-quote { border: 1px solid #cfdcff; background: #f5f8ff; }
+.tx-quote h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 1.05rem; color: var(--primary-strong); }
+.tx-quote p { margin: 0 0 10px; color: var(--text-soft); font-size: 0.92rem; }
+.tx-quote p a { color: var(--primary-strong); font-weight: 700; }
+.tx-quote button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.tx-quote.is-declined { border-color: #f3d19c; background: #fffaf0; }
+.tx-quote.is-declined h2 { color: #92400e; }
+.tx-quote.is-phone { margin: 0 0 16px; padding: 14px 16px; border-radius: 16px; }
+.tx-quote.is-phone button { width: 100%; }
+.mt-quote-list { display: grid; gap: 10px; margin-bottom: 18px; }
+.mt-quote-head { margin: 4px 0 8px; font-size: 0.95rem; font-weight: 800; color: var(--primary-strong); }

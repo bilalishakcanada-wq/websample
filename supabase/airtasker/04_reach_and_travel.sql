@@ -43,7 +43,8 @@ as $$
 $$;
 
 -- Where the signed-in person stands for one job: the reach, their distance and whether they may offer.
--- reason: ok | remote | no_limit | no_job_location | no_city | too_far | own_job | signed_out
+-- reason: ok | remote | no_limit | no_job_location | no_city | too_far | own_job | signed_out | invited
+-- A private quote request (05) has no reach: only the invited provider may offer, from anywhere.
 create or replace function public.listing_reach(p_listing uuid)
 returns table (reach_km numeric, distance_km numeric, can_offer boolean, reason text, my_city text)
 language plpgsql stable security definer set search_path = public
@@ -54,8 +55,16 @@ declare
   d double precision;
   r numeric;
 begin
-  select id, user_id, location, lat, lng, price, travel_allowance into l from public.listings where id = p_listing;
+  select id, user_id, location, lat, lng, price, travel_allowance, invited_provider into l from public.listings where id = p_listing;
   if l.id is null then return; end if;
+  if l.invited_provider is not null then
+    if auth.uid() = l.invited_provider then
+      return query select null::numeric, null::numeric, true, 'invited'::text, null::text;
+    elsif auth.uid() = l.user_id then
+      return query select null::numeric, null::numeric, false, 'own_job'::text, null::text;
+    end if;
+    return;
+  end if;
   r := public.listing_reach_km(l.price, l.travel_allowance);
   if public.listing_is_remote(l.location) then
     return query select null::numeric, null::numeric, true, 'remote'::text, null::text; return;
@@ -93,8 +102,9 @@ declare
   d double precision;
   r numeric;
 begin
-  select location, lat, lng, price, travel_allowance into l from public.listings where id = new.listing_id;
-  if l is null or public.listing_is_remote(l.location) or l.lat is null or l.lng is null then return new; end if;
+  select location, lat, lng, price, travel_allowance, invited_provider into l from public.listings where id = new.listing_id;
+  -- private quote requests have no reach limit; 05 makes sure only the invited provider offers
+  if l is null or l.invited_provider is not null or public.listing_is_remote(l.location) or l.lat is null or l.lng is null then return new; end if;
   r := public.listing_reach_km(l.price, l.travel_allowance);
   if r is null then return new; end if;
   select c.lat, c.lng into me
@@ -120,7 +130,8 @@ create trigger bids_reach_guard
   for each row execute function public.guard_bid_reach();
 
 -- Recommended jobs for providers (home feed): same scoring as before, but no jobs whose date
--- has passed and none outside the provider's reach.
+-- has passed, none outside the provider's reach and no private quote requests. Jobs due
+-- today or tomorrow get up to 10 extra points ("Treba brzo"), like Airtasker's urgent tasks.
 create or replace function public.recommended_listings(limit_count integer default 8)
  returns table(id uuid, title text, category text, location text, price numeric, currency text, created_at timestamp with time zone, bid_count bigint, match_score numeric, reasons text[])
  language sql stable security definer
@@ -139,12 +150,13 @@ as $function$
   ),
   candidates as (
     select l.id, l.title, l.category, l.location, l.price, l.currency, l.created_at, l.lat, l.lng,
-           l.bid_count::bigint as bid_count,
+           l.bid_count::bigint as bid_count, l.due_date - public.today_ba() as days_left,
            round((extract(epoch from now() - l.created_at) / 86400.0)::numeric, 2) as days_old,
            (select count(*) from public.listing_images li where li.listing_id = l.id) as photos,
            (public.fold_text(coalesce(l.location, '')) like '%online%' or public.fold_text(coalesce(l.location, '')) like '%daljin%') as is_remote
     from public.listings l cross join me
     where l.status = 'published' and l.user_id <> me.user_id
+      and l.invited_provider is null
       and (l.due_date is null or l.due_date >= public.today_ba())
       and (public.listing_is_remote(l.location) or l.lat is null or me.lat is null
            or public.listing_reach_km(l.price, l.travel_allowance) is null
@@ -170,7 +182,8 @@ as $function$
       + greatest(0, 18 - s.days_old * 2)
       + greatest(0, 15 - s.bid_count * 5)
       + (case when s.price is not null then 5 else 0 end)
-      + (case when s.photos > 0 then 3 else 0 end))::numeric as points   -- max 120
+      + (case when s.photos > 0 then 3 else 0 end)
+      + (case when s.days_left <= 1 then 10 when s.days_left <= 3 then 5 else 0 end))::numeric as points   -- max 130
     from scored s
   )
   select
@@ -180,6 +193,7 @@ as $function$
       case when r.trade_match then 'Odgovara tvojim vještinama' end,
       case when r.bids_in_category > 0 then 'Slično poslovima na koje si nudio/la' end,
       case when r.distance_km is not null and r.distance_km <= 15 then 'U blizini' when r.city_match then 'U tvom gradu' when r.distance_km is not null then round(r.distance_km)::int || ' km od tebe' end,
+      case when r.days_left <= 1 then 'Treba brzo' when r.days_left <= 3 then 'Rok za ' || r.days_left || ' dana' end,
       case when r.days_old <= 2 then 'Objavljeno nedavno' end,
       case when r.bid_count = 0 then 'Još nema ponuda — budi prvi' end,
       case when r.bid_count between 1 and 2 then 'Malo konkurencije' end,

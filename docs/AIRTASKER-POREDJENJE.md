@@ -31,6 +31,7 @@ Oznake: ✅ već postoji · 🆕 dodano u ovoj izmjeni · 🔜 predloženo sljed
 | Sačuvani poslovi | 🆕 dugme na kartici i na poslu, lista u „Moji poslovi → Sačuvano“ |
 | Obavještenja za nove poslove (task alerts) | ✅ |
 | Algoritam preporuka (vještine, udaljenost, svježina, konkurencija) | ✅ |
+| Hitni poslovi (rok danas ili sutra) malo više u preporukama | 🆕 „Treba brzo“ |
 
 ## 3. Stranica posla, pitanja i ponude
 
@@ -43,6 +44,7 @@ Oznake: ✅ već postoji · 🆕 dodano u ovoj izmjeni · 🔜 predloženo sljed
 | Izmjena poslane ponude | ➡️ nit „Fix offer sending error“ |
 | Klijent odgovara na ponudu (privatno pitanje uz ponudu) | ➡️ nit „Fix offer sending error“ |
 | Prijava oglasa, dijeljenje, slični poslovi, predloženi izvođači | ✅ |
+| „Request a quote“: posao poslan privatno jednom izvođaču s njegovog profila | 🆕 „Zatraži ponudu“ (vidi 4b) |
 
 ## 4. Istek posla (novo pravilo)
 
@@ -79,6 +81,18 @@ prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije p
 - Novac za put je za sada dogovor koji izvođač vidi i uračuna u ponudu; da ide kroz Poso.ba Pay
   kao poseban iznos → ➡️ nit „Plan rollout of enterprise modules“.
 
+## 4b. Zatraži ponudu (novo)
+
+Kao „Request a quote“ na Airtaskeru: na profilu izvođača klijent dodirne **Zatraži ponudu**,
+opiše posao i pošalje ga samo tom izvođaču.
+- Posao ne vidi niko drugi: nije u pretrazi, ne šalju se obavijesti drugima, nije na javnom profilu.
+- Izvođač dobija obavijest „… traži ponudu od tebe“ i posao u „Moji poslovi → Moje ponude“.
+- Doseg ne važi: klijent je izabrao baš tog izvođača, pa može ponuditi i izdaleka.
+- Izvođač može poslati ponudu ili dodirnuti „Ne mogu ovaj posao“; klijent tada dobija obavijest.
+- Klijent u svakom trenutku može „Objavi svima“: posao postaje običan javni posao, obavijesti idu
+  izvođačima u blizini, a ponude koje već ima ostaju.
+- Zahtjev se ne može preusmjeriti drugom izvođaču; najviše 10 zahtjeva dnevno po klijentu.
+
 ## 5. Dodjela, plaćanje, završetak
 
 | Airtasker | Poso.ba |
@@ -103,11 +117,11 @@ prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije p
 
 ## Predloženo sljedeće (ova nit)
 
-1. **Direktan zahtjev izvođaču** („Zatraži ponudu“ s profila izvođača, kao „Request a quote“).
-2. **Broj potrebnih izvođača** za veće poslove (selidbe, događaji).
-3. **Rok u rangiranju**: posao s rokom sutra malo više u preporukama za izvođače u blizini.
+1. **Broj potrebnih izvođača** za veće poslove (selidbe, događaji). Treba više uplata po poslu,
+   pa ide zajedno s nitom za plaćanja.
+2. **„Zatraži ponudu“ iz predloženih izvođača** na stranici posla, jednim dodirom.
 
 ## Baza
 
-SQL je u `supabase/airtasker/` (redom 01, 02, 03). Ekrani rade i prije migracije
-(rok se tada čita iz opisa, a čuvanje poslova javlja da još nije uključeno).
+SQL je u `supabase/airtasker/` (redom 01–05). Ekrani rade i prije migracije
+(rok se tada čita iz opisa, a čuvanje poslova i „Zatraži ponudu“ javljaju da još nisu uključeni).

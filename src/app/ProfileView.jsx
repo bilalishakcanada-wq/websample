@@ -122,9 +122,9 @@ function ProfileView({ bundle, user, onReport }) {
       {!isOwn && (
         <div className="jd-sticky pv-cta">
           <strong>{isProvider ? `Želiš raditi s ${first}?` : `Želiš raditi za ${first}?`}</strong>
-          <span>{isProvider ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+          <span>{isProvider ? `Opiši posao i pošalji ga samo ${first} da ti da ponudu.` : 'Pogledaj šta traži i pošalji ponudu.'}</span>
           {isProvider
-            ? <Link to="/objavi" className="ap-btn ap-btn-primary">Zatraži ponudu</Link>
+            ? <Link to={`/objavi?za=${profile.user_id}`} className="ap-btn ap-btn-primary">Zatraži ponudu</Link>
             : <Link to={listings[0] ? `/listings/${listings[0].id}` : '/search'} className="ap-btn ap-btn-primary">{listings[0] ? 'Pogledaj posao' : 'Pregledaj poslove'}</Link>}
         </div>
       )}

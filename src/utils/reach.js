@@ -35,10 +35,12 @@ const cityPoint = (city) => coordsForLocation(city)
 
 /**
  * Where a provider (by their profile city) stands for a job, computed on the device.
- * status: remote | no_limit | ok | too_far | no_city | no_job_location
+ * status: remote | no_limit | ok | too_far | no_city | no_job_location | invited
  */
 export const reachFor = (listing, myCity) => {
   if (!listing) return null
+  // "Zatraži ponudu": the client picked this provider, so distance does not limit the offer
+  if (listing.invited_provider) return { status: 'invited', reachKm: null, distanceKm: null }
   if (isRemoteLocation(listing.location)) return { status: 'remote', reachKm: null, distanceKm: null }
   const km = reachKm(listing.price, listing.travel_allowance)
   const job = listing.lat != null && listing.lng != null ? { lat: listing.lat, lng: listing.lng } : cityPoint(listing.location)

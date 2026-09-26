@@ -1,4 +1,4 @@
-# Airtasker-style pravila (rokovi, istek posla, obavezni uslovi, sačuvani poslovi, doseg i put)
+# Airtasker-style pravila (rokovi, istek posla, obavezni uslovi, sačuvani poslovi, doseg i put, zahtjev za ponudu)
 
 Pokrenuti ovim redom na Supabase bazi:
 
@@ -11,6 +11,12 @@ Pokrenuti ovim redom na Supabase bazi:
    toga koliko posao plaća (budžet + novac za put); ponuda izvan dosega se odbija
    (`PREDALEKO`), a izvođač bez grada u profilu dobija `GRAD_POTREBAN`. `listing_reach(id)` vraća
    doseg i udaljenost za prijavljenog korisnika; preporučeni poslovi ne nude poslove izvan dosega.
+   Poslovi s rokom danas ili sutra dobijaju malu prednost u preporukama („Treba brzo“).
+5. `05_quote_requests.sql` — „Zatraži ponudu“: klijent sa profila izvođača pošalje posao samo
+   njemu (`invited_provider`). Posao ne vidi niko drugi (ni pretraga, ni obavijesti, ni javni
+   profil), ponudu može poslati samo taj izvođač (`SAMO_POZVANI`) i doseg za njega ne važi.
+   Izvođač može odbiti (`decline_quote_request`), klijent dobija obavijest i može „Objavi svima“.
+   Najviše 10 zahtjeva dnevno po klijentu.
 
 | Plaća (budžet + put) | Ponude do |
 |---|---|
@@ -26,4 +32,9 @@ Pokrenuti ovim redom na Supabase bazi:
 Udaljenost je zračna linija od grada u profilu izvođača do grada posla.
 
 Aplikacija radi i prije nego što se ovo pokrene (stari način: rok u opisu), ali rok, istek,
-obavezni uslovi, sačuvani poslovi i doseg rade tek nakon migracija.
+obavezni uslovi, sačuvani poslovi, doseg i zahtjev za ponudu rade tek nakon migracija.
+Privatni zahtjev se nikad ne objavljuje javno ako 05 još nije pokrenut: aplikacija tada javi da
+„Zatraži ponudu“ još nije uključeno.
+
+Svih pet datoteka je testirano zajedno s ostalim SQL-om koji čeka (bid_replies, PR #9) na kopiji
+žive baze (supabase/postgres slika + 122 žive migracije), dvaput zaredom.

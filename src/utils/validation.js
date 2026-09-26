@@ -27,6 +27,14 @@ const POZNATE_GRESKE = [
   { test: /ROK_U_PROSLOSTI/i, poruka: 'Datum je već prošao — odaberi današnji ili neki kasniji dan.' },
   { test: /POSAO_ISTEKAO/i, poruka: 'Rok za ovaj posao je prošao. Vlasnik ga mora objaviti ponovo s novim datumom.' },
   { test: /POSAO_ZATVOREN/i, poruka: 'Ovaj posao više ne prima ponude.' },
+  // "Zatraži ponudu" (private quote requests)
+  { test: /SAMO_POZVANI/i, poruka: 'Ovaj posao je privatni zahtjev za drugog izvođača.' },
+  { test: /ZAHTJEV_SEBI/i, poruka: 'Ne možeš tražiti ponudu od sebe.' },
+  { test: /IZVODJAC_NEDOSTUPAN/i, poruka: 'Ovaj izvođač trenutno ne prima zahtjeve. Objavi posao svima.' },
+  { test: /PREVISE_ZAHTJEVA/i, poruka: 'Danas si poslao/la 10 zahtjeva za ponudu. Pokušaj sutra ili objavi posao svima.' },
+  { test: /ZAHTJEV_SE_NE_MIJENJA/i, poruka: 'Zahtjev za ponudu se ne može poslati drugom izvođaču. Objavi posao svima ili pošalji novi zahtjev.' },
+  { test: /NEMA_ZAHTJEVA/i, poruka: 'Ovaj zahtjev za ponudu nije za tebe.' },
+  { test: /PONUDA_POSLANA/i, poruka: 'Već si poslao/la ponudu. Povuci je ako ne možeš preuzeti posao.' },
   {
     test: /PREDALEKO/i,
     // "PREDALEKO: udaljen/a si 56 km, a za ovaj posao ponude mogu slati izvođači do 15 km"

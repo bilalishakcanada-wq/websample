@@ -11,7 +11,7 @@ const R = 70 // radius of the reach ring in the drawing
  */
 function ReachRadar({ listing, myCity, isOwner = false, signedIn = false, compact = false }) {
   const state = reachFor(listing, isOwner ? null : myCity)
-  if (!state || state.status === 'remote') return null
+  if (!state || state.status === 'remote' || state.status === 'invited') return null
   const travel = travelLabel(listing)
   const km = state.reachKm
   const showDot = !isOwner && state.distanceKm != null

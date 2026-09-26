@@ -16,6 +16,7 @@ import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
 import ImagePicker from '../components/ImagePicker'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
+import { InviteBanner } from '../components/QuoteRequest'
 import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
 
 const STEPS = [
@@ -37,10 +38,14 @@ const DRAFT_KEY = 'poso-post-draft-web'
 function PostTaskPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const editId = searchParams.get('edit')
   // "Objavi sličan posao": start from an earlier job, pick a new date
   const copyId = editId ? null : searchParams.get('copy')
+  // "Zatraži ponudu" from a provider's profile: the job goes only to them
+  const zaParam = searchParams.get('za') || ''
+  const inviteId = !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   // a half-written job survives a refresh or an accidental click away (not when editing an existing one)
   const draft = useMemo(() => {
     if (editId || copyId) return null
@@ -125,11 +130,11 @@ function PostTaskPage() {
     setError('')
     setSaving(true)
     try {
-      const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId })
+      const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
-      navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
+      navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError)
       setSaving(false)
@@ -153,7 +158,7 @@ function PostTaskPage() {
         <button type="button" className="icon-button" onClick={() => (step === 0 ? goBackOut() : setStep((s) => s - 1))} aria-label="Nazad">
           <ArrowLeft size={20} />
         </button>
-        <span className="wizard-title">Objavi posao</span>
+        <span className="wizard-title">{inviteId ? 'Zatraži ponudu' : editId ? 'Uredi posao' : 'Objavi posao'}</span>
         <button type="button" className="back-home-link" onClick={() => leaveFlow(() => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } goBackOut() })}>Odustani</button>
       </header>
 
@@ -167,6 +172,7 @@ function PostTaskPage() {
       </div>
 
       <main className="wizard-body">
+        {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
         {step === 0 && (
           <section className="wizard-panel">
             <h1>Počnimo od osnovnog</h1>
@@ -321,7 +327,9 @@ function PostTaskPage() {
               <div className="wizard-field">
                 <span>Troškovi puta (opciono)</span>
                 <TravelPicker value={form.travel} onChange={(travel) => update({ travel })} />
-                <ReachHint price={form.price} travel={form.travel} />
+                {inviteId
+                  ? <p className="tx-reach-hint">Doseg ne važi: izvođača biraš ti.</p>
+                  : <ReachHint price={form.price} travel={form.travel} />}
               </div>
             )}
 
@@ -351,7 +359,7 @@ function PostTaskPage() {
         )}
         {step === STEPS.length - 1 && (
           <button type="button" className="primary-button wizard-next" disabled={saving} onClick={submit}>
-            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : 'Objavljujem...') : editId ? 'Sačuvaj izmjene' : 'Objavi posao'}
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao'}
           </button>
         )}
       </footer>

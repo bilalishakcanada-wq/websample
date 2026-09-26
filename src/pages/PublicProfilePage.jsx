@@ -314,12 +314,12 @@ function PublicProfilePage() {
         <div className="profile-cta-bar">
           <div>
             <strong>{isProvider ? `Želiš raditi sa ${firstName}?` : `Želiš pomoći ${firstName}?`}</strong>
-            <span>{isProvider ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+            <span>{isProvider ? `Opiši posao i pošalji ga samo ${firstName} da ti da ponudu.` : 'Pogledaj šta traži i pošalji ponudu.'}</span>
           </div>
           <button
             type="button"
             className="primary-button"
-            onClick={() => navigate(isProvider || listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
+            onClick={() => navigate(isProvider ? `/objavi?za=${userId}` : listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
           >
             {isProvider || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'}
           </button>

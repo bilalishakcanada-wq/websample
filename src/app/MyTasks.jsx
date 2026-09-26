@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Bookmark, CalendarDays, Check, ChevronDown, MapPin, Plus, Users } from 'lucide-react'
+import { Bookmark, CalendarDays, Check, ChevronDown, Lock, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { keys, useMyBids, useMyListings } from '../hooks/queries'
 import { savedService } from '../services/savedService'
+import { listingService } from '../services/listingService'
 import { useSaved } from '../hooks/useSaved'
 import { daysUntilDue, scheduleLabel } from '../utils/schedule'
 import { timeAgo } from '../utils/dateFormat'
@@ -43,6 +44,12 @@ function MyTasks() {
   const savedQuery = useQuery({ queryKey: keys.savedListings(user.id), queryFn: () => savedService.list(user.id), enabled: tab === 'sacuvano' })
   const savedList = savedQuery.isPending ? null : (savedQuery.data || EMPTY)
   const saved = useSaved()
+  // "Traže ponudu od tebe": jobs a client sent privately to me that still wait for my answer
+  const quoteQuery = useQuery({ queryKey: keys.quoteRequests(user.id), queryFn: () => listingService.listQuoteRequests(user.id), enabled: tab === 'ponude' })
+  const quoteRequests = useMemo(() => {
+    const answered = new Set((bids || []).map((bid) => bid.listing_id))
+    return (quoteQuery.data || EMPTY).filter((job) => job.status === 'published' && !job.invite_declined_at && !answered.has(job.id))
+  }, [quoteQuery.data, bids])
   const failed = jobsQuery.isError || bidsQuery.isError
   // a failed load says so (with a retry) instead of pretending the list is empty
   const retryCard = failed && (
@@ -104,6 +111,7 @@ function MyTasks() {
                   <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
                   <span><MapPin size={14} /> {job.location || 'Online'}</span>
                   <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
+                  {job.invited_provider && <span><Lock size={14} /> Privatni zahtjev za ponudu</span>}
                   <div className="mt-card-foot">
                     <b className={`mt-state s-${tone}`}>{label}</b>
                     {job.status === 'expired'
@@ -155,6 +163,24 @@ function MyTasks() {
         <section className="ap-section">
           {bids === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
           {retryCard}
+          {quoteRequests.length > 0 && filter === 'all' && (
+            <>
+              <h2 className="mt-quote-head">Traže ponudu od tebe ({quoteRequests.length})</h2>
+              <div className="mt-list mt-quote-list">
+                {quoteRequests.map((job) => (
+                  <Link key={job.id} to={`/listings/${job.id}`} className="mt-card">
+                    <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
+                    <span><MapPin size={14} /> {job.location || 'Online'}</span>
+                    <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
+                    <div className="mt-card-foot">
+                      <b className="mt-state s-open"><Lock size={12} /> Samo za tebe</b>
+                      <small>Pošalji ponudu ili odbij</small>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
           {bids && bids.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
               <EmptyBoxMascot />

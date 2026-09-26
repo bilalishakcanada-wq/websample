@@ -6,6 +6,8 @@
 --  * listings.time_of_day subset of morning | midday | afternoon | evening (empty = any time)
 --  * listings.requirements up to 3 short "must-haves" (npr. "Ima svoj alat")
 --  * listings.travel_allowance KM the poster adds for the provider's travel (reach rule in 04)
+--  * listings.invited_provider / invite_declined_at: "Zatraži ponudu", a job sent privately to
+--    one provider (rules in 05; search and the feed already leave these jobs out)
 --  * status 'expired': an open job whose date has passed without an accepted offer.
 --    It leaves search, takes no new offers and no offer can be accepted until the
 --    owner picks a new date ("Objavi ponovo"), which puts it back to 'published'.
@@ -23,7 +25,11 @@ alter table public.listings
   add column if not exists due_date date,
   add column if not exists time_of_day text[] not null default '{}',
   add column if not exists requirements text[] not null default '{}',
-  add column if not exists travel_allowance numeric(8, 2);
+  add column if not exists travel_allowance numeric(8, 2),
+  add column if not exists invited_provider uuid,  -- no FK: a deleted account must not turn a private job public
+  add column if not exists invite_declined_at timestamptz;
+
+create index if not exists listings_invited_provider_idx on public.listings (invited_provider) where invited_provider is not null;
 
 -- "Platiću put": what the poster adds for the provider's travel (gorivo, taksi, prevoz); see 04
 alter table public.listings drop constraint if exists listings_travel_allowance_check;

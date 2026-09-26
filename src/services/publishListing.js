@@ -18,7 +18,7 @@ const kadaLine = (timing, date) => {
  * desktop wizard and the phone flow. Throws a user-facing Error on problems.
  * Returns { listing, flaggedPhotos }.
  */
-export async function publishListing({ user, form, photos = { files: [], removed: [] }, existingImages = [], tagList = [], editId = null }) {
+export async function publishListing({ user, form, photos = { files: [], removed: [] }, existingImages = [], tagList = [], editId = null, invitedProvider = null }) {
   const hit = findProhibitedTerm(form.title, form.description)
   if (hit) throw new Error('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
   const requirements = cleanRequirements(form.requirements)
@@ -40,6 +40,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
     requirements,
     // "Platiću put" only means something for jobs done in person
     travel_allowance: form.mode !== 'remote' && Number(form.travel) > 0 ? Math.min(MAX_TRAVEL_ALLOWANCE, Math.round(Number(form.travel))) : null,
+    // "Zatraži ponudu": sent privately to one provider; an edit never changes who it went to
+    ...(!editId && invitedProvider && invitedProvider !== user.id ? { invited_provider: invitedProvider } : {}),
   }
   const listing = editId ? await listingService.updateListing(editId, payload) : await listingService.createListing(payload)
   if (tagList.length > 0) await tagService.createForListing(listing.id, tagList, user.id)

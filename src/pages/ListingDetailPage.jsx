@@ -38,6 +38,7 @@ import { scheduleLabel } from '../utils/schedule'
 import { useSaved } from '../hooks/useSaved'
 import { RequirementsList } from '../components/TaskExtras'
 import ReachRadar from '../components/ReachRadar'
+import { QuoteRequestCard } from '../components/QuoteRequest'
 import { useMyCity } from '../hooks/useMyCity'
 import { travelLabel } from '../utils/reach'
 
@@ -88,7 +89,10 @@ function ListingDetailPage() {
   const navigate = useNavigate()
   const goBack = useGoBack()
   const [searchParams, setSearchParams] = useSearchParams()
-  const justPublished = searchParams.get('published') === '1'
+  const justPublished = ['1', 'quote'].includes(searchParams.get('published'))
+  const splash = searchParams.get('published') === 'quote'
+    ? { title: 'Zahtjev je poslan!', text: 'Posao vidi samo izvođač kojem si ga poslao/la. Javićemo ti čim pošalje ponudu.' }
+    : { title: 'Posao je objavljen!', text: 'Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena.' }
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
   const offerGate = useOfferGate(user?.id)
@@ -387,6 +391,8 @@ function ListingDetailPage() {
   const expired = listing.status === 'expired'
   const requirements = listing.requirements || []
   const isRemote = /online/i.test(listing.location || '')
+  // "Zatraži ponudu": only the client and the invited provider ever get this far
+  const isPrivate = Boolean(listing.invited_provider)
 
   const overlays = (
     <>
@@ -439,11 +445,11 @@ function ListingDetailPage() {
     return (
       <>
         {justPublished && (
-          <SuccessSplash title="Posao je objavljen!" text="Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena." onClose={closeSplash} onShare={share} />
+          <SuccessSplash title={splash.title} text={splash.text} onClose={closeSplash} onShare={isPrivate ? undefined : share} />
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} expired={expired} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} offerLabel={OFFER_CTA[offerGate]}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
@@ -458,13 +464,13 @@ function ListingDetailPage() {
   return (
     <div className="app-shell page-with-mobile-nav job-page">
       {justPublished && listing && (
-        <SuccessSplash title="Posao je objavljen!" text="Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena." onClose={closeSplash} onShare={share} />
+        <SuccessSplash title={splash.title} text={splash.text} onClose={closeSplash} onShare={isPrivate ? undefined : share} />
       )}
       <main className="content-container">
         <div className="job-top">
           <button type="button" className="job-back" onClick={goBack}><ArrowLeft size={16} /> Nazad</button>
           <div className="job-top-actions">
-            <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>
+            {!isPrivate && <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>}
             {!isOwner && (
               <button type="button" className={`job-icon job-icon-text ${saved.isSaved(listing.id) ? 'is-saved' : ''}`} onClick={() => saved.toggle(listing.id)} aria-pressed={saved.isSaved(listing.id)}>
                 <Bookmark size={15} fill={saved.isSaved(listing.id) ? 'currentColor' : 'none'} /> {saved.isSaved(listing.id) ? 'Sačuvano' : 'Sačuvaj'}
@@ -489,7 +495,8 @@ function ListingDetailPage() {
                 {listing.status === 'cancelled' && <span className="pill pill-danger">Otkazan</span>}
                 {expired && <span className="pill pill-danger"><History size={12} /> Rok je prošao</span>}
                 {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
-                {listing.status === 'published' && !acceptedBid && <span className="pill pill-ok">Otvoren za ponude</span>}
+                {listing.status === 'published' && !acceptedBid && !isPrivate && <span className="pill pill-ok">Otvoren za ponude</span>}
+                {listing.status === 'published' && !acceptedBid && isPrivate && <span className="pill pill-soft"><Lock size={12} /> Privatni zahtjev</span>}
               </div>
               <h1>{listing.title}</h1>
               <div className="job-meta">
@@ -518,6 +525,8 @@ function ListingDetailPage() {
               </section>
             )}
 
+            <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} />
+
             {requirements.length > 0 && (
               <section className="job-card">
                 <h2>Obavezni uslovi</h2>
@@ -526,7 +535,7 @@ function ListingDetailPage() {
               </section>
             )}
 
-            {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+            {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
               <section className="job-card">
                 <h2>Doseg ponuda</h2>
                 <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} />

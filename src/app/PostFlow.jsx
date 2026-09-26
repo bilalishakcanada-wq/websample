@@ -8,6 +8,7 @@ import { POPULAR_CITIES } from '../data/siteMap'
 import { publishListing } from '../services/publishListing'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
+import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
@@ -48,10 +49,14 @@ function PostFlow() {
   useFullscreen()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const editId = searchParams.get('edit')
   // "Objavi sličan posao": start from an earlier job (text, place, budget), pick a new date
   const copyId = editId ? null : searchParams.get('copy')
+  // "Zatraži ponudu" from a provider's profile: the job goes only to them
+  const zaParam = searchParams.get('za') || ''
+  const inviteId = !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   const draft = useMemo(() => (editId || copyId ? null : loadDraft()), [editId, copyId])
   const [step, setStep] = useState(() => (draft?.step ?? 0))
   const stepDir = useStepDirection(step)
@@ -149,19 +154,19 @@ function PostFlow() {
   const submit = async () => {
     if (!user) {
       saveDraft(form, step)
-      navigate(`/register?next=${encodeURIComponent('/objavi')}`)
+      navigate(`/register?next=${encodeURIComponent(inviteId ? `/objavi?za=${inviteId}` : '/objavi')}`)
       return
     }
     setSaving(true)
     setError('')
     try {
-      const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId })
+      const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       clearDraft()
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
       haptic('medium')
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
-      navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`, { replace: true })
+      navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true })
     } catch (requestError) {
       setError(requestError.message)
       setSaving(false)
@@ -181,6 +186,7 @@ function PostFlow() {
       {/* ---------- 1. title ---------- */}
       {key === 'title' && (
         <section className="ap-body" key="title">
+          {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
           <h1 className="ap-title">Počni s naslovom</h1>
           <p className="ap-sub">U par riječi, šta ti treba?</p>
           <input className="ap-input" autoFocus value={form.title} maxLength={70} placeholder="npr. Selidba kauča" onChange={(event) => update({ title: event.target.value })} enterKeyHint="next" onKeyDown={(event) => { if (event.key === 'Enter' && valid) goNext() }} />
@@ -280,7 +286,9 @@ function PostFlow() {
             : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
           {form.mode !== 'remote' && (
             <>
-              <ReachHint price={form.price} travel={form.travel} />
+              {inviteId
+                ? <p className="tx-reach-hint">Doseg ne važi: izvođača biraš ti.</p>
+                : <ReachHint price={form.price} travel={form.travel} />}
               <TravelPicker value={form.travel} onChange={(travel) => { update({ travel }); haptic('light') }} />
             </>
           )}
@@ -298,8 +306,9 @@ function PostFlow() {
       {/* ---------- 7. review ---------- */}
       {key === 'review' && (
         <section className="ap-body" key="review">
-          <h1 className="ap-title">Spreman/na za ponude?</h1>
-          <p className="ap-sub">Provjeri i objavi kad si spreman/na.</p>
+          <h1 className="ap-title">{inviteId ? 'Pošalji zahtjev za ponudu' : 'Spreman/na za ponude?'}</h1>
+          <p className="ap-sub">{inviteId ? 'Provjeri detalje. Posao vidi samo izvođač kojem ga šalješ.' : 'Provjeri i objavi kad si spreman/na.'}</p>
+          {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
@@ -319,7 +328,7 @@ function PostFlow() {
         {key === 'photos' && files.length === 0 && existingImages.length === 0 ? (
           <button type="button" className="ap-btn ap-btn-light" onClick={goNext}>Preskoči za sad</button>
         ) : key === 'review' ? (
-          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving} onClick={submit}>{saving ? 'Objavljujem…' : user ? (editId ? 'Sačuvaj izmjene' : 'Objavi posao') : 'Prijavi se i objavi'}</button>
+          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving} onClick={submit}>{saving ? (inviteId ? 'Šaljem…' : 'Objavljujem…') : user ? (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao') : (inviteId ? 'Prijavi se i pošalji' : 'Prijavi se i objavi')}</button>
         ) : (
           <button type="button" className="ap-btn ap-btn-primary" disabled={!valid} onClick={goNext}>Nastavi</button>
         )}

@@ -18,7 +18,11 @@ const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([k
 
 async function writeListing(run, row) {
   const first = await run(row)
-  if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) return run(withoutExtras(row))
+  if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) {
+    // a private quote request must never fall back to a public job
+    if (row.invited_provider) throw new Error('„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.')
+    return run(withoutExtras(row))
+  }
   return first
 }
 
@@ -233,6 +237,8 @@ export const listingService = {
       status: payload.status || 'draft',
       ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
       ...pickExtras(payload),
+      // "Zatraži ponudu": only this provider sees the job (set once, on create)
+      ...(payload.invited_provider ? { invited_provider: payload.invited_provider } : {}),
     })
 
     if (error) {
@@ -286,6 +292,35 @@ export const listingService = {
       throw publicError()
     }
     return data
+  },
+
+  /** Private quote request: the client opens the job to everyone (normal job alerts go out then). */
+  async openToEveryone(id) {
+    const { data, error } = await supabase.from('listings').update({ invited_provider: null }).eq('id', id).select('id, invited_provider, invite_declined_at').single()
+    if (error) throw prepoznajGresku(error) || publicError()
+    return data
+  },
+
+  /** Private quote request: the invited provider says no and the client is told. */
+  async declineQuote(id) {
+    const { error } = await supabase.rpc('decline_quote_request', { p_listing: id })
+    if (error) throw prepoznajGresku(error) || publicError()
+  },
+
+  /** Jobs sent privately to this provider ("Traže ponudu od tebe"), newest first. */
+  async listQuoteRequests(providerId) {
+    const { data, error } = await supabase
+      .from('listings')
+      .select('id, user_id, title, location, price, currency, status, created_at, date_type, due_date, time_of_day, invite_declined_at')
+      .eq('invited_provider', providerId)
+      .in('status', ['published', 'assigned', 'expired'])
+      .order('created_at', { ascending: false })
+      .limit(30)
+    if (error) {
+      if (isMissingColumn(error)) return []
+      throw publicError()
+    }
+    return (data || []).map(markExpired)
   },
 
   async deleteListing(id) {

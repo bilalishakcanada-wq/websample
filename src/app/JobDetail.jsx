@@ -5,6 +5,7 @@ import { JobPaymentCard } from '../components/JobPayment'
 import WorkFlow from '../components/WorkFlow'
 import { RequirementsList } from '../components/TaskExtras'
 import ReachRadar from '../components/ReachRadar'
+import { QuoteRequestCard } from '../components/QuoteRequest'
 import { travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
@@ -20,7 +21,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -38,8 +39,10 @@ function JobDetail(props) {
     ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
-          : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
+          : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
+            : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
     : myBid ? [`Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
+      : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
 
@@ -57,7 +60,7 @@ function JobDetail(props) {
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više" aria-expanded={menu}><MoreHorizontal size={22} /></button>
         {menu && (
           <div className="jd-menu" role="menu" onClick={() => setMenu(false)}>
-            <button type="button" role="menuitem" onClick={onShare}><Share2 size={16} /> Podijeli</button>
+            {!isPrivate && <button type="button" role="menuitem" onClick={onShare}><Share2 size={16} /> Podijeli</button>}
             {!isOwner && onSave && <button type="button" role="menuitem" onClick={onSave}><Bookmark size={16} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Ukloni iz sačuvanih' : 'Sačuvaj posao'}</button>}
             {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${listing.id}`} role="menuitem"><Copy size={16} /> Objavi sličan posao</Link>}
             {isOwner
@@ -120,6 +123,8 @@ function JobDetail(props) {
           )}
         </ul>
 
+        <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} phone />
+
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
 
         {requirements.length > 0 && (
@@ -129,7 +134,7 @@ function JobDetail(props) {
           </div>
         )}
 
-        {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+        {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
           <div className="jd-reqs">
             <h3>Doseg ponuda</h3>
             <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} compact />

@@ -4,6 +4,8 @@
 --   * extra output columns: date_type, due_date, time_of_day, travel_allowance
 --   * jobs whose date has passed never show up, even before the expiry job runs
 --   * p_sort = 'due_soon': dated jobs by nearest date first, flexible ones after
+--   * "Preporučeno" gives a small lift to jobs due today or in the next few days
+--   * private quote requests ("Zatraži ponudu", see 05) never show up
 -- The return type changes, so both functions are dropped and recreated.
 -- Needs 01_task_schedule_and_expiry.sql first.
 -- ============================================================================
@@ -35,6 +37,7 @@ as $function$
     from public.listings l cross join params pa
     where not p_fuzzy and l.status = 'published'
       and (l.due_date is null or l.due_date >= pa.today)
+      and l.invited_provider is null
       and (pa.q is null or l.search_tsv @@ pa.q or pa.folded operator(extensions.<%) public.fold_text(l.title))
       and (pa.cat is null or l.category = pa.cat)
       and (p_min_price is null or l.price >= p_min_price)
@@ -50,6 +53,7 @@ as $function$
       select l.* from public.listings l cross join params pa
       where p_fuzzy and l.status = 'published'
         and (l.due_date is null or l.due_date >= pa.today)
+        and l.invited_provider is null
         and (pa.cat is null or l.category = pa.cat)
         and (p_min_price is null or l.price >= p_min_price)
         and (p_max_price is null or l.price <= p_max_price)
@@ -103,8 +107,9 @@ as $function$
       + 0.8 * ((case when e.price is not null then 0.4 else 0 end) + (case when length(coalesce(e.description, '')) > 80 then 0.3 else 0 end) + (case when e.image_count > 0 then 0.3 else 0 end))
       + 0.9 * least(1, 0.4 + 0.1 * least(e.poster_completed, 4) + (case when e.poster_reviews > 0 and e.poster_rating >= 4.5 then 0.2 else 0 end))
       + 1.4 * (case when not e.has_trades then 0.5 when e.trade_match then 1 else 0.2 end)
+      + 0.7 * (case when e.due_date is null then 0 when e.due_date - pa.today <= 1 then 1 when e.due_date - pa.today <= 3 then 0.5 else 0 end)
       )::numeric, 4) as score
-    from enriched e
+    from enriched e cross join params pa
   )
   select s.id, s.user_id, s.title, s.description, s.category, s.location, s.price, s.currency, s.status, s.created_at,
          s.lat, s.lng, s.is_remote, s.cover_url, s.image_count, s.bid_count as offers, s.distance_km, s.text_rank,

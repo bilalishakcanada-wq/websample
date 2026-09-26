@@ -14,7 +14,7 @@ function AvatarWithBadges({ src, tier = 'unverified', badges = [], size = 128 })
   return (
     <div className={`avatar-badged tier-${tier}`} style={{ '--size': `${size}px` }}>
       <div className="avatar-badged-ring">
-        {src ? <img src={src} alt="" /> : <div className="avatar-badged-fallback"><UserRound size={size * 0.38} /></div>}
+        {src ? <img loading="lazy" decoding="async" src={src} alt="" /> : <div className="avatar-badged-fallback"><UserRound size={size * 0.38} /></div>}
       </div>
       {sorted.map((badge, index) => {
         const Icon = badgeIcon(badge.icon)

@@ -55,6 +55,13 @@ function PostFlow() {
   const stepDir = useStepDirection(step)
   const [form, setForm] = useState(() => ({ ...emptyForm, ...(draft?.form || {}) }))
   const [files, setFiles] = useState([])
+  // one preview URL per picked photo, made once and released when the photo goes (not on every keystroke)
+  const [previews, setPreviews] = useState([])
+  useEffect(() => {
+    const urls = files.map((file) => URL.createObjectURL(file))
+    setPreviews(urls)
+    return () => urls.forEach((url) => URL.revokeObjectURL(url))
+  }, [files])
   const [existingImages, setExistingImages] = useState([])
   const [removed, setRemoved] = useState([])
   const [saving, setSaving] = useState(false)
@@ -239,7 +246,7 @@ function PostFlow() {
               <div key={image.id} className="ap-photo"><img src={image.url} alt="" /><button type="button" onClick={() => setRemoved((r) => [...r, image.id])} aria-label="Ukloni"><X size={14} /></button></div>
             ))}
             {files.map((file, index) => (
-              <div key={`${file.name}-${index}`} className="ap-photo"><img src={URL.createObjectURL(file)} alt="" /><button type="button" onClick={() => setFiles((f) => f.filter((_, i) => i !== index))} aria-label="Ukloni"><X size={14} /></button></div>
+              <div key={`${file.name}-${index}`} className="ap-photo">{previews[index] && <img src={previews[index]} alt="" decoding="async" />}<button type="button" onClick={() => setFiles((f) => f.filter((_, i) => i !== index))} aria-label="Ukloni"><X size={14} /></button></div>
             ))}
           </div>
           <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={pickFiles} />

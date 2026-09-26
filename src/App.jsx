@@ -1,5 +1,5 @@
-import { Suspense, lazy } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
+import { Suspense, lazy, useEffect, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 import './app/app.css'
@@ -65,10 +65,26 @@ import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
 import { RouteFallback, RouteGuard } from './components/RouteBoundary'
-import SupportChat from './components/SupportChat'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import DialogHost from './components/DialogHost'
 import ViewTransitions from './components/ViewTransitions'
+
+// the support chat lives only on the help pages, so its code (and the help articles) load only there
+const SupportChat = lazy(lazyImport(() => import('./components/SupportChat')))
+function SupportChatSlot() {
+  const { pathname } = useLocation()
+  const onHelpPage = pathname.startsWith('/pomoc')
+  // a tap on "open chat" that lands before the chat's code has arrived still opens it
+  const [asked, setAsked] = useState(false)
+  useEffect(() => {
+    const ask = () => setAsked(true)
+    window.addEventListener('poso:open-support', ask)
+    return () => window.removeEventListener('poso:open-support', ask)
+  }, [])
+  const [wasOnHelpPage, setWasOnHelpPage] = useState(onHelpPage)
+  if (wasOnHelpPage !== onHelpPage) { setWasOnHelpPage(onHelpPage); setAsked(false) }
+  return onHelpPage ? <Suspense fallback={null}><SupportChat openRequested={asked} /></Suspense> : null
+}
 
 // phone app screens (welcome, goal, intro, post flow, my tasks); desktop keeps its pages
 const StartGoal = lazy(lazyImport(() => import('./app/StartGoal')))
@@ -91,7 +107,7 @@ function App() {
       <ViewTransitions />
       <SwBridge />
       <SiteHeader />
-      <SupportChat />
+      <SupportChatSlot />
       <InstallPrompt />
       <RouteGuard>
       <Suspense fallback={<RouteFallback />}>

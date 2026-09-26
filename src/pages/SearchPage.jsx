@@ -398,7 +398,7 @@ function SearchPage() {
               onFocus={() => setActiveId(item.id)}
             >
               <Link to={`/listings/${item.id}`} className={`task-card-link ${item.photo ? 'has-photo' : ''}`}>
-                {item.photo && <div className="task-card-photo"><img src={item.photo} alt="" loading="lazy" />{item.photoCount > 1 && <span>{item.photoCount}</span>}</div>}
+                {item.photo && <div className="task-card-photo"><img src={item.photo} alt="" loading="lazy" decoding="async" />{item.photoCount > 1 && <span>{item.photoCount}</span>}</div>}
                 <div className="task-card-head">
                   <h3>{item.title}</h3>
                   <strong className="task-card-price">{formatPrice(item.price, item.currency)}</strong>

@@ -6013,8 +6013,7 @@ body:has(.profile-cta-bar) .support-chat {
   width: min(100% - 32px, 1400px);
   margin: 0 auto;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--stroke);
   border-radius: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
@@ -7280,9 +7279,8 @@ body:has(.profile-cta-bar) .support-chat {
   right: 0;
   z-index: 80;
   height: var(--header-h);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.98); /* no backdrop blur: at 98% it was invisible but re-blurred every scroll frame */
   border-bottom: 1px solid rgba(223, 230, 241, 0.9);
-  backdrop-filter: blur(14px);
   transition: box-shadow 0.25s ease;
 }
 
@@ -12120,7 +12118,7 @@ button { touch-action: manipulation; }
   input, select, textarea { font-size: 16px !important; }
 
   /* fixed app tab bar */
-  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; margin: 0; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(13, 42, 82, 0.08); }
+  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; margin: 0; background: rgba(255, 255, 255, 0.98); box-shadow: 0 -8px 24px rgba(13, 42, 82, 0.08); } /* opaque, no blur: the tab bar sits over every scroll */
   .mobile-nav-item.active { color: var(--primary); }
   .mobile-nav-item.active svg { transform: translateY(-1px); }
   .mobile-nav-item svg { transition: transform 0.2s ease; }

@@ -1,7 +1,8 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 
 // Deploy target decides the base path: '/' on a domain (Vercel), '/websample/' on GitHub Pages.
 const base = process.env.VITE_BASE || '/'
@@ -57,6 +58,51 @@ const prerenderWelcome = () => ({
       html = html.replace('</head>', `    ${boot}\n  </head>`)
       return html.replace('<div id="root">', `<div id="boot-welcome" aria-hidden="true">${welcome}</div><div id="root">`)
     },
+  },
+})
+
+/**
+ * App.css has grown over many redesigns and still carries rules for screens that no longer exist.
+ * At build time, drop every selector naming a class that appears nowhere in the source (any word in
+ * src/ or index.html counts, as do dynamic prefixes like `wf-${step}` or 'tier-' + x), so the one
+ * stylesheet the first paint waits for is ~10% smaller. The source files stay as they are.
+ * Kept always: classes added by libraries at runtime (maplibre), :is()/:where() lists, and anything
+ * inside :not(), which never makes a rule dead.
+ */
+const pruneUnusedCss = () => ({
+  name: 'poso-prune-css',
+  apply: 'build',
+  enforce: 'pre',
+  transform(code, id) {
+    if (process.env.POSO_KEEP_CSS) return null // debug: ship the stylesheet unpruned
+    if (!/src[\\/](App|index|app[\\/]app)\.css$/.test(id.split('?')[0])) return null
+    const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
+    const source = [...walk('src').filter((f) => /\.(jsx?|mjs|html)$/.test(f)), 'index.html'].map((f) => readFileSync(f, 'utf8')).join('\n')
+    const words = new Set(source.match(/[A-Za-z_][\w-]*/g))
+    const prefixes = [...new Set([...source.matchAll(/([A-Za-z][\w-]*-)(?:\$\{|['"`]\s*\+)/g)].map((m) => m[1])), 'maplibregl-']
+    const used = (name) => words.has(name) || prefixes.some((p) => name.startsWith(p))
+    const live = (selector) => /:(is|where|matches)\(/.test(selector) || [...selector.replace(/:not\([^)]*\)/g, '').matchAll(/\.([A-Za-z_][\w-]*)/g)].every((m) => used(m[1]))
+    const prune = (css) => {
+      let out = ''
+      let i = 0
+      while (i < css.length) {
+        const open = css.indexOf('{', i)
+        if (open === -1) { out += css.slice(i); break }
+        const prelude = css.slice(i, open)
+        let depth = 0
+        let close = open
+        for (; close < css.length; close++) { if (css[close] === '{') depth++; else if (css[close] === '}' && --depth === 0) break }
+        const inner = css.slice(open + 1, close)
+        i = close + 1
+        const head = prelude.trim()
+        if (/^@(media|supports|layer|container)/.test(head)) { const kept = prune(inner); if (kept.trim()) out += `${prelude}{${kept}}` }
+        else if (head.startsWith('@')) out += `${prelude}{${inner}}`
+        else { const kept = head.split(',').filter(live); if (kept.length) out += `${kept.join(',')}{${inner}}` }
+      }
+      return out
+    }
+    // before bundling, so the file name's hash reflects what actually ships
+    return { code: prune(code.replace(/\/\*[\s\S]*?\*\//g, '')), map: null }
   },
 })
 
@@ -123,6 +169,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    pruneUnusedCss(),
     asyncCss(),
     prerenderWelcome(),
     process.env.VITE_NO_PWA ? null : VitePWA({

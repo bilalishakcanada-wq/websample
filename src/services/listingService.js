@@ -162,11 +162,15 @@ export const listingService = {
   async uploadImages(userId, listingId, files, startPosition = 0) {
     const allowed = new Set(['image/jpeg', 'image/png', 'image/webp'])
     const rows = []
-    for (const [index, file] of Array.from(files).slice(0, 8).entries()) {
+    const { resizeImage } = await import('../utils/imageResize')
+    for (const [index, original] of Array.from(files).slice(0, 8).entries()) {
+      // phone photos are 3–8 MB; everyone who opens the job would download that. 1600 px webp is ~200–400 KB.
+      const file = allowed.has(original.type) ? await resizeImage(original) : original
       if (!allowed.has(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Slika mora biti JPG, PNG ili WEBP i manja od 5 MB.')
       const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
       const path = `${userId}/listings/${listingId}/${crypto.randomUUID()}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '3600', contentType: file.type })
+      // every upload gets a fresh random name, so browsers may keep it for a year
+      const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '31536000', contentType: file.type })
       if (uploadError) {
         console.error('Listing image upload failed', { message: uploadError.message })
         throw new Error('Slika nije mogla biti učitana. Pokušaj ponovo.')

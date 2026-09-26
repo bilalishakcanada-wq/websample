@@ -5,7 +5,7 @@ import { useBackToClose } from '../hooks/useBackToClose'
 import { useGoBack } from '../hooks/useGoBack'
 import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
-import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
+import { ArrowLeft, Bookmark, CalendarDays, Car, Copy, History, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
@@ -34,6 +34,12 @@ import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
 import { useOfferGate, OFFER_CTA } from '../hooks/useOfferGate'
 import { recordInterest } from '../utils/interests'
+import { scheduleLabel } from '../utils/schedule'
+import { useSaved } from '../hooks/useSaved'
+import { RequirementsList } from '../components/TaskExtras'
+import ReachRadar from '../components/ReachRadar'
+import { useMyCity } from '../hooks/useMyCity'
+import { travelLabel } from '../utils/reach'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -165,6 +171,8 @@ function ListingDetailPage() {
   useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
+  const saved = useSaved()
+  const myCity = useMyCity()
   // opening someone else's job teaches the feed what this person is into (kept on this device)
   useEffect(() => {
     if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
@@ -374,8 +382,10 @@ function ListingDetailPage() {
   }
   if (!listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>Oglas više nije dostupan ili je privatan.</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>
 
-  const [descriptionBody, whenLine] = (listing.description || '').split('\n\nKada:')
-  const when = (whenLine || '').trim() || 'Fleksibilan termin'
+  const [descriptionBody] = (listing.description || '').split('\n\nKada:')
+  const when = scheduleLabel(listing)
+  const expired = listing.status === 'expired'
+  const requirements = listing.requirements || []
   const isRemote = /online/i.test(listing.location || '')
 
   const overlays = (
@@ -433,7 +443,7 @@ function ListingDetailPage() {
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          isOwner={isOwner} expired={expired} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} offerLabel={OFFER_CTA[offerGate]}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
@@ -455,6 +465,12 @@ function ListingDetailPage() {
           <button type="button" className="job-back" onClick={goBack}><ArrowLeft size={16} /> Nazad</button>
           <div className="job-top-actions">
             <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>
+            {!isOwner && (
+              <button type="button" className={`job-icon job-icon-text ${saved.isSaved(listing.id) ? 'is-saved' : ''}`} onClick={() => saved.toggle(listing.id)} aria-pressed={saved.isSaved(listing.id)}>
+                <Bookmark size={15} fill={saved.isSaved(listing.id) ? 'currentColor' : 'none'} /> {saved.isSaved(listing.id) ? 'Sačuvano' : 'Sačuvaj'}
+              </button>
+            )}
+            {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${id}`} className="job-icon job-icon-text"><Copy size={15} /> Objavi sličan</Link>}
             {isOwner
               ? <Link to={`/objavi?edit=${id}`} className="job-icon job-icon-text"><Pencil size={15} /> Uredi</Link>
               : <button type="button" className="job-icon" onClick={reportListing} aria-label="Prijavi oglas" title="Prijavi oglas"><Flag size={16} /></button>}
@@ -471,6 +487,7 @@ function ListingDetailPage() {
                 {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
                 {listing.status === 'assigned' && <span className="pill pill-gold"><Lock size={12} /> Izvođač odabran · uplata osigurana</span>}
                 {listing.status === 'cancelled' && <span className="pill pill-danger">Otkazan</span>}
+                {expired && <span className="pill pill-danger"><History size={12} /> Rok je prošao</span>}
                 {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
                 {listing.status === 'published' && !acceptedBid && <span className="pill pill-ok">Otvoren za ponude</span>}
               </div>
@@ -489,6 +506,33 @@ function ListingDetailPage() {
               {tags.length > 0 && <div className="tag-list job-tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>}
             </section>
 
+            {expired && (
+              <section className="job-card job-expired">
+                <h2><History size={18} /> Rok za ovaj posao je prošao</h2>
+                {isOwner
+                  ? <>
+                    <p className="muted-text">Posao više ne prima ponude i ne vidi se u pretrazi. Izaberi novi datum i objavi ga ponovo — postojeće ponude ostaju.</p>
+                    <Link to={`/objavi?edit=${id}&step=time`} className="primary-button"><CalendarDays size={16} /> Izaberi novi datum</Link>
+                  </>
+                  : <p className="muted-text">Ovaj posao više ne prima ponude. Pogledaj slične poslove ispod.</p>}
+              </section>
+            )}
+
+            {requirements.length > 0 && (
+              <section className="job-card">
+                <h2>Obavezni uslovi</h2>
+                <p className="muted-text">Klijent traži da izvođač ispunjava ove uslove.</p>
+                <RequirementsList items={requirements} />
+              </section>
+            )}
+
+            {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+              <section className="job-card">
+                <h2>Doseg ponuda</h2>
+                <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} />
+              </section>
+            )}
+
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
                 <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
@@ -503,6 +547,7 @@ function ListingDetailPage() {
                 <div><span className="job-fact-icon"><MapPin size={17} /></span><div><small>Gdje</small><strong>{isRemote ? 'Online / na daljinu' : listing.location || '—'}</strong></div></div>
                 <div><span className="job-fact-icon"><Tag size={17} /></span><div><small>Kategorija</small><strong>{listing.category || 'Ostalo'}</strong></div></div>
                 <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
+                {travelLabel(listing) && <div><span className="job-fact-icon"><Car size={17} /></span><div><small>Put</small><strong>{travelLabel(listing)}</strong></div></div>}
               </div>
             </section>
 
@@ -648,6 +693,7 @@ function ListingDetailPage() {
               )}
               {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
               {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
+              {expired && <div className="outcome-state cancelled">Rok je prošao</div>}
               {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Poso.ba`}</div>}
               <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Poso.ba Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
               {!payment && <HowPaymentWorks />}

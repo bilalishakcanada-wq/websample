@@ -5,7 +5,9 @@ import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import { cityCoordinates } from '../data/cityCoordinates'
 import { POPULAR_CITIES } from '../data/siteMap'
-import { publishListing, timingLabel } from '../services/publishListing'
+import { publishListing } from '../services/publishListing'
+import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
+import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { listingService } from '../services/listingService'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
@@ -26,7 +28,7 @@ const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review
 const ALL_CITIES = Object.keys(cityCoordinates)
 const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
 
-const emptyForm = { title: '', timing: '', date: '', mode: '', location: '', description: '', category: '', price: '' }
+const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], category: '', price: '', travel: '' }
 
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
@@ -34,11 +36,8 @@ const loadDraft = () => {
 const saveDraft = (form, step) => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step })) } catch { /* ignore */ } }
 const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
 
-const formatDate = (iso) => {
-  if (!iso) return ''
-  const d = new Date(`${iso}T12:00:00`)
-  return d.toLocaleDateString('bs-BA', { weekday: 'short', day: 'numeric', month: 'short' })
-}
+// the browser's Bosnian locale data is often incomplete ("M09 29, Tue"), so format by hand
+const formatDate = shortDate
 
 /**
  * Phone "Objavi posao" — one question per screen, like the app people already know:
@@ -51,7 +50,9 @@ function PostFlow() {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
-  const draft = useMemo(() => (editId ? null : loadDraft()), [editId])
+  // "Objavi sličan posao": start from an earlier job (text, place, budget), pick a new date
+  const copyId = editId ? null : searchParams.get('copy')
+  const draft = useMemo(() => (editId || copyId ? null : loadDraft()), [editId, copyId])
   const [step, setStep] = useState(() => (draft?.step ?? 0))
   const stepDir = useStepDirection(step)
   const [form, setForm] = useState(() => ({ ...emptyForm, ...(draft?.form || {}) }))
@@ -80,32 +81,34 @@ function PostFlow() {
   useBackToClose(catOpen, () => setCatOpen(false))
   const catSheet = usePresence(catOpen, 220)
 
-  // editing an existing job: load it into the flow
+  // editing an existing job (or copying one): load it into the flow
   useEffect(() => {
-    if (!editId) return
-    listingService.getById(editId).then((listing) => {
+    const sourceId = editId || copyId
+    if (!sourceId) return
+    listingService.getById(sourceId).then((listing) => {
       if (!listing) return
       const remote = listing.location === 'Online / na daljinu'
-      // "Kada: Prije 2026-10-01" / "Na dan 2026-10-01" → timing + date
-      const kada = ((listing.description || '').split('\n\nKada:')[1] || '').trim()
-      const dateMatch = kada.match(/(\d{4}-\d{2}-\d{2})/)
+      const schedule = formScheduleFromListing(listing)
+      // a date that has already passed (reposting an expired job, or a copy) has to be picked again
+      const stale = copyId || (schedule.date && schedule.date < todayBa())
       setForm({
         title: listing.title || '',
-        timing: dateMatch ? (kada.startsWith('Prije') ? 'before' : 'date') : 'flexible',
-        date: dateMatch ? dateMatch[1] : '',
+        ...(stale ? { timing: '', date: '', timeOfDay: schedule.timeOfDay } : schedule),
         mode: remote ? 'remote' : 'in-person',
         location: remote ? '' : (listing.location || ''),
         description: (listing.description || '').split('\n\nKada:')[0],
+        requirements: listing.requirements || [],
         category: listing.category || '',
         price: listing.price ?? '',
+        travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
       })
-      setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+      if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
       // land on the field the user tapped ("Uredi" next to the date / budget), otherwise on the review
       const wanted = STEPS.indexOf(searchParams.get('step'))
-      setStep(wanted >= 0 ? wanted : STEPS.length - 1)
+      setStep(stale ? STEPS.indexOf('time') : wanted >= 0 ? wanted : STEPS.length - 1)
     }).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editId])
+  }, [editId, copyId])
 
   // keep the draft on the device so a sign-in detour never loses the job
   useEffect(() => { if (!editId) saveDraft(form, step) }, [form, step, editId])
@@ -115,7 +118,7 @@ function PostFlow() {
 
   const valid = {
     title: form.title.trim().length >= 3,
-    time: form.timing === 'flexible' || ((form.timing === 'date' || form.timing === 'before') && Boolean(form.date)),
+    time: form.timing === 'flexible' || ((form.timing === 'date' || form.timing === 'before') && Boolean(form.date) && form.date >= todayBa()),
     where: form.mode === 'remote' || (form.mode === 'in-person' && Boolean(form.location)),
     describe: form.description.trim().length >= 10,
     photos: true,
@@ -198,9 +201,15 @@ function PostFlow() {
           {(form.timing === 'date' || form.timing === 'before') && (
             <label className="ap-date">
               <span>{form.timing === 'date' ? 'Datum' : 'Najkasnije do'}</span>
-              <input type="date" value={form.date} min={new Date().toISOString().slice(0, 10)} onChange={(event) => update({ date: event.target.value })} />
+              <input type="date" value={form.date} min={todayBa()} onChange={(event) => update({ date: event.target.value })} />
               {form.date && <em>{formatDate(form.date)}</em>}
             </label>
+          )}
+          {form.timing && (
+            <>
+              <span className="ap-label">U koje doba dana? (opciono)</span>
+              <TimeOfDayPicker value={form.timeOfDay || []} onChange={(timeOfDay) => { update({ timeOfDay }); haptic('light') }} />
+            </>
           )}
         </section>
       )}
@@ -236,6 +245,8 @@ function PostFlow() {
           <p className="ap-sub">Sažmi ključne detalje</p>
           <textarea className="ap-input ap-textarea" autoFocus value={form.description} maxLength={2000} rows={5} placeholder="Napiši šta tačno treba uraditi, koliko je posao velik, treba li alat…" onChange={(event) => update({ description: event.target.value })} />
           <span className="ap-hint">Najviše 2000 znakova · bez brojeva telefona i emaila (Pravilo #1)</span>
+          <span className="ap-label">Obavezni uslovi</span>
+          <RequirementsEditor value={form.requirements || []} onChange={(requirements) => update({ requirements })} />
         </section>
       )}
 
@@ -267,6 +278,12 @@ function PostFlow() {
           {priceStats
             ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
             : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
+          {form.mode !== 'remote' && (
+            <>
+              <ReachHint price={form.price} travel={form.travel} />
+              <TravelPicker value={form.travel} onChange={(travel) => { update({ travel }); haptic('light') }} />
+            </>
+          )}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
               k === '' ? <span key={`sp-${i}`} />
@@ -285,12 +302,14 @@ function PostFlow() {
           <p className="ap-sub">Provjeri i objavi kad si spreman/na.</p>
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{timingLabel(form.timing, form.date)}</strong><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.location}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setCatOpen(true)} className={form.category ? '' : 'is-missing'}><span>Kategorija</span><strong>{form.category || 'Odaberi'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(3)}><span>Opis</span><strong className="ap-clamp">{form.description}</strong><ChevronRight size={18} /></button>
+            {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
+            {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
           {error && <div className="form-error">{error}</div>}
         </section>

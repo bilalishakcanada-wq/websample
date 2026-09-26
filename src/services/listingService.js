@@ -5,6 +5,22 @@ import { appConfig } from '../config/appConfig'
 import { listingInputSchema, parseInput } from '../utils/inputSchemas'
 import { prepoznajGresku } from '../utils/validation'
 import { coordsForLocation } from '../data/cityCoordinates'
+import { isExpired } from '../utils/schedule'
+
+// schedule, must-haves and the travel allowance live in their own columns (supabase/airtasker/01); until that migration is
+// on the database, a write that names them fails with "column not found" and is retried without
+const EXTRA_COLUMNS = ['date_type', 'due_date', 'time_of_day', 'requirements', 'travel_allowance']
+const isMissingColumn = (error) => error?.code === 'PGRST204' || error?.code === '42703'
+const pickExtras = (payload) => Object.fromEntries(EXTRA_COLUMNS.filter((key) => payload[key] !== undefined).map((key) => [key, payload[key]]))
+// an open job whose date has passed reads as 'expired' right away (the server flips it within minutes)
+const markExpired = (row) => (row && row.status === 'published' && isExpired(row) ? { ...row, status: 'expired' } : row)
+const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([key]) => !EXTRA_COLUMNS.includes(key)))
+
+async function writeListing(run, row) {
+  const first = await run(row)
+  if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) return run(withoutExtras(row))
+  return first
+}
 
 export const listingService = {
   /** Owner marks a job done or cancelled. `reason` (provider|client|other) only matters for cancellations. */
@@ -25,14 +41,14 @@ export const listingService = {
       .from('listings')
       .select('*, listing_tags(tag_id, tags(name)), listing_images(id, url, position)')
       .eq('id', id)
-      .in('status', ['published', 'assigned', 'completed', 'cancelled'])
+      .in('status', ['published', 'assigned', 'completed', 'cancelled', 'expired'])
       .maybeSingle()
 
     if (error) {
       console.error('Supabase listing detail fetch failed', { message: error.message, code: error.code, details: error.details, hint: error.hint })
       throw publicError()
     }
-    return data
+    return markExpired(data)
   },
 
   async listLatestPublished(limit = 8) {
@@ -91,7 +107,7 @@ export const listingService = {
       .select('*, listing_tags(tag_id, tags(name)), bids(count), listing_images(url, position)', { count: 'exact' })
       .range(from, to)
     // an owner's dashboard shows every live job (open, assigned, done); everyone else only open ones
-    query = ownerId && status === 'published' ? query.in('status', ['published', 'assigned', 'completed', 'cancelled']) : query.eq('status', status)
+    query = ownerId && status === 'published' ? query.in('status', ['published', 'assigned', 'completed', 'cancelled', 'expired']) : query.eq('status', status)
     query = query
       .order(orderColumn, { ascending, nullsFirst: false })
 
@@ -118,7 +134,7 @@ export const listingService = {
       })
       throw publicError()
     }
-    return { data, count }
+    return { data: ownerId ? (data || []).map(markExpired) : data, count }
   },
 
   /**
@@ -206,21 +222,18 @@ export const listingService = {
     const cleanPayload = { ...payload, ...input, price: input.price === '' ? null : input.price }
     if (appConfig.apiBaseUrl) return apiRequest('/api/listings', { method: 'POST', body: cleanPayload })
 
-    const { data, error } = await supabase
-      .from('listings')
-      .insert({
-        user_id: payload.user_id,
-        title: cleanPayload.title,
-        description: cleanPayload.description,
-        category: cleanPayload.category,
-        location: cleanPayload.location,
-        price: cleanPayload.price,
-        currency: payload.currency || 'BAM',
-        status: payload.status || 'draft',
-        ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
-      })
-      .select()
-      .single()
+    const { data, error } = await writeListing((row) => supabase.from('listings').insert(row).select().single(), {
+      user_id: payload.user_id,
+      title: cleanPayload.title,
+      description: cleanPayload.description,
+      category: cleanPayload.category,
+      location: cleanPayload.location,
+      price: cleanPayload.price,
+      currency: payload.currency || 'BAM',
+      status: payload.status || 'draft',
+      ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
+      ...pickExtras(payload),
+    })
 
     if (error) {
       const poznata = prepoznajGresku(error)
@@ -255,17 +268,15 @@ export const listingService = {
       currency: 'BAM',
       status: payload.status || 'published',
       ...(coordsForLocation(input.location) || { lat: null, lng: null }),
+      ...pickExtras(payload),
     }
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'PATCH', body: cleanPayload })
 
-    const { data, error } = await supabase
-      .from('listings')
-      .update(cleanPayload)
-      .eq('id', id)
-      .select()
-      .single()
+    const { data, error } = await writeListing((row) => supabase.from('listings').update(row).eq('id', id).select().single(), cleanPayload)
 
     if (error) {
+      const poznata = prepoznajGresku(error)
+      if (poznata) throw poznata
       console.error('Supabase listing update failed', {
         message: error.message,
         code: error.code,

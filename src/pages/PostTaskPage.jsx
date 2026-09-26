@@ -9,15 +9,14 @@ import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
-import { tagService } from '../services/tagService'
+import { publishListing } from '../services/publishListing'
 import { serviceCategories } from '../data/categories'
-import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
-import { queryClient } from '../lib/queryClient'
 import ImagePicker from '../components/ImagePicker'
-import { profileService } from '../services/profileService'
+import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
+import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
 
 const STEPS = [
   { id: 'basics', label: 'Naslov i rok' },
@@ -40,11 +39,13 @@ function PostTaskPage() {
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
+  // "Objavi sličan posao": start from an earlier job, pick a new date
+  const copyId = editId ? null : searchParams.get('copy')
   // a half-written job survives a refresh or an accidental click away (not when editing an existing one)
   const draft = useMemo(() => {
-    if (editId) return null
+    if (editId || copyId) return null
     try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { return null }
-  }, [editId])
+  }, [editId, copyId])
   const [step, setStep] = useState(draft?.step || 0)
   const stepDir = useStepDirection(step)
   const goBackOut = useGoBack('/')
@@ -56,7 +57,7 @@ function PostTaskPage() {
   const [tagList, setTagList] = useState(draft?.tags || [])
   const [photos, setPhotos] = useState({ files: [], removed: [] })
   const [existingImages, setExistingImages] = useState([])
-  const [form, setForm] = useState(draft?.form || {
+  const [form, setForm] = useState({ timeOfDay: [], requirements: [], travel: '', ...(draft?.form || {
     title: '',
     timing: 'flexible',
     date: '',
@@ -65,7 +66,7 @@ function PostTaskPage() {
     category: '',
     description: '',
     price: '',
-  })
+  }) })
   useEffect(() => {
     if (editId) return
     try {
@@ -75,13 +76,20 @@ function PostTaskPage() {
   }, [form, step, tagList, editId])
 
   useEffect(() => {
-    if (!editId) return
-    listingService.getById(editId)
+    const sourceId = editId || copyId
+    if (!sourceId) return
+    listingService.getById(sourceId)
       .then((listing) => {
         if (!listing) return
         const isRemote = listing.location === 'Online / na daljinu'
+        const schedule = formScheduleFromListing(listing)
+        // a date that has already passed (reposting an expired job, or a copy) has to be picked again
+        const stale = copyId || (schedule.date && schedule.date < todayBa())
         setForm((current) => ({
           ...current,
+          ...(stale ? { timing: 'flexible', date: '', timeOfDay: schedule.timeOfDay } : schedule),
+          requirements: listing.requirements || [],
+          travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
           title: listing.title || '',
           category: listing.category || '',
           description: (listing.description || '').split('\n\nKada:')[0],
@@ -89,15 +97,18 @@ function PostTaskPage() {
           mode: isRemote ? 'remote' : 'in-person',
           price: listing.price ?? '',
         }))
-        setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+        if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+        // "Povećaj budžet ili dodaj put" on the job page lands on the budget step
+        setStep(!stale && searchParams.get('step') === 'budget' ? STEPS.length - 1 : 0)
       })
       .catch(() => {})
-  }, [editId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId, copyId])
 
   const update = (changes) => setForm((current) => ({ ...current, ...changes }))
 
   const canContinue = () => {
-    if (step === 0) return form.title.trim().length >= 3 && (form.timing === 'flexible' || form.date)
+    if (step === 0) return form.title.trim().length >= 3 && (form.timing === 'flexible' || (form.date && form.date >= todayBa()))
     if (step === 1) return form.mode === 'remote' || Boolean(form.location)
     if (step === 2) return Boolean(form.category) && form.description.trim().length >= 10
     return true
@@ -110,54 +121,14 @@ function PostTaskPage() {
     setTagDraft('')
   }
 
-  const timingLabel = () => {
-    if (form.timing === 'flexible') return 'Fleksibilan termin'
-    if (form.timing === 'before') return `Prije ${form.date}`
-    return `Na dan ${form.date}`
-  }
-
   const submit = async () => {
     setError('')
-    const hit = findProhibitedTerm(form.title, form.description)
-    if (hit) {
-      setError('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
-      return
-    }
-    const contactScan = scanContactInfo(form.title, form.description)
-    if (!contactScan.clean) {
-      setError(contactInfoMessage(contactScan, 'oglas'))
-      return
-    }
-
     setSaving(true)
     try {
-      const payload = {
-        user_id: user.id,
-        title: form.title.trim(),
-        description: `${form.description.trim()}\n\nKada: ${timingLabel()}`,
-        category: form.category,
-        location: form.mode === 'remote' ? 'Online / na daljinu' : form.location,
-        price: form.price ? Number(form.price) : null,
-        status: 'published',
-      }
-      const listing = editId
-        ? await listingService.updateListing(editId, payload)
-        : await listingService.createListing(payload)
-      if (tagList.length > 0) await tagService.createForListing(listing.id, tagList, user.id)
-      // photos: drop the ones removed while editing, upload the new ones, then let the AI check them
-      for (const image of existingImages.filter((item) => photos.removed.includes(item.id))) await listingService.deleteImage(image)
-      if (photos.files.length > 0) {
-        const kept = existingImages.filter((item) => !photos.removed.includes(item.id)).length
-        await listingService.uploadImages(user.id, listing.id, photos.files, kept)
-        const outcome = await profileService.checkMyMedia()
-        const flagged = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
-        if (flagged > 0) toast(`Pravilo #1: ${flagged} ${flagged === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
-      }
+      const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId })
+      if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
-      queryClient.invalidateQueries({ queryKey: ['search'] })
-      queryClient.invalidateQueries({ queryKey: ['me'] })
-      if (editId) queryClient.invalidateQueries({ queryKey: ['listing', editId] })
       navigate(`/listings/${listing.id}${editId ? '' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError)
@@ -228,9 +199,11 @@ function PostTaskPage() {
             {form.timing !== 'flexible' && (
               <label className="wizard-field">
                 <span>Datum</span>
-                <input type="date" value={form.date} onChange={(event) => update({ date: event.target.value })} />
+                <input type="date" value={form.date} min={todayBa()} onChange={(event) => update({ date: event.target.value })} />
               </label>
             )}
+            <span className="wizard-label">U koje doba dana? (opciono)</span>
+            <TimeOfDayPicker value={form.timeOfDay} onChange={(timeOfDay) => update({ timeOfDay })} />
           </section>
         )}
 
@@ -278,6 +251,10 @@ function PostTaskPage() {
               />
               <RuleOneNotice compact />
             </label>
+            <div className="wizard-field">
+              <span>Obavezni uslovi (opciono)</span>
+              <RequirementsEditor value={form.requirements} onChange={(requirements) => update({ requirements })} />
+            </div>
             <label className="wizard-field">
               <span>Tagovi (opciono)</span>
               <div className="wizard-tag-row">
@@ -340,14 +317,24 @@ function PostTaskPage() {
               </div>
             )}
 
+            {form.mode !== 'remote' && (
+              <div className="wizard-field">
+                <span>Troškovi puta (opciono)</span>
+                <TravelPicker value={form.travel} onChange={(travel) => update({ travel })} />
+                <ReachHint price={form.price} travel={form.travel} />
+              </div>
+            )}
+
             <div className="wizard-summary">
               <h3>Pregled oglasa</h3>
               <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : (form.location || '—')}</strong></div>
-              <div className="wizard-summary-row"><span>Kada</span><strong>{timingLabel()}</strong></div>
+              <div className="wizard-summary-row"><span>Kada</span><strong>{formScheduleLabel(form)}</strong></div>
+              {form.requirements.length > 0 && <div className="wizard-summary-row"><span>Uslovi</span><strong>{form.requirements.join(' · ')}</strong></div>}
               <div className="wizard-summary-row"><span>Slike</span><strong>{existingImages.filter((item) => !photos.removed.includes(item.id)).length + photos.files.length || 'Bez slika'}</strong></div>
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>
+              {form.mode !== 'remote' && Number(form.travel) > 0 && <div className="wizard-summary-row"><span>Put</span><strong>Plaćam do {form.travel} KM</strong></div>}
             </div>
           </section>
         )}

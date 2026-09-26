@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, CalendarDays, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
 import WorkFlow from '../components/WorkFlow'
+import { RequirementsList } from '../components/TaskExtras'
+import ReachRadar from '../components/ReachRadar'
+import { travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import './app.css'
@@ -17,7 +20,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -29,7 +32,9 @@ function JobDetail(props) {
   const open = listing.status === 'published' && !acceptedBid
   const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
-  const band = isOwner
+  const band = expired
+    ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
+    : isOwner
     ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
@@ -53,6 +58,8 @@ function JobDetail(props) {
         {menu && (
           <div className="jd-menu" role="menu" onClick={() => setMenu(false)}>
             <button type="button" role="menuitem" onClick={onShare}><Share2 size={16} /> Podijeli</button>
+            {!isOwner && onSave && <button type="button" role="menuitem" onClick={onSave}><Bookmark size={16} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Ukloni iz sačuvanih' : 'Sačuvaj posao'}</button>}
+            {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${listing.id}`} role="menuitem"><Copy size={16} /> Objavi sličan posao</Link>}
             {isOwner
               ? <Link to={`/objavi?edit=${listing.id}`} role="menuitem"><Pencil size={16} /> Uredi posao</Link>
               : <button type="button" role="menuitem" onClick={onReport}><Flag size={16} /> Prijavi</button>}
@@ -66,6 +73,10 @@ function JobDetail(props) {
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
+        {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
+        {!isOwner && !myBid && open && onSave && (
+          <button type="button" className="ap-btn ap-btn-light jd-save" onClick={onSave} aria-pressed={saved}><Bookmark size={18} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Sačuvano' : 'Sačuvaj za kasnije'}</button>
+        )}
         {isOwner && acceptedBid && !payment && listing.status === 'published' && (
           <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
         )}
@@ -101,9 +112,29 @@ function JobDetail(props) {
             <span><strong>{money(listing.price, listing.currency)}</strong><small>Budžet</small></span>
             {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=budget`} className="jd-link">Uredi</Link>}
           </li>
+          {travelLabel(listing) && (
+            <li>
+              <Car size={20} />
+              <span><strong>{travelLabel(listing)}</strong><small>Gorivo, taksi ili prevoz</small></span>
+            </li>
+          )}
         </ul>
 
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
+
+        {requirements.length > 0 && (
+          <div className="jd-reqs">
+            <h3>Obavezni uslovi</h3>
+            <RequirementsList items={requirements} />
+          </div>
+        )}
+
+        {!isRemote && !['completed', 'cancelled'].includes(listing.status) && (
+          <div className="jd-reqs">
+            <h3>Doseg ponuda</h3>
+            <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} compact />
+          </div>
+        )}
 
         {images.length > 0 && (
           <div className="jd-photos">

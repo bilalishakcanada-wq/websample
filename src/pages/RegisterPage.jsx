@@ -8,6 +8,7 @@ import AuthLayout from '../components/AuthLayout'
 import { serviceCategories } from '../data/categories'
 import { getMode } from '../app/mode'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import PasswordField from '../components/PasswordField'
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove i biram ponude', icon: Briefcase },
@@ -110,18 +111,14 @@ function RegisterPage() {
         )}
 
         <div className="field">
-          <input id="fullName" name="fullName" placeholder=" " value={form.fullName} onChange={handleChange} required />
+          <input id="fullName" name="fullName" autoComplete="name" autoCapitalize="words" placeholder=" " value={form.fullName} onChange={handleChange} required />
           <label htmlFor="fullName">Ime i prezime</label>
         </div>
         <div className="field">
-          <input id="email" name="email" type="email" placeholder=" " value={form.email} onChange={handleChange} required />
+          <input id="email" name="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={form.email} onChange={handleChange} required />
           <label htmlFor="email">Email adresa</label>
         </div>
-        <div className="field">
-          <input id="password" name="password" type="password" placeholder=" " value={form.password} onChange={handleChange} required />
-          <label htmlFor="password">Lozinka</label>
-          <small>Najmanje 8 znakova, veliko i malo slovo i broj.</small>
-        </div>
+        <PasswordField name="password" label="Lozinka" value={form.password} onChange={handleChange} isNew />
         <div className="field-row">
           <div className="field">
             <input id="city" name="city" placeholder=" " value={form.city} onChange={handleChange} />

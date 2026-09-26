@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import SuccessSplash from '../components/SuccessSplash'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -121,6 +122,7 @@ function ListingDetailPage() {
 
   // phone back button closes overlays instead of leaving the job
   useBackToClose(sheetOpen, () => setSheetOpen(false))
+  const offerSheet = usePresence(sheetOpen, 220)
   useBackToClose(Boolean(acceptBid), () => setAcceptBid(null))
   useBackToClose(lightbox !== null, () => setLightbox(null))
 
@@ -382,8 +384,8 @@ function ListingDetailPage() {
           <span className="lightbox-count">{lightbox + 1} / {images.length}</span>
         </div>
       )}
-      {sheetOpen && (
-        <div className="sheet-backdrop" role="presentation" onClick={() => setSheetOpen(false)}>
+      {offerSheet.mounted && (
+        <div className={`sheet-backdrop ${offerSheet.closing ? 'is-closing' : ''}`} inert={offerSheet.closing || undefined} role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
             <h2 id="offer-title">Pošalji ponudu</h2>

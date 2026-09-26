@@ -11,11 +11,13 @@ import { setupNative } from './utils/native'
 import { watchServiceWorkerUpdates } from './utils/appUpdates'
 import { installErrorReporter } from './utils/errorReporter'
 import { watchHandoff } from './utils/authHandoff'
+import { installImageFade } from './utils/imageFade'
 
 setupNative()
 watchServiceWorkerUpdates()
 installErrorReporter()
 watchHandoff()
+installImageFade()
 
 // the query cache wraps everything; it is persisted to localStorage when storage is available
 const DataProvider = persister

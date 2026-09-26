@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from '../components/Toaster'
 import ActionError from '../components/ActionError'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
+import { useStepDirection } from '../hooks/useStepDirection'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -43,6 +44,7 @@ function PostTaskPage() {
     try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { return null }
   }, [editId])
   const [step, setStep] = useState(draft?.step || 0)
+  const stepDir = useStepDirection(step)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [tagDraft, setTagDraft] = useState('')
@@ -170,7 +172,7 @@ function PostTaskPage() {
   }
 
   return (
-    <div className="wizard-shell">
+    <div className="wizard-shell" data-dir={stepDir}>
       <header className="wizard-header">
         <button type="button" className="icon-button" onClick={() => (step === 0 ? navigate(-1) : setStep((s) => s - 1))} aria-label="Nazad">
           <ArrowLeft size={20} />

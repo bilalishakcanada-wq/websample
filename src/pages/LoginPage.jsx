@@ -5,6 +5,7 @@ import { Turnstile } from '@marsidev/react-turnstile'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import PasswordField from '../components/PasswordField'
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -60,13 +61,10 @@ function LoginPage() {
       )}
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="field">
-          <input id="email" name="email" type="email" placeholder=" " value={form.email} onChange={handleChange} required />
+          <input id="email" name="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={form.email} onChange={handleChange} required />
           <label htmlFor="email">Email adresa</label>
         </div>
-        <div className="field">
-          <input id="password" name="password" type="password" placeholder=" " value={form.password} onChange={handleChange} required />
-          <label htmlFor="password">Lozinka</label>
-        </div>
+        <PasswordField name="password" label="Lozinka" value={form.password} onChange={handleChange} />
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}</div>}
         <button type="submit" className="primary-button auth-submit" disabled={loading}>

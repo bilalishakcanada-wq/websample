@@ -177,6 +177,18 @@ export const adminService = {
     return data
   },
 
+  async payoutQueue() {
+    const { data, error } = await supabase.rpc('admin_payout_queue')
+    if (error) { console.error('Payout queue failed', { message: error.message, code: error.code }); throw publicError() }
+    return data || []
+  },
+
+  /** paid=true traži referencu bankovnog naloga; paid=false traži razlog (novac se vraća na balans). */
+  async resolvePayout(id, paid, bankRef = null, note = null) {
+    const { error } = await supabase.rpc('staff_resolve_payout', { p_id: id, p_paid: paid, p_bank_ref: bankRef, p_note: note })
+    if (error) { console.error('Payout resolve failed', { message: error.message, code: error.code }); throw new Error(staffErrorMessage(error)) }
+  },
+
   async walletOverview(limit = 100) {
     const { data, error } = await supabase.rpc('admin_wallet_overview', { p_limit: limit })
     if (error) {

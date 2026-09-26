@@ -76,6 +76,8 @@ export const reviewService = {
     if (error) {
       console.error('Supabase review insert failed', { message: error.message, code: error.code })
       if (error.code === '23505') throw new Error('Već si ostavio/la recenziju za ovaj posao.')
+      // RLS: recenzija samo za posao koji je plaćen i isplaćen kroz Poso.ba
+      if (error.code === '42501') throw new Error('Recenziju možeš ostaviti kad je posao plaćen i isplaćen kroz Poso.ba.')
       throw publicError()
     }
     return data

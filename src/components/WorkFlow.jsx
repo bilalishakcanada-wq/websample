@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle, BadgeCheck, CheckCircle2, Clock, Handshake, ImagePlus, RotateCcw, Send, X,
+  AlertTriangle, BadgeCheck, CheckCircle2, Clock, Handshake, ImagePlus, RotateCcw, Send, TrendingUp, X,
 } from 'lucide-react'
 import { paymentService } from '../services/paymentService'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -26,6 +26,15 @@ function Countdown({ until }) {
   )
 }
 
+const km = (value) => `${Number(value || 0).toLocaleString('bs-BA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
+
+/** Naknada za otkazivanje (ista formula kao cancellation_fee_for u bazi). */
+function naknadaZaOtkaz(payment) {
+  const funded = payment.funded_at ? new Date(payment.funded_at).getTime() : 0
+  if (funded && Date.now() < funded + 3_600_000) return 0
+  return Math.min(50, Math.round(Number(payment.amount || 0) * 10) / 100)
+}
+
 const RAZLOZI_SPORA = [
   ['not_delivered', 'Posao nije urađen'],
   ['quality', 'Urađeno, ali ne po dogovoru'],
@@ -40,15 +49,21 @@ const RAZLOZI_SPORA = [
  * su samo dugmad koja odgovaraju trenutnom stanju i ulozi.
  */
 function WorkFlow({ payment, role, user, onChanged }) {
+  const [refreshKey, setRefreshKey] = useState(0)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
-  const [form, setForm] = useState(null)        // null | 'submit' | 'dispute'
+  const [form, setForm] = useState(null)        // null | 'submit' | 'dispute' | 'cancel' | 'increase'
   const [report, setReport] = useState('')
   const [claim, setClaim] = useState('')
   const [reasonCode, setReasonCode] = useState('quality')
   const [files, setFiles] = useState([])
   const [submissions, setSubmissions] = useState([])
   const [cancelReq, setCancelReq] = useState(null)
+  const [cancelDetail, setCancelDetail] = useState('')
+  const [responsible, setResponsible] = useState('me')
+  const [increase, setIncrease] = useState({ available: false, request: null })
+  const [incAmount, setIncAmount] = useState('')
+  const [incReason, setIncReason] = useState('')
   const fileRef = useRef(null)
 
   const state = payment.work_state || 'in_progress'
@@ -58,8 +73,9 @@ function WorkFlow({ payment, role, user, onChanged }) {
     let alive = true
     paymentService.workSubmissions(payment.id).then((rows) => alive && setSubmissions(rows))
     paymentService.pendingCancellation(payment.id).then((row) => alive && setCancelReq(row))
+    paymentService.pendingPriceIncrease(payment.id).then((row) => alive && setIncrease(row))
     return () => { alive = false }
-  }, [payment.id, payment.work_state, payment.revision_count])
+  }, [payment.id, payment.work_state, payment.revision_count, payment.amount, refreshKey])
 
   const latest = submissions[0]
   const mojZahtjevZaPrekid = cancelReq?.requested_by === user?.id
@@ -71,6 +87,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
       await fn()
       haptic('medium')
       if (poruka) toast(poruka, { kind: 'success' })
+      setRefreshKey((key) => key + 1)
       onChanged?.()
     } catch (requestError) {
       setError(requestError.message)
@@ -114,15 +131,29 @@ function WorkFlow({ payment, role, user, onChanged }) {
     run('release', () => paymentService.releasePayment(payment.listing_id), 'Uplata je oslobođena izvođaču.')
   }
 
-  const traziPrekid = async () => {
-    const detail = await promptDialog({
-      title: 'Zahtjev za sporazumni prekid',
-      text: 'Druga strana mora pristati. Dok ne odgovori, novac ostaje osiguran na Poso.ba.',
-      placeholder: 'Zašto prekidaš?', confirmLabel: 'Pošalji zahtjev',
+  const traziPrekid = () => run('cancelreq', async () => {
+    await paymentService.requestCancellation(payment.listing_id, 'other', cancelDetail.trim() || null, responsible)
+    setForm(null); setCancelDetail(''); setResponsible('me')
+  }, 'Zahtjev je poslan drugoj strani.')
+
+  const traziPovecanje = () => run('increase', async () => {
+    await paymentService.requestPriceIncrease(payment.listing_id, Number(String(incAmount).replace(',', '.')), incReason.trim())
+    setForm(null); setIncAmount(''); setIncReason('')
+  }, 'Zahtjev je poslan klijentu. Ništa se ne naplaćuje dok ne odobri.')
+
+  const odobriPovecanje = async () => {
+    const ok = await confirmDialog({
+      title: `Odobravaš +${km(increase.request.amount_km)}?`,
+      text: `Iznos se odmah skida s tvog balansa i čuva na Poso.ba zajedno s ostatkom. Nova cijena posla je ${km(Number(payment.amount) + Number(increase.request.amount_km))}.`,
+      confirmLabel: 'Odobri i plati',
     })
-    if (detail === null) return
-    run('cancelreq', () => paymentService.requestCancellation(payment.listing_id, 'other', detail), 'Zahtjev je poslan drugoj strani.')
+    if (!ok) return
+    run('incresp', () => paymentService.respondPriceIncrease(increase.request.id, true), 'Povećanje je odobreno i plaćeno.')
   }
+
+  const naknada = naknadaZaOtkaz(payment)
+  const odgovornaStrana = cancelReq?.responsible
+  const jaOdgovoran = odgovornaStrana && odgovornaStrana === (isClient ? 'client' : 'provider')
 
   const odgovoriNaPrekid = (prihvati) => run('cancelresp',
     () => paymentService.respondCancellation(payment.listing_id, prihvati),
@@ -173,7 +204,46 @@ function WorkFlow({ payment, role, user, onChanged }) {
             ? 'Poslao/la si zahtjev za prekid. Čeka se odgovor druge strane — novac je i dalje osiguran.'
             : 'Druga strana traži prekid posla. Ako prihvatiš, novac se vraća klijentu. Ako odbiješ, posao se nastavlja.'}
           {cancelReq?.detail && <em> „{cancelReq.detail}"</em>}
+          {odgovornaStrana && (
+            <span className="wf-note-line">
+              {jaOdgovoran ? 'Kao odgovorna strana navodiš se ti' : 'Odgovorna strana: druga strana'}
+              {Number(cancelReq.fee_km) > 0
+                ? `. Naknada za otkazivanje od ${km(cancelReq.fee_km)} ide na teret odgovorne strane${odgovornaStrana === 'provider' ? ' i posao joj se računa kao neuspješan' : ''}.`
+                : '. Prekid je zatražen u prvom satu, pa nema naknade.'}
+              {!mojZahtjevZaPrekid && jaOdgovoran && ' Ako se ne slažeš, odbij ili otvori spor.'}
+            </span>
+          )}
         </p>
+      )}
+
+      {increase.request && (
+        <div className="wf-note wf-increase">
+          <strong><TrendingUp size={15} /> Traži se povećanje cijene: +{km(increase.request.amount_km)}</strong>
+          <p>„{increase.request.reason}"</p>
+          <p className="muted-text">
+            {isClient
+              ? `Ako odobriš, nova cijena je ${km(Number(payment.amount) + Number(increase.request.amount_km))}. Dodatni iznos se čuva na Poso.ba kao i ostatak.`
+              : 'Čeka se odgovor klijenta. Ništa se ne naplaćuje dok ne odobri.'}
+          </p>
+          <div className="wf-actions">
+            {isClient ? (
+              <>
+                <button type="button" className="primary-button" onClick={odobriPovecanje} disabled={Boolean(busy)}>
+                  <CheckCircle2 size={15} /> {busy === 'incresp' ? 'Plaćam…' : `Odobri i plati ${km(increase.request.amount_km)}`}
+                </button>
+                <button type="button" className="ghost-button" disabled={Boolean(busy)}
+                  onClick={() => run('incresp', () => paymentService.respondPriceIncrease(increase.request.id, false), 'Povećanje je odbijeno.')}>
+                  <X size={15} /> Odbij
+                </button>
+              </>
+            ) : (
+              <button type="button" className="ghost-button" disabled={Boolean(busy)}
+                onClick={() => run('incresp', () => paymentService.cancelPriceIncrease(increase.request.id), 'Zahtjev je povučen.')}>
+                Povuci zahtjev
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {error && <div className="form-error">{error}</div>}
@@ -195,6 +265,57 @@ function WorkFlow({ payment, role, user, onChanged }) {
             <button type="button" className="primary-button" onClick={predajRad}
               disabled={busy === 'submit' || (report.trim().length < 20 && files.length === 0)}>
               <Send size={15} /> {busy === 'submit' ? 'Šaljem…' : 'Predaj rad'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- forma: sporazumni prekid ---------------------------------------- */}
+      {form === 'cancel' && (
+        <div className="wf-form">
+          <p className="muted-text wf-hint">Druga strana mora pristati. Dok ne odgovori, novac ostaje osiguran na Poso.ba.</p>
+          {increase.available && (
+            <fieldset className="wf-choice">
+              <legend>Ko je odgovoran za prekid?</legend>
+              <label><input type="radio" name="wf-resp" checked={responsible === 'me'} onChange={() => setResponsible('me')} /> Ja prekidam</label>
+              <label><input type="radio" name="wf-resp" checked={responsible === 'other'} onChange={() => setResponsible('other')} />
+                {isClient ? ' Izvođač nije ispoštovao dogovor' : ' Klijent nije ispoštovao dogovor'}</label>
+            </fieldset>
+          )}
+          <label htmlFor="wf-cancel">Zašto prekidaš?</label>
+          <textarea id="wf-cancel" value={cancelDetail} onChange={(event) => setCancelDetail(event.target.value)} rows={2} maxLength={1000}
+            placeholder={responsible === 'other' ? 'Npr. izvođač se nije pojavio dva puta.' : 'Npr. ne mogu uraditi posao u dogovorenom roku.'} />
+          {increase.available && (
+            <p className="muted-text wf-hint">
+              {naknada > 0
+                ? `Odgovorna strana plaća naknadu za otkazivanje od ${km(naknada)} (10 % cijene, najviše 50 KM)${responsible === 'me' && !isClient ? ', a posao ti se računa kao neuspješan' : ''}.`
+                : 'U prvom satu nakon prihvatanja ponude prekid je bez naknade.'}
+            </p>
+          )}
+          <div className="wf-actions">
+            <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
+            <button type="button" className="primary-button" onClick={traziPrekid} disabled={busy === 'cancelreq'}>
+              <Send size={15} /> {busy === 'cancelreq' ? 'Šaljem…' : 'Pošalji zahtjev'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- forma: povećanje cijene ---------------------------------------- */}
+      {form === 'increase' && (
+        <div className="wf-form">
+          <label htmlFor="wf-inc-amount">Koliko dodatno (KM)?</label>
+          <input id="wf-inc-amount" type="number" inputMode="decimal" min="1" max="2000" step="1"
+            value={incAmount} onChange={(event) => setIncAmount(event.target.value)} placeholder="Npr. 40" />
+          <label htmlFor="wf-inc-reason">Zašto?</label>
+          <textarea id="wf-inc-reason" value={incReason} onChange={(event) => setIncReason(event.target.value)} rows={2} maxLength={1000}
+            placeholder="Npr. na licu mjesta se pokazalo da treba zamijeniti i ventil." />
+          <p className="muted-text wf-hint">Klijent mora odobriti. Tek tada se iznos naplati i čuva na Poso.ba, a ti ga dobiješ uz ostatak po završetku.</p>
+          <div className="wf-actions">
+            <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
+            <button type="button" className="primary-button" onClick={traziPovecanje}
+              disabled={busy === 'increase' || !(Number(String(incAmount).replace(',', '.')) >= 1) || incReason.trim().length < 10}>
+              <Send size={15} /> {busy === 'increase' ? 'Šaljem…' : 'Pošalji klijentu'}
             </button>
           </div>
         </div>
@@ -261,8 +382,13 @@ function WorkFlow({ payment, role, user, onChanged }) {
               </button>
             </>
           )}
+          {!isClient && increase.available && !increase.request && ['in_progress', 'revision'].includes(state) && (
+            <button type="button" className="ghost-button" onClick={() => setForm('increase')} disabled={Boolean(busy)}>
+              <TrendingUp size={15} /> Zatraži povećanje cijene
+            </button>
+          )}
           {['in_progress', 'submitted', 'revision'].includes(state) && (
-            <button type="button" className="ghost-button" onClick={traziPrekid} disabled={Boolean(busy)}>
+            <button type="button" className="ghost-button" onClick={() => setForm('cancel')} disabled={Boolean(busy)}>
               Zatraži prekid
             </button>
           )}

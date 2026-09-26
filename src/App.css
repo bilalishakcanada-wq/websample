@@ -12249,8 +12249,10 @@ button { touch-action: manipulation; }
 
 /* wallet: request top-up / payout via support */
 .wallet-cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; }
-.wallet-cta a { display: inline-flex; align-items: center; gap: 8px; }
-@media (max-width: 560px) { .wallet-cta a { flex: 1 1 auto; justify-content: center; } }
+.wallet-cta a, .wallet-cta button { display: inline-flex; align-items: center; gap: 8px; }
+@media (max-width: 560px) { .wallet-cta a, .wallet-cta button { flex: 1 1 auto; justify-content: center; } }
+.wallet-action { max-width: 420px; margin: 0 0 18px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.wallet-action > a.primary-button { justify-self: start; text-decoration: none; }
 
 /* staff console: crash reports */
 .admin-stack { margin-top: 6px; }
@@ -12608,6 +12610,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   border: 1px solid var(--stroke); background: var(--surface); font: inherit; color: var(--text); }
 .wf-form textarea { resize: vertical; min-height: 84px; }
 .wf-hint { font-size: .82rem; margin: 0; }
+.wf-form input[type="number"] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--stroke); background: var(--surface, #fff); color: var(--text); font: inherit; }
+.wf-form .wf-choice { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
+.wf-form .wf-choice legend { font-size: .85rem; font-weight: 700; color: var(--text-soft); margin-bottom: 6px; }
+.wf-form .wf-choice label { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); min-height: 32px; }
+.wf-note-line { display: block; margin-top: 6px; }
+.wf-increase { display: grid; gap: 6px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: var(--surface-soft, #f6f8fb); }
+.wf-increase strong { display: inline-flex; align-items: center; gap: 6px; color: var(--text); }
+.wf-increase p { margin: 0; }
 .wf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .wf-actions-main { margin-top: 2px; }
 .wf-actions .primary-button, .wf-actions .ghost-button, .wf-actions .danger-button { min-height: 44px; }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, Info, Landmark, Lock, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import { accountService } from '../../services/accountService'
@@ -63,6 +63,10 @@ function WalletPage() {
   }, [])
 
   const openPanel = (name) => { setPanel(panel === name ? null : name); setAmount(''); setActionError('') }
+  // na telefonu panel zna pasti ispod trake s tabovima — pomjeri ga u vidno polje
+  const panelRef = useCallback((node) => {
+    if (node) window.requestAnimationFrame(() => node.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  }, [])
 
   const topUp = async (event) => {
     event.preventDefault()
@@ -133,7 +137,7 @@ function WalletPage() {
       )}
 
       {panel === 'topup' && (
-        <form className="auth-form wallet-action" onSubmit={topUp}>
+        <form ref={panelRef} className="auth-form wallet-action" onSubmit={topUp}>
           <label>Iznos uplate (KM)<input type="number" inputMode="decimal" min="5" max="2000" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="npr. 100" required /></label>
           <small className="muted-text">Karticu unosiš na sigurnoj stranici banke (Monri). Poso.ba ne vidi ni ne čuva podatke kartice.</small>
           {actionError && <div className="form-error">{actionError}</div>}
@@ -142,9 +146,19 @@ function WalletPage() {
       )}
 
       {panel === 'payout' && payout && (
-        <form className="auth-form wallet-action" onSubmit={withdraw}>
-          {!payout.verified && <p>Za isplatu prvo <Link to="/account/verifikacija">potvrdi identitet</Link>.</p>}
-          {payout.verified && !payout.has_account && <p>Dodaj račun za isplatu u <Link to="/account/nacini-placanja">Načini plaćanja</Link>. Račun mora glasiti na tvoje ime.</p>}
+        <form ref={panelRef} className="auth-form wallet-action" onSubmit={withdraw}>
+          {!payout.verified && (
+            <>
+              <p>Za isplatu prvo potvrdi identitet.</p>
+              <Link to="/account/verifikacija" className="primary-button">Potvrdi identitet</Link>
+            </>
+          )}
+          {payout.verified && !payout.has_account && (
+            <>
+              <p>Dodaj bankovni račun na koji šaljemo novac. Račun mora glasiti na tvoje ime.</p>
+              <Link to="/account/nacini-placanja" className="primary-button"><Landmark size={15} /> Dodaj račun za isplatu</Link>
+            </>
+          )}
           {payout.verified && payout.has_account && (
             <>
               <p className="muted-text">Možeš isplatiti do <strong>{money(payout.withdrawable)}</strong> (zarada od poslova). Najmanje 20 KM.</p>

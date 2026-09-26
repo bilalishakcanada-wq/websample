@@ -627,7 +627,9 @@ function ListingDetailPage() {
               {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
-                  Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
+                  {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
+                    ? <>Dogovorena cijena: <strong>{formatPrice(payment.amount)}</strong> (ponuda {formatPrice(myBid.amount)} + odobreno povećanje)</>
+                    : <>Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong></>} — {BID_STATUS_LABEL[myBid.status]}
                   {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={withdrawBid}>Povuci ponudu</button>}
                 </div>
               )}

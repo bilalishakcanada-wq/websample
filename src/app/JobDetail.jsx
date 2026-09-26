@@ -34,7 +34,8 @@ function JobDetail(props) {
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
-    : myBid ? [`Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
+    : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
+        ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
 

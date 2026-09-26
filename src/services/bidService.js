@@ -75,6 +75,61 @@ export const bidService = {
     return data
   },
 
+  /** Izvođač mijenja cijenu ili opis svoje ponude dok klijent nije odlučio ("Izmijeni ponudu"). */
+  async updateBid(bidId, { amount, message }) {
+    const cleanMessage = sanitizeText(message).slice(0, 2000)
+    const cleanAmount = Number(amount)
+    if (!bidId || !Number.isFinite(cleanAmount) || cleanAmount < 0 || !cleanMessage) {
+      throw new Error('Unesite iznos i kratko obrazloženje ponude.')
+    }
+    const { data, error } = await supabase
+      .from('bids')
+      .update({ amount: cleanAmount, message: cleanMessage })
+      .eq('id', bidId)
+      .eq('status', 'pending')
+      .select('id, listing_id, bidder_id, amount, message, status, created_at')
+      .maybeSingle()
+    if (error) {
+      console.error('Supabase bid edit failed', { message: error.message, code: error.code })
+      throw prepoznajGresku(error) || publicError()
+    }
+    if (!data) throw new Error('Klijent je u međuvremenu odlučio o ponudi, pa se više ne može mijenjati.')
+    return data
+  },
+
+  /**
+   * Privatni odgovori ispod jedne ponude — vide ih samo klijent i taj izvođač.
+   * null znači da tabela još ne postoji u bazi (sučelje tada sakrije dio).
+   */
+  async listReplies(bidId) {
+    const { data, error } = await supabase
+      .from('bid_replies')
+      .select('id, bid_id, author_id, body, created_at')
+      .eq('bid_id', bidId)
+      .order('created_at', { ascending: true })
+    if (error) {
+      if (['42P01', 'PGRST205'].includes(error.code)) return null
+      console.error('Supabase bid replies fetch failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  async addReply(bidId, body) {
+    const clean = sanitizeText(body).slice(0, 1000)
+    if (!clean) throw new Error('Napiši poruku.')
+    const { data, error } = await supabase
+      .from('bid_replies')
+      .insert({ bid_id: bidId, body: clean })
+      .select('id, bid_id, author_id, body, created_at')
+      .single()
+    if (error) {
+      console.error('Supabase bid reply failed', { message: error.message, code: error.code })
+      throw prepoznajGresku(error) || publicError()
+    }
+    return data
+  },
+
   async setStatus(bidId, status) {
     const { data, error } = await supabase
       .from('bids')

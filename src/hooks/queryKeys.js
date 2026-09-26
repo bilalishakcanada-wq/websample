@@ -20,4 +20,5 @@ export const keys = {
   publicProfile: (userId) => ['profile', userId],
   savedIds: (userId) => ['me', userId, 'saved-ids'],
   savedListings: (userId) => ['me', userId, 'saved'],
+  offerGate: (userId) => ['me', userId, 'offer-gate'],
 }

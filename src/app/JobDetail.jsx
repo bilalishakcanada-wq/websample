@@ -19,7 +19,7 @@ const Avatar = ({ url, size = 48 }) => (url
 function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, requirements = [], saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
-    onBack, onShare, onReport, onOpenBid, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
+    onBack, onShare, onReport, onOpenBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
@@ -69,7 +69,7 @@ function JobDetail(props) {
         {isOwner && <div className="jd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>}
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
-        {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>Pošalji ponudu</button>}
+        {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
         {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
         {!isOwner && !myBid && open && onSave && (
@@ -231,7 +231,7 @@ function JobDetail(props) {
       </section>
 
       {!isOwner && open && !myBid && (
-        <div className="jd-sticky"><button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>Pošalji ponudu</button></div>
+        <div className="jd-sticky"><button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button></div>
       )}
     </div>
   )

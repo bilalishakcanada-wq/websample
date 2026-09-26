@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { keys } from '../../hooks/queryKeys'
 import { BadgeCheck, Clock, IdCard, Info, ShieldCheck, Upload, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { identityService } from '../../services/identityService'
@@ -60,6 +63,10 @@ function Stanje({ predmet }) {
 
 function VerificationPage() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const [params] = useSearchParams()
+  // Samo interna putanja (ne "//drugi-sajt") — ovamo se dolazi sa dugmeta za ponudu.
+  const next = /^\/(?!\/)/.test(params.get('next') || '') ? params.get('next') : null
   const [predmet, setPredmet] = useState(undefined)   // undefined = učitavanje
   const [ime, setIme] = useState('')
   const [jmbg, setJmbg] = useState('')
@@ -112,6 +119,7 @@ function VerificationPage() {
         phash: lice.otisak, quality: lice.mjere,
       })
       setPredmet(row)
+      queryClient.invalidateQueries({ queryKey: keys.offerGate(user.id) })
       toast('Podaci su poslani na provjeru.', { kind: 'success' })
     } catch (error) {
       setGreska(error.message)
@@ -125,9 +133,11 @@ function VerificationPage() {
       <div className="account-section-head">
         <h1>Potvrda identiteta</h1>
         <p className="muted-text">Poso.ba drži pravi novac. Zato prije objave posla ili slanja ponude provjeravamo ko je ko — to štiti i tebe i drugu stranu.</p>
+        {!zakljucano && <p className="muted-text">Do potvrde možeš sve pregledati, ali ne i slati ponude. Traje par minuta: ime, JMBG i slika dokumenta.</p>}
       </div>
 
       <Stanje predmet={predmet} />
+      {zakljucano && next && <Link to={next} className="ghost-button verif-back">Nazad na posao</Link>}
 
       {!zakljucano && (
         <form className="verif-form" onSubmit={posalji}>

@@ -32,8 +32,7 @@ import JobDetail from '../app/JobDetail'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
-import { identityService } from '../services/identityService'
-import { prepoznajGresku } from '../utils/validation'
+import { useOfferGate, OFFER_CTA } from '../hooks/useOfferGate'
 import { recordInterest } from '../utils/interests'
 
 const formatDate = formatBosnianDate
@@ -86,6 +85,7 @@ function ListingDetailPage() {
   const justPublished = searchParams.get('published') === '1'
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
+  const offerGate = useOfferGate(user?.id)
   const [listing, setListing] = useState(null)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
@@ -200,12 +200,18 @@ function ListingDetailPage() {
       navigate('/login', { state: { from: { pathname: `/listings/${id}` } } })
       return
     }
+    // Ponude šalju samo izvođači s potvrđenim identitetom: nepotvrđen ide ravno
+    // na verifikaciju (i nazad na ovaj posao), umjesto da piše ponudu uzalud.
+    if (offerGate === 'needed' || offerGate === 'rejected') {
+      navigate(`/account/verifikacija?next=${encodeURIComponent(`/listings/${id}`)}`)
+      return
+    }
+    if (offerGate === 'pending') {
+      toast('Identitet se još provjerava — obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
+      return
+    }
     setBidError('')
     setSheetOpen(true)
-    // Nepotvrđen izvođač saznaje odmah, a ne tek nakon što napiše cijelu ponudu.
-    identityService.blocks('bids').then((blokirano) => {
-      if (blokirano) setBidError(prepoznajGresku({ message: 'VERIFIKACIJA_POTREBNA' }))
-    })
   }
 
   const submitBid = async (event) => {
@@ -428,7 +434,7 @@ function ListingDetailPage() {
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} offerLabel={OFFER_CTA[offerGate]}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -624,7 +630,7 @@ function ListingDetailPage() {
             <div className="job-offer-card">
               <span>Okvirni budžet</span>
               <strong>{formatPrice(listing.price, listing.currency)}</strong>
-              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
+              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong> — {BID_STATUS_LABEL[myBid.status]}
@@ -661,7 +667,7 @@ function ListingDetailPage() {
         </div>
       </main>
 
-      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> Pošalji ponudu</button>}
+      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
 
       {overlays}
     </div>

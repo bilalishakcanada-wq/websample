@@ -24,16 +24,28 @@ const storage = (() => {
   try { localStorage.setItem('poso-q-test', '1'); localStorage.removeItem('poso-q-test'); return localStorage } catch { return null }
 })()
 
+/*
+ * Only data that is either public or this person's own is written to the device. The job page
+ * ('listing') carries other people's offers, and inbox, threads and notifications are private,
+ * so anything not on this list stays in memory and is gone when the app closes.
+ */
+const PERSISTED = { search: true, feed: true, profile: true, me: new Set(['listings', 'bids', 'recommended', 'taste']) }
+const canPersist = (query) => {
+  if (query.meta?.persist === false) return false
+  const [root, , part] = query.queryKey
+  const rule = PERSISTED[root]
+  return rule === true || (rule instanceof Set && rule.has(part))
+}
+
 export const persister = storage ? createSyncStoragePersister({
   storage,
   key: 'poso-query-cache',
   throttleTime: 1000,
-  // only small, public-ish lists are worth persisting; per-user private data stays in memory
   serialize: (client) => JSON.stringify({
     ...client,
     clientState: {
       ...client.clientState,
-      queries: client.clientState.queries.filter((q) => q.meta?.persist !== false && JSON.stringify(q.state.data || '').length < 200_000),
+      queries: client.clientState.queries.filter((q) => canPersist(q) && JSON.stringify(q.state.data || '').length < 200_000),
     },
   }),
 }) : null
@@ -42,5 +54,5 @@ export const persistOptions = {
   persister,
   maxAge: 24 * 60 * 60 * 1000,
   buster: import.meta.env.VITE_BUILD_ID || 'dev',
-  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && query.meta?.persist !== false },
+  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && canPersist(query) },
 }

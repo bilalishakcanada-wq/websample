@@ -17,13 +17,18 @@ const typing = () => {
 
 export function watchServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return
+  // once someone has tapped or typed, the page may hold work that lives only in memory (picked photos,
+  // the ID form): an update then waits for the next navigation (SwBridge) instead of reloading under them
+  let interacted = false
+  const mark = () => { interacted = true }
+  window.addEventListener('pointerdown', mark, { once: true, capture: true })
+  window.addEventListener('keydown', mark, { once: true, capture: true })
   let hadController = Boolean(navigator.serviceWorker.controller)
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadController) { hadController = true; return } // first install: nothing to swap
     if (updateReady) return
     updateReady = true
-    // never pull the page from under someone who is typing — SwBridge reloads on the next navigation
-    if (typing()) window.dispatchEvent(new CustomEvent(UPDATE_EVENT))
+    if (interacted || typing()) window.dispatchEvent(new CustomEvent(UPDATE_EVENT))
     else window.location.reload()
   })
   // installed apps stay open for days: look for a new build every hour and when coming back to the foreground

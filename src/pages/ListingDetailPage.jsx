@@ -162,7 +162,8 @@ function ListingDetailPage() {
     }
     return () => { active = false }
   }, [core.data, id])
-  useEffect(() => { if (core.error) { setError(core.error.message); setLoading(false) } }, [core.error])
+  // a failed background refresh keeps the job on screen; the error page is only for a job that never loaded
+  useEffect(() => { if (core.error && !core.data) { setError(core.error.message); setLoading(false) } }, [core.error, core.data])
 
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
   // opening someone else's job teaches the feed what this person is into (kept on this device)
@@ -369,7 +370,8 @@ function ListingDetailPage() {
   // a failed request is not a missing job: on a weak mobile connection people need a retry, not a dead end
   if (error) {
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false
-    const retry = () => { setError(''); setLoading(true); core.refetch() }
+    // an unchanged result keeps the same data reference, so the load effect won't clear the skeleton: do it here
+    const retry = async () => { setError(''); setLoading(true); await core.refetch(); setLoading(false) }
     return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Posao se nije učitao</h1><p>{offline ? 'Nema internet veze. Provjeri vezu i pokušaj ponovo.' : 'Veza sa serverom je prekinuta. Pokušaj ponovo.'}</p><button type="button" className="primary-button" onClick={retry}>Pokušaj ponovo</button><Link to="/search" className="secondary-button">Nazad na pretragu</Link></main></div>
   }
   if (!listing) return <div className="app-shell page-with-mobile-nav"><main className="content-container empty-state"><h1>Oglas nije pronađen</h1><p>Oglas više nije dostupan ili je privatan.</p><Link to="/search" className="primary-button">Nazad na pretragu</Link></main></div>

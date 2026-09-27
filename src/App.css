@@ -9404,17 +9404,19 @@ body:has(.profile-cta-bar) .support-chat {
   display: block;
 }
 
-.earn-art-coin { animation: earn-coin 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.earn-art-spark { animation: earn-spark 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.earn-art-coin { animation: earn-coin 3.6s ease-in-out infinite; }
+.earn-art-spark { animation: earn-spark 2.4s ease-in-out infinite; }
+/* coins and stars are drawn around 0,0 inside a positioned wrapper, so no fill-box (it forced layout every frame) */
+.earn-art[data-paused] *, .trust-art[data-paused] * { animation-play-state: paused; }
 
 @keyframes earn-coin {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -10px; }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes earn-spark {
-  0%, 100% { opacity: 0.25; scale: 0.7; }
-  50% { opacity: 1; scale: 1; }
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 .earn-stage-pill {

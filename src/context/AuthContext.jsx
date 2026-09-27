@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { disablePush, syncPush } from '../utils/push'
 import { authService } from '../services/authService'
 import { trustService } from '../services/trustService'
@@ -11,6 +11,10 @@ const hasStoredSession = () => {
   try { return Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')) } catch { return true }
 }
 
+// supabase re-reads the session on every tab/app resume and hands back a fresh copy of the same user:
+// keeping the old object stops every useAuth screen from re-rendering and re-fetching for nothing
+const sameUser = (a, b) => a === b || (!!a && !!b && a.id === b.id && a.updated_at === b.updated_at && a.email === b.email && JSON.stringify(a.user_metadata) === JSON.stringify(b.user_metadata))
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [staffRole, setStaffRole] = useState(null) // 'admin' | 'moderator' | null
@@ -18,6 +22,9 @@ export function AuthProvider({ children }) {
   // instead of waiting for the session check (the check still runs and can only sign someone in)
   const [loading, setLoading] = useState(() => hasStoredSession())
   const [error, setError] = useState('')
+  // the staff role arrives after the first paint; only /admin and /mod wait for it (see ProtectedRoute)
+  const [staffReady, setStaffReady] = useState(() => !hasStoredSession())
+  const lastUserId = useRef(undefined)
 
   const refreshAdminStatus = async (currentUser) => {
     if (!currentUser) {
@@ -39,8 +46,15 @@ export function AuthProvider({ children }) {
       try {
         const data = await authService.getSession()
         let sessionUser = data?.session?.user || null
-        setUser(sessionUser)
-        await refreshAdminStatus(sessionUser)
+        setUser((prev) => (sameUser(prev, sessionUser) ? prev : sessionUser))
+        // the user is known from storage: render now, don't wait for the staff_role round trip
+        setLoading(false)
+        if (lastUserId.current !== (sessionUser?.id ?? null)) {
+          lastUserId.current = sessionUser?.id ?? null
+          setStaffReady(false)
+          refreshAdminStatus(sessionUser).finally(() => setStaffReady(true))
+          if (sessionUser) syncPush() // the listener skips INITIAL_SESSION for an account handled here
+        }
         // the stored token is checked against the server once: a deleted account (or a revoked
         // session) must not keep browsing as a ghost until the token expires
         if (sessionUser) {
@@ -48,6 +62,7 @@ export function AuthProvider({ children }) {
           if (userError && [401, 403].includes(userError.status)) {
             await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
             sessionUser = null
+            lastUserId.current = null
             setUser(null)
             setStaffRole(null)
           }
@@ -63,9 +78,14 @@ export function AuthProvider({ children }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const sessionUser = session?.user || null
-      setUser(sessionUser)
-      // resolve the admin role before letting guarded routes decide
-      refreshAdminStatus(sessionUser).finally(() => setLoading(false))
+      setUser((prev) => (sameUser(prev, sessionUser) ? prev : sessionUser))
+      setLoading(false)
+      const id = sessionUser?.id ?? null
+      // same account (tab/app resume, token refresh, another tab): no role check, no push sync, no refetch
+      if (id === lastUserId.current) return
+      lastUserId.current = id
+      setStaffReady(false)
+      refreshAdminStatus(sessionUser).finally(() => setStaffReady(true))
       // a device that already allowed push gets (re)attached to this account
       if (sessionUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) syncPush()
       if (event === 'SIGNED_IN') queryClient.invalidateQueries({ queryKey: ['me'] })
@@ -122,8 +142,8 @@ export function AuthProvider({ children }) {
   const isAdmin = staffRole === 'admin'
   const isModerator = staffRole === 'moderator'
   const value = useMemo(
-    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, loading, error, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
-    [user, isAdmin, isModerator, staffRole, loading, error],
+    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
+    [user, isAdmin, isModerator, staffRole, staffReady, loading, error],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { usePauseOffscreen } from '../hooks/usePauseOffscreen'
+
 const NAVY = '#0d2a52'
 const NAVY_DEEP = '#081b38'
 const NAVY_SOFT = '#1b4a8a'
@@ -15,8 +18,10 @@ const STAR = 'M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z'
  * a five-star rating. Navy + gold only.
  */
 function TrustArt() {
+  const ref = useRef(null)
+  usePauseOffscreen(ref)
   return (
-    <svg className="trust-art" viewBox="0 0 480 600" role="img" aria-label="Klijent i majstor se rukuju ispod verifikovanog štita">
+    <svg ref={ref} className="trust-art" viewBox="0 0 480 600" role="img" aria-label="Klijent i majstor se rukuju ispod verifikovanog štita">
       <rect width="480" height="600" rx="30" fill={NAVY} />
       <circle cx="240" cy="300" r="190" fill={NAVY_SOFT} opacity="0.5" />
       <circle cx="60" cy="520" r="70" fill={GOLD} opacity="0.1" />
@@ -86,7 +91,8 @@ function TrustArt() {
 
       {/* sparkles */}
       {[[150, 60, 1], [400, 250, 0.8], [110, 460, 0.7], [380, 470, 0.7]].map(([x, y, s], index) => (
-        <path key={index} d={STAR} transform={`translate(${x} ${y}) scale(${s})`} fill={WHITE} opacity="0.85" className="earn-art-spark" style={{ animationDelay: `${index * 0.5}s` }} />
+        // position on the wrapper, animation on the path: animating a transformed element with transform-box forced layout every frame
+        <g key={index} transform={`translate(${x} ${y}) scale(${s})`}><path d={STAR} fill={WHITE} opacity="0.85" className="earn-art-spark" style={{ animationDelay: `${index * 0.5}s` }} /></g>
       ))}
     </svg>
   )

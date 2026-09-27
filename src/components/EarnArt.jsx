@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { usePauseOffscreen } from '../hooks/usePauseOffscreen'
+
 const NAVY = '#0d2a52'
 const NAVY_DEEP = '#081b38'
 const NAVY_SOFT = '#1b4a8a'
@@ -15,8 +18,10 @@ const STAR = 'M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z'
  * with KM coins drifting up. Brand navy + gold only, no photo.
  */
 function EarnArt() {
+  const ref = useRef(null)
+  usePauseOffscreen(ref)
   return (
-    <svg className="earn-art" viewBox="0 0 600 500" role="img" aria-label="Majstor sa telefonom i isplatom">
+    <svg ref={ref} className="earn-art" viewBox="0 0 600 500" role="img" aria-label="Majstor sa telefonom i isplatom">
       {/* soft backdrop */}
       <circle cx="310" cy="250" r="210" fill={NAVY_SOFT} opacity="0.55" />
       <circle cx="120" cy="120" r="46" fill={GOLD} opacity="0.12" />
@@ -50,10 +55,12 @@ function EarnArt() {
 
       {/* ---- coins ---- */}
       {[[470, 70, 22], [545, 120, 16], [500, 30, 12]].map(([x, y, r], index) => (
-        <g key={index} transform={`translate(${x} ${y})`} className="earn-art-coin" style={{ animationDelay: `${index * 0.6}s` }}>
-          <circle r={r} fill={GOLD_DARK} />
-          <circle r={r} cx="-2" cy="-2" fill={GOLD} />
-          <text y={r * 0.35} textAnchor="middle" fontFamily="Archivo, Manrope, sans-serif" fontWeight="900" fontSize={r * 0.95} fill={NAVY_DEEP}>KM</text>
+        <g key={index} transform={`translate(${x} ${y})`}>
+          <g className="earn-art-coin" style={{ animationDelay: `${index * 0.6}s` }}>
+            <circle r={r} fill={GOLD_DARK} />
+            <circle r={r} cx="-2" cy="-2" fill={GOLD} />
+            <text y={r * 0.35} textAnchor="middle" fontFamily="Archivo, Manrope, sans-serif" fontWeight="900" fontSize={r * 0.95} fill={NAVY_DEEP}>KM</text>
+          </g>
         </g>
       ))}
 
@@ -98,7 +105,8 @@ function EarnArt() {
 
       {/* sparkles */}
       {[[92, 210, 1.2], [330, 60, 0.9], [560, 250, 1.1], [70, 330, 0.7]].map(([x, y, s], index) => (
-        <path key={index} d={STAR} transform={`translate(${x} ${y}) scale(${s})`} fill={WHITE} opacity="0.9" className="earn-art-spark" style={{ animationDelay: `${index * 0.5}s` }} />
+        // position on the wrapper, animation on the path: animating a transformed element with transform-box forced layout every frame
+        <g key={index} transform={`translate(${x} ${y}) scale(${s})`}><path d={STAR} fill={WHITE} opacity="0.9" className="earn-art-spark" style={{ animationDelay: `${index * 0.5}s` }} /></g>
       ))}
     </svg>
   )

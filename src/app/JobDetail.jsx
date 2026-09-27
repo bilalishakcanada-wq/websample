@@ -44,7 +44,8 @@ function JobDetail(props) {
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
             : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
-    : myBid ? [`Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
+    : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
+        ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
       : open && tooFar ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko.`]
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']

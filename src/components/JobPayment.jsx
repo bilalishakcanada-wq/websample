@@ -41,7 +41,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
     setBusy(true)
     setError('')
     try {
-      await paymentService.acceptAndFund(bid.id)
+      await paymentService.acceptAndFund(bid.id, amount)
       haptic('medium')
       toast(`Ponuda prihvaćena — ${money(amount)} je osigurano na Poso.ba.`, { kind: 'success' })
       onDone?.()

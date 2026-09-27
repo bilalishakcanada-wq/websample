@@ -65,6 +65,26 @@
   <body>
     <div id="native-return"><div><p>Prijava je uspjela — vraćamo te u aplikaciju.</p><a href="#">Otvori Poso.ba aplikaciju</a></div></div>
     <div id="root"><div class="boot-splash" id="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><rect x="248" y="190" width="150" height="598" rx="75" fill="#f5b400"/><circle cx="560" cy="418" r="228" fill="#f5b400"/><circle cx="560" cy="418" r="150" fill="#0d2a52"/><path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Poso.ba</strong></div></div></div>
+    <script>
+      // if the app never mounts (a script failed to download on a bad connection) don't leave the
+      // splash up forever: offer a reload
+      setTimeout(function () {
+        var splash = document.getElementById('boot-splash')
+        // the prerendered welcome (data-boot) is already on screen and usable: leave it
+        if (!splash || document.documentElement.hasAttribute('data-boot')) return
+        var box = splash.firstElementChild
+        var note = document.createElement('p')
+        note.textContent = 'Učitavanje nije uspjelo.'
+        note.style.margin = '0'
+        var again = document.createElement('a')
+        again.textContent = 'Pokušaj ponovo'
+        again.href = location.href
+        again.setAttribute('style', 'padding:12px 22px;border-radius:999px;background:#f5b400;color:#0d2a52;font-weight:800;text-decoration:none')
+        again.onclick = function (e) { e.preventDefault(); location.reload() }
+        box.appendChild(note)
+        box.appendChild(again)
+      }, 15000)
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

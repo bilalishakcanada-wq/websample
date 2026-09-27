@@ -205,7 +205,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         // the 1 MB map chunk (and its CSS) is fetched (and runtime-cached) only when someone opens the map;
         // the large install icons are read once by the OS at install time, never by the offline app
-        globIgnores: ['**/TaskMap-*.js', '**/TaskMap-*.css', '**/icons/icon-512.png', '**/icons/icon-maskable-*.png', '**/maplibre-gl-worker-*.js', '**/DesktopHome-*.js', '**/AdminPage-*.js', '**/node_modules/**'],
+        globIgnores: ['**/offline.html', '**/TaskMap-*.js', '**/TaskMap-*.css', '**/icons/icon-512.png', '**/icons/icon-maskable-*.png', '**/maplibre-gl-worker-*.js', '**/DesktopHome-*.js', '**/AdminPage-*.js', '**/node_modules/**'],
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],

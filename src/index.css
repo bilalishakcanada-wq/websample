@@ -83,3 +83,17 @@ button {
   content-visibility: auto;
   contain-intrinsic-size: auto 180px;
 }
+
+/* Android 15+ draws the page under the status bar and ignores its colour, so the white status icons
+   would sit on a white header: paint the navy behind them. The inset is 0 where the bar is not overlaid. */
+html.is-native body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: #081b38;
+  z-index: 2147483647;
+  pointer-events: none;
+}

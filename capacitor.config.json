@@ -2,33 +2,33 @@
   "appId": "ba.poso.app",
   "appName": "Poso.ba",
   "webDir": "dist",
-  "backgroundColor": "#f6f4ee",
+  "backgroundColor": "#0d2a52",
   "ios": {
     "contentInset": "never",
-    "scheme": "Poso.ba",
     "limitsNavigationsToAppBoundDomains": false
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#f6f4ee"
+    "backgroundColor": "#0d2a52"
   },
   "server": {
     "url": "https://bilalishakcanada-wq.github.io/websample/",
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "errorPath": "offline.html"
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1200,
       "launchAutoHide": true,
-      "backgroundColor": "#0d2a52",
-      "showSpinner": false,
-      "splashFullScreen": true,
-      "splashImmersive": true
+      "backgroundColor": "#0d2a52"
     },
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#081b38",
       "overlaysWebView": false
+    },
+    "SystemBars": {
+      "initialViewportFitValueHint": "cover"
     }
   }
 }

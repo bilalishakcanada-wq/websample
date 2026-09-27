@@ -39,6 +39,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Poso.ba koristi kameru da slikaš posao ili profilnu sliku.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Poso.ba koristi mikrofon kad snimaš video za portfolio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Poso.ba pristupa galeriji da odabereš slike za posao ili profil.</string>
 	<key>UIApplicationSceneManifest</key>

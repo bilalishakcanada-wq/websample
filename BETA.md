@@ -48,7 +48,7 @@ Svaki push na `main` (ili ručno: GitHub → *Actions* → **Android app** → *
 
 **https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta** → `poso-ba-beta.apk`
 
-Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare.
+Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare (svaka beta je potpisana istim ključem, `android/app/beta.keystore`). Ko je beta instalirao prije ove promjene, mora je jednom deinstalirati.
 
 ### Android — Google Play (interno testiranje)
 1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Poso.ba.

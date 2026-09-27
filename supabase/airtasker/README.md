@@ -40,8 +40,9 @@ Udaljenost je zračna linija od grada u profilu izvođača do grada posla.
 
 Aplikacija radi i prije nego što se ovo pokrene (stari način: rok u opisu), ali rok, istek,
 obavezni uslovi, sačuvani poslovi, doseg i zahtjev za ponudu rade tek nakon migracija.
-Privatni zahtjev se nikad ne objavljuje javno ako 05 još nije pokrenut: aplikacija prvo pita bazu
-(`quote_requests_enabled()`), a dok 05 nije pokrenut dugme na profilu vodi na običnu objavu.
+Privatni zahtjev se nikad ne objavljuje javno ako 04 i 05 još nisu pokrenuti: aplikacija prvo pita
+bazu (`quote_requests_enabled()` iz 05 i `listing_reach` iz 04, jer tek preporučeni poslovi iz 04
+izostavljaju privatne poslove), a dotad dugme na profilu vodi na običnu objavu.
 
 Svih pet datoteka je testirano na kopiji žive baze (supabase/postgres slika + 122 žive migracije
 + bids_require_verified, security/05 i payments/01), zajedno s ostalim SQL-om koji čeka

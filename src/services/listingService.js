@@ -299,10 +299,16 @@ export const listingService = {
     return data
   },
 
-  /** True once the private-request rules (supabase/airtasker/05) are on the database. */
+  /**
+   * True once the private-request rules are on the database: 05 (who sees the job) and 04,
+   * whose recommended feed leaves private jobs out (the older feed would show them to others).
+   */
   async quoteRequestsEnabled() {
-    const { data, error } = await supabase.rpc('quote_requests_enabled')
-    return !error && data === true
+    const [rules, feed] = await Promise.all([
+      supabase.rpc('quote_requests_enabled'),
+      supabase.rpc('listing_reach', { p_listing: '00000000-0000-0000-0000-000000000000' }),
+    ])
+    return !rules.error && rules.data === true && !feed.error
   },
 
   /** Private quote request: the client opens the job to everyone (normal job alerts go out then). */

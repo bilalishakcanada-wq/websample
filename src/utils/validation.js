@@ -24,6 +24,9 @@ const POZNATE_GRESKE = [
   { test: /CHAT_JOS_NIJE_OTVOREN/i, poruka: 'Dopisivanje počinje kada klijent prihvati ponudu i osigura uplatu.' },
   { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },
   { test: /NISI_UCESNIK_RAZGOVORA/i, poruka: 'Nemaš pristup ovom razgovoru.' },
+  { test: /PONUDA_NA_SVOJ_OGLAS/i, poruka: 'Ne možeš slati ponudu na vlastiti posao.' },
+  { test: /PONUDA_ZAKLJUCANA/i, poruka: 'Iznos i opis ponude može mijenjati samo izvođač koji ju je poslao.' },
+  { test: /BID_STATUS_FORBIDDEN/i, poruka: 'Ponuda se prihvata dugmetom „Prihvati i plati“, uz osiguranu uplatu.' },
 ]
 
 /** Vraća Error sa razumljivom porukom (i eventualno linkom), ili null. */

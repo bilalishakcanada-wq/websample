@@ -3,7 +3,71 @@ import { publicError, sanitizeText } from '../utils/validation'
 
 const LICENCE_TYPES = ['electrician', 'plumber', 'gas', 'hvac', 'construction', 'driver']
 
+// Greške uplate/isplate iz baze i Edge funkcija → rečenica koju korisnik razumije.
+const PAY_ERRORS = [
+  [/CARD_PAYMENTS_OFF/, 'Plaćanje karticom još nije uključeno. Do tada uplatu dogovaraš s timom.'],
+  [/TOO_MANY_ATTEMPTS/, 'Previše pokušaja plaćanja zaredom. Pokušaj ponovo za 10 minuta.'],
+  [/BAD_AMOUNT/, 'Uplata može biti od 5 do 2.000 KM.'],
+  [/SUSPENDED/, 'Nalog je suspendovan, pa uplata i isplata nisu moguće.'],
+  [/VERIFIKACIJA_POTREBNA/, 'Za isplatu prvo potvrdi identitet.'],
+  [/ISPLATA_MIN/, 'Najmanja isplata je 20 KM.'],
+  [/ISPLATA_PREKO_ZARADE/, 'Na račun se može isplatiti samo zarada od poslova, ne novac uplaćen karticom.'],
+  [/NEMA_RACUNA_ZA_ISPLATU/, 'Prvo dodaj račun za isplatu u „Načini plaćanja“.'],
+  [/IME_RACUNA_SE_NE_POKLAPA/, 'Račun za isplatu mora glasiti na ime sa tvog profila.'],
+  [/ISPLATA_VEC_CEKA/, 'Već imaš zahtjev za isplatu na čekanju.'],
+  [/INSUFFICIENT/, 'Nemaš dovoljno na balansu.'],
+]
+const payError = (text = '') => new Error((PAY_ERRORS.find(([test]) => test.test(text)) || [null, 'Radnja nije uspjela. Pokušaj ponovo.'])[1])
+
 export const accountService = {
+  /**
+   * Uplata karticom: Edge funkcija vrati potpisanu Monri formu, a preglednik je
+   * pošalje Monri-ju. Kartica se unosi samo na Monri stranici; balans raste tek
+   * kad Monri potvrdi naplatu (card-topup-callback), ne pri povratku na sajt.
+   */
+  async startCardTopup(amount) {
+    const { data, error } = await supabase.functions.invoke('card-topup-start', { body: { amount: Number(amount) } })
+    if (error) {
+      let code = error.message || ''
+      try { code = JSON.stringify(await error.context.json()) } catch { /* nije JSON */ }
+      throw payError(code)
+    }
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = data.action
+    for (const [name, value] of Object.entries(data.fields)) {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = name
+      input.value = value
+      form.appendChild(input)
+    }
+    document.body.appendChild(form)
+    form.submit()
+  },
+
+  async cardPaymentStatus(orderNumber) {
+    const { data } = await supabase.from('card_payments').select('status, amount_km').eq('order_number', orderNumber).maybeSingle()
+    return data || null
+  },
+
+  async payoutState() {
+    const { data, error } = await supabase.rpc('my_payout_state')
+    if (error) { console.error('Payout state failed', { message: error.message, code: error.code }); return null }
+    return data
+  },
+
+  async requestPayout(amount) {
+    const { data, error } = await supabase.rpc('request_payout', { p_amount: Number(amount) })
+    if (error) { console.error('Payout request failed', { message: error.message, code: error.code }); throw payError(error.message) }
+    return data
+  },
+
+  async cancelPayout(id) {
+    const { error } = await supabase.rpc('cancel_payout', { p_id: id })
+    if (error) { console.error('Payout cancel failed', { message: error.message, code: error.code }); throw payError(error.message) }
+  },
+
   /** Balance, totals and the ledger of the signed-in user. */
   async myWallet() {
     const { data, error } = await supabase.rpc('my_wallet')

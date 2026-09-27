@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { MessageCircle, Send } from 'lucide-react'
 import { bidService } from '../services/bidService'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
@@ -13,16 +14,22 @@ import ActionError from './ActionError'
  */
 function OfferReplies({ bid, userId, canWrite }) {
   const [open, setOpen] = useState(false)
-  const [replies, setReplies] = useState(undefined) // undefined = nije učitano, null = nije dostupno
   const [draft, setDraft] = useState('')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
 
-  useEffect(() => {
-    let active = true
-    bidService.listReplies(bid.id).then((rows) => active && setReplies(rows)).catch(() => active && setReplies(null))
-    return () => { active = false }
-  }, [bid.id])
+  const queryClient = useQueryClient()
+  // Jedan upit za sve ponude posla (ne jedan po ponudi). Privatno, pa se ne
+  // sprema u localStorage; queryClient.clear() pri odjavi ga briše.
+  const key = ['listing', bid.listing_id, 'replies']
+  const { data: poPonudi, isError } = useQuery({
+    queryKey: key,
+    queryFn: () => bidService.listRepliesForListing(bid.listing_id),
+    enabled: Boolean(bid.listing_id),
+    meta: { persist: false },
+  })
+  // undefined = nije učitano, null = nije dostupno
+  const replies = isError || poPonudi === null ? null : poPonudi === undefined ? undefined : (poPonudi[bid.id] ?? [])
 
   if (replies === null || replies === undefined) return null
   if (!canWrite && replies.length === 0) return null
@@ -36,7 +43,7 @@ function OfferReplies({ bid, userId, canWrite }) {
     setSending(true)
     try {
       const row = await bidService.addReply(bid.id, draft)
-      setReplies((current) => [...current, row])
+      queryClient.setQueryData(key, (m) => ({ ...(m || {}), [bid.id]: [...((m && m[bid.id]) || []), row] }))
       setDraft('')
     } catch (requestError) {
       setError(requestError)

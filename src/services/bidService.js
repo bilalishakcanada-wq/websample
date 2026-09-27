@@ -98,21 +98,25 @@ export const bidService = {
   },
 
   /**
-   * Privatni odgovori ispod jedne ponude — vide ih samo klijent i taj izvođač.
-   * null znači da tabela još ne postoji u bazi (sučelje tada sakrije dio).
+   * Privatni odgovori ispod svih ponuda jednog posla, u jednom upitu, grupisani
+   * po ponudi: { [bidId]: [...] }. RLS vraća samo ono što pozivalac smije vidjeti
+   * (klijent sve, izvođač samo svoju ponudu). null znači da tabela još ne
+   * postoji u bazi (sučelje tada sakrije dio).
    */
-  async listReplies(bidId) {
+  async listRepliesForListing(listingId) {
     const { data, error } = await supabase
       .from('bid_replies')
-      .select('id, bid_id, author_id, body, created_at')
-      .eq('bid_id', bidId)
+      .select('id, bid_id, author_id, body, created_at, bids!inner(listing_id)')
+      .eq('bids.listing_id', listingId)
       .order('created_at', { ascending: true })
     if (error) {
       if (['42P01', 'PGRST205'].includes(error.code)) return null
       console.error('Supabase bid replies fetch failed', { message: error.message, code: error.code })
       throw publicError()
     }
-    return data || []
+    const poPonudi = {}
+    for (const { bids: _bid, ...reply } of data || []) (poPonudi[reply.bid_id] ||= []).push(reply)
+    return poPonudi
   },
 
   async addReply(bidId, body) {

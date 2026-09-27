@@ -4,12 +4,12 @@ import { useAuth } from '../../context/AuthContext'
 import { keys, useNotifications } from '../../hooks/queries'
 import { Link } from 'react-router-dom'
 import { MailMascot } from '../../app/Mascots'
-import { Award, BadgeCheck, Bell, Bot, ChevronRight, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
+import { Award, BadgeCheck, Bell, Bot, CalendarX, Send, UserX, ChevronRight, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
 import { notificationService } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { SkeletonNotifRow } from '../../components/Skeleton'
 
-const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Award, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles }
+const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, badge: Award, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles, task_expired: CalendarX, quote_request: Send, quote_declined: UserX }
 
 function NotificationsPage() {
   const { user } = useAuth()

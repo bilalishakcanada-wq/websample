@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, BadgeCheck, Bell, Bot, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
+import { Award, BadgeCheck, Bell, Bot, CalendarX, Send, UserX, Handshake, HelpCircle, LifeBuoy, MessageCircle, ShieldBan, Sparkles, Star, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { desktopNotify, notificationService, playPing } from '../services/notificationService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { currentSubscription } from '../utils/push'
 import { toast } from './Toaster'
 
-const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles, badge: Award }
+const ICONS = { support: LifeBuoy, support_reply: MessageCircle, moderation: ShieldBan, ai: Bot, message: MessageCircle, offer: Handshake, offer_accepted: BadgeCheck, offer_rejected: Handshake, wallet: Wallet, job: Wallet, task_alert: Bell, task_live: Sparkles, question: HelpCircle, review: Star, welcome: Sparkles, badge: Award, task_expired: CalendarX, quote_request: Send, quote_declined: UserX }
 
 // notification ids already toasted/pinged in this session (shared by every bell instance)
 const announced = new Set()

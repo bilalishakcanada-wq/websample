@@ -151,7 +151,7 @@ function MyTasks() {
                       <small><Users size={13} /> {job.bid_count || 0} {(job.bid_count || 0) === 1 ? 'ponuda' : 'ponuda'}</small>
                     </div>
                   </Link>
-                  <button type="button" className="mt-unsave" onClick={() => saved.toggle(job.id)}>Ukloni</button>
+                  <button type="button" className="mt-unsave" onClick={() => saved.remove(job.id)}>Ukloni</button>
                 </div>
               )
             })}

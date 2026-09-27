@@ -9,7 +9,7 @@ export function useMyCity() {
     queryKey: ['me', user?.id, 'city'],
     queryFn: () => profileService.getProfile(user.id).then((profile) => profile?.city || null),
     enabled: Boolean(user?.id),
-    staleTime: 5 * 60_000,
+    staleTime: 60_000,
     meta: { persist: false },
   })
   return user ? (query.data ?? null) : null

@@ -85,6 +85,7 @@
 .tx-travel-chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; background: #eef2f8; color: var(--primary-strong); font-weight: 800; }
 .tx-travel-chips button.active { background: var(--primary-strong); color: white; }
 .tx-travel-chips input { width: 96px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 2px solid #e6eaf1; font-size: 0.95rem; }
+.tx-travel-chips input:not(:placeholder-shown) { border-color: var(--primary-strong); color: var(--primary-strong); font-weight: 800; }
 .tx-reach-hint { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 0.86rem; color: var(--text-soft); }
 .tx-reach-hint strong { color: var(--primary-strong); }
 

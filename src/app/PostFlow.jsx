@@ -10,6 +10,7 @@ import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
+import { useQuoteRequestsEnabled } from '../hooks/queries'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
@@ -34,7 +35,8 @@ const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', lo
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
 }
-const saveDraft = (form, step) => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step })) } catch { /* ignore */ } }
+// `za` = the provider a "Zatraži ponudu" draft is for, so a restored draft keeps going only to them
+const saveDraft = (form, step, za) => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, za: za || null })) } catch { /* ignore */ } }
 const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
 
 // the browser's Bosnian locale data is often incomplete ("M09 29, Tue"), so format by hand
@@ -55,9 +57,19 @@ function PostFlow() {
   const copyId = editId ? null : searchParams.get('copy')
   // "Zatraži ponudu" from a provider's profile: the job goes only to them
   const zaParam = searchParams.get('za') || ''
-  const inviteId = !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  const quoteEnabled = useQuoteRequestsEnabled()
+  const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
-  const draft = useMemo(() => (editId || copyId ? null : loadDraft()), [editId, copyId])
+  // editing and copying start from a job, not the draft, and leave the draft alone
+  const freshPost = !editId && !copyId
+  const draft = useMemo(() => {
+    if (!freshPost) return null
+    const saved = loadDraft()
+    // a draft written for everyone or for another provider is not this request: start clean
+    if (saved && zaParam && (saved.za || '') !== zaParam) return null
+    return saved
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freshPost])
   const [step, setStep] = useState(() => (draft?.step ?? 0))
   const stepDir = useStepDirection(step)
   const [form, setForm] = useState(() => ({ ...emptyForm, ...(draft?.form || {}) }))
@@ -115,8 +127,15 @@ function PostFlow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editId, copyId])
 
+  // a request draft came back without ?za= (a Google sign-in lands on the home page): it still
+  // goes only to that provider, and "Objavi svima" is one tap away
+  useEffect(() => {
+    if (freshPost && !zaParam && draft?.za) setSearchParams((params) => { params.set('za', draft.za); return params }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // keep the draft on the device so a sign-in detour never loses the job
-  useEffect(() => { if (!editId) saveDraft(form, step) }, [form, step, editId])
+  useEffect(() => { if (freshPost) saveDraft(form, step, zaParam) }, [form, step, freshPost, zaParam])
 
   const update = (changes) => setForm((current) => ({ ...current, ...changes }))
   const key = STEPS[step]
@@ -153,7 +172,7 @@ function PostFlow() {
 
   const submit = async () => {
     if (!user) {
-      saveDraft(form, step)
+      saveDraft(form, step, zaParam)
       navigate(`/register?next=${encodeURIComponent(inviteId ? `/objavi?za=${inviteId}` : '/objavi')}`)
       return
     }
@@ -162,7 +181,7 @@ function PostFlow() {
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
-      clearDraft()
+      if (freshPost) clearDraft()
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
       haptic('medium')
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
@@ -180,7 +199,7 @@ function PostFlow() {
       <header className="ap-top">
         <button type="button" className="ap-back" onClick={goBack} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <div className="ap-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
-        <button type="button" className="ap-cancel" onClick={() => leaveFlow(() => { clearDraft(); goBackOut() })}>Odustani</button>
+        <button type="button" className="ap-cancel" onClick={() => leaveFlow(() => { if (freshPost) clearDraft(); goBackOut() })}>Odustani</button>
       </header>
 
       {/* ---------- 1. title ---------- */}

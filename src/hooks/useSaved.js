@@ -8,7 +8,8 @@ import { toast } from '../components/Toaster'
 import { haptic } from '../utils/native'
 
 /**
- * Saved jobs for the signed-in person: `isSaved(id)` and `toggle(id)` (optimistic).
+ * Saved jobs for the signed-in person: `isSaved(id)`, `toggle(id)` and `remove(id)` (optimistic).
+ * `remove` never saves: a double tap on "Ukloni" while the list refreshes can't bring a job back.
  * Guests who tap "Sačuvaj" are sent to sign in and come back to the same page.
  */
 export function useSaved() {
@@ -26,12 +27,11 @@ export function useSaved() {
   const set = useMemo(() => new Set(query.data || []), [query.data])
   const isSaved = useCallback((id) => set.has(id), [set])
 
-  const toggle = useCallback(async (id) => {
+  const setSaved = useCallback(async (id, next) => {
     if (!userId) {
       navigate(`/login?next=${encodeURIComponent(location.pathname + location.search)}`)
       return
     }
-    const next = !set.has(id)
     haptic('light')
     queryClient.setQueryData(keys.savedIds(userId), (current = []) => (next ? [...current, id] : current.filter((item) => item !== id)))
     try {
@@ -43,7 +43,10 @@ export function useSaved() {
     } finally {
       queryClient.invalidateQueries({ queryKey: keys.savedListings(userId) })
     }
-  }, [userId, set, navigate, location, queryClient])
+  }, [userId, navigate, location, queryClient])
 
-  return { isSaved, toggle, signedIn: Boolean(userId) }
+  const toggle = useCallback((id) => setSaved(id, !set.has(id)), [setSaved, set])
+  const remove = useCallback((id) => setSaved(id, false), [setSaved])
+
+  return { isSaved, toggle, remove, signedIn: Boolean(userId) }
 }

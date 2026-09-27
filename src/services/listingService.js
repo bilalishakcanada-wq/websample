@@ -16,11 +16,13 @@ const pickExtras = (payload) => Object.fromEntries(EXTRA_COLUMNS.filter((key) =>
 const markExpired = (row) => (row && row.status === 'published' && isExpired(row) ? { ...row, status: 'expired' } : row)
 const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([key]) => !EXTRA_COLUMNS.includes(key)))
 
+const QUOTE_OFF = '„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.'
+
 async function writeListing(run, row) {
   const first = await run(row)
   if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) {
     // a private quote request must never fall back to a public job
-    if (row.invited_provider) throw new Error('„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.')
+    if (row.invited_provider) throw new Error(QUOTE_OFF)
     return run(withoutExtras(row))
   }
   return first
@@ -225,6 +227,9 @@ export const listingService = {
     })
     const cleanPayload = { ...payload, ...input, price: input.price === '' ? null : input.price }
     if (appConfig.apiBaseUrl) return apiRequest('/api/listings', { method: 'POST', body: cleanPayload })
+    // the invited_provider column is already on the database (01); without the rules in 05 the
+    // job would be public, so a private request goes out only once they're confirmed
+    if (payload.invited_provider && !(await listingService.quoteRequestsEnabled())) throw new Error(QUOTE_OFF)
 
     const { data, error } = await writeListing((row) => supabase.from('listings').insert(row).select().single(), {
       user_id: payload.user_id,
@@ -292,6 +297,12 @@ export const listingService = {
       throw publicError()
     }
     return data
+  },
+
+  /** True once the private-request rules (supabase/airtasker/05) are on the database. */
+  async quoteRequestsEnabled() {
+    const { data, error } = await supabase.rpc('quote_requests_enabled')
+    return !error && data === true
   },
 
   /** Private quote request: the client opens the job to everyone (normal job alerts go out then). */

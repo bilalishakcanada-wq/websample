@@ -64,7 +64,7 @@ prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije p
 
 | Plaća (budžet + put) | Ponude do |
 |---|---|
-| „Po dogovoru“ bez puta | 25 km |
+| „Po dogovoru“ | 25 km (ili više ako sam novac za put dostiže veći razred) |
 | do 49 KM | 15 km |
 | 50–99 KM | 25 km |
 | 100–199 KM | 40 km |
@@ -76,7 +76,8 @@ prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije p
   ili „Predaleko za ovaj posao“).
 - U pretrazi kartice pokazuju „U dosegu“ / „Predaleko“ / „Put 20 KM“, a filter „Samo u mom dosegu“
   sakriva poslove koje ne možeš uzeti. Postojeći filter udaljenosti od grada (10–100 km) ostaje.
-- Baza odbija ponudu izvan dosega; izvođač bez grada u profilu mora ga dodati.
+- Baza odbija ponudu izvan dosega; izvođač bez grada u profilu mora ga dodati. Grad koji nije na
+  našoj karti ne blokira ponudu.
 - Preporučeni poslovi izvođaču ne nude poslove izvan dosega.
 - Novac za put je za sada dogovor koji izvođač vidi i uračuna u ponudu; da ide kroz Poso.ba Pay
   kao poseban iznos → ➡️ nit „Plan rollout of enterprise modules“.
@@ -92,6 +93,7 @@ opiše posao i pošalje ga samo tom izvođaču.
 - Klijent u svakom trenutku može „Objavi svima“: posao postaje običan javni posao, obavijesti idu
   izvođačima u blizini, a ponude koje već ima ostaju.
 - Zahtjev se ne može preusmjeriti drugom izvođaču; najviše 10 zahtjeva dnevno po klijentu.
+- Pitanja i odgovori ispod privatnog posla vide samo klijent i taj izvođač.
 
 ## 5. Dodjela, plaćanje, završetak
 
@@ -102,8 +104,8 @@ opiše posao i pošalje ga samo tom izvođaču.
 | Izvođač traži isplatu, klijent odobrava, automatska isplata nakon roka | ✅ |
 | Revizije, sporovi, zahtjev za otkazivanje | ✅ |
 | Kartično plaćanje i isplate izvođačima | ➡️ nit „Plan rollout of enterprise modules“ (test način) |
-| Povećanje cijene tokom posla (dodatna sredstva) | ➡️ ista nit |
-| Naknada za otkazivanje i uticaj na stopu završenih poslova | ➡️ ista nit |
+| Povećanje cijene tokom posla (dodatna sredstva) | ✅ PR #9 (baza čeka odobrenje) |
+| Naknada za otkazivanje i uticaj na stopu završenih poslova | ✅ PR #9 (baza čeka odobrenje) |
 
 ## 6. Povjerenje
 
@@ -123,5 +125,6 @@ opiše posao i pošalje ga samo tom izvođaču.
 
 ## Baza
 
-SQL je u `supabase/airtasker/` (redom 01–05). Ekrani rade i prije migracije
-(rok se tada čita iz opisa, a čuvanje poslova i „Zatraži ponudu“ javljaju da još nisu uključeni).
+SQL je u `supabase/airtasker/` (redom 01–05; 01 je na živoj bazi od 27. 9. 2026). Ekrani rade i
+prije ostalih migracija (rok se tada čita iz opisa, čuvanje poslova javlja da još nije uključeno,
+a „Zatraži ponudu“ na profilu vodi na običnu objavu).

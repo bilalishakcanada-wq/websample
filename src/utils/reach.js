@@ -14,14 +14,17 @@ export const NO_BUDGET_REACH_KM = 25
 export const TRAVEL_CHIPS = [10, 20, 30, 50]
 export const MAX_TRAVEL_ALLOWANCE = 500
 
-/** km a provider may be from the job, or null for no limit (online, or pays 800 KM+). */
+/**
+ * km a provider may be from the job, or null for no limit (online, or pays 800 KM+).
+ * "Po dogovoru" never drops below the no-budget reach: travel money only widens it.
+ */
 export const reachKm = (price, travel) => {
   const p = price === '' || price == null ? null : Number(price)
   const t = Number(travel) > 0 ? Number(travel) : 0
-  if (p == null && t === 0) return NO_BUDGET_REACH_KM
   const pay = (p || 0) + t
   const tier = REACH_TIERS.find((item) => pay < item.below)
-  return tier ? tier.km : null
+  if (!tier) return null
+  return p == null ? Math.max(NO_BUDGET_REACH_KM, tier.km) : tier.km
 }
 
 export const listingReachKm = (listing) => (isRemoteLocation(listing?.location) ? null : reachKm(listing?.price, listing?.travel_allowance))
@@ -35,7 +38,8 @@ const cityPoint = (city) => coordsForLocation(city)
 
 /**
  * Where a provider (by their profile city) stands for a job, computed on the device.
- * status: remote | no_limit | ok | too_far | no_city | no_job_location | invited
+ * status: remote | no_limit | ok | too_far | no_city | unknown_city | no_job_location | invited
+ * unknown_city: a profile city we can't place on the map; the database doesn't block those either.
  */
 export const reachFor = (listing, myCity) => {
   if (!listing) return null
@@ -46,7 +50,10 @@ export const reachFor = (listing, myCity) => {
   const job = listing.lat != null && listing.lng != null ? { lat: listing.lat, lng: listing.lng } : cityPoint(listing.location)
   if (!job) return { status: 'no_job_location', reachKm: km, distanceKm: null }
   const me = cityPoint(myCity)
-  if (!me) return { status: km == null ? 'no_limit' : 'no_city', reachKm: km, distanceKm: null }
+  if (!me) {
+    const status = km == null ? 'no_limit' : String(myCity || '').trim() ? 'unknown_city' : 'no_city'
+    return { status, reachKm: km, distanceKm: null }
+  }
   const distance = Math.round(distanceKm(me, job) * 10) / 10
   if (km == null) return { status: 'no_limit', reachKm: null, distanceKm: distance }
   return { status: distance <= km ? 'ok' : 'too_far', reachKm: km, distanceKm: distance }

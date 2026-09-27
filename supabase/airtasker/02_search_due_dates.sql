@@ -6,6 +6,10 @@
 --   * p_sort = 'due_soon': dated jobs by nearest date first, flexible ones after
 --   * "Preporučeno" gives a small lift to jobs due today or in the next few days
 --   * private quote requests ("Zatraži ponudu", see 05) never show up
+--   * jobs posted by older app versions (date only in the "Kada: …" line) get the schedule
+--     columns filled in, now and from here on
+--   * "Kada: Prije 2026-10-01" is stored as "Kada: Prije: 2026-10-01": the contact-details
+--     filter read "e 2026-10-01" as a phone number, hid the date and gave the poster a strike
 -- The return type changes, so both functions are dropped and recreated.
 -- Needs 01_task_schedule_and_expiry.sql first.
 -- ============================================================================
@@ -143,3 +147,92 @@ end $function$;
 -- same grants as before: the wrapper is public, the core is internal
 revoke execute on function public.search_listings_core(text, text, double precision, double precision, double precision, boolean, numeric, numeric, boolean, boolean, text, integer, integer, boolean) from public, anon, authenticated;
 grant execute on function public.search_listings(text, text, double precision, double precision, double precision, boolean, numeric, numeric, boolean, boolean, text, integer, integer) to anon, authenticated;
+
+-- Older app versions still write the date only as the "Kada: …" line at the end of the
+-- description. Fill the schedule columns from that line when the app didn't send them, and
+-- keep them in step when such an app changes the line. Newer versions send both, and then
+-- the line and the columns already agree, so nothing changes.
+-- The trigger also rewrites "Prije 2026-10-01" as "Prije: 2026-10-01". The contact-details
+-- filter (moderate_listings, which runs after this trigger) reads "e 2026-10-01" as a nine-digit
+-- phone number, so the date got hidden and the poster got a strike toward suspension.
+create or replace function public.sync_schedule_from_kada()
+returns trigger language plpgsql set search_path = public
+as $$
+declare
+  v_line text;
+  v_type text;
+  v_date date;
+begin
+  v_line := substring(coalesce(new.description, '') from '\n\nKada: ([^\n]*)\s*$');
+  if v_line is null then return new; end if;
+  if v_line ~ '^Prije \d{4}-\d{2}-\d{2}' then
+    new.description := regexp_replace(new.description, '(\n\nKada: Prije) (\d{4}-\d{2}-\d{2}\s*)$', '\1: \2');
+    v_line := 'Prije: ' || substring(v_line from '\d{4}-\d{2}-\d{2}');
+  end if;
+  if v_line ~ '^(Na dan|Prije):? \d{4}-\d{2}-\d{2}' then
+    v_type := case when v_line like 'Prije%' then 'before' else 'on' end;
+    begin
+      v_date := substring(v_line from '\d{4}-\d{2}-\d{2}')::date;
+    exception when others then
+      return new;  -- not a real date: leave the columns alone
+    end;
+  elsif v_line like 'Fleksibilan termin%' then
+    v_type := 'flexible';
+  else
+    return new;
+  end if;
+  if tg_op = 'INSERT' then
+    if new.date_type is null then
+      new.date_type := v_type;
+      new.due_date := v_date;
+    end if;
+  elsif new.description is distinct from old.description
+        and new.date_type is not distinct from old.date_type
+        and new.due_date is not distinct from old.due_date
+        and (new.date_type is distinct from v_type or new.due_date is distinct from v_date) then
+    new.date_type := v_type;
+    new.due_date := v_date;
+  end if;
+  return new;
+end $$;
+
+revoke execute on function public.sync_schedule_from_kada() from public, anon, authenticated;
+
+-- named to run before listings_schedule_guard and moderate_listings (before-triggers run in
+-- name order): a date that has already passed is still refused, and the filter sees "Prije:"
+drop trigger if exists listings_kada_sync on public.listings;
+create trigger listings_kada_sync
+  before insert or update of description on public.listings
+  for each row execute function public.sync_schedule_from_kada();
+
+-- Jobs posted by older versions since 01 went live. The schedule guard refuses setting a date
+-- that has already passed, so such a job is only marked expired; anything that isn't a real
+-- date is left alone.
+do $$
+declare
+  r record;
+  v_line text;
+  v_date date;
+begin
+  for r in select id, description from public.listings where date_type is null and description ~ '\n\nKada: ' loop
+    v_line := substring(r.description from '\n\nKada: ([^\n]*)\s*$');
+    continue when v_line is null;
+    if v_line like 'Fleksibilan termin%' then
+      update public.listings set date_type = 'flexible' where id = r.id;
+    elsif v_line ~ '^(Na dan|Prije):? \d{4}-\d{2}-\d{2}' then
+      begin
+        v_date := substring(v_line from '\d{4}-\d{2}-\d{2}')::date;
+      exception when others then
+        continue;
+      end;
+      if v_date < public.today_ba() then
+        -- its date has passed: take it out of search like the expiry job would
+        update public.listings set status = 'expired' where id = r.id and status = 'published';
+        continue;
+      end if;
+      update public.listings
+      set date_type = case when v_line like 'Prije%' then 'before' else 'on' end, due_date = v_date
+      where id = r.id;
+    end if;
+  end loop;
+end $$;

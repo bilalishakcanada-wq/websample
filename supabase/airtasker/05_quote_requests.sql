@@ -9,7 +9,11 @@
 --    apply, the client picked them) or decline, which tells the client.
 --  * The client can "Otvori svima" at any time: invited_provider goes back to null, the
 --    job becomes a normal public job and job alerts go out then.
---  * Limits: not to yourself, only to an active account, at most 10 requests a day.
+--  * Limits: not to yourself, only to an active account, at most 10 requests a day
+--    (counted in quote_request_log, so deleting or opening jobs doesn't reset it).
+--  * Questions under a private job are as private as the job.
+--  * quote_requests_enabled() tells the app these rules are on; until then it never sends
+--    a private request (01 already has the column, so without 05 it would be public).
 --
 -- Needs 01–04 first. Idempotent: safe to run more than once.
 -- ============================================================================
@@ -20,6 +24,18 @@ drop policy if exists listings_private_quote on public.listings;
 create policy listings_private_quote on public.listings
   as restrictive for select
   using (invited_provider is null or user_id = auth.uid() or invited_provider = auth.uid() or public.is_staff());
+
+-- Every request sent, for the daily limit. Nobody reads it directly.
+create table if not exists public.quote_request_log (
+  id bigint generated always as identity primary key,
+  client_id uuid not null,
+  provider_id uuid not null,
+  listing_id uuid not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists quote_request_log_client_idx on public.quote_request_log (client_id, created_at desc);
+alter table public.quote_request_log enable row level security;
+revoke all on public.quote_request_log from public, anon, authenticated;
 
 -- Who may set or change the invitation
 create or replace function public.guard_listing_invite()
@@ -35,10 +51,11 @@ begin
     if not exists (select 1 from public.profiles p where p.user_id = new.invited_provider and p.account_status = 'active') then
       raise exception 'IZVODJAC_NEDOSTUPAN: ovaj izvođač trenutno ne prima zahtjeve' using errcode = 'P0001';
     end if;
-    if (select count(*) from public.listings l
-        where l.user_id = new.user_id and l.invited_provider is not null and l.created_at > now() - interval '24 hours') >= 10 then
+    if (select count(*) from public.quote_request_log q
+        where q.client_id = new.user_id and q.created_at > now() - interval '24 hours') >= 10 then
       raise exception 'PREVISE_ZAHTJEVA: danas si poslao/la 10 zahtjeva za ponudu, pokušaj sutra ili objavi posao svima' using errcode = 'P0001';
     end if;
+    insert into public.quote_request_log (client_id, provider_id, listing_id) values (new.user_id, new.invited_provider, new.id);
     return new;
   end if;
 
@@ -104,19 +121,22 @@ begin
     raise exception 'PONUDA_POSLANA: već si poslao/la ponudu; povuci je ako ne možeš preuzeti posao' using errcode = 'P0001';
   end if;
   update public.listings set invite_declined_at = now() where id = l.id;
-  select coalesce(nullif(btrim(full_name), ''), 'Izvođač') into v_name from public.profiles where user_id = auth.uid();
+  select case when btrim(coalesce(full_name, '')) = '' then 'Izvođač' else public.display_name_of(full_name) end
+  into v_name from public.profiles where user_id = auth.uid();
   insert into public.notifications (user_id, type, title, message, link, dedupe_key)
-  values (l.user_id, 'quote_declined', v_name || ' ne može preuzeti posao',
-          left(l.title, 120) || ' — otvori ga svima i ponude stižu od drugih izvođača.',
-          '/listings/' || l.id::text, 'quote_declined:' || l.id::text)
-  on conflict do nothing;
+  select l.user_id, 'quote_declined', coalesce(v_name, 'Izvođač') || ' ne može preuzeti posao',
+         left(l.title, 120) || ' — otvori ga svima i ponude stižu od drugih izvođača.',
+         '/listings/' || l.id::text, 'quote_declined:' || l.id::text
+  where not exists (select 1 from public.notifications n where n.user_id = l.user_id and n.dedupe_key = 'quote_declined:' || l.id::text);
 end $$;
 
 revoke execute on function public.decline_quote_request(uuid) from public, anon;
 grant execute on function public.decline_quote_request(uuid) to authenticated;
 
 -- Job alerts and "posao objavljen" (same as live, plus): a private request only notifies the
--- invited provider; opening it to everyone later sends the normal alerts.
+-- invited provider; opening it to everyone later sends the normal alerts. notifications has
+-- no unique key on dedupe_key, so each insert checks for itself: taking a job down and
+-- putting it back up doesn't notify anyone twice.
 create or replace function public.on_listing_published_alerts()
 returns trigger language plpgsql security definer set search_path = public
 as $function$
@@ -130,21 +150,21 @@ begin
 
   if new.invited_provider is not null then
     insert into public.notifications (user_id, type, title, message, link, dedupe_key)
-    values (new.user_id, 'task_live', 'Zahtjev za ponudu je poslan', left(new.title, 120) || ' — javićemo ti čim izvođač pošalje ponudu.', '/listings/' || new.id::text, 'live:' || new.id::text)
-    on conflict do nothing;
+    select new.user_id, 'task_live', 'Zahtjev za ponudu je poslan', left(new.title, 120) || ' — javićemo ti čim izvođač pošalje ponudu.', '/listings/' || new.id::text, 'quote_live:' || new.id::text
+    where not exists (select 1 from public.notifications n where n.user_id = new.user_id and n.dedupe_key = 'quote_live:' || new.id::text);
     insert into public.notifications (user_id, type, title, message, link, dedupe_key)
     select new.invited_provider, 'quote_request',
-           coalesce(nullif(btrim(p.full_name), ''), 'Klijent') || ' traži ponudu od tebe',
+           case when btrim(coalesce(p.full_name, '')) = '' then 'Klijent' else public.display_name_of(p.full_name) end || ' traži ponudu od tebe',
            left(new.title, 120) || coalesce(' · ' || new.location, '') || case when new.price is not null then ' · ' || new.price || ' KM' else '' end,
            '/listings/' || new.id::text, 'quote:' || new.id::text
     from public.profiles p where p.user_id = new.user_id
-    on conflict do nothing;
+      and not exists (select 1 from public.notifications n where n.user_id = new.invited_provider and n.dedupe_key = 'quote:' || new.id::text);
     return new;
   end if;
 
   insert into public.notifications (user_id, type, title, message, link, dedupe_key)
-  values (new.user_id, 'task_live', 'Tvoj posao je objavljen 🎉', left(new.title, 120) || ' — izvođači u blizini su obaviješteni. Ponude stižu ovdje.', '/listings/' || new.id::text, 'live:' || new.id::text)
-  on conflict do nothing;
+  select new.user_id, 'task_live', 'Tvoj posao je objavljen 🎉', left(new.title, 120) || ' — izvođači u blizini su obaviješteni. Ponude stižu ovdje.', '/listings/' || new.id::text, 'live:' || new.id::text
+  where not exists (select 1 from public.notifications n where n.user_id = new.user_id and n.dedupe_key = 'live:' || new.id::text);
   if new.title like '[E2E]%' then return new; end if;
   for a in
     select distinct t.user_id from public.task_alerts t
@@ -162,8 +182,8 @@ begin
       and (coalesce(p.city, '') = '' or public.cities_match(p.city, new.location) or new.location ilike '%online%')
   loop
     insert into public.notifications (user_id, type, title, message, link, dedupe_key)
-    values (a.user_id, 'task_alert', 'Novi posao: ' || new.title, coalesce(new.location, '') || case when new.price is not null then ' · ' || new.price || ' KM' else '' end, '/listings/' || new.id::text, 'alert:' || new.id::text || ':' || a.user_id::text)
-    on conflict do nothing;
+    select a.user_id, 'task_alert', 'Novi posao: ' || new.title, coalesce(new.location, '') || case when new.price is not null then ' · ' || new.price || ' KM' else '' end, '/listings/' || new.id::text, 'alert:' || new.id::text || ':' || a.user_id::text
+    where not exists (select 1 from public.notifications n where n.user_id = a.user_id and n.dedupe_key = 'alert:' || new.id::text || ':' || a.user_id::text);
   end loop;
   return new;
 end;
@@ -209,3 +229,38 @@ as $function$
   from (select null::uuid as user_id) dummy
   left join public.public_profiles pp on pp.user_id = p_user_id;
 $function$;
+
+-- Questions under a private job ("Pitanja") are as private as the job. The check runs as the
+-- definer because the reader can't see the private job itself.
+create or replace function public.listing_hidden_from_me(p_listing uuid)
+returns boolean language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1 from public.listings l
+    where l.id = p_listing and l.invited_provider is not null
+      and auth.uid() is distinct from l.user_id and auth.uid() is distinct from l.invited_provider
+      and not public.is_staff())
+$$;
+
+revoke execute on function public.listing_hidden_from_me(uuid) from public;
+grant execute on function public.listing_hidden_from_me(uuid) to anon, authenticated;
+
+drop policy if exists listing_questions_private_read on public.listing_questions;
+create policy listing_questions_private_read on public.listing_questions
+  as restrictive for select
+  using (not public.listing_hidden_from_me(listing_id));
+
+drop policy if exists listing_questions_private_insert on public.listing_questions;
+create policy listing_questions_private_insert on public.listing_questions
+  as restrictive for insert
+  with check (not public.listing_hidden_from_me(listing_id));
+
+-- The app sends a private request only when this answers true (see the header).
+create or replace function public.quote_requests_enabled()
+returns boolean language sql stable security definer set search_path = public
+as $$
+  select exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'listings' and policyname = 'listings_private_quote')
+$$;
+
+revoke execute on function public.quote_requests_enabled() from public;
+grant execute on function public.quote_requests_enabled() to anon, authenticated;

@@ -9,6 +9,7 @@ import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
+import { useQuoteRequestsEnabled } from '../hooks/queries'
 import { publishListing } from '../services/publishListing'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
@@ -44,13 +45,21 @@ function PostTaskPage() {
   const copyId = editId ? null : searchParams.get('copy')
   // "Zatraži ponudu" from a provider's profile: the job goes only to them
   const zaParam = searchParams.get('za') || ''
-  const inviteId = !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  const quoteEnabled = useQuoteRequestsEnabled()
+  const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
-  // a half-written job survives a refresh or an accidental click away (not when editing an existing one)
+  // a half-written job survives a refresh or an accidental click away; editing or copying a job
+  // starts from that job and leaves the draft alone
+  const freshPost = !editId && !copyId
   const draft = useMemo(() => {
-    if (editId || copyId) return null
-    try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { return null }
-  }, [editId, copyId])
+    if (!freshPost) return null
+    let saved = null
+    try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { /* ignore */ }
+    // a draft written for everyone or for another provider is not this request: start clean
+    if (saved && zaParam && (saved.za || '') !== zaParam) return null
+    return saved
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freshPost])
   const [step, setStep] = useState(draft?.step || 0)
   const stepDir = useStepDirection(step)
   const goBackOut = useGoBack('/')
@@ -72,13 +81,18 @@ function PostTaskPage() {
     description: '',
     price: '',
   }) })
+  // a request draft opened without ?za= still goes only to that provider ("Objavi svima" is one tap away)
   useEffect(() => {
-    if (editId) return
+    if (freshPost && !zaParam && draft?.za) setSearchParams((params) => { params.set('za', draft.za); return params }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    if (!freshPost) return
     try {
-      if (form.title.trim()) localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList }))
+      if (form.title.trim()) localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList, za: zaParam || null }))
       else localStorage.removeItem(DRAFT_KEY)
     } catch { /* ignore */ }
-  }, [form, step, tagList, editId])
+  }, [form, step, tagList, freshPost, zaParam])
 
   useEffect(() => {
     const sourceId = editId || copyId
@@ -133,7 +147,7 @@ function PostTaskPage() {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
-      try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
+      if (freshPost) { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
       navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`)
     } catch (requestError) {
       setError(requestError)
@@ -159,7 +173,7 @@ function PostTaskPage() {
           <ArrowLeft size={20} />
         </button>
         <span className="wizard-title">{inviteId ? 'Zatraži ponudu' : editId ? 'Uredi posao' : 'Objavi posao'}</span>
-        <button type="button" className="back-home-link" onClick={() => leaveFlow(() => { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } goBackOut() })}>Odustani</button>
+        <button type="button" className="back-home-link" onClick={() => leaveFlow(() => { if (freshPost) { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } } goBackOut() })}>Odustani</button>
       </header>
 
       <div className="wizard-progress">

@@ -22,4 +22,5 @@ export const keys = {
   savedListings: (userId) => ['me', userId, 'saved'],
   offerGate: (userId) => ['me', userId, 'offer-gate'],
   quoteRequests: (userId) => ['me', userId, 'quote-requests'],
+  quoteRequestsEnabled: ['feature', 'quote-requests'],
 }

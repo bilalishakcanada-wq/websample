@@ -6,10 +6,12 @@ import { queryClient } from '../lib/queryClient'
 import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
 import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
 
-// the "Kada:" line stays in the description so older app versions still show the date
+// the "Kada:" line stays in the description so older app versions still show the date.
+// "Prije: " with the colon: the database's contact-details filter reads "Prije 2026-10-01"
+// ("e" + 8 digits) as a phone number, hides the date and counts a strike against the poster.
 const kadaLine = (timing, date) => {
   if (timing === 'flexible' || !date) return 'Fleksibilan termin'
-  if (timing === 'before') return `Prije ${date}`
+  if (timing === 'before') return `Prije: ${date}`
   return `Na dan ${date}`
 }
 

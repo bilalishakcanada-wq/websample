@@ -6,7 +6,7 @@
 -- gorivo, taksi, prevoz) and that counts toward the pay, so it widens the reach.
 --
 --   pay = price + travel_allowance        (straight-line km from the provider's city)
---   price not set ("Po dogovoru")  -> 25 km (+ travel allowance tiers if one is set)
+--   price not set ("Po dogovoru")  -> 25 km, or more if the travel allowance alone reaches a wider tier
 --   pay  <  50 KM                  -> 15 km
 --   pay  <  100 KM                 -> 25 km
 --   pay  <  200 KM                 -> 40 km
@@ -21,19 +21,18 @@
 
 -- listings.travel_allowance is added in 01 (search in 02 returns it)
 
--- km a provider may be from the job, or null for no limit
+-- km a provider may be from the job, or null for no limit.
+-- "Po dogovoru" never drops below the 25 km no-budget reach: travel money only widens it.
 create or replace function public.listing_reach_km(p_price numeric, p_travel numeric)
 returns numeric language sql immutable set search_path = public
 as $$
   select case
-    when p_price is null and coalesce(p_travel, 0) = 0 then 25
-    when coalesce(p_price, 0) + coalesce(p_travel, 0) < 50 then 15
-    when coalesce(p_price, 0) + coalesce(p_travel, 0) < 100 then 25
-    when coalesce(p_price, 0) + coalesce(p_travel, 0) < 200 then 40
-    when coalesce(p_price, 0) + coalesce(p_travel, 0) < 400 then 70
-    when coalesce(p_price, 0) + coalesce(p_travel, 0) < 800 then 120
-    else null
+    when t.pay >= 800 then null
+    else greatest(
+      case when t.pay < 50 then 15 when t.pay < 100 then 25 when t.pay < 200 then 40 when t.pay < 400 then 70 else 120 end,
+      case when p_price is null then 25 else 0 end)
   end::numeric
+  from (select coalesce(p_price, 0) + coalesce(p_travel, 0) as pay) t
 $$;
 
 create or replace function public.listing_is_remote(p_location text)
@@ -43,7 +42,8 @@ as $$
 $$;
 
 -- Where the signed-in person stands for one job: the reach, their distance and whether they may offer.
--- reason: ok | remote | no_limit | no_job_location | no_city | too_far | own_job | signed_out | invited
+-- reason: ok | remote | no_limit | no_job_location | no_city | unknown_city | too_far | own_job | signed_out | invited
+-- unknown_city: the profile city is set but not on our map; distance can't be measured, so it doesn't block.
 -- A private quote request (05) has no reach: only the invited provider may offer, from anywhere.
 create or replace function public.listing_reach(p_listing uuid)
 returns table (reach_km numeric, distance_km numeric, can_offer boolean, reason text, my_city text)
@@ -82,6 +82,9 @@ begin
     return query select r, null::numeric, true, 'no_job_location'::text, me.city; return;
   end if;
   if me.lat is null then
+    if r is not null and coalesce(btrim(me.city), '') <> '' then
+      return query select r, null::numeric, true, 'unknown_city'::text, me.city; return;
+    end if;
     return query select r, null::numeric, r is null, case when r is null then 'no_limit' else 'no_city' end, me.city; return;
   end if;
   d := public.distance_km(me.lat, me.lng, l.lat, l.lng);
@@ -107,12 +110,15 @@ begin
   if l is null or l.invited_provider is not null or public.listing_is_remote(l.location) or l.lat is null or l.lng is null then return new; end if;
   r := public.listing_reach_km(l.price, l.travel_allowance);
   if r is null then return new; end if;
-  select c.lat, c.lng into me
+  select p.city, c.lat, c.lng into me
   from public.profiles p left join lateral public.coords_for_location(p.city) c on true
   where p.user_id = new.bidder_id;
   if me.lat is null then
-    raise exception 'GRAD_POTREBAN: dodaj svoj grad u profil da vidimo koliko si daleko od posla'
-      using errcode = 'P0001';
+    if coalesce(btrim(me.city), '') = '' then
+      raise exception 'GRAD_POTREBAN: dodaj svoj grad u profil da vidimo koliko si daleko od posla'
+        using errcode = 'P0001';
+    end if;
+    return new;  -- a city we can't place on the map: distance unknown, so don't block the offer
   end if;
   d := public.distance_km(me.lat, me.lng, l.lat, l.lng);
   if d > r then

@@ -82,6 +82,13 @@ export const usePublicProfile = (userId) => useQuery({
   staleTime: 2 * 60 * 1000,
 })
 
+/** Whether "Zatraži ponudu" is on (its privacy rules are on the database). undefined while loading. */
+export const useQuoteRequestsEnabled = () => useQuery({
+  queryKey: keys.quoteRequestsEnabled,
+  queryFn: () => listingService.quoteRequestsEnabled(),
+  staleTime: 10 * 60 * 1000,
+}).data
+
 /** Invalidates a set of keys whenever the window regains focus or a custom app event fires. */
 export function useInvalidateOn(eventNames, queryKeys) {
   const queryClient = useQueryClient()

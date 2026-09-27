@@ -208,7 +208,7 @@ function JobDetail(props) {
 
         {tab === 'pitanja' && (
           <div className="jd-questions">
-            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.'}</p>}
+            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.')}</p>}
             {questions.map((item) => {
               const fromOwner = item.user_id === listing.user_id
               return (

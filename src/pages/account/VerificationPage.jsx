@@ -30,7 +30,7 @@ function Stanje({ predmet }) {
         <BadgeCheck size={20} />
         <div>
           <strong>Identitet je potvrđen</strong>
-          <p>Potvrđeno {formatBosnianDate(predmet.reviewed_at)}. Možeš objavljivati poslove i slati ponude.</p>
+          <p>Potvrđeno {formatBosnianDate(predmet.reviewed_at)} Možeš objavljivati poslove i slati ponude.</p>
         </div>
       </div>
     )
@@ -41,7 +41,7 @@ function Stanje({ predmet }) {
         <Clock size={20} />
         <div>
           <strong>Provjera je u toku</strong>
-          <p>Poslano {formatBosnianDate(predmet.submitted_at)}. Naš tim provjerava podatke — obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
+          <p>Poslano {formatBosnianDate(predmet.submitted_at)} Naš tim provjerava podatke — obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
         </div>
       </div>
     )
@@ -80,14 +80,27 @@ function VerificationPage() {
   const liceRef = useRef(null)
   const nalicjeRef = useRef(null)
 
-  useEffect(() => {
+  const ucitaj = () => {
     identityService.mine().then((row) => {
       setPredmet(row)
       if (row && row.state === 'rejected') setIme(row.full_name || '')
-    })
-  }, [])
+    }).catch(() => setPredmet(false))   // false = nije učitano (ne "nije poslao")
+  }
+
+  useEffect(ucitaj, [])
 
   if (predmet === undefined) return <SkeletonPage />
+  if (predmet === false) {
+    return (
+      <div className="account-section verif-page">
+        <div className="empty-state">
+          <h2>Stanje verifikacije nije učitano</h2>
+          <p>Provjeri internet vezu pa pokušaj ponovo.</p>
+          <button type="button" className="primary-button" onClick={() => { setPredmet(undefined); ucitaj() }}>Pokušaj ponovo</button>
+        </div>
+      </div>
+    )
+  }
 
   const zakljucano = predmet && ['submitted', 'in_review', 'approved'].includes(predmet.state)
   const cifre = jmbg.replace(/\D/g, '')

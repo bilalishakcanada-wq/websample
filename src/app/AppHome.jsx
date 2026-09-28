@@ -87,7 +87,7 @@ function PosterHome({ firstName }) {
         <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
         <h1>Objavi posao. Riješeno.</h1>
         <form className="ap-hero-form" onSubmit={(event) => { event.preventDefault(); start(title) }}>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={70} placeholder="U par riječi, šta ti treba?" enterKeyHint="go" onFocus={() => prefetchRoute('/objavi')} />
+          <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={70} placeholder="U par riječi, šta ti treba?" aria-label="Šta ti treba?" enterKeyHint="go" onFocus={() => prefetchRoute('/objavi')} />
           <button type="submit"><span>Dobij ponude</span><ArrowRight size={18} /></button>
         </form>
         <div className="ap-hero-chips">

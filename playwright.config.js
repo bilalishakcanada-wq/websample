@@ -24,6 +24,8 @@ export default defineConfig({
     video: 'retain-on-failure',
     locale: 'bs-BA',
     ...devices['Desktop Chrome'],
+    // a preinstalled Chromium (sandboxes without `playwright install`): PW_CHROMIUM=/path/to/chrome
+    ...(process.env.PW_CHROMIUM ? { launchOptions: { executablePath: process.env.PW_CHROMIUM } } : {}),
   },
   webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npx vite preview --port 4173 --strictPort',

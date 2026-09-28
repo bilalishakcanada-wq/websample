@@ -113,7 +113,7 @@ function QuickGrant({ catalog, onDone }) {
       <h3><Plus size={16} /> Brzo dodijeli značku</h3>
       <form className="admin-search" onSubmit={search}>
         <Search size={16} />
-        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" />
+        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" aria-label="Nađi korisnika" />
         <button type="submit" className="primary-button">Traži</button>
       </form>
       {rows.length > 0 && !picked && rows.map((row) => (

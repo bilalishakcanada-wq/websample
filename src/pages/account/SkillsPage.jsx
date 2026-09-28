@@ -25,7 +25,7 @@ function ListEditor({ title, items, placeholder, onChange, max = 10 }) {
         </ul>
       )}
       <div className="list-editor-add">
-        <input value={draft} placeholder={placeholder} maxLength={120} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); add() } }} />
+        <input value={draft} placeholder={placeholder} aria-label={title} maxLength={120} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); add() } }} />
         <button type="button" className="ghost-button" onClick={add}><Plus size={14} /> Dodaj</button>
       </div>
     </div>

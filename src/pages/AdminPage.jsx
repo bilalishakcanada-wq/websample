@@ -121,7 +121,7 @@ function AdminPage({ mode = 'admin' }) {
             </div>
             <form className="adm-quick" onSubmit={quickSearch}>
               <Search size={15} />
-              <input value={quick} onChange={(event) => setQuick(event.target.value)} placeholder="Nađi korisnika: ime, PB-ID, email…" />
+              <input value={quick} onChange={(event) => setQuick(event.target.value)} placeholder="Nađi korisnika: ime, PB-ID, email…" aria-label="Nađi korisnika" />
             </form>
             <span className="adm-live"><span className="admin-live-dot" /> uživo</span>
           </header>

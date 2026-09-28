@@ -183,7 +183,7 @@ function JobDetail(props) {
               return (
                 <article key={bid.id} className={`jd-offer status-${bid.status}`}>
                   <div className="jd-offer-head">
-                    <Link to={`/korisnik/${bid.bidder_id}`}><Avatar url={bid.bidder?.avatar_url} size={56} /></Link>
+                    <Link to={`/korisnik/${bid.bidder_id}`} aria-label={`Profil: ${bid.bidder?.display_name || 'izvođač'}`}><Avatar url={bid.bidder?.avatar_url} size={56} /></Link>
                     <div className="jd-offer-who">
                       <strong>{mine ? 'Ti' : bid.bidder?.display_name || 'Izvođač'} {m?.is_verified && <BadgeCheck size={16} className="jd-verified" />}</strong>
                       {m && Number(m.review_count) > 0
@@ -226,7 +226,7 @@ function JobDetail(props) {
             })}
             {user ? (
               <form className="jd-ask" onSubmit={ask}>
-                <input value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={1000} placeholder={isOwner ? 'Odgovori…' : 'Postavi pitanje…'} />
+                <input value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={1000} placeholder={isOwner ? 'Odgovori…' : 'Postavi pitanje…'} aria-label={isOwner ? 'Odgovor na pitanje' : 'Tvoje pitanje'} />
                 <button type="submit" className="ap-btn ap-btn-primary ap-btn-inline" disabled={asking || question.trim().length < 3}>{isOwner ? 'Odgovori' : 'Pitaj'}</button>
                 {askError && <span className="jd-error">{askError}</span>}
               </form>

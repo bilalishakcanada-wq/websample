@@ -164,7 +164,7 @@ function SupportChat({ openRequested = false }) {
                 <Link to="/pomoc" className="support-help-link" onClick={() => setOpen(false)}><BookOpen size={13} /> Centar za pomoć</Link>
               </div>
               <form className="support-chat-form" onSubmit={(event) => { event.preventDefault(); send(draft) }}>
-                <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Napiši poruku..." maxLength={2000} />
+                <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Napiši poruku..." aria-label="Poruka podršci" maxLength={2000} />
                 <button type="submit" className="icon-button" disabled={sending || !draft.trim()} aria-label="Pošalji"><Send size={16} /></button>
               </form>
             </>

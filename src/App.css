@@ -12855,3 +12855,16 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .offer-reply small { display: block; margin-top: 2px; color: var(--text-soft); font-size: 0.75rem; }
 .offer-reply-form { display: flex; gap: 8px; }
 .offer-reply-form input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--stroke); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; font-size: 16px; }
+
+/* ---- found by the test robot (robot/README.md) ---- */
+/* the "open" arrow in the notification list was squeezed to ~18px by long notification text */
+.notif-list-open { flex-shrink: 0; }
+@media (max-width: 768px) {
+  /* the support chat grew taller than the space between the header and the tab bar,
+     so its title and close button ended up under the site header */
+  .support-chat-panel { max-height: min(78vh, 600px, calc(100dvh - 260px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+  /* finger-sized targets: breadcrumb link and the clear-search button */
+  .breadcrumbs a { display: inline-block; padding: 12px 0; margin: -12px 0; }
+  /* same 22px grey circle, 40px to tap */
+  .filter-search button { width: 40px; height: 40px; padding: 9px; margin: -9px -9px -9px 0; background-clip: content-box; }
+}

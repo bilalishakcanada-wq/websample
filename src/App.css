@@ -12874,7 +12874,7 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 :root { --accent-ink: #8a5a00; --danger-ink: #b91c1c; --success-ink: #0b6b4a; --badge-red: #c8352b; }
 .plan-badge, .badge-top_rated, .featured-tasker-rating-card strong, .rec-score, .chat-unread-total, .support-handoff, .pay-side,
 .pill.pay-status-funded, .pay-status-text.pay-status-funded, .dossier-tabs button.active .dossier-count { color: var(--accent-ink); }
-.danger-button, .filter-reset:hover { color: var(--danger-ink); }
+.danger-button, .bid-owner-actions .danger-button, .filter-reset:hover { color: var(--danger-ink); }
 .form-success { color: var(--success-ink); }
 .verif-field .req { color: #b42318; }
 .dossier-count { color: var(--text); }

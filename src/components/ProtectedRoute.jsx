@@ -12,13 +12,14 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    // the skeleton keeps the page's space for the moment before the login page shows (no footer jump)
+    return <><SkeletonPage /><Navigate to="/login" state={{ from: location }} replace /></>
   }
 
   // staff routes: ADMIN only, or ADMIN + MODERATOR when both are listed
   if (allowedRoles.length > 0) {
     const allowed = (allowedRoles.includes('ADMIN') && isAdmin) || (allowedRoles.includes('MODERATOR') && isModerator)
-    if (!allowed) return <Navigate to="/403" replace />
+    if (!allowed) return <><SkeletonPage /><Navigate to="/403" replace /></>
   }
 
   return children

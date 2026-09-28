@@ -8,7 +8,7 @@
 //   ROBOT_BASE_URL=http://localhost:4175 node robot/explore.mjs
 //
 // Options (env): ROBOT_PROFILES=desktop,phone,small,app  ROBOT_ROLES=guest,newbie,client,provider,admin
-//   ROBOT_MAX_PAGES=45 (per profile and role)  ROBOT_CLICKS=1 (0 = only look, don't press)
+//   ROBOT_MAX_PAGES=45 (per profile and role)  ROBOT_CLICKS=1 (0 = only look, don't press)  ROBOT_FORMS=1 (fill forms with odd input)
 //   ROBOT_PARALLEL=4  ROBOT_OUT=robot-report  ROBOT_CHROMIUM=/path/to/chrome  ROBOT_FAIL_ON=error|warn|never
 // Report: robot-report/report.md (+ report.json and screenshots).
 import { chromium, devices } from '@playwright/test'
@@ -26,6 +26,7 @@ const PROFILE_NAMES = (process.env.ROBOT_PROFILES || 'desktop,phone,small,app').
 const ROLE_NAMES = (process.env.ROBOT_ROLES || 'guest,newbie,client,provider,admin').split(',').map((s) => s.trim()).filter(Boolean)
 const MAX_PAGES = Number(process.env.ROBOT_MAX_PAGES || 45)
 const CLICKS = process.env.ROBOT_CLICKS !== '0'
+const FORMS = process.env.ROBOT_FORMS !== '0'
 const FAIL_ON = process.env.ROBOT_FAIL_ON || 'error'
 const PARALLEL = Number(process.env.ROBOT_PARALLEL || 4)
 const SLOW_MS = Number(process.env.ROBOT_SLOW_MS || 6000)
@@ -61,6 +62,7 @@ const ROLES = {
 }
 
 const findings = new Map()
+const PROFILES_BY_RUN = new Map()
 const stats = { pages: 0, clicks: 0, started: Date.now(), perRun: [] }
 
 const url = (p) => (p.startsWith('http') ? p : `${BASE}${p.startsWith('/') ? '' : '/'}${p}`)
@@ -117,7 +119,11 @@ async function login(browser, who) {
 
 function watch(page, run, current) {
   const net = { requests: 0, fileChoosers: 0, dialogs: 0 }
-  page.on('dialog', () => { net.dialogs += 1 })
+  page.on('dialog', (d) => {
+    net.dialogs += 1
+    // the robot types <img onerror=alert(1)> and <script>alert(1)</script> into forms: an alert means it ran
+    if (d.message() === '1') push({ kind: 'xss', severity: 'error', message: 'Text typed by a person ran as code on the page (cross-site scripting)' })
+  })
   page.on('filechooser', () => { net.fileChoosers += 1 })
   const push = (f) => record(run, pattern(current.path), { ...f, url: current.path })
   page.on('request', () => { net.requests += 1 })
@@ -259,10 +265,70 @@ async function pressButtons(page, run, current, net, profile) {
   }
 }
 
+
+const TRICKY = {
+  text: 'Robot <b>test</b> "navodnici" ćčžšđ ĆČŽŠĐ 😀 <img src=x onerror=alert(1)>',
+  textarea: 'Robot test: <script>alert(1)</script> ' + 'Dugačak tekst sa ćčžšđ i emoji 😀. '.repeat(120),
+  email: 'robot@test',
+  number: '-1',
+  tel: '000',
+  url: 'javascript:alert(1)',
+  date: '2020-01-01',
+  search: '%\' OR 1=1 --',
+}
+const SKIP_FORMS = /\/(login|register|forgot-password|reset-password)/
+
+/** Fills every form on the page with awkward input (emoji, HTML, negative numbers, very long text,
+ *  past dates) and submits it, like a careless or malicious person would. */
+async function fillForms(page, run, current, net) {
+  if (SKIP_FORMS.test(current.path)) return
+  const count = await page.locator('form').count().catch(() => 0)
+  for (let i = 0; i < Math.min(count, 3); i += 1) {
+    const form = page.locator('form').nth(i)
+    if (!(await form.isVisible().catch(() => false))) continue
+    if (await form.locator('input[type=password], input[type=file][required]').count()) continue
+    const submit = form.locator('button[type=submit], button:not([type]), input[type=submit]').last()
+    const label = ((await submit.textContent({ timeout: 1000 }).catch(() => '')) || '').trim()
+    if (!label || DANGER.test(label)) continue
+    const key = `${run}|form|${pattern(current.path)}|${label}`
+    if (seenClicks.has(key)) continue
+    seenClicks.set(key, true)
+    TRACE(run, current.path, 'form', label)
+    const fields = form.locator('input:not([type=hidden]):not([type=file]):not([type=submit]):not([type=button]), textarea, select')
+    const n = await fields.count()
+    for (let f = 0; f < n; f += 1) {
+      const field = fields.nth(f)
+      if (!(await field.isVisible().catch(() => false)) || !(await field.isEnabled().catch(() => false))) continue
+      const tag = await field.evaluate((el) => el.tagName.toLowerCase()).catch(() => 'input')
+      const type = tag === 'input' ? ((await field.getAttribute('type')) || 'text') : tag
+      try {
+        if (type === 'checkbox' || type === 'radio') await field.check({ timeout: 1000 })
+        else if (tag === 'select') {
+          const values = await field.evaluate((el) => [...el.options].map((o) => o.value).filter(Boolean))
+          if (values.length) await field.selectOption(values[values.length - 1], { timeout: 1000 })
+        } else await field.fill(TRICKY[type] ?? TRICKY.text, { timeout: 1500 })
+      } catch { /* read-only or custom widget */ }
+    }
+    await page.evaluate(observeMutations).catch(() => {})
+    const reqBefore = net.requests
+    if (!(await submit.click({ timeout: 3000 }).then(() => true, () => false))) continue
+    await page.waitForTimeout(1500)
+    await settle(page)
+    const mut = await page.evaluate(() => (window.__robotMut === undefined ? 1 : window.__robotMut)).catch(() => 1)
+    if (mut === 0 && net.requests === reqBefore) {
+      record(run, pattern(current.path), { kind: 'silent-form', severity: 'warn', message: `Form "${label}" gives no answer when sent with odd input`, url: current.path })
+    }
+    await inspect(page, run, { ...current, path: current.path }, PROFILES_BY_RUN.get(run))
+    await page.goto(url(current.path)).catch(() => {})
+    await settle(page)
+  }
+}
+
 async function crawl(browser, profileName, roleName, state) {
   const profile = PROFILES[profileName]
   const role = ROLES[roleName]
   const run = `${profileName}-${roleName}`
+  PROFILES_BY_RUN.set(run, profile)
   const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block' })
   if (profileName === 'app') await context.addInitScript(appShellStub)
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('poso-mode', m) } catch { /* private mode */ } }, role.mode)
@@ -314,6 +380,7 @@ async function crawl(browser, profileName, roleName, state) {
       if (!queue.includes(p)) queue.push(p)
     }
     if (CLICKS) await pressButtons(page, run, current, net, profile)
+    if (CLICKS && FORMS) await fillForms(page, run, current, net)
     for (const p of current.discovered) if (!queue.includes(p)) queue.push(p)
   }
   stats.perRun.push({ run, pages: visits, seconds: Math.round((Date.now() - t0) / 1000) })

@@ -39,6 +39,14 @@ export function pageChecks(opts) {
     if (/undefined|NaN|null/.test(el.placeholder)) push('bad-text', 'error', `Placeholder value in a field: "${el.placeholder}"`)
   }
 
+  // 2b. raw technical errors shown to people instead of a Bosnian message
+  const RAW = /(violates (foreign key|check|unique|row-level)|duplicate key|PGRST\d+|JWT (expired|malformed)|TypeError|ReferenceError|Cannot read propert|is not a function|Failed to fetch|NetworkError|null value in column|permission denied for|row-level security|function [\w.]+\(.*\) does not exist|syntax error at or near|invalid input syntax|Internal Server Error|Unexpected token)/i
+  for (const el of document.querySelectorAll('body *:not(script):not(style)')) {
+    if (el.children.length || !visible(el)) continue
+    const t = (el.textContent || '').trim()
+    if (t && RAW.test(t)) { push('raw-error', 'error', `Technical error text shown to people: "${t.slice(0, 120)}"`); break }
+  }
+
   // 3. sideways scrolling (the page is wider than the screen)
   const vw = document.documentElement.clientWidth
   const sw = document.scrollingElement.scrollWidth

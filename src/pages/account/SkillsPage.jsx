@@ -8,8 +8,8 @@ import RuleOneNotice from '../../components/RuleOneNotice'
 const TRANSPORT = ['Bicikl', 'Auto', 'Online', 'Skuter', 'Kamion', 'Kombi', 'Pješke', 'Javni prevoz']
 const LANGUAGES = ['Bosanski', 'Hrvatski', 'Srpski', 'Engleski', 'Njemački', 'Turski', 'Arapski', 'Italijanski', 'Francuski', 'Španski']
 
-function ListEditor({ title, items, placeholder, onChange, max = 10 }) {
-  const [draft, setDraft] = useState('')
+/** The draft lives in the parent, so text typed but not yet added with "Dodaj" is still saved. */
+function ListEditor({ title, items, placeholder, onChange, draft, setDraft, max = 10 }) {
   const add = () => {
     const value = draft.trim()
     if (!value || items.includes(value)) return
@@ -40,11 +40,17 @@ function SkillsPage() {
   const [education, setEducation] = useState(profile.education || [])
   const [work, setWork] = useState(profile.work_experience || [])
   const [specialties, setSpecialties] = useState(profile.specialties || [])
+  const [drafts, setDrafts] = useState({ education: '', work: '', specialties: '' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const draftProps = (key) => ({ draft: drafts[key], setDraft: (text) => setDrafts((current) => ({ ...current, [key]: text })) })
+  const withDraft = (items, key, max) => {
+    const value = drafts[key].trim()
+    return value && !items.includes(value) ? [...items, value].slice(0, max) : items
+  }
 
-  const scan = useMemo(() => scanContactInfo(...education, ...work, ...specialties), [education, work, specialties])
+  const scan = useMemo(() => scanContactInfo(...education, ...work, ...specialties, ...Object.values(drafts)), [education, work, specialties, drafts])
   const toggle = (list, setList, value) => setList(list.includes(value) ? list.filter((item) => item !== value) : [...list, value])
 
   const submit = async (event) => {
@@ -53,7 +59,14 @@ function SkillsPage() {
     setError('')
     setMessage('')
     try {
-      await saveProfile({ trades, transportation: transport, languages, education, work_experience: work, specialties, account_type: profile.account_type === 'client' ? 'provider' : profile.account_type })
+      const nextEducation = withDraft(education, 'education', 10)
+      const nextWork = withDraft(work, 'work', 10)
+      const nextSpecialties = withDraft(specialties, 'specialties', 15)
+      await saveProfile({ trades, transportation: transport, languages, education: nextEducation, work_experience: nextWork, specialties: nextSpecialties, account_type: profile.account_type === 'client' ? 'provider' : profile.account_type })
+      setEducation(nextEducation)
+      setWork(nextWork)
+      setSpecialties(nextSpecialties)
+      setDrafts({ education: '', work: '', specialties: '' })
       setMessage('Vještine su sačuvane.')
     } catch (requestError) {
       setError(requestError.message)
@@ -99,9 +112,9 @@ function SkillsPage() {
           </div>
         </div>
 
-        <ListEditor title="Koje kvalifikacije imaš?" items={education} onChange={setEducation} placeholder="npr. Elektrotehnička škola Sarajevo, 2014" />
-        <ListEditor title="Radno iskustvo" items={work} onChange={setWork} placeholder="npr. Električar — Elektroprivreda BiH, 6 godina" />
-        <ListEditor title="Specijalnosti" items={specialties} onChange={setSpecialties} placeholder="npr. Rasvjeta, Solarni sistemi" max={15} />
+        <ListEditor title="Koje kvalifikacije imaš?" items={education} onChange={setEducation} {...draftProps('education')} placeholder="npr. Elektrotehnička škola Sarajevo, 2014" />
+        <ListEditor title="Radno iskustvo" items={work} onChange={setWork} {...draftProps('work')} placeholder="npr. Električar — Elektroprivreda BiH, 6 godina" />
+        <ListEditor title="Specijalnosti" items={specialties} onChange={setSpecialties} {...draftProps('specialties')} placeholder="npr. Rasvjeta, Solarni sistemi" max={15} />
 
         {!scan.clean && <div className="form-error account-field-wide">{contactInfoMessage(scan, 'vještine')}</div>}
         <div className="account-field-wide"><RuleOneNotice compact /></div>

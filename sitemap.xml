@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://poso.ba/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://poso.ba/search</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://poso.ba/kako-radi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://poso.ba/zaradi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://poso.ba/cijene</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://poso.ba/za-biznis</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://poso.ba/vodici</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://poso.ba/pomoc</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://poso.ba/o-nama</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://poso.ba/kontakt</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://poso.ba/pravila</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://poso.ba/privatnost</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+</urlset>

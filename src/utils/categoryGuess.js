@@ -5,8 +5,9 @@ const RULES = [
   ['cleaning', ['cisc', 'ciscenje', 'pospremanje', 'usisav', 'pranje prozora', 'generalno', 'higijen', 'tepih']],
   ['moving-transport', ['selidb', 'prevoz namjest', 'kombi', 'kamion', 'transport', 'prenos', 'preseljenje']],
   ['delivery', ['dostav', 'kurir', 'paket', 'prevoz', 'pick up']],
-  ['plumber', ['slavin', 'cijev', 'vodoinst', 'bojler', 'wc', 'kupatil', 'odvod', 'curi', 'sifon', 'ventil']],
-  ['electrician', ['struj', 'elektr', 'uticnic', 'prekidac', 'rasvjet', 'lampa', 'osigurac', 'kabl']],
+  // rooms (kupatilo, kuhinja) are where the job is, not what it is, so they are not keywords
+  ['plumber', ['slavin', 'cijev', 'vodoinst', 'bojler', 'wc', 'odvod', 'curi', 'curenj', 'sudoper', 'sifon', 'ventil', 'tus ', 'lavabo']],
+  ['electrician', ['struj', 'elektr', 'uticnic', 'prekidac', 'rasvjet', 'luster', 'lampa', 'osigurac', 'kabl']],
   ['painting', ['krec', 'farb', 'moler', 'gletov', 'boj', 'zid']],
   ['carpentry', ['stolar', 'drvo', 'vrata', 'polic', 'ormar', 'kuhinjski element', 'lamperij']],
   ['furniture', ['montaz', 'sastav', 'ikea', 'namjest', 'krevet', 'sto ', 'stolic']],
@@ -36,10 +37,15 @@ const fold = (text) => String(text || '').toLowerCase()
 
 /** Best-guess category name for a job text, or '' when nothing matches. */
 export function guessCategory(title, description = '') {
-  const text = ` ${fold(`${title} ${description}`)} `
+  // the title says what the job is; the description often mentions the room, tools or materials
+  const head = ` ${fold(title)} `
+  const body = ` ${fold(description)} `
   let best = null
   for (const [id, words] of RULES) {
-    const score = words.reduce((sum, word) => sum + (text.includes(word) ? (word.length > 5 ? 2 : 1) : 0), 0)
+    const score = words.reduce((sum, word) => {
+      const weight = word.length > 5 ? 2 : 1
+      return sum + (head.includes(word) ? weight * 2 : 0) + (body.includes(word) ? weight : 0)
+    }, 0)
     if (score > 0 && (!best || score > best.score)) best = { id, score }
   }
   if (!best) return ''

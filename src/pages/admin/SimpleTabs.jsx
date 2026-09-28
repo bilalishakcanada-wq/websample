@@ -27,7 +27,7 @@ export function RegistryTab() {
       <p className="muted-text">Svaki nalog dobija privatni ID pri registraciji. Registar čuva ID, vlasnika i datum — i nakon brisanja naloga — pa se svaki događaj može vezati za tačan nalog.</p>
       <form className="admin-search" onSubmit={(event) => { event.preventDefault(); search(term) }}>
         <Search size={16} />
-        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="PB-XXXX-XXXX, email, ime ili user id" />
+        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="PB-XXXX-XXXX, email, ime ili user id" aria-label="Nađi člana" />
         <button type="submit" className="primary-button">Traži</button>
       </form>
       {error && <div className="form-error">{error}</div>}

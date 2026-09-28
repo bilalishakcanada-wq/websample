@@ -121,7 +121,7 @@ function DesktopHome() {
             >
               <div className="search-field">
                 <Search size={18} />
-                <input type="text" value={searchTerm} placeholder="Popravka kuće, web dizajn, IT podrška" onChange={(event) => setSearchTerm(event.target.value)} />
+                <input type="text" value={searchTerm} placeholder="Popravka kuće, web dizajn, IT podrška" aria-label="Šta ti treba?" onChange={(event) => setSearchTerm(event.target.value)} />
               </div>
               <button type="button" className="search-field location-field city-picker-trigger" onClick={() => setCityPickerOpen(true)}>
                 <MapPin size={18} />

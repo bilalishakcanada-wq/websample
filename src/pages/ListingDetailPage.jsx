@@ -646,7 +646,7 @@ function ListingDetailPage() {
               )}
               {user ? (
                 <form className="qa-form" onSubmit={async (event) => { event.preventDefault(); setQaError(''); setAsking(true); try { await askQuestion(qaDraft); setQaDraft('') } catch (requestError) { setQaError(requestError.message) } finally { setAsking(false) } }}>
-                  <input value={qaDraft} onChange={(event) => setQaDraft(event.target.value)} maxLength={1000} placeholder={isOwner ? 'Odgovori…' : 'Postavi pitanje…'} />
+                  <input value={qaDraft} onChange={(event) => setQaDraft(event.target.value)} maxLength={1000} placeholder={isOwner ? 'Odgovori…' : 'Postavi pitanje…'} aria-label={isOwner ? 'Odgovor na pitanje' : 'Tvoje pitanje'} />
                   <button type="submit" className="primary-button" disabled={asking || qaDraft.trim().length < 3}>{isOwner ? 'Odgovori' : 'Pitaj'}</button>
                   {qaError && <span className="form-error qa-error">{qaError}</span>}
                 </form>

@@ -119,7 +119,59 @@ export function pageChecks(opts) {
     }
   }
 
-  // 9. elements sticking out of the screen at the bottom that can't be reached (fixed bars covering content)
+  // 9. text too faint to read against its background (WCAG AA: 4.5:1, or 3:1 for large text)
+  const rgba = (c) => {
+    const m = c.match(/rgba?\(([^)]+)\)/)
+    if (!m) return null
+    const [r, g, b, a = 1] = m[1].split(/[\s,/]+/).filter(Boolean).map(Number)
+    return [r, g, b, a]
+  }
+  const lum = ([r, g, b]) => {
+    const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4 }
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+  }
+  const over = (top, under) => [0, 1, 2].map((i) => top[i] * top[3] + under[i] * (1 - top[3])).concat(1)
+  // the background behind an element; null when it is a picture or gradient (can't be judged from styles)
+  const backdrop = (el) => {
+    const layers = []
+    for (let n = el; n; n = n.parentElement) {
+      const s = getComputedStyle(n)
+      if (s.backgroundImage && s.backgroundImage !== 'none') return null
+      const c = rgba(s.backgroundColor)
+      if (c && c[3] > 0) { layers.push(c); if (c[3] >= 1) break }
+    }
+    let bg = [255, 255, 255, 1]
+    for (const c of layers.reverse()) bg = over(c, bg)
+    return bg
+  }
+  const faint = new Map()
+  const textWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+  let judged = 0
+  for (let n = textWalker.nextNode(); n && judged < 600; n = textWalker.nextNode()) {
+    const el = n.parentElement
+    if (!el || !n.textContent.trim() || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION'].includes(el.tagName)) continue
+    if (el.closest('[disabled], [aria-disabled="true"], [aria-hidden="true"], .leaflet-container, .maplibregl-map')) continue
+    if (!visible(el)) continue
+    const s = getComputedStyle(el)
+    if (Number(s.opacity) < 1 || s.textShadow !== 'none') continue
+    judged += 1
+    const bg = backdrop(el)
+    const fg = rgba(s.color)
+    if (!bg || !fg) continue
+    const text = over(fg, bg)
+    const [a, b] = [lum(text), lum(bg)].sort((x, y) => y - x)
+    const ratio = (a + 0.05) / (b + 0.05)
+    const size = parseFloat(s.fontSize)
+    const large = size >= 24 || (size >= 18.66 && Number(s.fontWeight) >= 700)
+    const need = large ? 3 : 4.5
+    if (ratio >= need) continue
+    const key = `${s.color}|${bg.join(',')}`
+    if (!faint.has(key)) faint.set(key, { ratio, need, el, color: s.color, bg })
+  }
+  for (const f of [...faint.values()].sort((x, y) => x.ratio - y.ratio).slice(0, 6)) {
+    push('contrast', f.ratio < 3 ? 'error' : 'warn', `Text hard to read: contrast ${f.ratio.toFixed(1)}:1 (needs ${f.need}:1)`, `${describe(f.el)} color ${f.color} on rgb(${f.bg.slice(0, 3).map(Math.round).join(',')})`)
+  }
+
   return out
 }
 

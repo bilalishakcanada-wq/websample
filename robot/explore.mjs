@@ -176,6 +176,41 @@ async function inspect(page, run, current, profile) {
   }
 }
 
+/** Runs in every page before the site's own code: records layout shifts and the largest paint (Web Vitals). */
+function vitalsRecorder() {
+  const v = { cls: 0, lcp: 0, lcpEl: '', shifts: [] }
+  window.__robotVitals = v
+  const name = (n) => {
+    if (!n || n.nodeType !== 1) return ''
+    const cls = typeof n.className === 'string' && n.className.trim() ? `.${n.className.trim().split(/\s+/).slice(0, 2).join('.')}` : ''
+    return `${n.tagName.toLowerCase()}${cls}`
+  }
+  try {
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        if (e.hadRecentInput) continue // shifts right after a tap or key are expected
+        v.cls += e.value
+        if (e.value >= 0.02) v.shifts.push({ value: Math.round(e.value * 1000) / 1000, at: Math.round(e.startTime), nodes: (e.sources || []).map((s) => name(s.node)).filter(Boolean).slice(0, 3) })
+      }
+    }).observe({ type: 'layout-shift', buffered: true })
+    new PerformanceObserver((list) => {
+      const last = list.getEntries().at(-1)
+      if (last) { v.lcp = Math.round(last.startTime); v.lcpEl = name(last.element) }
+    }).observe({ type: 'largest-contentful-paint', buffered: true })
+  } catch { /* browser without these entry types */ }
+}
+
+async function vitals(page, run, current) {
+  const v = await page.evaluate(() => window.__robotVitals).catch(() => null)
+  if (!v) return
+  const pat = pattern(current.path)
+  if (v.cls > 0.1) {
+    const worst = [...v.shifts].sort((a, b) => b.value - a.value).slice(0, 3).map((s) => `${s.value} at ${s.at} ms: ${s.nodes.join(', ') || '?'}`).join('; ')
+    record(run, pat, { kind: 'layout-shift', severity: v.cls > 0.25 ? 'error' : 'warn', message: `Page jumps while loading (layout shift ${v.cls.toFixed(2)}, good is under 0.1): taps can land on the wrong thing`, detail: worst, url: current.path })
+  }
+  if (v.lcp > 2500) record(run, pat, { kind: 'slow-paint', severity: v.lcp > 4000 ? 'error' : 'warn', message: `Main content appeared after ${(v.lcp / 1000).toFixed(1)} s (good is under 2.5 s)`, detail: v.lcpEl, url: current.path })
+}
+
 /** Runs in the page: counts DOM changes so the robot can tell whether a press did anything. */
 function observeMutations() {
   window.__robotMut = 0
@@ -330,6 +365,7 @@ async function crawl(browser, profileName, roleName, state) {
   const run = `${profileName}-${roleName}`
   PROFILES_BY_RUN.set(run, profile)
   const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block' })
+  await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('poso-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
@@ -370,6 +406,7 @@ async function crawl(browser, profileName, roleName, state) {
       record(run, pat, { kind: 'dead-link', severity: 'error', message: 'Link leads to "page not found"', url: next, detail: current.from ? `linked from ${current.from}` : '' })
     }
     await inspect(page, run, current, profile)
+    await vitals(page, run, current)
     // follow the links on the page
     const links = await page.$$eval('a[href]', (as) => as.map((a) => a.href)).catch(() => [])
     for (const href of links) {

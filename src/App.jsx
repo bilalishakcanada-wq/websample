@@ -5,6 +5,9 @@ import './App.css'
 import './app/app.css'
 // Every other page loads on demand — the phone downloads only what it opens.
 const DashboardPage = lazy(lazyImport(() => import('./pages/DashboardPage')))
+// sign-in screens pull the illustrations (Mascots) with them; signed-in people never need them in the entry
+const LoginPage = lazy(lazyImport(() => import('./pages/LoginPage')))
+const RegisterPage = lazy(lazyImport(() => import('./pages/RegisterPage')))
 const AdminPage = lazy(lazyImport(() => import('./pages/AdminPage')))
 const ForgotPasswordPage = lazy(lazyImport(() => import('./pages/ForgotPasswordPage')))
 const ResetPasswordPage = lazy(lazyImport(() => import('./pages/ResetPasswordPage')))
@@ -44,8 +47,6 @@ const PaymentOptionsPage = lazy(lazyImport(() => import('./pages/account/Payment
 const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
 
 import HomePage from './pages/HomePage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ForbiddenPage from './pages/ForbiddenPage'
 

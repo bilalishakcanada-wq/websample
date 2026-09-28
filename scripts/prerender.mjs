@@ -10,7 +10,9 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'error' })
 try {
   const { default: Welcome } = await server.ssrLoadModule('/src/app/Welcome.jsx')
-  const html = renderToString(createElement(MemoryRouter, { initialEntries: ['/'] }, createElement(Welcome)))
+  // same base as the build, so the pre-rendered links point at /websample/start on GitHub Pages (the phone app's URL)
+  const basename = (process.env.VITE_BASE || '/').replace(/\/+$/, '')
+  const html = renderToString(createElement(MemoryRouter, { basename, initialEntries: [basename || '/'] }, createElement(Welcome)))
   mkdirSync('src/prerender', { recursive: true })
   writeFileSync('src/prerender/welcome.html', html)
   console.log(`prerender: welcome.html ${(html.length / 1024).toFixed(1)} KB`)

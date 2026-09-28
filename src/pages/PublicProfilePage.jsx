@@ -81,7 +81,7 @@ function PublicProfilePage() {
   // the phone profile screen draws its own top bar (skeleton included); the not-found state keeps the tab bar
   useFullscreen(isPhone && (loading || Boolean(bundle?.profile)))
   useEffect(() => { if (bundle?.profile?.display_name) setPageTitle(bundle.profile.display_name) }, [bundle])
-  useEffect(() => { setError(profileQuery.error ? profileQuery.error.message : '') }, [profileQuery.error])
+  useEffect(() => { setError(profileQuery.error && !profileQuery.data ? profileQuery.error.message : '') }, [profileQuery.error, profileQuery.data])
 
   if (loading) {
     if (isPhone) return <SkeletonProfilePhone />

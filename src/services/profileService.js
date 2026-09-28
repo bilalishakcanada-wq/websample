@@ -59,15 +59,18 @@ export const profileService = {
     }
   },
 
-  async uploadAvatar(userId, file) {
+  async uploadAvatar(userId, original) {
     const allowed = new Set(['image/jpeg', 'image/png', 'image/webp'])
+    const { resizeImage } = await import('../utils/imageResize')
+    // avatars show at 40–120 px: a 512 px webp instead of the camera original
+    const file = original && allowed.has(original.type) ? await resizeImage(original, { maxEdge: 512 }) : original
     if (!file || !allowed.has(file.type) || file.size > 5 * 1024 * 1024) {
       throw new Error('Slika mora biti JPG, PNG ili WEBP i manja od 5 MB.')
     }
     const ext = file.type.split('/')[1]
     const path = `${userId}/avatar-${Date.now()}.${ext}`
 
-    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' })
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '31536000', contentType: file.type })
     if (uploadError) {
       console.error('Supabase avatar upload failed', { message: uploadError.message })
       throw publicError()

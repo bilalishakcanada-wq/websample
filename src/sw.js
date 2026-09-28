@@ -23,9 +23,9 @@ if (manifest.length > 0) {
   }))
 }
 
-// hashed build assets that are not precached (the map chunk): immutable, cache first
+// hashed build assets that are not precached (the map chunk and its CSS): immutable, cache first
 registerRoute(
-  ({ url, request }) => (request.destination === 'script' || request.destination === 'worker') && url.origin === self.location.origin && /\/assets\/.*-[A-Za-z0-9_-]{8}\.js$/.test(url.pathname),
+  ({ url, request }) => ['script', 'worker', 'style'].includes(request.destination) && url.origin === self.location.origin && /\/assets\/.*-[A-Za-z0-9_-]{8}\.(js|css)$/.test(url.pathname),
   new CacheFirst({ cacheName: 'poso-assets', plugins: [new ExpirationPlugin({ maxEntries: 40, maxAgeSeconds: 30 * 24 * 3600 })] }),
 )
 
@@ -35,12 +35,18 @@ registerRoute(
   new StaleWhileRevalidate({ cacheName: 'poso-images', plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 30 * 24 * 3600 })] }),
 )
 
-// user media from Supabase Storage: cache first, a week
+// user photos from Supabase Storage (public buckets only: signed URLs such as ID documents are never cached).
+// <img> requests are no-cors, so their responses are opaque and Workbox would never store them:
+// fetch a CORS copy instead (Storage allows it), which caches and serves back to the <img> fine.
+const media = new CacheFirst({ cacheName: 'poso-media', plugins: [new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 7 * 24 * 3600, purgeOnQuotaError: true })] })
 registerRoute(
-  ({ url }) => url.hostname.endsWith('supabase.co') && url.pathname.startsWith('/storage/'),
-  new CacheFirst({ cacheName: 'poso-media', plugins: [new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 7 * 24 * 3600 })] }),
+  ({ url, request }) => request.destination === 'image' && url.hostname.endsWith('.supabase.co') && /^\/storage\/v1\/(object|render\/image)\/public\//.test(url.pathname),
+  async ({ request, event }) => {
+    try { return await media.handle({ request: new Request(request.url, { mode: 'cors', credentials: 'omit' }), event }) } catch { return fetch(request) }
+  },
 )
-registerRoute(({ url }) => url.hostname.includes('fonts.g'), new StaleWhileRevalidate({ cacheName: 'poso-fonts' }))
+// fonts are self-hosted and precached now: drop the Google Fonts cache older versions kept
+self.addEventListener('activate', (event) => { event.waitUntil(caches.delete('poso-fonts')) })
 
 // ---------- Web Push ----------
 self.addEventListener('push', (event) => {

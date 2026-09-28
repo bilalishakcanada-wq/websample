@@ -23,6 +23,8 @@ function NativeBack() {
       if (state.posoOverlay || state.posoStep || canGoBackInApp()) { window.history.back(); return }
       const up = parentOf(hereRef.current.pathname, hereRef.current.search)
       if (up) navigate(up, { replace: true })
+      // minimize keeps the WebView alive, so reopening is instant instead of a full reload behind the splash
+      else if (app.minimizeApp) app.minimizeApp()
       else app.exitApp?.()
     }
     Promise.resolve(app.addListener('backButton', onBack)).then((h) => { if (gone) h?.remove?.(); else handle = h }).catch(() => {})

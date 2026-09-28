@@ -1,9 +1,10 @@
 /* ---------- Fonts: self-hosted (no third-party round trip), swapped in without a layout shift ----------
    The fallback faces are metric-matched to Arial / Arial Narrow (size-adjust + ascent/descent overrides),
    so text occupies the same space before and after the web font arrives. */
-@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('/fonts/manrope-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* the -ext files hold only the Bosnian letters (č ć đ š ž and capitals): 2–3 KB instead of 15 and 36; any other rare letter falls back to Arial */
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('/fonts/manrope-latin-ext.woff2') format('woff2'); unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E; }
 @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400 800; font-display: swap; src: url('/fonts/manrope-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 600 900; font-stretch: 75% 100%; /* one condensed-bold instance (wdth 85 / wght 800): every heading stretch maps to it, 37 KB instead of 88 */ font-display: swap; src: url('/fonts/archivo-latin-ext.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 600 900; font-stretch: 75% 100%; /* one condensed-bold instance (wdth 85 / wght 800): every heading stretch maps to it, 37 KB instead of 88 */ font-display: swap; src: url('/fonts/archivo-latin-ext.woff2') format('woff2'); unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E; }
 @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 600 900; font-stretch: 75% 100%; font-display: swap; src: url('/fonts/archivo-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 /* metric-matched fallbacks (calibrated 2026-09-22 by measuring real text: same widths ±2 %, same line boxes) */
 @font-face { font-family: 'Manrope Fallback'; font-weight: 100 599; src: local('Arial'), local('Helvetica'); size-adjust: 103.8%; ascent-override: 102.7%; descent-override: 28.9%; line-gap-override: 0%; }
@@ -81,4 +82,18 @@ button {
 .task-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 180px;
+}
+
+/* Android 15+ draws the page under the status bar and ignores its colour, so the white status icons
+   would sit on a white header: paint the navy behind them. The inset is 0 where the bar is not overlaid. */
+html.is-native body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: #081b38;
+  z-index: 2147483647;
+  pointer-events: none;
 }

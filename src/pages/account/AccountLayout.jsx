@@ -45,11 +45,11 @@ function AccountLayout() {
   const bundleQuery = useMyBundle(user?.id)
   const bundle = bundleQuery.data ?? null
   const loading = bundleQuery.isPending
-  const [error, setError] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarNotice, setAvatarNotice] = useState('')
   const avatarInputRef = useRef(null)
-  useEffect(() => { if (bundleQuery.error) setError(bundleQuery.error.message) }, [bundleQuery.error])
+  // only when nothing is cached: a failed background refresh must not unmount the open form
+  const error = bundleQuery.error && !bundleQuery.data ? bundleQuery.error.message : ''
 
   const setBundle = useCallback((next) => {
     queryClient.setQueryData(keys.myBundle(user?.id), (current) => (typeof next === 'function' ? next(current) : next))
@@ -139,7 +139,7 @@ function AccountLayout() {
   }
 
   if (error || !profile) {
-    return <div className="page-shell"><div className="empty-state"><h2>Profil nije učitan</h2><p>{error || 'Pokušaj osvježiti stranicu.'}</p></div></div>
+    return <div className="page-shell"><div className="empty-state"><h2>Profil nije učitan</h2><p>{error || 'Pokušaj osvježiti stranicu.'}</p><button type="button" className="primary-button" onClick={() => bundleQuery.refetch()} disabled={bundleQuery.isFetching}>{bundleQuery.isFetching ? 'Učitavam…' : 'Pokušaj ponovo'}</button></div></div>
   }
 
   const isSuspended = profile.account_status === 'suspended'

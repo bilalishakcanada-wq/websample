@@ -21,6 +21,7 @@ export const keys = {
   savedIds: (userId) => ['me', userId, 'saved-ids'],
   savedListings: (userId) => ['me', userId, 'saved'],
   offerGate: (userId) => ['me', userId, 'offer-gate'],
+  offerReach: (userId, listingId) => ['me', userId, 'offer-reach', listingId],
   quoteRequests: (userId) => ['me', userId, 'quote-requests'],
   quoteRequestsEnabled: ['feature', 'quote-requests'],
 }

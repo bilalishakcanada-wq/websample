@@ -22,7 +22,7 @@ const Avatar = ({ src, name, size = 48 }) => (src
 function Chat(props) {
   const {
     user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, chatState,
-    grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading,
+    grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading, sending,
     error, notice, togglePref, reportConversation, timeOf, shortDate, retry,
   } = props
   useFullscreen(Boolean(active))
@@ -136,7 +136,7 @@ function Chat(props) {
           <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
           <button type="button" className="ch-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={22} /></button>
           <textarea ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} placeholder="Napiši poruku…" rows={1} maxLength={2000} enterKeyHint="send" />
-          <button type="submit" className="ch-send" aria-label="Pošalji" disabled={!draft.trim()}><Send size={18} /></button>
+          <button type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
         </form>
       ) : (
         <ChatStateNotice state={chatState} listingId={active.listing_id} />

@@ -2371,6 +2371,11 @@ button.back-home-link {
 
 .offer-sheet {
   width: 100%;
+  /* a sheet taller than the screen (short laptop, phone with the keyboard open) scrolls
+     inside itself, so the submit button at the bottom is always reachable */
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px 18px max(24px, env(safe-area-inset-bottom));
   border-radius: 24px 24px 0 0;
   background: var(--surface);
@@ -6013,8 +6018,7 @@ body:has(.profile-cta-bar) .support-chat {
   width: min(100% - 32px, 1400px);
   margin: 0 auto;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--stroke);
   border-radius: 18px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
@@ -7280,9 +7284,8 @@ body:has(.profile-cta-bar) .support-chat {
   right: 0;
   z-index: 80;
   height: var(--header-h);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.98); /* no backdrop blur: at 98% it was invisible but re-blurred every scroll frame */
   border-bottom: 1px solid rgba(223, 230, 241, 0.9);
-  backdrop-filter: blur(14px);
   transition: box-shadow 0.25s ease;
 }
 
@@ -9406,17 +9409,19 @@ body:has(.profile-cta-bar) .support-chat {
   display: block;
 }
 
-.earn-art-coin { animation: earn-coin 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.earn-art-spark { animation: earn-spark 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.earn-art-coin { animation: earn-coin 3.6s ease-in-out infinite; }
+.earn-art-spark { animation: earn-spark 2.4s ease-in-out infinite; }
+/* coins and stars are drawn around 0,0 inside a positioned wrapper, so no fill-box (it forced layout every frame) */
+.earn-art[data-paused] *, .trust-art[data-paused] * { animation-play-state: paused; }
 
 @keyframes earn-coin {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -10px; }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes earn-spark {
-  0%, 100% { opacity: 0.25; scale: 0.7; }
-  50% { opacity: 1; scale: 1; }
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 .earn-stage-pill {
@@ -12120,7 +12125,7 @@ button { touch-action: manipulation; }
   input, select, textarea { font-size: 16px !important; }
 
   /* fixed app tab bar */
-  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; margin: 0; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 -8px 24px rgba(13, 42, 82, 0.08); }
+  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 85; margin: 0; background: rgba(255, 255, 255, 0.98); box-shadow: 0 -8px 24px rgba(13, 42, 82, 0.08); } /* opaque, no blur: the tab bar sits over every scroll */
   .mobile-nav-item.active { color: var(--primary); }
   .mobile-nav-item.active svg { transform: translateY(-1px); }
   .mobile-nav-item svg { transition: transform 0.2s ease; }
@@ -12842,3 +12847,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .info-header .back-home-link { display: none; }
 .info-header .breadcrumbs { margin-top: 0; }
 .info-page .content-container > * + section:not(.info-section):not(.cta-strip):not(.related-pages) { margin-top: 34px; }
+
+/* Privatni odgovori ispod ponude (OfferReplies) */
+.offer-replies { margin-top: 8px; }
+.offer-replies-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 4px 0; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.offer-replies-body { display: grid; gap: 8px; margin-top: 6px; }
+.offer-reply { margin: 0; max-width: 90%; padding: 8px 12px; border-radius: 12px; background: var(--surface-soft); line-height: 1.45; overflow-wrap: anywhere; }
+.offer-reply.mine { justify-self: end; background: var(--primary-soft); }
+.offer-reply span { display: block; white-space: pre-wrap; }
+.offer-reply small { display: block; margin-top: 2px; color: var(--text-soft); font-size: 0.75rem; }
+.offer-reply-form { display: flex; gap: 8px; }
+.offer-reply-form input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--stroke); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; font-size: 16px; }

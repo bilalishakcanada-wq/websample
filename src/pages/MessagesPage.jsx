@@ -88,26 +88,37 @@ function MessagesPage() {
   const loadInbox = () => inboxQuery.refetch().then((result) => { if (result.error) setError(result.error.message); else setError('') })
   useEffect(() => { if (inboxQuery.error) setError(inboxQuery.error.message) }, [inboxQuery.error])
 
-  // any message to me refreshes the inbox (unread counts, ordering)
-  useEffect(() => messageService.subscribeToMine(user.id, () => { queryClient.invalidateQueries({ queryKey: keys.inbox(user.id) }) }), [user.id, queryClient])
+  // any message to me refreshes the inbox (unread counts, ordering): useUnreadMessages in the always-mounted
+  // MobileNav already listens for that and invalidates keys.inbox, so no second channel here
+  const [sending, setSending] = useState(false)
+  const sendingRef = useRef(false)
+  const markingRef = useRef(false)
+  const [markTick, setMarkTick] = useState(0)
 
   const active = inbox.find((item) => item.id === activeId)
   const chatState = active?.chat_state || 'open'
 
-  // the thread arrives from the cache/query; unread rows addressed to me are marked read
+  // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
+  // and the rows are patched locally: markRead's 'poso:messages-read' event already refreshes inbox + badge
   useEffect(() => {
-    if (!activeId || !threadQuery.data) return
-    if (threadQuery.data.some((row) => row.receiver_id === user.id && !row.read_at)) {
-      messageService.markRead(activeId).then(() => { loadInbox(); queryClient.invalidateQueries({ queryKey: keys.thread(activeId) }) })
-    }
+    if (!activeId || !threadQuery.data || markingRef.current) return
+    const ids = threadQuery.data.filter((row) => row.receiver_id === user.id && !row.read_at).map((row) => row.id)
+    if (!ids.length) return
+    markingRef.current = true
+    const conversationId = activeId
+    messageService.markRead(conversationId).then(() => {
+      const now = new Date().toISOString()
+      const marked = new Set(ids)
+      queryClient.setQueryData(keys.thread(conversationId), (rows) => rows?.map((row) => (marked.has(row.id) && !row.read_at ? { ...row, read_at: now } : row)))
+    }).finally(() => { markingRef.current = false; setMarkTick((n) => n + 1) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId, threadQuery.data, user.id])
+  }, [activeId, threadQuery.data, user.id, markTick])
   useEffect(() => { if (threadQuery.error) setError(threadQuery.error.message) }, [threadQuery.error])
   useEffect(() => {
     if (!activeId) return undefined
     const unsubscribe = messageService.subscribeToConversation(activeId, (row) => {
+      // appending changes the thread data, and the effect above marks it read
       queryClient.setQueryData(keys.thread(activeId), (current) => ((current || []).some((item) => item.id === row.id) ? current : [...(current || []), row]))
-      if (row.receiver_id === user.id) messageService.markRead(activeId).then(loadInbox)
     })
     return () => { unsubscribe() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +192,10 @@ function MessagesPage() {
         : `${contactInfoMessage(scan, 'poruka')} Kontakt možete razmijeniti čim ponuda bude prihvaćena.`)
       return
     }
+    // a second tap or Enter while the first send is in flight would send the same message again
+    if (sendingRef.current) return
+    sendingRef.current = true
+    setSending(true)
     try {
       const created = await messageService.send({ conversationId: active.id, senderId: user.id, receiverId: active.other_id, content: text })
       setThread((current) => (current.some((item) => item.id === created.id) ? current : [...current, created]))
@@ -190,6 +205,9 @@ function MessagesPage() {
       loadInbox()
     } catch (requestError) {
       setError(requestError.message)
+    } finally {
+      sendingRef.current = false
+      setSending(false)
     }
   }
 
@@ -211,7 +229,8 @@ function MessagesPage() {
   }
 
   const onKeyDown = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage() }
+    // a held Enter repeats keydown: only the first press sends; Enter that confirms an IME composition doesn't send
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); if (!event.repeat) sendMessage() }
   }
 
   const reportConversation = async () => {
@@ -246,7 +265,7 @@ function MessagesPage() {
       <Chat
         user={user} inbox={inbox} visible={visible} active={active} loading={loading} query={query} setQuery={setQuery} filter={filter} setFilter={setFilter}
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
-        listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage}
+        listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage} sending={sending}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
         retry={() => loadInbox()} chatState={chatState}
       />
@@ -393,7 +412,7 @@ function MessagesPage() {
                       rows={1}
                       maxLength={2000}
                     />
-                    <button type="submit" className="chat-send" aria-label="Pošalji" disabled={!draft.trim()}><Send size={18} /></button>
+                    <button type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
                   </form>
                   <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
                   </>

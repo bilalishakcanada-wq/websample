@@ -10,9 +10,13 @@ export async function resizeImage(file, { maxEdge = 1600, quality = 0.82 } = {})
     canvas.height = Math.round(bitmap.height * scale)
     canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
     bitmap.close?.()
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality))
-    if (!blob) return file
-    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webp', { type: 'image/webp' })
+    const encode = (type) => new Promise((resolve) => canvas.toBlob(resolve, type, quality))
+    // older iOS Safari cannot encode webp and silently hands back a PNG: use JPEG there
+    let blob = await encode('image/webp')
+    if (blob && blob.type !== 'image/webp') blob = await encode('image/jpeg')
+    if (!blob || (scale === 1 && blob.size >= file.size)) return file
+    const ext = blob.type === 'image/webp' ? 'webp' : 'jpg'
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.${ext}`, { type: blob.type })
   } catch {
     return file
   }

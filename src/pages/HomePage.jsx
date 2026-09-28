@@ -9,6 +9,11 @@ const Welcome = lazy(lazyImport(() => import('../app/Welcome')))
 const AppHome = lazy(lazyImport(() => import('../app/AppHome')))
 const DesktopHome = lazy(lazyImport(() => import('./home/DesktopHome')))
 
+// a signed-in phone will show AppHome: start its download now instead of after the session check and first render
+try {
+  if (window.innerWidth <= 768 && Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token'))) import('../app/AppHome').catch(() => {})
+} catch { /* storage blocked: the lazy() import still loads it */ }
+
 // placeholders hold the page height while code/session load, so the footer never jumps into view
 const Holding = () => <><div className="route-loading"><span /></div><div className="route-placeholder" /></>
 

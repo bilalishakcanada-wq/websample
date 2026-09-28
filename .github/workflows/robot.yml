@@ -1,7 +1,7 @@
 # The test robot (robot/README.md): on every pull request, and every night, it builds a private copy
 # of the database with test accounts, runs the end-to-end money path, then explores the whole site
 # on a desktop, a phone, a small phone and inside the Android app as a guest, a new account, a client,
-# a worker and an admin. The report (with screenshots) is attached to the run as "robot-report".
+# a worker and an admin (about 40 minutes). The report (with screenshots) is attached to the run as "robot-report".
 # Nothing here touches the live site or the live database.
 name: Robot
 
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   robot:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       E2E_BASE_URL: http://localhost:4175
       E2E_CLIENT_EMAIL: klijent@test.poso

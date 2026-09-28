@@ -5,6 +5,28 @@ import { appConfig } from '../config/appConfig'
 import { listingInputSchema, parseInput } from '../utils/inputSchemas'
 import { prepoznajGresku } from '../utils/validation'
 import { coordsForLocation } from '../data/cityCoordinates'
+import { isExpired } from '../utils/schedule'
+
+// schedule, must-haves and the travel allowance live in their own columns (supabase/airtasker/01); until that migration is
+// on the database, a write that names them fails with "column not found" and is retried without
+const EXTRA_COLUMNS = ['date_type', 'due_date', 'time_of_day', 'requirements', 'travel_allowance']
+const isMissingColumn = (error) => error?.code === 'PGRST204' || error?.code === '42703'
+const pickExtras = (payload) => Object.fromEntries(EXTRA_COLUMNS.filter((key) => payload[key] !== undefined).map((key) => [key, payload[key]]))
+// an open job whose date has passed reads as 'expired' right away (the server flips it within minutes)
+const markExpired = (row) => (row && row.status === 'published' && isExpired(row) ? { ...row, status: 'expired' } : row)
+const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([key]) => !EXTRA_COLUMNS.includes(key)))
+
+const QUOTE_OFF = '„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.'
+
+async function writeListing(run, row) {
+  const first = await run(row)
+  if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) {
+    // a private quote request must never fall back to a public job
+    if (row.invited_provider) throw new Error(QUOTE_OFF)
+    return run(withoutExtras(row))
+  }
+  return first
+}
 
 export const listingService = {
   /** Owner marks a job done or cancelled. `reason` (provider|client|other) only matters for cancellations. */
@@ -25,14 +47,14 @@ export const listingService = {
       .from('listings')
       .select('*, listing_tags(tag_id, tags(name)), listing_images(id, url, position)')
       .eq('id', id)
-      .in('status', ['published', 'assigned', 'completed', 'cancelled'])
+      .in('status', ['published', 'assigned', 'completed', 'cancelled', 'expired'])
       .maybeSingle()
 
     if (error) {
       console.error('Supabase listing detail fetch failed', { message: error.message, code: error.code, details: error.details, hint: error.hint })
       throw publicError()
     }
-    return data
+    return markExpired(data)
   },
 
   async listLatestPublished(limit = 8) {
@@ -91,7 +113,7 @@ export const listingService = {
       .select('*, listing_tags(tag_id, tags(name)), bids(count), listing_images(url, position)', { count: 'exact' })
       .range(from, to)
     // an owner's dashboard shows every live job (open, assigned, done); everyone else only open ones
-    query = ownerId && status === 'published' ? query.in('status', ['published', 'assigned', 'completed', 'cancelled']) : query.eq('status', status)
+    query = ownerId && status === 'published' ? query.in('status', ['published', 'assigned', 'completed', 'cancelled', 'expired']) : query.eq('status', status)
     query = query
       .order(orderColumn, { ascending, nullsFirst: false })
 
@@ -118,7 +140,7 @@ export const listingService = {
       })
       throw publicError()
     }
-    return { data, count }
+    return { data: ownerId ? (data || []).map(markExpired) : data, count }
   },
 
   /**
@@ -205,22 +227,24 @@ export const listingService = {
     })
     const cleanPayload = { ...payload, ...input, price: input.price === '' ? null : input.price }
     if (appConfig.apiBaseUrl) return apiRequest('/api/listings', { method: 'POST', body: cleanPayload })
+    // the invited_provider column is already on the database (01); without the rules in 05 the
+    // job would be public, so a private request goes out only once they're confirmed
+    if (payload.invited_provider && !(await listingService.quoteRequestsEnabled())) throw new Error(QUOTE_OFF)
 
-    const { data, error } = await supabase
-      .from('listings')
-      .insert({
-        user_id: payload.user_id,
-        title: cleanPayload.title,
-        description: cleanPayload.description,
-        category: cleanPayload.category,
-        location: cleanPayload.location,
-        price: cleanPayload.price,
-        currency: payload.currency || 'BAM',
-        status: payload.status || 'draft',
-        ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
-      })
-      .select()
-      .single()
+    const { data, error } = await writeListing((row) => supabase.from('listings').insert(row).select().single(), {
+      user_id: payload.user_id,
+      title: cleanPayload.title,
+      description: cleanPayload.description,
+      category: cleanPayload.category,
+      location: cleanPayload.location,
+      price: cleanPayload.price,
+      currency: payload.currency || 'BAM',
+      status: payload.status || 'draft',
+      ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
+      ...pickExtras(payload),
+      // "Zatraži ponudu": only this provider sees the job (set once, on create)
+      ...(payload.invited_provider ? { invited_provider: payload.invited_provider } : {}),
+    })
 
     if (error) {
       const poznata = prepoznajGresku(error)
@@ -255,17 +279,15 @@ export const listingService = {
       currency: 'BAM',
       status: payload.status || 'published',
       ...(coordsForLocation(input.location) || { lat: null, lng: null }),
+      ...pickExtras(payload),
     }
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'PATCH', body: cleanPayload })
 
-    const { data, error } = await supabase
-      .from('listings')
-      .update(cleanPayload)
-      .eq('id', id)
-      .select()
-      .single()
+    const { data, error } = await writeListing((row) => supabase.from('listings').update(row).eq('id', id).select().single(), cleanPayload)
 
     if (error) {
+      const poznata = prepoznajGresku(error)
+      if (poznata) throw poznata
       console.error('Supabase listing update failed', {
         message: error.message,
         code: error.code,
@@ -275,6 +297,47 @@ export const listingService = {
       throw publicError()
     }
     return data
+  },
+
+  /**
+   * True once the private-request rules are on the database: 05 (who sees the job) and 04,
+   * whose recommended feed leaves private jobs out (the older feed would show them to others).
+   */
+  async quoteRequestsEnabled() {
+    const [rules, feed] = await Promise.all([
+      supabase.rpc('quote_requests_enabled'),
+      supabase.rpc('listing_reach', { p_listing: '00000000-0000-0000-0000-000000000000' }),
+    ])
+    return !rules.error && rules.data === true && !feed.error
+  },
+
+  /** Private quote request: the client opens the job to everyone (normal job alerts go out then). */
+  async openToEveryone(id) {
+    const { data, error } = await supabase.from('listings').update({ invited_provider: null }).eq('id', id).select('id, invited_provider, invite_declined_at').single()
+    if (error) throw prepoznajGresku(error) || publicError()
+    return data
+  },
+
+  /** Private quote request: the invited provider says no and the client is told. */
+  async declineQuote(id) {
+    const { error } = await supabase.rpc('decline_quote_request', { p_listing: id })
+    if (error) throw prepoznajGresku(error) || publicError()
+  },
+
+  /** Jobs sent privately to this provider ("Traže ponudu od tebe"), newest first. */
+  async listQuoteRequests(providerId) {
+    const { data, error } = await supabase
+      .from('listings')
+      .select('id, user_id, title, location, price, currency, status, created_at, date_type, due_date, time_of_day, invite_declined_at')
+      .eq('invited_provider', providerId)
+      .in('status', ['published', 'assigned', 'expired'])
+      .order('created_at', { ascending: false })
+      .limit(30)
+    if (error) {
+      if (isMissingColumn(error)) return []
+      throw publicError()
+    }
+    return (data || []).map(markExpired)
   },
 
   async deleteListing(id) {

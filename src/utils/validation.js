@@ -25,6 +25,33 @@ const POZNATE_GRESKE = [
   { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },
   { test: /PREVISE_ODGOVORA/i, poruka: 'Previše poruka ispod ove ponude. Dogovorite ostalo kad klijent prihvati ponudu.' },
   { test: /NISI_UCESNIK_RAZGOVORA/i, poruka: 'Nemaš pristup ovom razgovoru.' },
+  { test: /PONUDA_NA_SVOJ_OGLAS/i, poruka: 'Ne možeš slati ponudu na vlastiti posao.' },
+  { test: /PONUDA_ZAKLJUCANA/i, poruka: 'Iznos i opis ponude može mijenjati samo izvođač koji ju je poslao.' },
+  { test: /BID_STATUS_FORBIDDEN/i, poruka: 'Ponuda se prihvata dugmetom „Prihvati i plati“, uz osiguranu uplatu.' },
+  { test: /ROK_U_PROSLOSTI/i, poruka: 'Datum je već prošao — odaberi današnji ili neki kasniji dan.' },
+  { test: /POSAO_ISTEKAO/i, poruka: 'Rok za ovaj posao je prošao. Vlasnik ga mora objaviti ponovo s novim datumom.' },
+  { test: /POSAO_ZATVOREN/i, poruka: 'Ovaj posao više ne prima ponude.' },
+  // "Zatraži ponudu" (private quote requests)
+  { test: /SAMO_POZVANI/i, poruka: 'Ovaj posao je privatni zahtjev za drugog izvođača.' },
+  { test: /ZAHTJEV_SEBI/i, poruka: 'Ne možeš tražiti ponudu od sebe.' },
+  { test: /IZVODJAC_NEDOSTUPAN/i, poruka: 'Ovaj izvođač trenutno ne prima zahtjeve. Objavi posao svima.' },
+  { test: /PREVISE_ZAHTJEVA/i, poruka: 'Danas si poslao/la 10 zahtjeva za ponudu. Pokušaj sutra ili objavi posao svima.' },
+  { test: /ZAHTJEV_SE_NE_MIJENJA/i, poruka: 'Zahtjev za ponudu se ne može poslati drugom izvođaču. Objavi posao svima ili pošalji novi zahtjev.' },
+  { test: /NEMA_ZAHTJEVA/i, poruka: 'Ovaj zahtjev za ponudu nije za tebe.' },
+  { test: /PONUDA_POSLANA/i, poruka: 'Već si poslao/la ponudu. Povuci je ako ne možeš preuzeti posao.' },
+  {
+    test: /PREDALEKO/i,
+    // "PREDALEKO: udaljen/a si 56 km, a za ovaj posao ponude mogu slati izvođači do 15 km"
+    poruka: (tekst) => {
+      const detalj = (tekst.match(/PREDALEKO:\s*([^\n]+?)(?:\s{2,}|$)/) || [])[1]
+      return `Predaleko si za ovaj posao${detalj ? ` — ${detalj.trim()}` : ''}. Što je posao bolje plaćen (ili klijent plaća put), to izdaleka se mogu slati ponude.`
+    },
+  },
+  {
+    test: /GRAD_POTREBAN/i,
+    poruka: 'Dodaj svoj grad u profil — po njemu vidimo koliko si daleko od posla.',
+    akcija: { tekst: 'Dodaj grad', href: '/account/profil' },
+  },
 ]
 
 /** Vraća Error sa razumljivom porukom (i eventualno linkom), ili null. */
@@ -32,7 +59,7 @@ export function prepoznajGresku(error) {
   const tekst = `${error?.message || ''} ${error?.hint || ''} ${error?.details || ''}`
   const nadjena = POZNATE_GRESKE.find((g) => g.test.test(tekst))
   if (!nadjena) return null
-  const e = new Error(nadjena.poruka)
+  const e = new Error(typeof nadjena.poruka === 'function' ? nadjena.poruka(tekst) : nadjena.poruka)
   if (nadjena.akcija) e.akcija = nadjena.akcija
   return e
 }

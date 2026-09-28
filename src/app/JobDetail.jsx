@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, CalendarDays, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
+import { RequirementsList } from '../components/TaskExtras'
+import ReachRadar from '../components/ReachRadar'
+import { QuoteRequestCard } from '../components/QuoteRequest'
+import { reachFor, travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import './app.css'
@@ -18,7 +22,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -28,14 +32,23 @@ function JobDetail(props) {
   const [askError, setAskError] = useState('')
 
   const open = listing.status === 'published' && !acceptedBid
+  // a provider outside this job's reach is told so up front, not invited to offer
+  const reach = !isOwner && user && myCity ? reachFor(listing, myCity) : null
+  const tooFar = reach?.status === 'too_far'
   const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
-  const band = isOwner
+  const band = expired
+    ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
+    : isOwner
     ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
-          : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
-    : myBid ? [`Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
+          : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
+            : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
+    : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
+        ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
+      : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
+      : open && tooFar ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko.`]
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
 
@@ -53,7 +66,9 @@ function JobDetail(props) {
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više" aria-expanded={menu}><MoreHorizontal size={22} /></button>
         {menu && (
           <div className="jd-menu" role="menu" onClick={() => setMenu(false)}>
-            <button type="button" role="menuitem" onClick={onShare}><Share2 size={16} /> Podijeli</button>
+            {!isPrivate && <button type="button" role="menuitem" onClick={onShare}><Share2 size={16} /> Podijeli</button>}
+            {!isOwner && onSave && <button type="button" role="menuitem" onClick={onSave}><Bookmark size={16} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Ukloni iz sačuvanih' : 'Sačuvaj posao'}</button>}
+            {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${listing.id}`} role="menuitem"><Copy size={16} /> Objavi sličan posao</Link>}
             {isOwner
               ? <Link to={`/objavi?edit=${listing.id}`} role="menuitem"><Pencil size={16} /> Uredi posao</Link>
               : <button type="button" role="menuitem" onClick={onReport}><Flag size={16} /> Prijavi</button>}
@@ -68,6 +83,10 @@ function JobDetail(props) {
         {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>Izmijeni ponudu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
+        {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
+        {!isOwner && !myBid && open && onSave && (
+          <button type="button" className="ap-btn ap-btn-light jd-save" onClick={onSave} aria-pressed={saved}><Bookmark size={18} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Sačuvano' : 'Sačuvaj za kasnije'}</button>
+        )}
         {isOwner && acceptedBid && !payment && listing.status === 'published' && (
           <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
         )}
@@ -103,9 +122,31 @@ function JobDetail(props) {
             <span><strong>{money(listing.price, listing.currency)}</strong><small>Budžet</small></span>
             {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=budget`} className="jd-link">Uredi</Link>}
           </li>
+          {travelLabel(listing) && (
+            <li>
+              <Car size={20} />
+              <span><strong>{travelLabel(listing)}</strong><small>Gorivo, taksi ili prevoz</small></span>
+            </li>
+          )}
         </ul>
 
+        <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} phone />
+
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
+
+        {requirements.length > 0 && (
+          <div className="jd-reqs">
+            <h3>Obavezni uslovi</h3>
+            <RequirementsList items={requirements} />
+          </div>
+        )}
+
+        {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
+          <div className="jd-reqs">
+            <h3>Doseg ponuda</h3>
+            <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} compact />
+          </div>
+        )}
 
         {images.length > 0 && (
           <div className="jd-photos">
@@ -170,7 +211,7 @@ function JobDetail(props) {
 
         {tab === 'pitanja' && (
           <div className="jd-questions">
-            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.'}</p>}
+            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.')}</p>}
             {questions.map((item) => {
               const fromOwner = item.user_id === listing.user_id
               return (

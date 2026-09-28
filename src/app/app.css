@@ -503,7 +503,7 @@
 
 /* unread count on the bell of the pinned top bars */
 .ap-icon-btn { position: relative; }
-.ap-bell-count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #e0463c; color: white; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; border: 2px solid var(--bg); }
+.ap-bell-count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #c8352b; color: white; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; border: 2px solid var(--bg); }
 
 /* ---------- pinned top bars (phone app shell: #root scrolls, these stay put) ---------- */
 @media (max-width: 768px) {

@@ -12868,3 +12868,17 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
   /* same 22px grey circle, 40px to tap */
   .filter-search button { width: 40px; height: 40px; padding: 9px; margin: -9px -9px -9px 0; background-clip: content-box; }
 }
+
+/* text colours the robot measured below the WCAG AA minimum (4.5:1, 3:1 for large text).
+   The bright yellow and red stay for fills and icons; words on light backgrounds get a deeper shade. */
+:root { --accent-ink: #8a5a00; --danger-ink: #b91c1c; --success-ink: #0b6b4a; --badge-red: #c8352b; }
+.plan-badge, .badge-top_rated, .featured-tasker-rating-card strong, .rec-score, .chat-unread-total, .support-handoff, .pay-side,
+.pill.pay-status-funded, .pay-status-text.pay-status-funded, .dossier-tabs button.active .dossier-count { color: var(--accent-ink); }
+.danger-button, .filter-reset:hover { color: var(--danger-ink); }
+.form-success { color: var(--success-ink); }
+.verif-field .req { color: #b42318; }
+.dossier-count { color: var(--text); }
+.notif-count, .mobile-nav-badge { background: var(--badge-red); }
+@media (max-width: 768px) {
+  .mobile-nav-item:not(.active) { color: var(--text-soft); }
+}

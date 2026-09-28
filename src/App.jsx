@@ -50,12 +50,17 @@ import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
 import ForbiddenPage from './pages/ForbiddenPage'
 
+/** A redirect that keeps the page's space while the next page loads, so the footer doesn't flash up and jump down. */
+function Redirect({ to }) {
+  return <><RouteFallback /><Navigate to={to} replace /></>
+}
+
 // Old links keep working: /profile?tab=... -> the matching account section.
 function LegacyProfileRedirect() {
   const [params] = useSearchParams()
   const tab = params.get('tab')
   const target = { usluge: '/account/vjestine', iskustvo: '/account/vjestine', portfolio: '/account/portfolio', verifikacija: '/account/znacke', racun: '/account/postavke' }[tab] || '/account/profil'
-  return <Navigate to={params.get('setup') === '1' ? `${target}?setup=1` : target} replace />
+  return <Redirect to={params.get('setup') === '1' ? `${target}?setup=1` : target} />
 }
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
@@ -129,7 +134,7 @@ function App() {
         <Route path="/intro" element={<Intro />} />
         <Route path="/moji-poslovi" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
         {MascotGallery && <Route path="/dev/ilustracije" element={<MascotGallery />} />}
-        <Route path="/dashboard" element={<Navigate to="/account" replace />} />
+        <Route path="/dashboard" element={<Redirect to="/account" />} />
         <Route path="/profile" element={<LegacyProfileRedirect />} />
         <Route path="/nivoi" element={<TiersInfoPage />} />
         <Route path="/account" element={<ProtectedRoute><AccountLayout /></ProtectedRoute>}>
@@ -166,7 +171,7 @@ function App() {
         <Route path="/privatnost" element={<PrivacyPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
+        <Route path="*" element={<Redirect to="/404" />} />
       </Routes>
       </Suspense>
       </RouteGuard>

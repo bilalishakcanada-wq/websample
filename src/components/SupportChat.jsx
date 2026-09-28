@@ -27,10 +27,12 @@ function SupportChat({ openRequested = false }) {
   const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
   const onHelpPage = pathname.startsWith('/pomoc')
-  const [open, setOpen] = useState(openRequested)
+  // a deep link opens the chat on the first paint, so it doesn't pop open (and jump) a moment later
+  const deepLink = onHelpPage && searchParams.get('chat') === '1'
+  const [open, setOpen] = useState(openRequested || deepLink)
 
   const [messages, setMessages] = useState([])
-  const [draft, setDraft] = useState('')
+  const [draft, setDraft] = useState(() => (deepLink ? (searchParams.get('msg') || '').slice(0, 500) : ''))
   // deep link: /pomoc?chat=1 opens the conversation straight away; ?msg= pre-fills the draft
   useEffect(() => {
     if (onHelpPage && searchParams.get('chat') === '1') {

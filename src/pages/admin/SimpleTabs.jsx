@@ -241,7 +241,7 @@ export function SupportTab() {
               ))}
             </div>
             <form className="support-chat-form" onSubmit={sendReply}>
-              <input value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Odgovorite korisniku..." />
+              <input value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Odgovorite korisniku..." aria-label="Odgovor korisniku" />
               <button type="submit" className="primary-button small-button">Pošalji</button>
             </form>
           </>

@@ -137,6 +137,11 @@ export function pageChecks(opts) {
     for (let n = el; n; n = n.parentElement) {
       const s = getComputedStyle(n)
       if (s.backgroundImage && s.backgroundImage !== 'none') return null
+      // a decorative ::before/::after layer (hero gradients, photos) sits behind the text: can't be judged
+      for (const pseudo of ['::before', '::after']) {
+        const ps = getComputedStyle(n, pseudo)
+        if (ps.content !== 'none' && ps.position === 'absolute' && (ps.backgroundImage !== 'none' || (rgba(ps.backgroundColor)?.[3] || 0) > 0)) return null
+      }
       const c = rgba(s.backgroundColor)
       if (c && c[3] > 0) { layers.push(c); if (c[3] >= 1) break }
     }

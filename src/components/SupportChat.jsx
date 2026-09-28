@@ -27,10 +27,12 @@ function SupportChat({ openRequested = false }) {
   const { pathname } = useLocation()
   const [searchParams] = useSearchParams()
   const onHelpPage = pathname.startsWith('/pomoc')
-  const [open, setOpen] = useState(openRequested)
+  // a deep link opens the chat on the first paint, so it doesn't pop open (and jump) a moment later
+  const deepLink = onHelpPage && searchParams.get('chat') === '1'
+  const [open, setOpen] = useState(openRequested || deepLink)
 
   const [messages, setMessages] = useState([])
-  const [draft, setDraft] = useState('')
+  const [draft, setDraft] = useState(() => (deepLink ? (searchParams.get('msg') || '').slice(0, 500) : ''))
   // deep link: /pomoc?chat=1 opens the conversation straight away; ?msg= pre-fills the draft
   useEffect(() => {
     if (onHelpPage && searchParams.get('chat') === '1') {
@@ -164,7 +166,7 @@ function SupportChat({ openRequested = false }) {
                 <Link to="/pomoc" className="support-help-link" onClick={() => setOpen(false)}><BookOpen size={13} /> Centar za pomoć</Link>
               </div>
               <form className="support-chat-form" onSubmit={(event) => { event.preventDefault(); send(draft) }}>
-                <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Napiši poruku..." maxLength={2000} />
+                <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Napiši poruku..." aria-label="Poruka podršci" maxLength={2000} />
                 <button type="submit" className="icon-button" disabled={sending || !draft.trim()} aria-label="Pošalji"><Send size={16} /></button>
               </form>
             </>

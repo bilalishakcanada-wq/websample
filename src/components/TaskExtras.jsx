@@ -51,7 +51,10 @@ export function RequirementsEditor({ value = [], onChange }) {
             value={draft}
             maxLength={REQUIREMENT_MAX_LENGTH}
             placeholder={value.length === 0 ? 'npr. Ima svoj alat' : 'Dodaj još jedan uslov'}
+            aria-label="Obavezni uslov"
             onChange={(event) => setDraft(event.target.value)}
+            // a typed condition counts even when the person taps Nastavi instead of +
+            onBlur={add}
             onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); add() } }}
             enterKeyHint="done"
           />

@@ -1,0 +1,75 @@
+# The test robot (robot/README.md): on every pull request, and every night, it builds a private copy
+# of the database with test accounts, runs the end-to-end money path, then explores the whole site
+# on a desktop, a phone, a small phone and inside the Android app as a guest, a new account, a client,
+# a worker and an admin (about 40 minutes). The report (with screenshots) is attached to the run as "robot-report".
+# Nothing here touches the live site or the live database.
+name: Robot
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: robot-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      E2E_BASE_URL: http://localhost:4175
+      E2E_CLIENT_EMAIL: klijent@test.poso
+      E2E_CLIENT_PASSWORD: Test12345!
+      E2E_PROVIDER_EMAIL: izvodjac@test.poso
+      E2E_PROVIDER_PASSWORD: Test12345!
+      ROBOT_BASE_URL: http://localhost:4175
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start the local test database
+        run: bash robot/local-db/setup.sh
+      - name: Build the site against it
+        run: npx vite build
+      - name: Serve the site
+        run: |
+          nohup npx vite preview --port 4175 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4175 >/dev/null && break; sleep 1; done
+      - name: End-to-end tests (post, offer, pay, chat, deliver, approve, review)
+        # the ID-check tests leave the worker's ID "submitted" (no offers allowed), so they run last
+        run: |
+          npx playwright test $(ls e2e/*.spec.js | grep -v identity)
+          npx playwright test $(ls e2e/*.spec.js | grep identity)
+      - name: Fill the database with sample jobs, offers and a paid job
+        if: always()
+        run: |
+          bash robot/local-db/reset.sh
+          export $(cat robot/local-db/.anon)
+          node robot/seed.mjs
+      - name: Robot explores the site
+        if: always()
+        run: node robot/explore.mjs
+      - name: Report
+        if: always()
+        run: |
+          if [ -f robot-report/report.md ]; then head -c 60000 robot-report/report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robot-report
+          path: |
+            robot-report/
+            playwright-report/
+            test-results/
+          retention-days: 14

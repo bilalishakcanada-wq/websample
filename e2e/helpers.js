@@ -14,7 +14,8 @@ export async function login(page, who) {
   await page.getByLabel('Email adresa').fill(email)
   await page.getByLabel('Lozinka', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Nastavi' }).click()
-  await expect(page).toHaveURL(/\/account/, { timeout: 20_000 })
+  // desktop lands on /account, phones on the app home
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 })
 }
 
 /** Native confirm()/alert() dialogs are accepted so destructive steps can proceed. */

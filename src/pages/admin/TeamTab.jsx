@@ -79,7 +79,7 @@ function TeamTab() {
           <h4 className="team-sub"><UserPlus size={15} /> Dodaj moderatora</h4>
           <form className="admin-search" onSubmit={search}>
             <Search size={16} />
-            <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" />
+            <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" aria-label="Nađi korisnika" />
             <button type="submit" className="primary-button" disabled={searching}>{searching ? '…' : 'Traži'}</button>
           </form>
           {candidates.map((row) => (

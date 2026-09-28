@@ -208,7 +208,7 @@ function PostFlow() {
           {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
           <h1 className="ap-title">Počni s naslovom</h1>
           <p className="ap-sub">U par riječi, šta ti treba?</p>
-          <input className="ap-input" autoFocus value={form.title} maxLength={70} placeholder="npr. Selidba kauča" onChange={(event) => update({ title: event.target.value })} enterKeyHint="next" onKeyDown={(event) => { if (event.key === 'Enter' && valid) goNext() }} />
+          <input className="ap-input" autoFocus value={form.title} maxLength={70} placeholder="npr. Selidba kauča" aria-label="Naslov posla" onChange={(event) => update({ title: event.target.value })} enterKeyHint="next" onKeyDown={(event) => { if (event.key === 'Enter' && valid) goNext() }} />
           <span className="ap-hint">Najviše 70 znakova</span>
         </section>
       )}

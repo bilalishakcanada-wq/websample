@@ -80,14 +80,27 @@ function VerificationPage() {
   const liceRef = useRef(null)
   const nalicjeRef = useRef(null)
 
-  useEffect(() => {
+  const ucitaj = () => {
     identityService.mine().then((row) => {
       setPredmet(row)
       if (row && row.state === 'rejected') setIme(row.full_name || '')
-    })
-  }, [])
+    }).catch(() => setPredmet(false))   // false = nije učitano (ne "nije poslao")
+  }
+
+  useEffect(ucitaj, [])
 
   if (predmet === undefined) return <SkeletonPage />
+  if (predmet === false) {
+    return (
+      <div className="account-section verif-page">
+        <div className="empty-state">
+          <h2>Stanje verifikacije nije učitano</h2>
+          <p>Provjeri internet vezu pa pokušaj ponovo.</p>
+          <button type="button" className="primary-button" onClick={() => { setPredmet(undefined); ucitaj() }}>Pokušaj ponovo</button>
+        </div>
+      </div>
+    )
+  }
 
   const zakljucano = predmet && ['submitted', 'in_review', 'approved'].includes(predmet.state)
   const cifre = jmbg.replace(/\D/g, '')

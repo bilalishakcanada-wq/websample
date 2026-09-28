@@ -49,7 +49,9 @@ export const identityService = {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    if (error) return null
+    // Greška nije isto što i "nije poslao": inače bi verifikovanom korisniku
+    // opet pokazali formular za JMBG i dokumente.
+    if (error) throw publicError()
     return data
   },
 
@@ -68,7 +70,7 @@ export const identityService = {
    */
   async offerGate() {
     try {
-      const [policy, predmet, strict] = await Promise.all([this.policy(), this.mine(), supabase.rpc('identity_verified')])
+      const [policy, predmet, strict] = await Promise.all([this.policy(), this.mine().catch(() => null), supabase.rpc('identity_verified')])
       if (!policy.require_for_bids) return 'ok'
       let ok = strict.error ? null : strict.data
       if (ok === null) {

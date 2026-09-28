@@ -292,6 +292,8 @@
 .jd-photos button { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #eef2f8; padding: 0; }
 .jd-photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .jd-payment { margin: 0 0 18px; }
+/* room for the payment card while it loads, so "Otvori poruke" and the offers don't jump down under a finger */
+.jd-payment-loading { min-height: 520px; border-radius: 18px; background: var(--surface-soft, #f1f4f9); }
 .jd-messages { width: 100%; margin: 0 0 18px; }
 .jd-tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin: 6px 0 18px; border-radius: 999px; background: #eef2f8; }
 .jd-tabs button { min-height: 46px; border-radius: 999px; font-weight: 800; font-size: 1.02rem; color: var(--primary); background: transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

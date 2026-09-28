@@ -156,6 +156,9 @@ function JobDetail(props) {
           </div>
         )}
 
+        {payment === undefined && acceptedBid && (isOwner || user?.id === acceptedBid.bidder_id) && (
+          <div className="jd-payment jd-payment-loading" aria-busy="true" />
+        )}
         {payment && (isOwner || user?.id === payment.provider_id) && (
           <div className="jd-payment">
             <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />

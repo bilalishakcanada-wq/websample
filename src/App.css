@@ -12882,3 +12882,6 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 @media (max-width: 768px) {
   .mobile-nav-item:not(.active) { color: var(--text-soft); }
 }
+/* the help chat kept a 200px message area while loading and grew to 320px when the greeting arrived,
+   so the whole panel jumped up; a steady height (shrinking only on short screens) keeps it still */
+.support-chat-messages { height: 320px; min-height: 0; flex: 1 1 auto; }

@@ -113,7 +113,8 @@ function ListingDetailPage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
   const [submittingReview, setSubmittingReview] = useState(false)
   const [lightbox, setLightbox] = useState(null)
-  const [payment, setPayment] = useState(null)
+  // undefined while it loads, null when the job has none: the job page keeps room for the card meanwhile
+  const [payment, setPayment] = useState(undefined)
   const [acceptBid, setAcceptBid] = useState(null)
   const [questions, setQuestions] = useState([])
   const [feePercent, setFeePercent] = useState(null)
@@ -166,7 +167,7 @@ function ListingDetailPage() {
     setLoading(false)
     if (result?.title) setPageTitle(result.title)
     if (result) {
-      paymentService.forListing(id).then((row) => active && setPayment(row)).catch(() => {})
+      paymentService.forListing(id).then((row) => active && setPayment(row ?? null)).catch(() => active && setPayment(null))
       questionService.list(id).then((rows) => active && setQuestions(rows)).catch(() => {})
       bidService.bidderMetrics(id).then((rows) => active && setMetrics(rows)).catch(() => {})
       listingService.listRelated({ id, category: result.category, location: result.location }).then((rows) => active && setRelated(rows)).catch(() => {})

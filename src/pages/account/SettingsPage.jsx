@@ -89,7 +89,7 @@ function SettingsPage() {
         ) : (
           <form className="settings-row" id="lozinka" onSubmit={changePassword}>
             <div><strong>Nova lozinka</strong><span>Najmanje 8 znakova.</span></div>
-            <div className="settings-inline"><input type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" /><button type="submit" className="ghost-button" disabled={busy === 'pw' || password.length < 8}>Promijeni</button></div>
+            <div className="settings-inline"><input type="password" aria-label="Nova lozinka" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" /><button type="submit" className="ghost-button" disabled={busy === 'pw' || password.length < 8}>Promijeni</button></div>
           </form>
         )}
         <div className="settings-row"><div><strong>Odjava</strong><span>Odjavi se sa ovog uređaja.</span></div><button type="button" className="ghost-button" onClick={async () => { await logout(); navigate('/') }}><LogOut size={15} /> Odjavi se</button></div>

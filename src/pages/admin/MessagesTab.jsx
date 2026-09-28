@@ -43,7 +43,7 @@ function MessagesTab({ initialConversationId = '' }) {
   return (
     <div className="admin-support-layout">
       <div className="admin-thread-list">
-        <input className="adm-filter" value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Pretraži razgovore…" />
+        <input className="adm-filter" value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Pretraži razgovore…" aria-label="Pretraži razgovore" />
         <p className="muted-text">Svi razgovori ({conversations.length}). Uživo.</p>
         {visible.length === 0 && <p className="muted-text">Nema razgovora.</p>}
         {visible.map((conversation) => (

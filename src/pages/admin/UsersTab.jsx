@@ -31,7 +31,7 @@ function UsersTab({ openUserId, onOpenUser, onCloseUser, initialTerm = '' }) {
     <div className="admin-table">
       <form className="admin-search" onSubmit={(event) => { event.preventDefault(); load() }}>
         <Search size={16} />
-        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder={isAdmin ? 'Ime, PB-ID, email, grad ili user id' : 'Ime, PB-ID, grad ili user id'} />
+        <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder={isAdmin ? 'Ime, PB-ID, email, grad ili user id' : 'Ime, PB-ID, grad ili user id'} aria-label="Pretraži korisnike" />
         <button type="submit" className="primary-button">Traži</button>
       </form>
       <div className="admin-subtabs">

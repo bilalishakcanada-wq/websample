@@ -80,7 +80,7 @@ function WalletTab() {
           <h3><Coins size={16} /> Uplati na balans korisnika</h3>
           <form className="admin-search" onSubmit={search}>
             <Search size={16} />
-            <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" />
+            <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="Ime, PB-ID ili email korisnika" aria-label="Nađi korisnika" />
             <button type="submit" className="primary-button">Traži</button>
           </form>
           {candidates.map((row) => (

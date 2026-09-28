@@ -409,6 +409,7 @@ function MessagesPage() {
                       onChange={(event) => setDraft(event.target.value)}
                       onKeyDown={onKeyDown}
                       placeholder="Napiši poruku…"
+                      aria-label="Poruka"
                       rows={1}
                       maxLength={2000}
                     />

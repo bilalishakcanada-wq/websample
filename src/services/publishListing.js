@@ -3,10 +3,15 @@ import { tagService } from './tagService'
 import { profileService } from './profileService'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import { queryClient } from '../lib/queryClient'
+import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
+import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
 
-export const timingLabel = (timing, date) => {
+// the "Kada:" line stays in the description so older app versions still show the date.
+// "Prije: " with the colon: the database's contact-details filter reads "Prije 2026-10-01"
+// ("e" + 8 digits) as a phone number, hides the date and counts a strike against the poster.
+const kadaLine = (timing, date) => {
   if (timing === 'flexible' || !date) return 'Fleksibilan termin'
-  if (timing === 'before') return `Prije ${date}`
+  if (timing === 'before') return `Prije: ${date}`
   return `Na dan ${date}`
 }
 
@@ -15,20 +20,30 @@ export const timingLabel = (timing, date) => {
  * desktop wizard and the phone flow. Throws a user-facing Error on problems.
  * Returns { listing, flaggedPhotos }.
  */
-export async function publishListing({ user, form, photos = { files: [], removed: [] }, existingImages = [], tagList = [], editId = null }) {
+export async function publishListing({ user, form, photos = { files: [], removed: [] }, existingImages = [], tagList = [], editId = null, invitedProvider = null }) {
   const hit = findProhibitedTerm(form.title, form.description)
   if (hit) throw new Error('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
-  const contactScan = scanContactInfo(form.title, form.description)
+  const requirements = cleanRequirements(form.requirements)
+  if (findProhibitedTerm(requirements.join(' '))) throw new Error('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
+  const contactScan = scanContactInfo(form.title, form.description, ...requirements)
   if (!contactScan.clean) throw new Error(contactInfoMessage(contactScan, 'oglas'))
+  const schedule = scheduleFromForm(form)
+  if (schedule.due_date && schedule.due_date < todayBa()) throw new Error('Datum je već prošao — odaberi današnji ili neki kasniji dan.')
 
   const payload = {
     user_id: user.id,
     title: form.title.trim(),
-    description: `${form.description.trim()}\n\nKada: ${timingLabel(form.timing, form.date)}`,
+    description: `${form.description.trim()}\n\nKada: ${kadaLine(form.timing, form.date)}`,
     category: form.category,
     location: form.mode === 'remote' ? 'Online / na daljinu' : form.location,
     price: Number(form.price) > 0 ? Number(form.price) : null,
     status: 'published',
+    ...schedule,
+    requirements,
+    // "Platiću put" only means something for jobs done in person
+    travel_allowance: form.mode !== 'remote' && Number(form.travel) > 0 ? Math.min(MAX_TRAVEL_ALLOWANCE, Math.round(Number(form.travel))) : null,
+    // "Zatraži ponudu": sent privately to one provider; an edit never changes who it went to
+    ...(!editId && invitedProvider && invitedProvider !== user.id ? { invited_provider: invitedProvider } : {}),
   }
   const listing = editId ? await listingService.updateListing(editId, payload) : await listingService.createListing(payload)
   if (tagList.length > 0) await tagService.createForListing(listing.id, tagList, user.id)

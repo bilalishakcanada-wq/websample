@@ -23,7 +23,7 @@ function LoginPage() {
   // ?next=/objavi (phone flows) or the guarded page that sent us here
   const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
   // phones land on the app home, the website on the account dashboard
-  const destination = safeNext(searchParams.get('next')) || location.state?.from?.pathname || (isPhone ? '/' : '/account')
+  const destination = safeNext(searchParams.get('next')) || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null) || (isPhone ? '/' : '/account')
 
   if (user) return <Navigate to={destination} replace />
 

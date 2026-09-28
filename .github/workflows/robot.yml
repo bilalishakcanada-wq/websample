@@ -47,7 +47,10 @@ jobs:
           nohup npx vite preview --port 4175 --strictPort > preview.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:4175 >/dev/null && break; sleep 1; done
       - name: End-to-end tests (post, offer, pay, chat, deliver, approve, review)
-        run: npx playwright test
+        # the ID-check tests leave the worker's ID "submitted" (no offers allowed), so they run last
+        run: |
+          npx playwright test $(ls e2e/*.spec.js | grep -v identity)
+          npx playwright test $(ls e2e/*.spec.js | grep identity)
       - name: Fill the database with sample jobs, offers and a paid job
         if: always()
         run: |

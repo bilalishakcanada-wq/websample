@@ -1,8 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CalendarDays, Check, ChevronDown, MapPin, Plus, Users } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Bookmark, CalendarDays, Check, ChevronDown, Lock, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { useMyBids, useMyListings } from '../hooks/queries'
+import { keys, useMyBids, useMyListings } from '../hooks/queries'
+import { savedService } from '../services/savedService'
+import { listingService } from '../services/listingService'
+import { useSaved } from '../hooks/useSaved'
+import { daysUntilDue, scheduleLabel } from '../utils/schedule'
 import { timeAgo } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
@@ -11,14 +16,14 @@ import { EmptyBoxMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 import { SkeletonMtCard } from '../components/Skeleton'
+import '../components/TaskExtras.css'
 
-const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'] }
+const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'], expired: ['Rok prošao', 'off'] }
 const BID_STATUS = { pending: ['Ponuda poslana', 'open'], accepted: ['Dodijeljen tebi', 'done'], rejected: ['Nije prošla', 'off'], withdrawn: ['Povučena', 'off'] }
-const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani']]
+const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani'], ['expired', 'Rok prošao']]
 const BID_FILTERS = [['all', 'Sve ponude'], ['pending', 'Čekaju odgovor'], ['accepted', 'Dodijeljeni meni'], ['rejected', 'Nisu prošle']]
 const EMPTY = []
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
-const when = (description) => ((description || '').split('\n\nKada:')[1] || '').trim() || 'Fleksibilan termin'
 
 /** "Moji poslovi": jobs I posted and offers I sent — cards like the browse list, with a status filter. */
 function MyTasks() {
@@ -36,6 +41,15 @@ function MyTasks() {
   const bidsQuery = useMyBids(user.id)
   const jobs = useMemo(() => (jobsQuery.isPending ? null : (jobsQuery.data || EMPTY)), [jobsQuery.isPending, jobsQuery.data])
   const bids = useMemo(() => (bidsQuery.isPending ? null : (bidsQuery.data || EMPTY)), [bidsQuery.isPending, bidsQuery.data])
+  const savedQuery = useQuery({ queryKey: keys.savedListings(user.id), queryFn: () => savedService.list(user.id), enabled: tab === 'sacuvano' })
+  const savedList = savedQuery.isPending ? null : (savedQuery.data || EMPTY)
+  const saved = useSaved()
+  // "Traže ponudu od tebe": jobs a client sent privately to me that still wait for my answer
+  const quoteQuery = useQuery({ queryKey: keys.quoteRequests(user.id), queryFn: () => listingService.listQuoteRequests(user.id), enabled: tab === 'ponude' })
+  const quoteRequests = useMemo(() => {
+    const answered = new Set((bids || []).map((bid) => bid.listing_id))
+    return (quoteQuery.data || EMPTY).filter((job) => job.status === 'published' && !job.invite_declined_at && !answered.has(job.id))
+  }, [quoteQuery.data, bids])
   const failed = jobsQuery.isError || bidsQuery.isError
   // a failed load says so (with a retry) instead of pretending the list is empty
   const retryCard = failed && (
@@ -59,10 +73,11 @@ function MyTasks() {
         <div className="ap-tabs" role="tablist">
           <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavio/la sam {jobs ? `(${jobs.length})` : ''}</button>
           <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => switchTab('ponude')}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
+          <button type="button" role="tab" aria-selected={tab === 'sacuvano'} className={tab === 'sacuvano' ? 'active' : ''} onClick={() => switchTab('sacuvano')}>Sačuvano</button>
         </div>
       </div>
 
-      <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>
+      {tab !== 'sacuvano' && <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>}
       {pickSheet.mounted && (
         <div className={`ap-sheet-backdrop ${pickSheet.closing ? 'is-closing' : ''}`} inert={pickSheet.closing || undefined} onClick={() => setPick(false)}>
           <div className="ap-sheet" role="listbox" onClick={(event) => event.stopPropagation()}>
@@ -95,12 +110,49 @@ function MyTasks() {
                 <Link key={job.id} to={`/listings/${job.id}`} className="mt-card">
                   <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
                   <span><MapPin size={14} /> {job.location || 'Online'}</span>
-                  <span><CalendarDays size={14} /> {when(job.description)}</span>
+                  <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
+                  {job.invited_provider && <span><Lock size={14} /> Privatni zahtjev za ponudu</span>}
                   <div className="mt-card-foot">
                     <b className={`mt-state s-${tone}`}>{label}</b>
-                    <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>
+                    {job.status === 'expired'
+                      ? <small>Izaberi novi datum da primaš ponude</small>
+                      : <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>}
                   </div>
                 </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {tab === 'sacuvano' && (
+        <section className="ap-section">
+          {savedList === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
+          {savedList && savedList.length === 0 && (
+            <div className="ap-empty ap-empty-art">
+              <EmptyBoxMascot />
+              <strong>Nemaš sačuvanih poslova</strong>
+              <span>Dodirni <Bookmark size={14} /> na poslu koji te zanima i nađeš ga ovdje.</span>
+              <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>
+            </div>
+          )}
+          <div className="mt-list">
+            {(savedList || []).map((job) => {
+              const due = daysUntilDue(job)
+              const closed = job.status !== 'published' || (due != null && due < 0)
+              return (
+                <div key={job.id} className="mt-card-wrap">
+                  <Link to={`/listings/${job.id}`} className="mt-card">
+                    <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
+                    <span><MapPin size={14} /> {job.location || 'Online'}</span>
+                    <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
+                    <div className="mt-card-foot">
+                      <b className={`mt-state s-${closed ? 'off' : 'open'}`}>{closed ? 'Ne prima ponude' : 'Otvoren'}</b>
+                      <small><Users size={13} /> {job.bid_count || 0} {(job.bid_count || 0) === 1 ? 'ponuda' : 'ponuda'}</small>
+                    </div>
+                  </Link>
+                  <button type="button" className="mt-unsave" onClick={() => saved.remove(job.id)}>Ukloni</button>
+                </div>
               )
             })}
           </div>
@@ -111,6 +163,24 @@ function MyTasks() {
         <section className="ap-section">
           {bids === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
           {retryCard}
+          {quoteRequests.length > 0 && filter === 'all' && (
+            <>
+              <h2 className="mt-quote-head">Traže ponudu od tebe ({quoteRequests.length})</h2>
+              <div className="mt-list mt-quote-list">
+                {quoteRequests.map((job) => (
+                  <Link key={job.id} to={`/listings/${job.id}`} className="mt-card">
+                    <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
+                    <span><MapPin size={14} /> {job.location || 'Online'}</span>
+                    <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
+                    <div className="mt-card-foot">
+                      <b className="mt-state s-open"><Lock size={12} /> Samo za tebe</b>
+                      <small>Pošalji ponudu ili odbij</small>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
           {bids && bids.length === 0 && !failed && (
             <div className="ap-empty ap-empty-art">
               <EmptyBoxMascot />

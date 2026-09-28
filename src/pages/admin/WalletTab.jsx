@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Coins, Lock, Search, TrendingDown, TrendingUp, Users } from 'lucide-react'
+import { AlertTriangle, Coins, Landmark, Lock, Search, TrendingDown, TrendingUp, Users } from 'lucide-react'
 import { adminService } from '../../services/adminService'
 import { paymentService } from '../../services/paymentService'
 import { formatBosnianDate } from '../../utils/dateFormat'
@@ -16,11 +16,27 @@ function WalletTab() {
   const [picked, setPicked] = useState(null)
   const [message, setMessage] = useState('')
   const [jobs, setJobs] = useState(null)
+  const [payouts, setPayouts] = useState([])
 
   const load = () => Promise.all([
     adminService.walletOverview(150).then(setData),
     paymentService.adminOverview(150).then(setJobs),
+    adminService.payoutQueue().then(setPayouts),
   ]).catch((requestError) => setError(requestError.message))
+
+  // Isplata ide bankovnim nalogom firme: tim uplati, pa ovdje upiše referencu naloga.
+  const resolvePayout = async (row, paid) => {
+    const answer = paid
+      ? window.prompt(`Uplaćeno ${formatKM(row.amount_km)} na ${row.iban} (${row.holder_name})? Upiši referencu bankovnog naloga:`)
+      : window.prompt('Razlog odbijanja (korisnik ga vidi, iznos se vraća na balans):')
+    if (!answer || !answer.trim()) return
+    setError('')
+    try {
+      await adminService.resolvePayout(row.id, paid, paid ? answer.trim() : null, paid ? null : answer.trim())
+      setMessage(paid ? 'Isplata je označena kao poslana.' : 'Isplata je odbijena, iznos je vraćen korisniku.')
+      load()
+    } catch (requestError) { setError(requestError.message) }
+  }
 
   const resolve = async (row, action) => {
     let share = null
@@ -131,6 +147,31 @@ function WalletTab() {
           ))}
         </section>
       )}
+
+      <section className="dossier-card">
+        <h3><Landmark size={16} /> Zahtjevi za isplatu</h3>
+        {payouts.length === 0 && <p className="muted-text">Nema zahtjeva za isplatu.</p>}
+        {payouts.map((row) => (
+          <div key={row.id} className="wallet-row pay-admin-row">
+            <span className={`wallet-sign ${row.status === 'paid' ? 'plus' : row.status === 'requested' ? '' : 'minus'}`}><Landmark size={15} /></span>
+            <div>
+              <strong><button type="button" className="adm-userlink" onClick={() => openUser(row.user_id)}>{row.full_name || 'Korisnik'}</button> <span className="uid-chip">{row.member_id}</span> <span className="pill">{{ requested: 'Čeka', paid: 'Poslano', rejected: 'Odbijeno', cancelled: 'Otkazano' }[row.status]}</span></strong>
+              <small>{row.holder_name} · {row.bank_name ? `${row.bank_name} · ` : ''}{row.iban} · {formatBosnianDate(row.created_at)}</small>
+              {row.bank_ref && <small>Nalog: {row.bank_ref}</small>}
+              {row.note && <small>Razlog: {row.note}</small>}
+            </div>
+            <div className="pay-admin-side">
+              <b>{formatKM(row.amount_km)}</b>
+              {row.status === 'requested' && (
+                <div className="admin-row-actions">
+                  <button type="button" className="ghost-button" onClick={() => resolvePayout(row, true)}>Poslano</button>
+                  <button type="button" className="ghost-button" onClick={() => resolvePayout(row, false)}>Odbij</button>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </section>
 
       <section className="dossier-card">
         <h3>Sve transakcije</h3>

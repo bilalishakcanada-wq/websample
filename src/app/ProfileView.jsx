@@ -6,6 +6,7 @@ import BadgeChip from '../components/BadgeChip'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useFullscreen } from './useFullscreen'
 import { useGoBack } from '../hooks/useGoBack'
+import { useQuoteRequestsEnabled } from '../hooks/queries'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -20,6 +21,7 @@ const Stars = ({ value, size = 15 }) => {
 function ProfileView({ bundle, user, onReport }) {
   const goBack = useGoBack()
   useFullscreen()
+  const quoteEnabled = useQuoteRequestsEnabled()
   const [menu, setMenu] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const { profile, trust, badges = [], reviews = [], listings = [], portfolio = [] } = bundle
@@ -122,9 +124,9 @@ function ProfileView({ bundle, user, onReport }) {
       {!isOwn && (
         <div className="jd-sticky pv-cta">
           <strong>{isProvider ? `Želiš raditi s ${first}?` : `Želiš raditi za ${first}?`}</strong>
-          <span>{isProvider ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+          <span>{isProvider ? (quoteEnabled ? `Opiši posao i pošalji ga samo ${first} da ti da ponudu.` : 'Objavi posao i zatraži ponudu.') : 'Pogledaj šta traži i pošalji ponudu.'}</span>
           {isProvider
-            ? <Link to="/objavi" className="ap-btn ap-btn-primary">Zatraži ponudu</Link>
+            ? <Link to={quoteEnabled ? `/objavi?za=${profile.user_id}` : '/objavi'} className="ap-btn ap-btn-primary">Zatraži ponudu</Link>
             : <Link to={listings[0] ? `/listings/${listings[0].id}` : '/search'} className="ap-btn ap-btn-primary">{listings[0] ? 'Pogledaj posao' : 'Pregledaj poslove'}</Link>}
         </div>
       )}

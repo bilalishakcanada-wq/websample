@@ -104,8 +104,10 @@ function AccountLayout() {
       ...overrides,
     })
     await reload()
+    // the job pages measure the reach from this city
+    queryClient.invalidateQueries({ queryKey: ['me', user.id, 'city'] })
     return saved
-  }, [profile, user, reload])
+  }, [profile, user, reload, queryClient])
 
   const handleAvatarChange = async (event) => {
     const file = event.target.files?.[0]

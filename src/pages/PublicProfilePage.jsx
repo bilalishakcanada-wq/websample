@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { usePublicProfile } from '../hooks/queries'
+import { usePublicProfile, useQuoteRequestsEnabled } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Sparkles, Star, UserRound } from 'lucide-react'
 import { reportService } from '../services/reportService'
@@ -70,6 +70,7 @@ function PublicProfilePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const profileQuery = usePublicProfile(userId)
+  const quoteEnabled = useQuoteRequestsEnabled()
   const bundle = profileQuery.data ?? null
   const loading = profileQuery.isPending
   const [showAllReviews, setShowAllReviews] = useState(false)
@@ -314,12 +315,12 @@ function PublicProfilePage() {
         <div className="profile-cta-bar">
           <div>
             <strong>{isProvider ? `Želiš raditi sa ${firstName}?` : `Želiš pomoći ${firstName}?`}</strong>
-            <span>{isProvider ? 'Objavi posao i zatraži ponudu.' : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+            <span>{isProvider ? (quoteEnabled ? `Opiši posao i pošalji ga samo ${firstName} da ti da ponudu.` : 'Objavi posao i zatraži ponudu.') : 'Pogledaj šta traži i pošalji ponudu.'}</span>
           </div>
           <button
             type="button"
             className="primary-button"
-            onClick={() => navigate(isProvider || listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
+            onClick={() => navigate(isProvider ? (quoteEnabled ? `/objavi?za=${userId}` : '/objavi') : listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
           >
             {isProvider || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'}
           </button>

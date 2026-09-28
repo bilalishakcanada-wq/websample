@@ -1,3 +1,4 @@
+import { uploadPrivate } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError } from '../utils/validation'
 
@@ -110,16 +111,14 @@ export const paymentService = {
     call('respond_price_increase', { p_request: requestId, p_accept: accept }),
   cancelPriceIncrease: (requestId) => call('cancel_price_increase', { p_request: requestId }),
 
-  /** Slike kao dokaz idu u isti bucket kao i slike u porukama. */
-  async uploadEvidence(userId, files) {
+  /** Slike kao dokaz idu u privatni bucket: vide ih samo klijent, izvođač i tim. */
+  async uploadEvidence(userId, listingId, files) {
     const urls = []
     for (const file of files) {
-      const path = `${userId}/work/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-      const { error } = await supabase.storage.from('media').upload(path, file, {
-        cacheControl: '31536000', contentType: file.type,
-      })
-      if (error) throw new Error('Slika se nije mogla poslati.')
-      urls.push(supabase.storage.from('media').getPublicUrl(path).data.publicUrl)
+      const path = `${userId}/work/${listingId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      urls.push(await uploadPrivate(path, file, { cacheControl: '31536000' }).catch(() => {
+        throw new Error('Slika se nije mogla poslati.')
+      }))
     }
     return urls
   },

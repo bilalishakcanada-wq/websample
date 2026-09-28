@@ -1,3 +1,4 @@
+import { PrivateImage } from './PrivateFile'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle, BadgeCheck, CheckCircle2, Clock, Handshake, ImagePlus, RotateCcw, Send, TrendingUp, X,
@@ -96,7 +97,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
   }
 
   const predajRad = () => run('submit', async () => {
-    const urls = files.length ? await paymentService.uploadEvidence(user.id, files) : []
+    const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.submitWork(payment.listing_id, report.trim(), urls)
     setForm(null); setReport(''); setFiles([])
   }, 'Rad je predat — klijent ima 72 sata da pregleda.')
@@ -160,7 +161,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
     prihvati ? 'Prekid je prihvaćen — novac je vraćen klijentu.' : 'Prekid nije prihvaćen; posao se nastavlja.')
 
   const posaljiSpor = () => run('dispute', async () => {
-    const urls = files.length ? await paymentService.uploadEvidence(user.id, files) : []
+    const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.openWorkDispute(payment.listing_id, reasonCode, claim.trim(), urls)
     setForm(null); setClaim(''); setFiles([])
   }, 'Spor je otvoren — posao je zamrznut dok tim ne odluči.')
@@ -191,7 +192,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           {latest.evidence_urls?.length > 0 && (
             <div className="wf-evidence">
               {latest.evidence_urls.map((url) => (
-                <a key={url} href={url} target="_blank" rel="noreferrer"><img src={url} alt="Dokaz" loading="lazy" /></a>
+                <PrivateImage key={url} fileRef={url} alt="Dokaz" />
               ))}
             </div>
           )}

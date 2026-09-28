@@ -177,6 +177,40 @@ export function pageChecks(opts) {
     push('contrast', f.ratio < 3 ? 'error' : 'warn', `Text hard to read: contrast ${f.ratio.toFixed(1)}:1 (needs ${f.need}:1)`, `${describe(f.el)} color ${f.color} on rgb(${f.bg.slice(0, 3).map(Math.round).join(',')})`)
   }
 
+  // 10. text too small to read on a phone (under 11px, not counting tiny badges with a number)
+  if (opts.phone) {
+    const tiny = new Map()
+    const walker2 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+    for (let n = walker2.nextNode(); n; n = walker2.nextNode()) {
+      const el = n.parentElement
+      const text = n.textContent.trim()
+      if (!el || !text || /^[\d+.,%·•-]{1,4}$/.test(text) || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(el.tagName)) continue
+      if (el.closest('[aria-hidden="true"], .leaflet-container, .maplibregl-map, svg')) continue
+      if (!visible(el)) continue
+      const size = parseFloat(getComputedStyle(el).fontSize)
+      if (size < 11 && !tiny.has(el.className)) tiny.set(el.className, { el, size })
+    }
+    for (const { el, size } of [...tiny.values()].slice(0, 5)) push('tiny-text', 'warn', `Text only ${size.toFixed(1)}px on a phone (hard to read; 12px+ is comfortable)`, describe(el))
+  }
+
+  // 11. photos downloaded much bigger than they are shown (slow on mobile data)
+  for (const img of document.querySelectorAll('img')) {
+    if (!img.complete || !img.naturalWidth || !visible(img)) continue
+    const r = img.getBoundingClientRect()
+    const shown = r.width * (window.devicePixelRatio || 1)
+    if (img.naturalWidth > 1200 && img.naturalWidth > shown * 3) {
+      push('oversized-image', 'warn', `Photo is ${img.naturalWidth}px wide but shown at ${Math.round(r.width)}px (wasted download)`, (img.currentSrc || img.src).split('?')[0].slice(-80))
+    }
+  }
+
+  // 12. page structure: one main heading, no duplicate ids (screen readers and label links rely on both)
+  const h1s = [...document.querySelectorAll('h1')].filter(visible)
+  if (h1s.length > 1) push('structure', 'warn', `${h1s.length} main headings (h1) on one page`, h1s.slice(0, 3).map(describe).join(' | '))
+  const ids = new Map()
+  for (const el of document.querySelectorAll('[id]')) ids.set(el.id, (ids.get(el.id) || 0) + 1)
+  const dup = [...ids].filter(([id, c]) => c > 1 && id).map(([id]) => id)
+  if (dup.length) push('structure', 'warn', `Same id used twice: ${dup.slice(0, 4).join(', ')}`)
+
   return out
 }
 
@@ -203,4 +237,15 @@ export function clickables() {
     items.push({ id: String(index), tag: el.tagName.toLowerCase(), text, href, active: Boolean(active), target: el.getAttribute('target'), type: el.getAttribute('type'), inForm: Boolean(el.closest('form')) })
   })
   return items
+}
+
+/** Runs in the page after the robot pressed Tab: is the focused element visibly marked? */
+export function focusCheck() {
+  const el = document.activeElement
+  if (!el || el === document.body) return null
+  const s = getComputedStyle(el)
+  const ring = (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) || (s.boxShadow && s.boxShadow !== 'none')
+  if (ring) return null
+  const text = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('placeholder') || '').trim().replace(/\s+/g, ' ').slice(0, 40)
+  return `${el.tagName.toLowerCase()}${typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/)[0] : ''}${text ? ` "${text}"` : ''}`
 }

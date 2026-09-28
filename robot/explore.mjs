@@ -15,7 +15,7 @@ import { chromium, devices } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ACCOUNTS } from './accounts.mjs'
-import { pageChecks, clickables } from './checks.mjs'
+import { pageChecks, clickables, focusCheck } from './checks.mjs'
 import { PROFILES, appShellStub } from './profiles.mjs'
 
 const BASE = (process.env.ROBOT_BASE_URL || 'http://localhost:4175').replace(/\/+$/, '')
@@ -198,6 +198,21 @@ function vitalsRecorder() {
       if (last) { v.lcp = Math.round(last.startTime); v.lcpEl = name(last.element) }
     }).observe({ type: 'largest-contentful-paint', buffered: true })
   } catch { /* browser without these entry types */ }
+}
+
+/** Presses Tab a few times like a keyboard user; flags controls that get focus without a visible marker. */
+async function keyboard(page, run, current, profile) {
+  if (profile.phone) return
+  const seen = new Set()
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab').catch(() => {})
+    const bad = await page.evaluate(focusCheck).catch(() => null)
+    if (bad && !seen.has(bad)) {
+      seen.add(bad)
+      record(run, pattern(current.path), { kind: 'focus', severity: 'warn', message: 'Keyboard focus is invisible: people using Tab can\'t see where they are', detail: bad, url: current.path })
+    }
+  }
+  await page.keyboard.press('Escape').catch(() => {})
 }
 
 async function vitals(page, run, current) {
@@ -407,6 +422,7 @@ async function crawl(browser, profileName, roleName, state) {
     }
     await inspect(page, run, current, profile)
     await vitals(page, run, current)
+    await keyboard(page, run, current, profile)
     // follow the links on the page
     const links = await page.$$eval('a[href]', (as) => as.map((a) => a.href)).catch(() => [])
     for (const href of links) {

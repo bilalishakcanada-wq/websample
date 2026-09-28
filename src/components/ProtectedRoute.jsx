@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext'
 import { SkeletonPage } from './Skeleton'
 
 function ProtectedRoute({ children, allowedRoles = [] }) {
-  const { user, isAdmin, isModerator, loading } = useAuth()
+  const { user, isAdmin, isModerator, loading, staffReady } = useAuth()
   const location = useLocation()
 
-  if (loading) {
+  // everyone else renders as soon as the session is known; staff routes also wait for the role check
+  if (loading || (allowedRoles.length > 0 && user && !staffReady)) {
     return <SkeletonPage />
   }
 

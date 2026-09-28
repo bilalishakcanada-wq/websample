@@ -9,6 +9,8 @@ const ROUTES = {
   '/objavi': () => import('../pages/PostTaskPage'),
   '/listings': () => import('../pages/ListingDetailPage'),
   '/pomoc': () => import('../pages/HelpPage'),
+  '/login': () => import('../pages/LoginPage'),
+  '/register': () => import('../pages/RegisterPage'),
 }
 
 const done = new Set()
@@ -24,7 +26,7 @@ export function prefetchRoute(path) {
 export function warmMainRoutes() {
   const connection = navigator.connection
   if (connection && (connection.saveData || /2g/.test(connection.effectiveType || ''))) return
-  const run = () => ['/search', '/listings', '/messages', '/account', '/objavi'].forEach(prefetchRoute)
+  const run = () => ['/search', '/listings', '/messages', '/account', '/objavi', '/login'].forEach(prefetchRoute)
   if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 4000 })
   else window.setTimeout(run, 2500)
 }

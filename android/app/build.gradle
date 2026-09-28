@@ -16,7 +16,23 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // One shared key for the sideloaded beta APK, so every new build installs over the previous one
+    // (a CI runner otherwise makes a fresh debug key each run). CI writes it from the
+    // ANDROID_BETA_KEYSTORE_BASE64 secret; it is never committed. Not the Google Play key: that one
+    // stays in the ANDROID_KEYSTORE_* secrets.
+    def betaKeystore = file("beta.keystore")
+    signingConfigs {
+        beta {
+            storeFile betaKeystore
+            storePassword System.getenv("ANDROID_BETA_KEYSTORE_PASSWORD") ?: "android"
+            keyAlias "androiddebugkey"
+            keyPassword System.getenv("ANDROID_BETA_KEYSTORE_PASSWORD") ?: "android"
+        }
+    }
     buildTypes {
+        debug {
+            if (betaKeystore.exists()) signingConfig signingConfigs.beta
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

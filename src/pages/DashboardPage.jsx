@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -44,7 +44,7 @@ function DashboardPage() {
   const bids = isProvider ? (bidsQuery.data ?? null) : null
   const recommended = recommendedQuery.data || []
   const recommendedLoading = recommendedQuery.isPending
-  useEffect(() => { if (listingsQuery.error) setError(listingsQuery.error.message) }, [listingsQuery.error])
+  const loadError = listingsQuery.error && !listingsQuery.data ? listingsQuery.error.message : ''
 
   const deleteListing = async (listing) => {
     if (!(await confirmDialog({ title: 'Obrisati oglas?', text: `„${listing.title}“ nestaje sa Poso.ba zajedno sa ponudama.`, confirmLabel: 'Obriši', danger: true }))) return
@@ -91,7 +91,7 @@ function DashboardPage() {
         <PushPrompt />
 
         {message && <div className="form-success">{message}</div>}
-        {error && <div className="form-error">{error}</div>}
+        {(error || loadError) && <div className="form-error">{error || loadError}</div>}
 
         {isProvider && bids && bids.length > 0 && (
           <section className="dashboard-section">

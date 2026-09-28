@@ -220,7 +220,8 @@ function DesktopHome() {
                 className="post-cat-card"
                 onClick={() => navigate(target)}
               >
-                <img src={image} alt="" loading="lazy" />
+                {/* shown at 54 px: a 162 px thumbnail instead of the 720 px cover photo */}
+                <img src={image.replace('/images/categories/', '/images/categories/thumb/')} alt="" width="54" height="54" loading="lazy" decoding="async" />
                 <div>
                   <strong>{name}</strong>
                   <span>{description}</span>

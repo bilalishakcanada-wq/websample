@@ -2382,6 +2382,15 @@ button.back-home-link {
   animation: sheet-up 0.25s ease both;
 }
 
+/* on a short phone the price hint pushes the send button below the fold: it stays pinned to the
+   sheet's bottom edge while the fields scroll under it, like a native bottom sheet */
+.offer-sheet .auth-form > button[type="submit"] {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  box-shadow: 0 10px 0 var(--surface), 0 -14px 18px -6px var(--surface);
+}
+
 .sheet-handle {
   width: 42px;
   height: 5px;

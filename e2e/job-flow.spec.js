@@ -107,12 +107,12 @@ test.describe.serial('Posao od objave do recenzije', () => {
 
     // the provider sees the job as finished on their dashboard
     await provider.goto('/account')
-    await expect(provider.getByTestId('dashboard-listing').filter({ hasText: title })).toContainText('Završen')
+    await expect(provider.getByTestId(/^dashboard-(listing|bid)$/).filter({ hasText: title })).toContainText('Završen')
   })
 
   test('test oglas se briše', async () => {
     await client.goto('/account')
-    const row = client.getByTestId('dashboard-listing').filter({ hasText: title })
+    const row = client.getByTestId(/^dashboard-(listing|bid)$/).filter({ hasText: title })
     await expect(row).toBeVisible()
     await row.getByRole('button', { name: /Obriši/ }).click()
     await client.getByRole('dialog').getByRole('button', { name: 'Obriši', exact: true }).click()

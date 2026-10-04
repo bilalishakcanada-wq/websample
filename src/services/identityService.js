@@ -90,10 +90,11 @@ export const identityService = {
 
   /**
    * Smije li prijavljeni korisnik objaviti posao: 'ok' | 'needed' | 'pending' | 'rejected'.
-   * Pita can_post_job() — istu funkciju koju baza provjerava pri objavi (stroga, bez
-   * prelaznog roka; supabase/identity/jobs_require_verified.sql). Dok ta datoteka nije
-   * primijenjena, pita identity_ok() koju baza tada koristi, pa forma nikad ne zaključa
-   * nekoga koga bi baza pustila. Ako upit ne uspije, vraća 'ok' — baza ima zadnju riječ.
+   * Objava ne traži identitet (supabase/identity/jobs_open_no_id.sql isključuje
+   * require_for_jobs), pa ovo vraća 'ok'. Dok ta datoteka nije primijenjena, baza još
+   * traži identitet od naloga otvorenih poslije 25.09.2026. (identity_ok()), pa forma
+   * kaže isto što i baza umjesto da korisnik tek na kraju dobije grešku.
+   * Ako upit ne uspije, vraća 'ok' — baza ima zadnju riječ.
    */
   async postGate() {
     try {

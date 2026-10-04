@@ -76,13 +76,13 @@ rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; oslanja se na
 `migration_identity_state_protection.sql` (već na produkciji). Sučelje (`useOfferGate`) već pita
 `identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
 
-**Na čekanju:** [`jobs_require_verified.sql`](jobs_require_verified.sql) isto to radi za
-**objavu posla**: novi posao objavljuje samo odobren identitet ili tim (`can_post_job()`),
-bez prelaznog roka; uređivanje već objavljenih poslova ostaje slobodno. Usput vraća i
-provjeru suspenzije pri objavi. Forma za objavu (računar i telefon) pita `can_post_job()`
-i dok datoteka nije primijenjena pada nazad na `identity_ok()`, pa nikad ne zaključa
-nekoga koga baza pušta. Cijeli tok (registracija → ID → odobrenje u adminu → objava)
-pokriva `e2e/post-job-verification.spec.js`.
+**Na čekanju:** [`jobs_open_no_id.sql`](jobs_open_no_id.sql): po odluci vlasnika
+(04.10.2026.) identitet potvrđuju samo izvođači. Objava posla ne traži ličnu kartu
+(`require_for_jobs` = false), ponude i dalje traže odobren identitet. Usput vraća
+provjeru suspenzije pri objavi. Forma za objavu pita `can_post_job()` (dok datoteka nije
+primijenjena, `identity_ok()`), pa kaže isto što i baza. Tok pokriva
+`e2e/verification-roles.spec.js`: klijent bez ID-a objavi posao, izvođač bez ID-a ne
+može poslati ponudu dok admin ne potvrdi njegovu ličnu kartu.
 
 ## Zašto postojeći nalozi nisu zaključani
 

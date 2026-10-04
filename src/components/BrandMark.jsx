@@ -1,6 +1,6 @@
-/** The Zadatak mark: a "p" whose bowl is a gold badge with a navy check. Same drawing as the app icon
- *  (scripts/brand-assets.mjs). `tile` draws it on the navy rounded square; without it the mark sits on
- *  whatever is behind it (e.g. the navy welcome screen). */
+/** The Zadatak mark: a rounded gold "Z" whose bottom stroke ends in a gold badge with a navy check
+ *  ("zadatak riješen"). Same drawing as the app icon (scripts/brand-assets.mjs). `tile` draws it on the
+ *  navy rounded square; without it the mark sits on whatever is behind it (e.g. the navy welcome screen). */
 function BrandMark({ size = 34, tile = true, className = '', ...props }) {
   const id = tile ? 'bm-tile' : 'bm-flat'
   return (
@@ -25,10 +25,9 @@ function BrandMark({ size = 34, tile = true, className = '', ...props }) {
       </defs>
       {tile && <rect width="1024" height="1024" rx="230" fill={`url(#${id}-bg)`} />}
       <g transform={tile ? 'translate(46 72) scale(0.9)' : 'translate(-6 23)'}>
-        <rect x="248" y="190" width="150" height="598" rx="75" fill={`url(#${id}-gold)`} />
-        <circle cx="560" cy="418" r="228" fill={`url(#${id}-gold)`} />
-        <circle cx="560" cy="418" r="150" fill="#0d2a52" />
-        <path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" strokeWidth="58" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M330 265 H713 L330 713 H560" fill="none" stroke={`url(#${id}-gold)`} strokeWidth="150" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="706" cy="713" r="96" fill={`url(#${id}-gold)`} />
+        <path d="M664 716 L695 747 L748 685" fill="none" stroke="#0d2a52" strokeWidth="34" strokeLinecap="round" strokeLinejoin="round" />
       </g>
     </svg>
   )

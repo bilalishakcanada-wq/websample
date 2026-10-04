@@ -26,12 +26,16 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
 type Article = { id: string; audience: string; q: string; a: string }
+type GuideEntry = { path: string; title: string; where: string }
 
-const systemPrompt = (articles: Article[], profile: Record<string, unknown> | null) => `Ti si "Zadatak asistent", digitalni asistent podrške platforme Zadatak — bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
+const systemPrompt = (articles: Article[], guide: GuideEntry[], profile: Record<string, unknown> | null) => `Ti si "Zadatak asistent", digitalni asistent podrške platforme Zadatak — bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
 Pišeš isključivo na bosanskom, jednostavno, toplo i kratko (2–5 rečenica, bez markdown naslova; smiješ koristiti crtice za korake). Obraćaš se sa "ti".
 
 ZNANJE — odgovaraj SAMO na osnovu ovih članaka i činjenica. Ne izmišljaj funkcije, cijene ni rokove kojih ovdje nema:
 ${articles.map((a) => `- [${a.audience}] ${a.q}\n  ${a.a}`).join('\n')}
+
+GDJE JE ŠTA NA SAJTU I U APLIKACIJI — kad korisnik pita gdje ili kako nešto uradi, reci tačno gdje to nađe (meni i naziv) i dodaj putanju u zagradi, npr. (/account/novcanik). Pomozi sa svakom opcijom s ove liste:
+${guide.map((g) => `- ${g.title} (${g.path}): ${g.where}`).join('\n')}
 
 Činjenice o korisniku s kojim razgovaraš: ${profile ? JSON.stringify(profile) : 'nepoznato'}.
 
@@ -50,6 +54,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}))
   const message = String(body.message || '').slice(0, 2000).trim()
   const articles: Article[] = Array.isArray(body.articles) ? body.articles.slice(0, 60) : []
+  const guide: GuideEntry[] = Array.isArray(body.guide) ? body.guide.slice(0, 60).map((g: GuideEntry) => ({ path: String(g.path || '').slice(0, 80), title: String(g.title || '').slice(0, 80), where: String(g.where || '').slice(0, 300) })) : []
   if (!message) return json({ error: 'empty' }, 400)
   if (!ANTHROPIC_KEY) return json({ configured: false })
 
@@ -76,7 +81,7 @@ Deno.serve(async (req) => {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: MODEL, max_tokens: 600, system: systemPrompt(articles, safeProfile), messages: merged }),
+    body: JSON.stringify({ model: MODEL, max_tokens: 600, system: systemPrompt(articles, guide, safeProfile), messages: merged }),
   })
   if (!res.ok) return json({ configured: true, error: `anthropic ${res.status}: ${(await res.text()).slice(0, 300)}` }, 502)
   const data = await res.json()

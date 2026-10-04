@@ -3,7 +3,7 @@
 //
 //   node scripts/brand-assets.mjs && npm run app:assets
 //
-// The mark: a "P" whose bowl is a gold badge with a navy check — "posao" + "riješeno".
+// The mark: a rounded gold "Z" whose bottom stroke ends in a gold badge with a navy check — "zadatak" + "riješeno".
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -25,13 +25,11 @@ const GOLD_DEEP = '#d99a00'
 /** The mark itself, drawn in a 1000×1000 box centred on (500, 500). */
 const mark = (scale = 1, x = 0, y = 0) => `
   <g transform="translate(${x} ${y}) scale(${scale})">
-    <!-- stem -->
-    <rect x="248" y="190" width="150" height="598" rx="75" fill="url(#gold)" />
-    <!-- bowl / badge -->
-    <circle cx="560" cy="418" r="228" fill="url(#gold)" />
-    <circle cx="560" cy="418" r="150" fill="${NAVY}" />
-    <!-- check -->
-    <path d="M478 424 L540 486 L650 358" fill="none" stroke="${GOLD}" stroke-width="58" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Z -->
+    <path d="M330 265 H713 L330 713 H560" fill="none" stroke="url(#gold)" stroke-width="150" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- badge + check: "zadatak riješen" -->
+    <circle cx="706" cy="713" r="96" fill="url(#gold)" />
+    <path d="M664 716 L695 747 L748 685" fill="none" stroke="${NAVY}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" />
   </g>`
 
 const defs = `

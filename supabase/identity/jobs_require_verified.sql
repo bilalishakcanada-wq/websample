@@ -1,29 +1,31 @@
 -- ============================================================================
--- Posao objavljuje svako, bez lične karte; ponude i dalje samo potvrđeni izvođači
+-- Posao objavljuju SAMO korisnici s potvrđenim identitetom — bez prelaznog roka
 -- ----------------------------------------------------------------------------
 -- NIJE PRIMIJENJENO. Čeka izričito odobrenje vlasnika.
 --
--- Odluka vlasnika (04.10.2026.): verifikaciju identiteta prolaze samo izvođači.
--- Klijent objavljuje posao bez ikakve provjere.
+-- Danas objava posla koristi identity_ok(), koja pušta i svaki nalog napravljen
+-- prije grandfather_before (25.09.2026. 16:00 UTC). Ovo uvodi za OBJAVU POSLA
+-- isto pravilo koje ponude imaju od 26.09.2026. (bids_require_verified.sql):
+-- odobren identitet ili član tima (ADMIN / MODERATOR).
 --
--- Danas objava posla koristi identity_ok() s prelaznim rokom: nalozi otvoreni
--- poslije 25.09.2026. 16:00 UTC ne mogu objaviti posao bez potvrđene lične
--- karte. Ova datoteka:
---   * isključuje prekidač verification_policy.require_for_jobs;
---   * listings_insert_own: vlastiti user_id, nalog nije suspendovan, a identitet
---     samo ako se prekidač ikad opet uključi (tada strogo, identity_verified());
---   * trigger listings_identity_gate daje jasne poruke (SUSPENDED / VERIFIKACIJA_POTREBNA);
---   * can_post_job() — sučelje pita istu funkciju koju pita baza.
+-- Usput vraća i provjeru suspenzije: migracija identity_gate_on_jobs_and_bids
+-- (25.09.2026.) je pri ponovnom pravljenju listings_insert_own izostavila
+-- "not is_suspended()", pa suspendovan nalog i danas može objaviti posao.
 --
--- Vraća i provjeru suspenzije pri objavi: identity_gate_on_jobs_and_bids
--- (25.09.2026.) ju je izostavila, pa suspendovan nalog danas može objaviti posao.
+-- Pregledanje ostaje otvoreno svima. Provjera ide samo na INSERT u listings:
+-- već objavljene poslove vlasnik i dalje može uređivati, zatvarati i brisati.
 --
--- PONUDE se ne mijenjaju: bids_require_verified.sql (produkcija od 26.09.2026.)
--- i dalje traži odobren identitet ili člana tima.
+-- Oslanja se na:
+--   * migration_identity_state_protection.sql (produkcija od 25.09.2026.) —
+--     korisnik ne može sam sebi upisati identity_state = 'approved';
+--   * identity_verified() iz bids_require_verified.sql (produkcija od 26.09.2026.);
+--     ovdje se ponavlja da datoteka radi i sama.
+--
+-- Sučelje pita can_post_job(); dok ova datoteka nije primijenjena, pada nazad
+-- na identity_ok() — tako forma uvijek govori isto što i baza.
 -- Idempotentno: može se pokrenuti više puta.
 -- ============================================================================
 
--- Iz bids_require_verified.sql (već na produkciji); ponavlja se da datoteka radi i sama.
 create or replace function public.identity_verified(p_user uuid default auth.uid())
 returns boolean
 language sql stable security definer set search_path = public as $fn$
@@ -38,25 +40,19 @@ $fn$;
 revoke execute on function public.identity_verified(uuid) from public, anon;
 grant execute on function public.identity_verified(uuid) to authenticated;
 
-update public.verification_policy set require_for_jobs = false where id;
-
--- Smije li korisnik objaviti posao (bez obzira na suspenziju): da, osim ako se
--- prekidač ikad opet uključi — tada samo odobren identitet ili tim.
+-- Jedno mjesto koje kaže smije li korisnik objaviti posao (pravila + identitet).
+-- Sučelje i baza pitaju istu funkciju.
 create or replace function public.can_post_job(p_user uuid default auth.uid())
 returns boolean
 language sql stable security definer set search_path = public as $fn$
-  select not coalesce((select require_for_jobs from public.verification_policy where id), false)
+  select not coalesce((select require_for_jobs from public.verification_policy where id), true)
          or public.identity_verified(p_user);
 $fn$;
 
 revoke execute on function public.can_post_job(uuid) from public, anon;
 grant execute on function public.can_post_job(uuid) to authenticated;
 
-drop policy if exists listings_insert_own on public.listings;
-create policy listings_insert_own on public.listings for insert to authenticated
-  with check (auth.uid() = user_id and not public.is_suspended() and public.can_post_job());
-
--- Jasna poruka prije RLS-a; sučelje je prevodi.
+-- Jasna poruka (VERIFIKACIJA_POTREBNA) prije RLS-a; sučelje je prevodi i daje link.
 create or replace function public.guard_identity_on_listing()
 returns trigger
 language plpgsql security definer set search_path = public as $fn$
@@ -74,3 +70,10 @@ end $fn$;
 drop trigger if exists listings_identity_gate on public.listings;
 create trigger listings_identity_gate before insert on public.listings
   for each row execute function public.guard_identity_on_listing();
+
+-- Restriktivna politika: vrijedi uz listings_insert_own (vlastiti user_id), koja
+-- ostaje netaknuta. Trigger iznad daje poruku; politika drži i kad bi trigger
+-- nekad bio uklonjen.
+drop policy if exists listings_insert_identity on public.listings;
+create policy listings_insert_identity on public.listings as restrictive for insert to authenticated
+  with check (public.can_post_job() and not public.is_suspended());

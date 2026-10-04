@@ -1,4 +1,4 @@
--- Two-way matching algorithm for Poso.ba.
+-- Two-way matching algorithm for Zadatak.
 --
 -- Design notes (the marketplace is young: few reviews, few bids), so the
 -- scoring has to be useful on day one and improve as data arrives:

@@ -16,7 +16,7 @@ function SwBridge() {
     if (isUpdateReady()) window.location.reload()
   }, [pathname])
   useEffect(() => {
-    const onReady = () => toast('Nova verzija Poso.ba je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })
+    const onReady = () => toast('Nova verzija Zadatka je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })
     window.addEventListener(UPDATE_EVENT, onReady)
     return () => window.removeEventListener(UPDATE_EVENT, onReady)
   }, [])

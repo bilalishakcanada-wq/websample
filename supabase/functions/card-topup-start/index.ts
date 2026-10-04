@@ -1,8 +1,8 @@
-// Poso.ba — start a card top-up through Monri WebPay Form.
+// Zadatak — start a card top-up through Monri WebPay Form.
 //
 // The browser calls this with { amount } (KM). We open a card_payments row and
 // return the signed form fields; the browser POSTs them to Monri, where the
-// card is entered (card data never touches Poso.ba). Money reaches the balance
+// card is entered (card data never touches Zadatak). Money reaches the balance
 // only through card-topup-callback, never through the return redirect.
 //
 // Secrets (Supabase → Edge Functions → Secrets):
@@ -72,14 +72,14 @@ Deno.serve(async (req) => {
 
   const currency = 'BAM'
   const fields: Record<string, string> = {
-    ch_full_name: (profile.full_name || 'Poso.ba korisnik').slice(0, 30),
+    ch_full_name: (profile.full_name || 'Zadatak korisnik').slice(0, 30),
     ch_address: 'N/A',
     ch_city: (profile.city || 'Sarajevo').slice(0, 30),
     ch_zip: '71000',
     ch_country: 'BA',
     ch_phone: (profile.phone || '000000').slice(0, 30),
     ch_email: (profile.email || user.email || '').slice(0, 100),
-    order_info: `Poso.ba uplata na balans ${amount.toFixed(2)} KM`,
+    order_info: `Zadatak uplata na balans ${amount.toFixed(2)} KM`,
     order_number: orderNumber,
     amount: String(amountMinor),
     currency,

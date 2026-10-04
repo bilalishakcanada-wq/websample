@@ -92,7 +92,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
       ))}
 
       <button type="button" className="ap-menu-row ap-menu-logout" onClick={async () => { await logout(); navigate('/') }}><LogOut size={18} /><span>Odjavi se</span></button>
-      <p className="ap-version">Poso.ba · beta</p>
+      <p className="ap-version">Zadatak · beta</p>
     </div>
   )
 }

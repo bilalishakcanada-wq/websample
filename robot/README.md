@@ -1,4 +1,4 @@
-# Robot za testiranje Poso.ba
+# Robot za testiranje Zadatka
 
 Robot otvara sajt kao čovjek: na računaru, na telefonu, na malom Android telefonu (360 px) i unutar
 Android aplikacije, kao gost, novi korisnik, klijent, izvođač i administrator. Na svakoj stranici

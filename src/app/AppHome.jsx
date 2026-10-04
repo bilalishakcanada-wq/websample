@@ -100,7 +100,7 @@ function PosterHome({ firstName }) {
         <MyOpenJobs userId={user.id} />
         <Link to="/account/profil" className="ap-promo" onClick={() => haptic('light')}>
           <div>
-            <span className="ap-promo-eyebrow">Poso.ba za izvođače</span>
+            <span className="ap-promo-eyebrow">Zadatak za izvođače</span>
             <strong>Zaradi uz poslove u svom gradu</strong>
             <p>Pošalji ponudu za minutu — klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
             <em>Postani izvođač →</em>

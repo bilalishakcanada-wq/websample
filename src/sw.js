@@ -1,5 +1,5 @@
 /* eslint-env serviceworker */
-// Poso.ba service worker: offline shell (workbox precache) + Web Push.
+// Zadatak service worker: offline shell (workbox precache) + Web Push.
 // Built by vite-plugin-pwa (injectManifest) — self.__WB_MANIFEST is filled at build time.
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
 import { NavigationRoute, registerRoute } from 'workbox-routing'
@@ -51,8 +51,8 @@ self.addEventListener('activate', (event) => { event.waitUntil(caches.delete('po
 // ---------- Web Push ----------
 self.addEventListener('push', (event) => {
   let data = {}
-  try { data = event.data ? event.data.json() : {} } catch { data = { title: 'Poso.ba', body: event.data?.text() || '' } }
-  const title = data.title || 'Poso.ba'
+  try { data = event.data ? event.data.json() : {} } catch { data = { title: 'Zadatak', body: event.data?.text() || '' } }
+  const title = data.title || 'Zadatak'
   const options = {
     body: data.body || '',
     icon: `${BASE}icons/icon-192.png`,
@@ -70,7 +70,7 @@ self.addEventListener('notificationclick', (event) => {
   const target = event.notification.data?.url || `${self.location.origin}${BASE}`
   event.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-    // reuse an open Poso.ba tab/app window when there is one
+    // reuse an open Zadatak tab/app window when there is one
     for (const client of all) {
       if ('focus' in client) {
         await client.focus()

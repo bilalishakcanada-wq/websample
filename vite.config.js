@@ -212,8 +212,8 @@ export default defineConfig({
       // lets the service worker (and push) be tested on the dev server too
       devOptions: { enabled: true, type: 'module', suppressWarnings: true },
       manifest: {
-        name: 'Poso.ba — Marketplace za usluge',
-        short_name: 'Poso.ba',
+        name: 'Zadatak — Marketplace za usluge',
+        short_name: 'Zadatak',
         description: 'Pronađite ili ponudite lokalne usluge u Bosni i Hercegovini.',
         lang: 'bs',
         start_url: base,

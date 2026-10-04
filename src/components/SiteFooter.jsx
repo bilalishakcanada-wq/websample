@@ -72,7 +72,7 @@ function SiteFooter() {
           <div className="site-footer-brand">
             <BrandMark size={42} className="brand-mark" />
             <div>
-              <strong>Poso.ba</strong>
+              <strong>Zadatak</strong>
               <span>Marketplace za usluge u Bosni i Hercegovini</span>
             </div>
           </div>
@@ -81,7 +81,7 @@ function SiteFooter() {
             <span><MessageCircle size={14} /> Zaštićena komunikacija</span>
             <a href="mailto:podrska@poso.ba"><Mail size={14} /> podrska@poso.ba</a>
           </div>
-          <span className="site-footer-copy">© {new Date().getFullYear()} Poso.ba. Sva prava zadržana.</span>
+          <span className="site-footer-copy">© {new Date().getFullYear()} Zadatak. Sva prava zadržana.</span>
         </div>
       </div>
     </footer>

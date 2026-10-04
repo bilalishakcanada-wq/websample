@@ -54,7 +54,7 @@ jobs:
       - name: Build web bundle (offline fallback inside the app)
         env:
           VITE_BASE: /
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
           VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
@@ -129,10 +129,10 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           tag_name: android-beta
-          name: Poso.ba Android beta
+          name: Zadatak Android beta
           prerelease: true
           body: |
-            Najnovija beta verzija Poso.ba aplikacije za Android (build ${{ github.run_number }}).
+            Najnovija beta verzija aplikacije Zadatak za Android (build ${{ github.run_number }}).
 
             **Instalacija:** preuzmi `poso-ba-beta.apk` na telefon → otvori → dozvoli instalaciju iz nepoznatih izvora → Instaliraj.
           files: out/*

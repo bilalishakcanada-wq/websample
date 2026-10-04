@@ -47,7 +47,7 @@ function HelpPage() {
         <HelpArt side="left" />
         <HelpArt side="right" />
         <div className="help-hero-inner">
-          <span className="help-eyebrow">Poso.ba pomoć</span>
+          <span className="help-eyebrow">Zadatak pomoć</span>
           <h1>Kako ti možemo pomoći?</h1>
           <label className="help-hero-search">
             <Search size={20} />

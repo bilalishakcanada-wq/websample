@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Poso.ba test robot: opens the site like a person would, on a desktop, a phone, a small phone and
+// Zadatak test robot: opens the site like a person would, on a desktop, a phone, a small phone and
 // inside the Android app, as a guest, a new account, a client, a worker and an admin. On every
 // screen it follows the links, presses the buttons, and writes down whatever goes wrong:
 // JavaScript crashes, console errors, failed requests, error screens, pages that scroll sideways,
@@ -433,7 +433,7 @@ function writeReport() {
   const warns = items.filter((f) => f.severity === 'warn')
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify({ base: BASE, stats, findings: items }, null, 2))
   const lines = [
-    '# Poso.ba robot report',
+    '# Zadatak robot report',
     '',
     `Site: ${BASE}  ·  ${stats.pages} pages and ${stats.clicks} button presses in ${Math.round((Date.now() - stats.started) / 1000)} s  ·  profiles: ${PROFILE_NAMES.join(', ')}  ·  roles: ${ROLE_NAMES.join(', ')}`,
     '',

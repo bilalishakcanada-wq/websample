@@ -31,7 +31,7 @@ const call = async (fn, args) => {
   return data
 }
 
-/** Poso.ba Pay: money is held on the platform from acceptance until the client releases it. */
+/** Zadatak Pay: money is held on the platform from acceptance until the client releases it. */
 export const paymentService = {
   async forListing(listingId) {
     const { data, error } = await supabase.from('job_payments').select('*').eq('listing_id', listingId).maybeSingle()

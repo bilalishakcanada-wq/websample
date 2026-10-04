@@ -26,7 +26,7 @@ const FILTERS = [
 ]
 
 const SAFETY_TIPS = [
-  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Poso.ba poruke — tako je sve zabilježeno ako nešto krene po zlu.',
+  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Zadatak poruke — tako je sve zabilježeno ako nešto krene po zlu.',
   'Broj telefona i kontakt razmjenjujete tek kad je ponuda prihvaćena — do tada ih platforma automatski uklanja.',
   'Nikad ne plaćajte unaprijed van platforme i ne dijelite brojeve kartica ni lične dokumente.',
   'Oružje, droga, falsifikati i slično su zabranjeni — takve poruke se automatski uklanjaju, a nalog dobija opomenu.',
@@ -187,7 +187,7 @@ function MessagesPage() {
     const scan = scanChatMessage(text, active.contacts_allowed)
     if (!scan.clean) {
       setError(scan.kinds.includes('prohibited')
-        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Poso.ba.'
+        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Zadatku.'
         : `${contactInfoMessage(scan, 'poruka')} Kontakt možete razmijeniti čim ponuda bude prihvaćena.`)
       return
     }
@@ -329,7 +329,7 @@ function MessagesPage() {
                   <div className="chat-safety-banner">
                     <div>
                       <strong>Kako prepoznati prevaru i sigurno sarađivati?</strong>
-                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Poso.ba poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
+                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Zadatak poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
                     </div>
                     <button type="button" onClick={hideTips} aria-label="Zatvori"><X size={18} /></button>
                   </div>

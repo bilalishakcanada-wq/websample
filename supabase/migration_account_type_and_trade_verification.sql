@@ -1,4 +1,4 @@
--- Signup now asks how the person wants to use Poso.ba and, for tradespeople,
+-- Signup now asks how the person wants to use Zadatak and, for tradespeople,
 -- which trades they offer. Verification is tied to a specific trade so a
 -- profile can say "Verifikovan majstor — Električar" rather than a generic
 -- "verified" stamp.

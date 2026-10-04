@@ -10,7 +10,7 @@ import { publicError } from '../utils/validation'
  */
 /**
  * Gruba oznaka uređaja: platforma, jezik, rezolucija, vremenska zona.
- * Nije praćenje po webu — ne izlazi iz Poso.ba i služi samo da se vidi kad isti
+ * Nije praćenje po webu — ne izlazi iz Zadatka i služi samo da se vidi kad isti
  * uređaj šalje više različitih identiteta.
  */
 function deviceFingerprint() {

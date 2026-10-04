@@ -62,7 +62,7 @@ function DesktopHome() {
       return {
         isLive: true,
         userId: top.user_id,
-        name: top.display_name || 'Korisnik Poso.ba',
+        name: top.display_name || 'Korisnik Zadatka',
         photo: top.avatar_url,
         rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '—',
         reviewLabel: top.review_count > 0 ? `${top.review_count} ${top.review_count === 1 ? 'ocjena' : 'ocjena'}` : 'Nova na platformi',
@@ -208,7 +208,7 @@ function DesktopHome() {
               Objavi posao
             </button>
             <a className="post-task-learn" href="#kako-radi">
-              Pogledaj kako Poso.ba radi <ArrowRight size={15} />
+              Pogledaj kako Zadatak radi <ArrowRight size={15} />
             </a>
           </div>
 
@@ -330,7 +330,7 @@ function DesktopHome() {
           <div className="section-heading centered">
             <div>
               <span className="eyebrow small-eyebrow">Zajednica</span>
-              <h2>{featuredProvider.isLive ? 'Naši izvođači već grade svoj posao ovdje' : 'Pridružite se izvođačima koji zarađuju na Poso.ba'}</h2>
+              <h2>{featuredProvider.isLive ? 'Naši izvođači već grade svoj posao ovdje' : 'Pridružite se izvođačima koji zarađuju na Zadatku'}</h2>
             </div>
           </div>
           <div className="featured-tasker-card">
@@ -393,7 +393,7 @@ function DesktopHome() {
             {providers.map((provider) => {
               const isLive = !provider.isDemo
               const key = isLive ? provider.user_id : provider.name
-              const name = isLive ? (provider.display_name || 'Korisnik Poso.ba') : provider.name
+              const name = isLive ? (provider.display_name || 'Korisnik Zadatka') : provider.name
               const photo = isLive ? provider.avatar_url : provider.photo
               const badgeLabel = isLive
                 ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? `${provider.badge_count} znački` : 'Aktivan'))
@@ -458,7 +458,7 @@ function DesktopHome() {
           <div className="boss-band-copy">
             <span className="eyebrow small-eyebrow">Zarada</span>
             <h2>Budi svoj šef.</h2>
-            <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Poso.ba.</p>
+            <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Zadatku.</p>
             <ul className="boss-checklist">
               <li><Check size={16} /> Besplatan pristup hiljadama poslova</li>
               <li><Check size={16} /> Bez pretplate za osnovno korištenje</li>
@@ -466,7 +466,7 @@ function DesktopHome() {
               <li><Check size={16} /> Izgradi svoj biznis i bazu klijenata</li>
             </ul>
             <button type="button" className="boss-band-button" onClick={() => navigate('/zaradi')}>
-              Zaradi sa Poso.ba <ArrowRight size={16} />
+              Zaradi sa Zadatkom <ArrowRight size={16} />
             </button>
           </div>
           <div className="boss-band-visual">
@@ -509,7 +509,7 @@ function DesktopHome() {
             <div className="fee-card">
               <span className="fee-card-eyebrow">Sigurno plaćanje</span>
               <strong className="fee-card-big">Balans</strong>
-              <p>Klijent uplati unaprijed, novac stoji na Poso.ba dok posao nije završen, pa se oslobađa izvođaču. Spor? Tim pregleda i odluči.</p>
+              <p>Klijent uplati unaprijed, novac stoji na Zadatku dok posao nije završen, pa se oslobađa izvođaču. Spor? Tim pregleda i odluči.</p>
               <ul>
                 <li><Check size={15} /> Nema plaćanja unaprijed „na ruke“</li>
                 <li><Check size={15} /> Povrat kod otkaza prije početka</li>

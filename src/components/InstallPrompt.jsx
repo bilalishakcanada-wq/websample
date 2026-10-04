@@ -44,7 +44,7 @@ function InstallPrompt() {
     <div className="install-banner" role="dialog" aria-label="Instaliraj aplikaciju">
       <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" width="44" height="44" />
       <div>
-        <strong>Poso.ba kao aplikacija</strong>
+        <strong>Zadatak kao aplikacija</strong>
         {deferred
           ? <span>Brže otvaranje, cijeli ekran, obavijesti — bez app storea.</span>
           : <span>Klikni <Share size={13} /> <b>Podijeli</b> pa <b>„Dodaj na početni ekran“</b>.</span>}

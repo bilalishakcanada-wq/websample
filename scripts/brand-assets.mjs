@@ -1,4 +1,4 @@
-// Renders the Poso.ba brand mark into the source PNGs that `@capacitor/assets` turns into
+// Renders the Zadatak brand mark into the source PNGs that `@capacitor/assets` turns into
 // iOS/Android icons + splash screens (assets/icon*.png, assets/splash*.png) and the PWA icons.
 //
 //   node scripts/brand-assets.mjs && npm run app:assets
@@ -68,7 +68,7 @@ const splash = (dark) => svg(2732, `
   <rect width="2732" height="2732" fill="${dark ? NAVY_DEEP : NAVY}" />
   <rect width="2732" height="2732" fill="url(#glow)" />
   ${mark(0.62, 1056, 890)}
-  <text x="1366" y="1690" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Poso.ba</text>
+  <text x="1366" y="1690" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Zadatak</text>
   <text x="1366" y="1790" text-anchor="middle" font-family="Manrope" font-weight="600" font-size="62" fill="#ffffff" fill-opacity="0.72">Objavi posao. Riješeno.</text>`)
 
 const out = (name) => resolve(root, 'assets', name)

@@ -1,4 +1,4 @@
-# Poso.ba — beta testing (kratki vodič)
+# Zadatak — beta testing (kratki vodič)
 
 ## Link za testere
 **https://bilalishakcanada-wq.github.io/websample/**
@@ -7,7 +7,7 @@ Svaki push na `main` automatski gradi i objavljuje novu verziju (GitHub Actions 
 
 ## Instalacija na telefon (bez App Store-a)
 - **iPhone (Safari):** otvori link → *Dijeli* (ikona kvadrata sa strelicom) → **Dodaj na početni ekran**. Aplikacija se otvara preko cijelog ekrana, bez Safari trake.
-- **Android (Chrome):** otvori link → pojavi se traka „Instaliraj Poso.ba“ (ili meni ⋮ → **Instaliraj aplikaciju**).
+- **Android (Chrome):** otvori link → pojavi se traka „Instaliraj Zadatak“ (ili meni ⋮ → **Instaliraj aplikaciju**).
 
 Na telefonu aplikacija počinje ekranom dobrodošlice → „Šta ti je glavni cilj?“ → 3 kratka ekrana uvoda → objava posla ili pregled poslova (registracija se traži tek na kraju).
 
@@ -24,7 +24,7 @@ Sve ide u zvono u aplikaciji + push (kad je uključen) + link na pravi ekran:
 ## Šta testirati
 1. Registracija (email ili Google) → popuni profil → odaberi tip naloga.
 2. Objavi posao sa slikama (5 koraka) → „Posao je objavljen!“.
-3. Drugi nalog: pošalji ponudu → prvi nalog: prihvati ponudu (Poso.ba Pay rezerviše iznos sa balansa — admin može dodati balans u *Admin → Balans*).
+3. Drugi nalog: pošalji ponudu → prvi nalog: prihvati ponudu (Zadatak Pay rezerviše iznos sa balansa — admin može dodati balans u *Admin → Balans*).
 4. Poruke između naloga (Pravilo #1 automatski uklanja brojeve/emailove).
 5. Izvođač: „Posao je urađen — zatraži isplatu“ → klijent: „Oslobodi“ → provjeri *Balans* na oba naloga.
 6. Recenzija, značke, javni profil, pomoć + chat podrške.
@@ -51,7 +51,7 @@ Svaki push na `main` (ili ručno: GitHub → *Actions* → **Android app** → *
 Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare (kad su postavljeni GitHub secrets `ANDROID_BETA_KEYSTORE_BASE64` i `ANDROID_BETA_KEYSTORE_PASSWORD`, svaka beta je potpisana istim ključem). Ko je beta instalirao prije ove promjene, mora je jednom deinstalirati.
 
 ### Android — Google Play (interno testiranje)
-1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Poso.ba.
+1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Zadatak.
 2. Napravi ključ za potpis (jednom, čuvaj ga!):
    ```bash
    keytool -genkeypair -v -keystore poso-release.keystore -alias poso -keyalg RSA -keysize 2048 -validity 10000
@@ -60,7 +60,7 @@ Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ →
 4. Pokreni workflow → u *Releases* se pojavi i `poso-ba-release.aab` → Play Console → *Testing → Internal testing → Create release* → upload `.aab` → dodaj emailove testera → podijeli link.
 
 ### iOS — TestFlight
-1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Poso.ba, Bundle ID `ba.poso.app`.
+1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Zadatak, Bundle ID `ba.poso.app`.
 2. U Xcodeu: `open ios/App/App.xcodeproj` → **App** → *Signing & Capabilities* → tvoj tim → gore odaberi **Any iOS Device (arm64)** → *Product → Archive* → *Distribute App → TestFlight & App Store* → Upload.
 3. App Store Connect → *TestFlight* → dodaj testere (email) ili uključi **Public link** i pošalji ga. Testeri instaliraju aplikaciju TestFlight i otvore link.
 4. Za svoj iPhone odmah (bez TestFlight-a): spoji kabl, odaberi telefon u Xcodeu → ▶ Run (na telefonu: *Settings → General → VPN & Device Management → Trust*).

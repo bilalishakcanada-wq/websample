@@ -1,4 +1,4 @@
-// The money path on phones, the way most people use Poso.ba: the client posts a job through the
+// The money path on phones, the way most people use Zadatak: the client posts a job through the
 // one-question-per-screen flow, the worker sends an offer from the phone job page, the client
 // accepts and secures the payment, and both write in the chat. Runs on an iPhone and on a small 360 px Android screen.
 import { test, expect, devices } from '@playwright/test'
@@ -89,7 +89,7 @@ for (const [screen, phone] of Object.entries(SCREENS)) test.describe.serial(`Tel
     const pay = client.getByRole('button', { name: /Prihvati i osiguraj/ })
     await expect(pay).toBeInViewport()
     await pay.click()
-    await expect(client.getByText(/osigurano na Poso\.ba|Uplata je osigurana/).first()).toBeVisible({ timeout: 20_000 })
+    await expect(client.getByText(/osigurano na Zadatku|Uplata je osigurana/).first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('poruke na telefonu stižu odmah', async () => {

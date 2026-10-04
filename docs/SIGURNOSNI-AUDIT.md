@@ -1,4 +1,4 @@
-# Sigurnosni audit — Poso.ba (22.09.2026.)
+# Sigurnosni audit — Zadatak (22.09.2026.)
 
 Audit je rađen nad **živom arhitekturom**, ne nad pretpostavljenom: pregledane su
 RLS politike, sve `SECURITY DEFINER` funkcije, prava na kolone, Realtime

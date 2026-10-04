@@ -22,7 +22,7 @@ export function appShellStub() {
   const method = (plugin, name) => {
     if (name === 'addListener') return async () => handle
     if (plugin === 'Network' && name === 'getStatus') return async () => ({ connected: true, connectionType: 'wifi' })
-    if (plugin === 'App' && name === 'getInfo') return async () => ({ name: 'Poso.ba', id: 'ba.poso.app', build: '1', version: '1.0.0' })
+    if (plugin === 'App' && name === 'getInfo') return async () => ({ name: 'Zadatak', id: 'ba.poso.app', build: '1', version: '1.0.0' })
     if (plugin === 'Device' && name === 'getInfo') return async () => ({ platform: 'android', operatingSystem: 'android' })
     return async () => ({ ...handle, value: null })
   }

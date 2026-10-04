@@ -53,7 +53,7 @@ jobs:
         run: npm run build
         env:
           VITE_NO_PWA: '1'
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
       - name: Install Chromium
         if: steps.gate.outputs.armed == 'true'
@@ -105,7 +105,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE: /
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
       - name: Create the Pages project once
         if: steps.cf.outputs.ready == 'true'
@@ -127,7 +127,7 @@ jobs:
       - name: Build (base /websample/)
         env:
           VITE_BASE: /websample/
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
           VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
           # the anon key is a public client key (it ships inside the JS bundle either way)

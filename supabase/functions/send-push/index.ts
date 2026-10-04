@@ -1,4 +1,4 @@
-// Poso.ba — Web Push delivery.
+// Zadatak — Web Push delivery.
 //
 // Called by the on_notification_push trigger (x-sweep-key) for every in-app
 // notification whose user has at least one subscribed device. Encrypts the

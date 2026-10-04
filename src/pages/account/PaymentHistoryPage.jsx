@@ -22,7 +22,7 @@ function PaymentHistoryPage() {
   return (
     <div className="account-section">
       <div className="account-section-head"><h1>Historija plaćanja</h1></div>
-      <p className="muted-text">Svaki posao plaćen kroz Poso.ba Pay: novac se rezerviše kad klijent prihvati ponudu i isplaćuje izvođaču kad klijent potvrdi da je posao završen.</p>
+      <p className="muted-text">Svaki posao plaćen kroz Zadatak Pay: novac se rezerviše kad klijent prihvati ponudu i isplaćuje izvođaču kad klijent potvrdi da je posao završen.</p>
 
       <div className="pay-summary">
         <div><span>Zarađeno (neto)</span><strong>{formatKM(earned)}</strong></div>

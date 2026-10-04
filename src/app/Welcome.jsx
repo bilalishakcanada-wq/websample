@@ -37,7 +37,7 @@ function Welcome() {
   return (
     <div className="wl" style={{ '--wl-color': scene.color }}>
       <div className="wl-stage" key={scene.key}>
-        <div className="wl-brand"><BrandMark size={28} tile={false} /> Poso.ba</div>
+        <div className="wl-brand"><BrandMark size={28} tile={false} /> Zadatak</div>
         <ArcHeadline top={`URADI ${scene.word}`} bottom="ODMAH." id="wl-arc" as="div" className="wl-arc" />
         <div className="wl-card"><Mascot /></div>
         <div className="wl-dots" aria-hidden="true">
@@ -46,7 +46,7 @@ function Welcome() {
       </div>
 
       <div className="wl-sheet">
-        <p>Dobro došli na Poso.ba</p>
+        <p>Dobro došli na Zadatak</p>
         <Link to="/start" className="wl-btn wl-btn-primary" onClick={() => haptic('light')}>Počni</Link>
         <Link to="/login" className="wl-btn wl-btn-dark">Prijava</Link>
         <Link to="/search" className="wl-link">Samo pogledaj poslove →</Link>

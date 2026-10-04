@@ -69,7 +69,7 @@ function SettingsPage() {
               {device === 'on' && 'Prima obavijesti.'}
               {device === 'off' && 'Još ne prima obavijesti — uključi ih ovdje.'}
               {device === 'blocked' && 'Obavijesti su blokirane u pregledniku. Dozvoli ih u postavkama sajta pa pokušaj ponovo.'}
-              {device === 'install' && 'Na iPhoneu prvo dodaj Poso.ba na početni ekran (Dijeli → Dodaj na početni ekran), pa uključi obavijesti ovdje.'}
+              {device === 'install' && 'Na iPhoneu prvo dodaj Zadatak na početni ekran (Dijeli → Dodaj na početni ekran), pa uključi obavijesti ovdje.'}
               {device === 'unsupported' && 'Ovaj preglednik ne podržava push obavijesti.'}
               {device === 'loading' && '…'}
             </span>

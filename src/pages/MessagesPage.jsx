@@ -26,7 +26,7 @@ const FILTERS = [
 ]
 
 const SAFETY_TIPS = [
-  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Poso.ba poruke — tako je sve zabilježeno ako nešto krene po zlu.',
+  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Zadatak poruke — tako je sve zabilježeno ako nešto krene po zlu.',
   'Broj telefona i kontakt razmjenjujete tek kad je ponuda prihvaćena — do tada ih platforma automatski uklanja.',
   'Nikad ne plaćajte unaprijed van platforme i ne dijelite brojeve kartica ni lične dokumente.',
   'Oružje, droga, falsifikati i slično su zabranjeni — takve poruke se automatski uklanjaju, a nalog dobija opomenu.',
@@ -77,7 +77,7 @@ function MessagesPage() {
   const loading = inboxQuery.isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('poso-chat-tips') !== 'hidden' } catch { return true } })
+  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('zadatak-chat-tips') !== 'hidden' } catch { return true } })
   const listRef = useRef(null)
   const inputRef = useRef(null)
   const imageRef = useRef(null)
@@ -98,7 +98,7 @@ function MessagesPage() {
   const chatState = active?.chat_state || 'open'
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
-  // and the rows are patched locally: markRead's 'poso:messages-read' event already refreshes inbox + badge
+  // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
   useEffect(() => {
     if (!activeId || !threadQuery.data || markingRef.current) return
     const ids = threadQuery.data.filter((row) => row.receiver_id === user.id && !row.read_at).map((row) => row.id)
@@ -187,7 +187,7 @@ function MessagesPage() {
     const scan = scanChatMessage(text, active.contacts_allowed)
     if (!scan.clean) {
       setError(scan.kinds.includes('prohibited')
-        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Poso.ba.'
+        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Zadatku.'
         : `${contactInfoMessage(scan, 'poruka')} Kontakt možete razmijeniti čim ponuda bude prihvaćena.`)
       return
     }
@@ -244,7 +244,7 @@ function MessagesPage() {
     }
   }
 
-  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('poso-chat-tips', 'hidden') } catch { /* ignore */ } }
+  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('zadatak-chat-tips', 'hidden') } catch { /* ignore */ } }
 
   // group the thread by day for separators
   const grouped = useMemo(() => {
@@ -329,7 +329,7 @@ function MessagesPage() {
                   <div className="chat-safety-banner">
                     <div>
                       <strong>Kako prepoznati prevaru i sigurno sarađivati?</strong>
-                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Poso.ba poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
+                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Zadatak poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
                     </div>
                     <button type="button" onClick={hideTips} aria-label="Zatvori"><X size={18} /></button>
                   </div>

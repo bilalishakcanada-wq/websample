@@ -7,7 +7,7 @@ function AuthLayout({ title, subtitle, children, footer }) {
     <div className="auth-shell">
       <Link to="/" className="auth-logo">
         <BrandMark size={42} className="brand-mark" />
-        <span className="brand-name">Poso.ba</span>
+        <span className="brand-name">Zadatak</span>
       </Link>
       <div className="auth-art" aria-hidden="true"><DoneMascot /></div>
 

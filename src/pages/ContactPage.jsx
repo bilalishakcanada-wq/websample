@@ -22,7 +22,7 @@ function ContactPage() {
         <aside className="contact-side">
           <div className="info-card">
             <Mail size={20} /><strong>Email</strong>
-            <p><a href="mailto:podrska@poso.ba">podrska@poso.ba</a></p>
+            <p>Piši kroz formu na ovoj stranici — odgovor stiže na email koji upišeš.</p>
           </div>
           <button type="button" className="info-card info-card-button" onClick={() => navigate('/pomoc?chat=1')}>
             <MessageCircle size={20} /><strong>Live chat</strong>

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
  * in-app Safari view with its own storage. The PWA generates a nonce before leaving; the callback
  * page (index.html) parks the session under that nonce; the PWA claims it when it is back.
  */
-const KEY = 'poso-oauth-nonce'
+const KEY = 'zadatak-oauth-nonce'
 
 export const isStandaloneWebApp = () =>
   window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true

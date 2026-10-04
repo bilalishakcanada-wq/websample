@@ -1,6 +1,6 @@
 # Sigurnost prijave i podataka (04.10.2026.)
 
-Poso.ba nema svoj server. Sajt je statičan (GitHub Pages), aplikacija učitava taj sajt, a prijava,
+Zadatak nema svoj server. Sajt je statičan (GitHub Pages), aplikacija učitava taj sajt, a prijava,
 baza i fajlovi su na Supabaseu. Zato se dio sigurnosti radi u kodu, a dio u Supabase podešavanjima.
 
 ## 1. Lozinke (bcrypt)
@@ -53,7 +53,7 @@ može se dodati mali server (Cloudflare Worker) koji drži sesiju u HttpOnly kol
 
 - **Edge funkcije** (`delete-account`, `support-assistant`, `moderate-media`, `trust-agent`,
   `card-topup-start`) su do sada odgovarale svakoj stranici (`*`). Sada samo našim:
-  `https://bilalishakcanada-wq.github.io`, `https://poso.ba`, `https://www.poso.ba`, aplikaciji
+  `https://bilalishakcanada-wq.github.io`, aplikaciji
   (`capacitor://localhost`, `https://localhost`) i lokalnom razvoju. Ostale dobiju 403 prije nego
   funkcija išta uradi. Nova domena (npr. nakon promjene imena) dodaje se u Supabase tajnu
   `ALLOWED_ORIGINS`, bez mijenjanja koda. Pozivi bez `Origin` zaglavlja (cron, Monri) rade kao prije.

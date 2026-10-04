@@ -62,15 +62,15 @@ function PaymentMethodsPage() {
 
       {tab === 'pay' && (
         <>
-          <p>Kad prihvatiš ponudu izvođača, posao ćeš plaćati kroz <strong>Poso.ba Pay</strong>. Novac se drži sigurno dok posao nije završen i dok ga ti ne oslobodiš izvođaču.</p>
+          <p>Kad prihvatiš ponudu izvođača, posao ćeš plaćati kroz <strong>Zadatak Pay</strong>. Novac se drži sigurno dok posao nije završen i dok ga ti ne oslobodiš izvođaču.</p>
           <h3 className="account-sub">Kartica</h3>
-          <button type="button" className="account-link-button" onClick={() => setMessage('Poso.ba Pay i plaćanje karticom stižu uskoro — do tada se plaćanje dogovara direktno sa izvođačem.')}>
+          <button type="button" className="account-link-button" onClick={() => setMessage('Zadatak Pay i plaćanje karticom stižu uskoro — do tada se plaćanje dogovara direktno sa izvođačem.')}>
             <PlusCircle size={20} /> Dodaj kreditnu ili debitnu karticu
           </button>
           <h3 className="account-sub">Balans</h3>
           <span className="muted-text">Stanje:</span>
           <strong className="credits-balance">{Number(profile.balance || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} KM</strong>
-          <p className="muted-text">Tvoj novac na Poso.ba — iz njega se naplaćuje naknada za završene poslove. <Link to="/account/novcanik">Otvori balans</Link></p>
+          <p className="muted-text">Tvoj novac na Zadatku — iz njega se naplaćuje naknada za završene poslove. <Link to="/account/novcanik">Otvori balans</Link></p>
         </>
       )}
 

@@ -42,7 +42,7 @@ function JobDetail(props) {
     : isOwner
     ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
-        : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
+        : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Zadatku.' : 'Dogovorite detalje u porukama.']
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
             : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
     : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
@@ -99,7 +99,7 @@ function JobDetail(props) {
           <Link to={`/korisnik/${listing.user_id}`} className="jd-poster">
             <Avatar url={poster?.avatar_url} size={44} />
             <div>
-              <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
+              <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
               <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član!' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '—'}.`}</span>
             </div>
             <ChevronRight size={18} />

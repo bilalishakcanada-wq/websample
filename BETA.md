@@ -1,4 +1,4 @@
-# Poso.ba — beta testing (kratki vodič)
+# Zadatak — beta testing (kratki vodič)
 
 ## Link za testere
 **https://bilalishakcanada-wq.github.io/websample/**
@@ -7,7 +7,7 @@ Svaki push na `main` automatski gradi i objavljuje novu verziju (GitHub Actions 
 
 ## Instalacija na telefon (bez App Store-a)
 - **iPhone (Safari):** otvori link → *Dijeli* (ikona kvadrata sa strelicom) → **Dodaj na početni ekran**. Aplikacija se otvara preko cijelog ekrana, bez Safari trake.
-- **Android (Chrome):** otvori link → pojavi se traka „Instaliraj Poso.ba“ (ili meni ⋮ → **Instaliraj aplikaciju**).
+- **Android (Chrome):** otvori link → pojavi se traka „Instaliraj Zadatak“ (ili meni ⋮ → **Instaliraj aplikaciju**).
 
 Na telefonu aplikacija počinje ekranom dobrodošlice → „Šta ti je glavni cilj?“ → 3 kratka ekrana uvoda → objava posla ili pregled poslova (registracija se traži tek na kraju).
 
@@ -24,7 +24,7 @@ Sve ide u zvono u aplikaciji + push (kad je uključen) + link na pravi ekran:
 ## Šta testirati
 1. Registracija (email ili Google) → popuni profil → odaberi tip naloga.
 2. Objavi posao sa slikama (5 koraka) → „Posao je objavljen!“.
-3. Drugi nalog: pošalji ponudu → prvi nalog: prihvati ponudu (Poso.ba Pay rezerviše iznos sa balansa — admin može dodati balans u *Admin → Balans*).
+3. Drugi nalog: pošalji ponudu → prvi nalog: prihvati ponudu (Zadatak Pay rezerviše iznos sa balansa — admin može dodati balans u *Admin → Balans*).
 4. Poruke između naloga (Pravilo #1 automatski uklanja brojeve/emailove).
 5. Izvođač: „Posao je urađen — zatraži isplatu“ → klijent: „Oslobodi“ → provjeri *Balans* na oba naloga.
 6. Recenzija, značke, javni profil, pomoć + chat podrške.
@@ -46,21 +46,21 @@ Projekat je spreman u `ios/` i `android/` (Capacitor 8; aplikacija učitava live
 ### Android — beta bez Google Play-a (najbrže)
 Svaki push na `main` (ili ručno: GitHub → *Actions* → **Android app** → *Run workflow*) gradi APK. Testerima pošalji ovaj link:
 
-**https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta** → `poso-ba-beta.apk`
+**https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta** → `zadatak-beta.apk`
 
 Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare (kad su postavljeni GitHub secrets `ANDROID_BETA_KEYSTORE_BASE64` i `ANDROID_BETA_KEYSTORE_PASSWORD`, svaka beta je potpisana istim ključem). Ko je beta instalirao prije ove promjene, mora je jednom deinstalirati.
 
 ### Android — Google Play (interno testiranje)
-1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Poso.ba.
+1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Zadatak.
 2. Napravi ključ za potpis (jednom, čuvaj ga!):
    ```bash
-   keytool -genkeypair -v -keystore poso-release.keystore -alias poso -keyalg RSA -keysize 2048 -validity 10000
+   keytool -genkeypair -v -keystore zadatak-release.keystore -alias zadatak -keyalg RSA -keysize 2048 -validity 10000
    ```
-3. GitHub → repo *Settings → Secrets and variables → Actions* → dodaj: `ANDROID_KEYSTORE_BASE64` (`base64 -i poso-release.keystore | pbcopy`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (=`poso`), `ANDROID_KEY_PASSWORD`.
-4. Pokreni workflow → u *Releases* se pojavi i `poso-ba-release.aab` → Play Console → *Testing → Internal testing → Create release* → upload `.aab` → dodaj emailove testera → podijeli link.
+3. GitHub → repo *Settings → Secrets and variables → Actions* → dodaj: `ANDROID_KEYSTORE_BASE64` (`base64 -i zadatak-release.keystore | pbcopy`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (=`poso`), `ANDROID_KEY_PASSWORD`.
+4. Pokreni workflow → u *Releases* se pojavi i `zadatak-release.aab` → Play Console → *Testing → Internal testing → Create release* → upload `.aab` → dodaj emailove testera → podijeli link.
 
 ### iOS — TestFlight
-1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Poso.ba, Bundle ID `ba.poso.app`.
+1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Zadatak, Bundle ID `ba.poso.app`.
 2. U Xcodeu: `open ios/App/App.xcodeproj` → **App** → *Signing & Capabilities* → tvoj tim → gore odaberi **Any iOS Device (arm64)** → *Product → Archive* → *Distribute App → TestFlight & App Store* → Upload.
 3. App Store Connect → *TestFlight* → dodaj testere (email) ili uključi **Public link** i pošalji ga. Testeri instaliraju aplikaciju TestFlight i otvore link.
 4. Za svoj iPhone odmah (bez TestFlight-a): spoji kabl, odaberi telefon u Xcodeu → ▶ Run (na telefonu: *Settings → General → VPN & Device Management → Trust*).
@@ -74,16 +74,16 @@ Cijeli tok posla — objava → ponuda → prihvatanje i osiguranje uplate → p
 - **Da bi gate radio na GitHubu:** repo → *Settings → Secrets and variables → Actions → New repository secret* — dodaj `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`, `E2E_PROVIDER_EMAIL`, `E2E_PROVIDER_PASSWORD` (vrijednosti su u lokalnom `.env.e2e`, koji se ne commituje). Bez njih job samo upozori i deploy prođe.
 - Lokalno (dok dev server radi): `set -a && source .env.e2e && set +a && E2E_BASE_URL=http://localhost:54971 npm run test:e2e`.
 
-## Produkcija: Cloudflare Pages + poso.ba
-Sajt je spreman za pravi domen: `public/_headers` daje ispravne cache/security zaglavlja, `public/_redirects` SPA rute, `robots.txt` + `sitemap.xml` su za `https://poso.ba`. Deploy ide iz GitHub Actions-a (`pages.yml`, job `deploy-cloudflare`) **tek nakon što E2E testovi prođu**, čim postoje tajne.
+## Produkcija: Cloudflare Pages + vlastiti domen (npr. zadatak.ba)
+Sajt je spreman za pravi domen: `public/_headers` daje ispravne cache/security zaglavlja, `public/_redirects` SPA rute, `robots.txt` + `sitemap.xml` su za `https://zadatak.ba`. Deploy ide iz GitHub Actions-a (`pages.yml`, job `deploy-cloudflare`) **tek nakon što E2E testovi prođu**, čim postoje tajne.
 
 Koraci (samo vlasnik, ~30 min):
 1. **Domena:** `.ba` domene se registruju kod ovlaštenih BiH registrara (npr. preko UTIC-a / lokalnih hosting firmi). Ako je već imaš, preskoči.
-2. **Cloudflare nalog** → *Add a site* → `poso.ba` (Free plan) → kod registrara promijeni nameservere na one koje Cloudflare pokaže (propagacija do 24 h).
+2. **Cloudflare nalog** → *Add a site* → `zadatak.ba` (Free plan) → kod registrara promijeni nameservere na one koje Cloudflare pokaže (propagacija do 24 h).
 3. Cloudflare → *My Profile → API Tokens → Create Token* → predložak **„Edit Cloudflare Workers“** (dovoljan za Pages) → kopiraj token. *Account ID* je na naslovnoj strani domene (desno).
 4. GitHub repo → *Settings → Secrets and variables → Actions* → `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
-5. Pokreni workflow (Actions → *Deploy to GitHub Pages* → *Run workflow*). Job `deploy-cloudflare` sam napravi Pages projekat `poso-ba` i objavi build (privremeni link: `https://poso-ba.pages.dev`).
-6. Cloudflare → *Workers & Pages → poso-ba → Custom domains → Set up a custom domain* → `poso.ba` (i `www.poso.ba`). SSL je automatski.
-7. Supabase → *Auth → URL Configuration*: Site URL `https://poso.ba`, u Redirect URLs dodaj `https://poso.ba/**`. Google Cloud → OAuth client → *Authorized JavaScript origins*: dodaj `https://poso.ba`.
-8. Supabase → Edge Functions → secrets: `SITE_URL=https://poso.ba` (linkovi u push obavijestima).
-9. Javi mi kad je domen živ: prebacujem `capacitor.config.json` (`server.url`) na `https://poso.ba`, README/BETA linkove i pravim novi build aplikacija; GitHub Pages ostaje kao rezerva.
+5. Pokreni workflow (Actions → *Deploy to GitHub Pages* → *Run workflow*). Job `deploy-cloudflare` sam napravi Pages projekat `zadatak` i objavi build (privremeni link: `https://zadatak.pages.dev`).
+6. Cloudflare → *Workers & Pages → zadatak → Custom domains → Set up a custom domain* → `zadatak.ba` (i `www.zadatak.ba`). SSL je automatski.
+7. Supabase → *Auth → URL Configuration*: Site URL `https://zadatak.ba`, u Redirect URLs dodaj `https://zadatak.ba/**`. Google Cloud → OAuth client → *Authorized JavaScript origins*: dodaj `https://zadatak.ba`.
+8. Supabase → Edge Functions → secrets: `SITE_URL=https://zadatak.ba` (linkovi u push obavijestima).
+9. Javi mi kad je domen živ: prebacujem `capacitor.config.json` (`server.url`) na `https://zadatak.ba`, README/BETA linkove i pravim novi build aplikacija; GitHub Pages ostaje kao rezerva.

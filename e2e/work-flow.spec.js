@@ -60,7 +60,7 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
     await client.goto(listingUrl)
     await client.getByRole('button', { name: 'Prihvati i plati' }).click()
     await client.getByRole('button', { name: /Prihvati i osiguraj/ }).click()
-    await expect(client.getByText(/osigurano na Poso\.ba/).first()).toBeVisible({ timeout: 20_000 })
+    await expect(client.getByText(/osigurano na Zadatku/).first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('klijent ne može odobriti rad koji nije predat', async () => {

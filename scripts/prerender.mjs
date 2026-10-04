@@ -1,6 +1,6 @@
 // Pre-renders the phone Welcome screen to static HTML so a first-time visitor sees the real first
 // screen from the HTML itself (before any JavaScript). Runs before `vite build`; the output is
-// injected into index.html by the `poso-prerender` plugin in vite.config.js.
+// injected into index.html by the `zadatak-prerender` plugin in vite.config.js.
 import { createServer } from 'vite'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'

@@ -5,7 +5,7 @@
  * itself and tells people how long to wait instead of showing a raw "429".
  * Attempts are kept per action and email in localStorage, so a reload does not reset them.
  */
-const KEY = 'poso-auth-throttle'
+const KEY = 'zadatak-auth-throttle'
 
 const RULES = {
   // failed logins for one email: 5 in 15 minutes, then wait until the oldest one is 15 minutes old

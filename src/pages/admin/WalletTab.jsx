@@ -113,7 +113,7 @@ function WalletTab() {
 
       {jobs && (
         <section className="dossier-card">
-          <h3><Lock size={16} /> Poso.ba Pay — osigurane uplate</h3>
+          <h3><Lock size={16} /> Zadatak Pay — osigurane uplate</h3>
           <div className="wallet-kpis">
             <div className="wallet-kpi main"><Lock size={18} /><strong>{formatKM(jobs.held)}</strong><span>trenutno osigurano (escrow)</span></div>
             <div className="wallet-kpi"><AlertTriangle size={18} /><strong>{jobs.disputed}</strong><span>otvorenih sporova</span></div>

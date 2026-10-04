@@ -1,4 +1,4 @@
-/* Poso.ba illustrations: flat, friendly people doing everyday jobs, drawn in our palette
+/* Zadatak illustrations: flat, friendly people doing everyday jobs, drawn in our palette
    (navy / gold / mint / cream) with no outlines. Every scene is built from the same `Person`
    so the whole app feels like one family. All scenes share the 300×300 viewBox. */
 

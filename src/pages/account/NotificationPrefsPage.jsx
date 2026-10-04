@@ -55,8 +55,8 @@ function NotificationPrefsPage() {
             <span>
               {device === 'on' && 'Prima push obavijesti.'}
               {device === 'off' && 'Još ne prima obavijesti.'}
-              {device === 'blocked' && 'Blokirane u postavkama — dozvoli obavijesti za Poso.ba pa pokušaj ponovo.'}
-              {device === 'install' && 'Na iPhoneu prvo dodaj Poso.ba na početni ekran, pa uključi ovdje.'}
+              {device === 'blocked' && 'Blokirane u postavkama — dozvoli obavijesti za Zadatak pa pokušaj ponovo.'}
+              {device === 'install' && 'Na iPhoneu prvo dodaj Zadatak na početni ekran, pa uključi ovdje.'}
               {device === 'unsupported' && 'Ovaj preglednik ne podržava push.'}
               {device === 'native' && 'Obavijesti u aplikaciji stižu u sljedećoj verziji — do tada ih vidiš u zvonu.'}
               {device === 'loading' && '…'}

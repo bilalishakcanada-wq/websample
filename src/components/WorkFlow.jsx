@@ -39,7 +39,7 @@ const RAZLOZI_SPORA = [
   ['not_delivered', 'Posao nije urađen'],
   ['quality', 'Urađeno, ali ne po dogovoru'],
   ['payment_refused', 'Klijent odbija osloboditi uplatu'],
-  ['off_platform', 'Traži plaćanje mimo Poso.ba'],
+  ['off_platform', 'Traži plaćanje mimo Zadatka'],
   ['other', 'Drugi razlog'],
 ]
 
@@ -144,7 +144,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
   const odobriPovecanje = async () => {
     const ok = await confirmDialog({
       title: `Odobravaš +${km(increase.request.amount_km)}?`,
-      text: `Iznos se odmah skida s tvog balansa i čuva na Poso.ba zajedno s ostatkom. Nova cijena posla je ${km(Number(payment.amount) + Number(increase.request.amount_km))}.`,
+      text: `Iznos se odmah skida s tvog balansa i čuva na Zadatku zajedno s ostatkom. Nova cijena posla je ${km(Number(payment.amount) + Number(increase.request.amount_km))}.`,
       confirmLabel: 'Odobri i plati',
     })
     if (!ok) return
@@ -222,7 +222,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           <p>„{increase.request.reason}"</p>
           <p className="muted-text">
             {isClient
-              ? `Ako odobriš, nova cijena je ${km(Number(payment.amount) + Number(increase.request.amount_km))}. Dodatni iznos se čuva na Poso.ba kao i ostatak.`
+              ? `Ako odobriš, nova cijena je ${km(Number(payment.amount) + Number(increase.request.amount_km))}. Dodatni iznos se čuva na Zadatku kao i ostatak.`
               : 'Čeka se odgovor klijenta. Ništa se ne naplaćuje dok ne odobri.'}
           </p>
           <div className="wf-actions">
@@ -273,7 +273,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
       {/* --- forma: sporazumni prekid ---------------------------------------- */}
       {form === 'cancel' && (
         <div className="wf-form">
-          <p className="muted-text wf-hint">Druga strana mora pristati. Dok ne odgovori, novac ostaje osiguran na Poso.ba.</p>
+          <p className="muted-text wf-hint">Druga strana mora pristati. Dok ne odgovori, novac ostaje osiguran na Zadatku.</p>
           {increase.available && (
             <fieldset className="wf-choice">
               <legend>Ko je odgovoran za prekid?</legend>
@@ -310,7 +310,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           <label htmlFor="wf-inc-reason">Zašto?</label>
           <textarea id="wf-inc-reason" value={incReason} onChange={(event) => setIncReason(event.target.value)} rows={2} maxLength={1000}
             placeholder="Npr. na licu mjesta se pokazalo da treba zamijeniti i ventil." />
-          <p className="muted-text wf-hint">Klijent mora odobriti. Tek tada se iznos naplati i čuva na Poso.ba, a ti ga dobiješ uz ostatak po završetku.</p>
+          <p className="muted-text wf-hint">Klijent mora odobriti. Tek tada se iznos naplati i čuva na Zadatku, a ti ga dobiješ uz ostatak po završetku.</p>
           <div className="wf-actions">
             <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
             <button type="button" className="primary-button" onClick={traziPovecanje}

@@ -78,9 +78,9 @@ function SiteHeader() {
     <>
       <header ref={headerRef} className={`site-header ${scrolled ? 'scrolled' : ''}`}>
         <div className="site-header-inner">
-          <Link to="/" className="site-logo" aria-label="Poso.ba početna">
+          <Link to="/" className="site-logo" aria-label="Zadatak početna">
             <BrandMark size={34} className="site-logo-mark" />
-            <span className="site-logo-text">Poso.ba</span>
+            <span className="site-logo-text">Zadatak</span>
           </Link>
 
           <Link to="/objavi" className="site-header-cta">Objavi posao</Link>

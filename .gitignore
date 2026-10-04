@@ -53,3 +53,4 @@ src/prerender/
 robot-report/
 robot/local-db/.anon
 robot/local-db/supabase/.temp/
+robot/local-db/supabase/.branches/

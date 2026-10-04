@@ -10,8 +10,6 @@
 
 const DEFAULT_ORIGINS = [
   'https://bilalishakcanada-wq.github.io', // live site (GitHub Pages) and the Android app, which loads it
-  'https://poso.ba',
-  'https://www.poso.ba',
   'capacitor://localhost', // iOS app shell
   'https://localhost', // Android app shell
   'http://localhost:5173', // npm run dev

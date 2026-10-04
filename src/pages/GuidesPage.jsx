@@ -27,7 +27,7 @@ function GuidesPage() {
     <InfoLayout
       eyebrow="Vodiči za cijene"
       title="Koliko košta posao u BiH?"
-      lead="Rasponi ispod se računaju iz stvarnih objavljenih oglasa na Poso.ba — ne iz procjena. Što više oglasa, to je slika tačnija."
+      lead="Rasponi ispod se računaju iz stvarnih objavljenih oglasa na Zadatku — ne iz procjena. Što više oglasa, to je slika tačnija."
       cta={{ eyebrow: 'Imaš posao?', text: 'Objavi ga i dobij ponude umjesto nagađanja.', to: '/objavi', label: 'Objavi posao' }}
       wide
     >

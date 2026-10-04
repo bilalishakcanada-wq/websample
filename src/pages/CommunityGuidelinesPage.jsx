@@ -15,7 +15,7 @@ function CommunityGuidelinesPage() {
   return (
     <InfoLayout
       eyebrow="Pravila zajednice"
-      title="Kako se ponašamo na Poso.ba"
+      title="Kako se ponašamo na Zadatku"
       lead="Ovo su pravila koja svaki korisnik prihvata pri registraciji. Nisu tu da ograniče — tu su da svako ko uđe zna šta može očekivati od drugih."
       cta={{ eyebrow: 'Primijetio si kršenje?', text: 'Prijavi oglas ili korisnika — gledamo svaku prijavu.', to: '/kontakt?tema=report', label: 'Prijavi zloupotrebu' }}
     >
@@ -25,7 +25,7 @@ function CommunityGuidelinesPage() {
           <h2>Bez kontakata i društvenih mreža na platformi</h2>
         </div>
         <p>
-          Na Poso.ba se <strong>nikad</strong> ne dijeli broj telefona, email, link, Instagram, Facebook, Viber, WhatsApp, TikTok ni bilo koji drugi
+          Na Zadatku se <strong>nikad</strong> ne dijeli broj telefona, email, link, Instagram, Facebook, Viber, WhatsApp, TikTok ni bilo koji drugi
           način kontakta van platforme — ni u oglasu, ni u ponudi, ni u opisu profila, ni u recenziji, <strong>ni na slici</strong>
           (profilna slika sa brojem, vizitka, natpis na kombiju). Jedini izuzetak: kad klijent prihvati ponudu, u porukama se kontakt može razmijeniti.
         </p>

@@ -15,7 +15,7 @@ function ProviderPrinciplesPage() {
     <InfoLayout
       eyebrow="Principi izvođača"
       title="Šta klijent može očekivati od svakog majstora"
-      lead="Ovih šest principa prihvata svaki izvođač na Poso.ba. Nisu pravila kažnjavanja — to je standard po kojem te klijenti biraju i po kojem te platforma rangira."
+      lead="Ovih šest principa prihvata svaki izvođač na Zadatku. Nisu pravila kažnjavanja — to je standard po kojem te klijenti biraju i po kojem te platforma rangira."
       cta={{ eyebrow: 'Spreman za posao?', text: 'Napravi profil izvođača i pošalji prvu ponudu danas.', to: '/zaradi', label: 'Postani izvođač' }}
     >
       <section className="info-grid reveal-stagger reveal">

@@ -180,7 +180,7 @@ function ProfileSettingsPage() {
         </label>
 
         <div className="account-field account-field-wide">
-          <span>Šta ti je glavni cilj na Poso.ba?</span>
+          <span>Šta ti je glavni cilj na Zadatku?</span>
           <div className="goal-cards">
             <button type="button" className={`goal-card ${form.accountType === 'client' ? 'active' : ''}`} onClick={() => setForm((current) => ({ ...current, accountType: 'client' }))}>
               <CheckCircle2 size={26} /><span>Završiti poslove</span><small>Objavljujem i biram majstore</small>

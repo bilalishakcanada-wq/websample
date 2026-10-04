@@ -69,7 +69,7 @@ function MessagesTab({ initialConversationId = '' }) {
                 <div key={item.id} className={`support-bubble ${item.sender_id === active.one_id ? 'from-admin' : 'from-user'}`}>
                   <small>{nameOf(item.sender_id)} · {formatBosnianDate(item.created_at)}</small>
                   {item.content}
-                  <button type="button" className="bubble-remove" title="Ukloni poruku" onClick={async () => { try { await adminService.redact('message', item.id, 'Uklonio Poso.ba tim'); setThread(await adminService.conversationMessages(active.id)) } catch (requestError) { setError(requestError.message) } }}>×</button>
+                  <button type="button" className="bubble-remove" title="Ukloni poruku" onClick={async () => { try { await adminService.redact('message', item.id, 'Uklonio Zadatak tim'); setThread(await adminService.conversationMessages(active.id)) } catch (requestError) { setError(requestError.message) } }}>×</button>
                 </div>
               ))}
             </div>

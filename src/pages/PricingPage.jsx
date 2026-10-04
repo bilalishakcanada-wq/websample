@@ -30,7 +30,7 @@ function PricingPage() {
     <InfoLayout
       eyebrow="Cijene"
       title="Za klijente besplatno. Izvođač plaća samo kad je posao plaćen."
-      lead="Poso.ba ne naplaćuje objavu posla, slanje ponuda ni komunikaciju. Jedina naknada je postotak koji platforma zadrži od plaćenog posla — i ona pada kako izvođač radi više."
+      lead="Zadatak ne naplaćuje objavu posla, slanje ponuda ni komunikaciju. Jedina naknada je postotak koji platforma zadrži od plaćenog posla — i ona pada kako izvođač radi više."
       cta={{ eyebrow: 'Spreman?', text: 'Objavi posao ili napravi profil — bez kartice.', to: '/register', label: 'Napravi nalog' }}
     >
       <section className="info-section reveal">
@@ -61,7 +61,7 @@ function PricingPage() {
       <section className="info-section reveal">
         <h2>Kako ide plaćanje</h2>
         <ol className="steps-list">
-          <li><strong>Klijent prihvati ponudu</strong> — iznos se rezerviše sa njegovog Balansa i čuva na Poso.ba.</li>
+          <li><strong>Klijent prihvati ponudu</strong> — iznos se rezerviše sa njegovog Balansa i čuva na Zadatku.</li>
           <li><strong>Posao se uradi</strong> — izvođač zatraži isplatu, klijent potvrdi.</li>
           <li><strong>Novac se oslobađa</strong> — zarada bez naknade sjeda izvođaču na Balans; historija je vidljiva obojici.</li>
         </ol>

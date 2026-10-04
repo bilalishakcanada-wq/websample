@@ -16,11 +16,11 @@ function Countdown({ until }) {
     return () => window.clearInterval(timer)
   }, [])
   const left = new Date(until).getTime() - now
-  if (left <= 0) return <span className="wf-clock late"><Clock size={14} /> Rok je istekao — uplata se oslobađa automatski</span>
+  if (left <= 0) return <span className="wf-clock late" data-testid="workflow-clock"><Clock size={14} /> Rok je istekao — uplata se oslobađa automatski</span>
   const hours = Math.floor(left / 3_600_000)
   const minutes = Math.floor((left % 3_600_000) / 60_000)
   return (
-    <span className={`wf-clock ${hours < 6 ? 'soon' : ''}`}>
+    <span className={`wf-clock ${hours < 6 ? 'soon' : ''}`} data-testid="workflow-clock">
       <Clock size={14} /> Automatsko odobrenje za {hours > 0 ? `${hours} h ${minutes} min` : `${minutes} min`}
     </span>
   )
@@ -176,16 +176,16 @@ function WorkFlow({ payment, role, user, onChanged }) {
   }[state]), [state, isClient])
 
   return (
-    <section className="job-card wf-card">
+    <section data-testid="workflow" className="job-card wf-card">
       <div className="wf-head">
         <h2><Handshake size={18} /> Tok posla</h2>
-        <span className={`pill wf-${state}`}>{naslov}</span>
+        <span data-testid="workflow-state" className={`pill wf-${state}`}>{naslov}</span>
       </div>
 
       {state === 'submitted' && payment.review_deadline && <Countdown until={payment.review_deadline} />}
 
       {latest && (
-        <div className="wf-submission">
+        <div data-testid="workflow-submission" className="wf-submission">
           <strong>{latest.revision_no > 0 ? `Ispravka #${latest.revision_no}` : 'Predani rad'} · {formatBosnianDate(latest.submitted_at)}</strong>
           <p>{latest.report}</p>
           {latest.evidence_urls?.length > 0 && (
@@ -252,7 +252,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
       {form === 'submit' && (
         <div className="wf-form">
           <label htmlFor="wf-report">Šta si uradio/la?</label>
-          <textarea id="wf-report" value={report} onChange={(event) => setReport(event.target.value)} rows={3} maxLength={2000}
+          <textarea data-testid="workflow-report" id="wf-report" value={report} onChange={(event) => setReport(event.target.value)} rows={3} maxLength={2000}
             placeholder="Npr. Montirani svi kuhinjski elementi, police poravnate i provjerene." />
           <input ref={fileRef} type="file" accept="image/*" multiple hidden
             onChange={(event) => setFiles([...event.target.files].slice(0, 5))} />
@@ -262,7 +262,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           <p className="muted-text wf-hint">Dokaz je obavezan: napiši izvještaj (bar 20 znakova) ili dodaj sliku.</p>
           <div className="wf-actions">
             <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
-            <button type="button" className="primary-button" onClick={predajRad}
+            <button data-testid="workflow-submit-confirm" type="button" className="primary-button" onClick={predajRad}
               disabled={busy === 'submit' || (report.trim().length < 20 && files.length === 0)}>
               <Send size={15} /> {busy === 'submit' ? 'Šaljem…' : 'Predaj rad'}
             </button>
@@ -350,17 +350,17 @@ function WorkFlow({ payment, role, user, onChanged }) {
       {form === null && (
         <div className="wf-actions wf-actions-main">
           {!isClient && ['in_progress', 'revision'].includes(state) && (
-            <button type="button" className="primary-button" onClick={() => setForm('submit')} disabled={Boolean(busy)}>
+            <button data-testid="workflow-submit" type="button" className="primary-button" onClick={() => setForm('submit')} disabled={Boolean(busy)}>
               <BadgeCheck size={16} /> {state === 'revision' ? 'Predaj ispravljen rad' : 'Predaj rad'}
             </button>
           )}
           {isClient && state === 'submitted' && (
             <>
-              <button type="button" className="primary-button" onClick={odobri} disabled={Boolean(busy)}>
+              <button data-testid="workflow-approve" type="button" className="primary-button" onClick={odobri} disabled={Boolean(busy)}>
                 <CheckCircle2 size={16} /> {busy === 'approve' ? 'Odobravam…' : 'Odobri i isplati'}
               </button>
               {preostaloIspravki > 0 && (
-                <button type="button" className="ghost-button" onClick={traziIspravku} disabled={Boolean(busy)}>
+                <button data-testid="workflow-revision" type="button" className="ghost-button" onClick={traziIspravku} disabled={Boolean(busy)}>
                   <RotateCcw size={15} /> Traži ispravku ({preostaloIspravki})
                 </button>
               )}
@@ -368,7 +368,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           )}
           {isClient && state === 'in_progress' && (
             // klijent smije platiti i prije predaje rada — svoj novac, svoja odluka
-            <button type="button" className="ghost-button" onClick={oslobodiOdmah} disabled={Boolean(busy)}>
+            <button data-testid="workflow-release" type="button" className="ghost-button" onClick={oslobodiOdmah} disabled={Boolean(busy)}>
               <CheckCircle2 size={15} /> Oslobodi uplatu odmah
             </button>
           )}
@@ -388,12 +388,12 @@ function WorkFlow({ payment, role, user, onChanged }) {
             </button>
           )}
           {['in_progress', 'submitted', 'revision'].includes(state) && (
-            <button type="button" className="ghost-button" onClick={() => setForm('cancel')} disabled={Boolean(busy)}>
+            <button data-testid="workflow-cancel" type="button" className="ghost-button" onClick={() => setForm('cancel')} disabled={Boolean(busy)}>
               Zatraži prekid
             </button>
           )}
           {['in_progress', 'submitted', 'revision', 'cancel_requested'].includes(state) && (
-            <button type="button" className="ghost-button danger" onClick={() => setForm('dispute')} disabled={Boolean(busy)}>
+            <button data-testid="workflow-dispute" type="button" className="ghost-button danger" onClick={() => setForm('dispute')} disabled={Boolean(busy)}>
               <AlertTriangle size={15} /> Otvori spor
             </button>
           )}

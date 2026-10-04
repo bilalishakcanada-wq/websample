@@ -2,10 +2,13 @@
 // Zadatak service worker: offline shell (workbox precache) + Web Push.
 // Built by vite-plugin-pwa (injectManifest) — self.__WB_MANIFEST is filled at build time.
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
+import { appConfig } from './config/appConfig'
 import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { clientsClaim } from 'workbox-core'
+
+const BRAND = appConfig.appName
 
 self.skipWaiting()
 clientsClaim()
@@ -54,8 +57,8 @@ self.addEventListener('activate', (event) => {
 // ---------- Web Push ----------
 self.addEventListener('push', (event) => {
   let data = {}
-  try { data = event.data ? event.data.json() : {} } catch { data = { title: 'Zadatak', body: event.data?.text() || '' } }
-  const title = data.title || 'Zadatak'
+  try { data = event.data ? event.data.json() : {} } catch { data = { title: BRAND, body: event.data?.text() || '' } }
+  const title = data.title || BRAND
   const options = {
     body: data.body || '',
     icon: `${BASE}icons/icon-192.png`,

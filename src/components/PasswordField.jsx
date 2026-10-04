@@ -18,6 +18,7 @@ function PasswordField({ id = 'password', name, label, value, onChange, isNew = 
     <div className="field field-password">
       <input
         id={id}
+        data-testid={`${id}-input`}
         name={name}
         type={visible ? 'text' : 'password'}
         placeholder=" "

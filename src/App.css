@@ -9994,6 +9994,10 @@ body:has(.profile-cta-bar) .support-chat {
   animation: panel-in 0.16s ease both;
 }
 
+.chat-bubble.is-pending {
+  opacity: 0.6;
+}
+
 .chat-bubble p {
   margin: 0;
   white-space: pre-wrap;

@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, RolePills, StatusPill, relativeTime, useStaff } from './shared'
 import UserDossier from './UserDossier'
+import { SkeletonRows } from '../../components/Skeleton'
 
 const FILTERS = [['', 'Svi'], ['active', 'Aktivni'], ['suspended', 'Suspendovani']]
 
@@ -41,7 +42,7 @@ function UsersTab({ openUserId, onOpenUser, onCloseUser, initialTerm = '' }) {
         <span className="muted-text adm-count">{rows.length} naloga</span>
       </div>
       {error && <div className="form-error">{error}</div>}
-      {loading && rows.length === 0 && <div className="page-state">Učitavanje korisnika...</div>}
+      {loading && rows.length === 0 && <SkeletonRows n={4} />}
       {!loading && rows.length === 0 && <p className="muted-text">Nema korisnika za ovaj upit.</p>}
       <div className="adm-user-list">
         {rows.map((row) => (

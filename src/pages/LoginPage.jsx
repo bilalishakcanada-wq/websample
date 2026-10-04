@@ -61,13 +61,13 @@ function LoginPage() {
       )}
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="field">
-          <input id="email" name="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={form.email} onChange={handleChange} required />
+          <input data-testid="login-email" id="email" name="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={form.email} onChange={handleChange} required />
           <label htmlFor="email">Email adresa</label>
         </div>
         <PasswordField name="password" label="Lozinka" value={form.password} onChange={handleChange} />
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}</div>}
-        <button type="submit" className="primary-button auth-submit" disabled={loading}>
+        <button data-testid="login-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Prijava...' : 'Nastavi'}
         </button>
       </form>

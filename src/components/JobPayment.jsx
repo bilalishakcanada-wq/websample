@@ -87,7 +87,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
         {error && <div className="form-error">{error}</div>}
         <div className="pay-sheet-actions">
           <button type="button" className="ghost-button" onClick={onClose}>Odustani</button>
-          <button type="button" className="primary-button" onClick={confirm} disabled={busy || !wallet || !enough}><Lock size={16} /> {busy ? 'Osiguravam…' : `Prihvati i osiguraj ${money(amount)}`}</button>
+          <button data-testid="payment-confirm" type="button" className="primary-button" onClick={confirm} disabled={busy || !wallet || !enough}><Lock size={16} /> {busy ? 'Osiguravam…' : `Prihvati i osiguraj ${money(amount)}`}</button>
         </div>
         <p className="pay-fine"><Wallet size={12} /> Ako se posao otkaže prije završetka, cijeli iznos se vraća na tvoj balans.</p>
       </section>

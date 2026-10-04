@@ -133,7 +133,7 @@ function RegisterPage() {
         </div>
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}</div>}
-        <button type="submit" className="primary-button auth-submit" disabled={loading}>
+        <button data-testid="register-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Registracija...' : 'Nastavi'}
         </button>
       </form>

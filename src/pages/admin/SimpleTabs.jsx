@@ -6,6 +6,7 @@ import { desktopNotify, playPing } from '../../services/notificationService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { ACTION_LABEL, KIND_LABEL, QUEUE_LABEL, useStaff, verificationTitle } from './shared'
 import { withBase } from '../../utils/paths'
+import { SkeletonRows } from '../../components/Skeleton'
 
 export function RegistryTab() {
   const { openUser } = useStaff()
@@ -84,7 +85,7 @@ export function ModerationTab() {
   const suspended = events.filter((event) => event.profiles?.account_status === 'suspended').reduce((map, event) => map.set(event.user_id, event.profiles), new Map())
   const pendingQueue = queue.filter((item) => ['pending', 'unconfigured'].includes(item.status))
 
-  if (loading) return <div className="page-state">Učitavanje moderacije...</div>
+  if (loading) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">
@@ -212,7 +213,7 @@ export function SupportTab() {
     }
   }
 
-  if (loading) return <div className="page-state">Učitavanje razgovora...</div>
+  if (loading) return <SkeletonRows n={4} />
   const active = threads.find((thread) => thread.userId === activeUser)
 
   return (
@@ -274,7 +275,7 @@ export function VerificationTab() {
     }
   }
 
-  if (loading) return <div className="page-state">Učitavanje zahtjeva...</div>
+  if (loading) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">
@@ -322,7 +323,7 @@ export function ReportsTab() {
     }
   }
 
-  if (loading) return <div className="page-state">Učitavanje prijava...</div>
+  if (loading) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">
@@ -369,7 +370,7 @@ export function ListingsTab() {
     }
   }
 
-  if (loading) return <div className="page-state">Učitavanje oglasa...</div>
+  if (loading) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">

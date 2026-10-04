@@ -100,7 +100,7 @@ function DashboardPage() {
               <p>Poslovi na koje si poslao/la ponudu.</p>
             </div>
             {bids.slice(0, 6).map((bid) => (
-              <article className="dashboard-listing" key={bid.id}>
+              <article data-testid="dashboard-bid" className="dashboard-listing" key={bid.id}>
                 <div className="dashboard-listing-main">
                   <span className={`status-pill bid-${bid.status}`}>{bid.status === 'accepted' && bid.listing?.status === 'completed' ? 'Završen' : BID_LABELS[bid.status] || bid.status}</span>
                   <h3><Link to={`/listings/${bid.listing_id}`}>{bid.listing?.title || 'Posao'}</Link></h3>
@@ -168,7 +168,7 @@ function DashboardPage() {
           )}
 
           {!loading && listings.map((listing) => (
-            <article className="dashboard-listing" key={listing.id}>
+            <article data-testid="dashboard-listing" className="dashboard-listing" key={listing.id}>
               <div className="dashboard-listing-main">
                 <span className={`status-pill status-${listing.status}`}>{STATUS_LABELS[listing.status] || listing.status}</span>
                 <h3><Link to={`/listings/${listing.id}`}>{listing.title}</Link></h3>

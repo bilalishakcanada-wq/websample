@@ -28,11 +28,11 @@ test.describe('Potvrda identiteta', () => {
     await login(page, 'provider')
     await page.goto('/account/verifikacija')
     // Sačekaj da se stranica iscrta — inače provjera ispod gleda praznu stranicu.
-    await page.waitForSelector('.verif-form, .verif-state', { timeout: 20_000 })
+    await page.getByTestId('verification-form').or(page.getByTestId('verification-state')).first().waitFor({ timeout: 20_000 })
     // Zahtjev poslan u ranijem prolazu zaključa formu, pa nema šta provjeriti.
     // Stanje se vraća SQL-om (vidi supabase/identity/README.md), ne iz testa —
     // test nema ni smije imati pravo da resetuje tuđu verifikaciju.
-    test.skip(await page.locator('.verif-form').count() === 0,
+    test.skip(await page.getByTestId('verification-form').count() === 0,
       'verifikacija je već poslana — forma je zaključana')
   })
   test.afterAll(async () => { await ctx?.close() })
@@ -40,27 +40,27 @@ test.describe('Potvrda identiteta', () => {
   test('forma traži ime, 13 cifara i sliku dokumenta', async () => {
     await expect(page.getByRole('heading', { name: 'Potvrda identiteta' })).toBeVisible()
 
-    const posalji = page.getByRole('button', { name: /Pošalji na provjeru/ })
+    const posalji = page.getByTestId('verification-submit')
     await expect(posalji).toBeDisabled()
 
     await page.getByLabel(/Ime i prezime/).fill('Test Izvođač')
     await page.getByLabel(/^JMBG/).fill(JMBG_ISPRAVAN)
     await expect(posalji).toBeDisabled()           // još nema slike
 
-    await page.locator('.verif-uploads input[type="file"]').first().setInputFiles('e2e/fixtures/dokument.png')
+    await page.getByTestId('verification-uploads').locator('input[type="file"]').first().setInputFiles('e2e/fixtures/dokument.png')
     await expect(posalji).toBeEnabled()
   })
 
   test('pogrešna kontrolna cifra se odbija sa jasnom porukom', async () => {
     await page.getByLabel(/^JMBG/).fill(JMBG_LOSA_CIFRA)
-    await page.getByRole('button', { name: /Pošalji na provjeru/ }).click()
+    await page.getByTestId('verification-submit').click()
     await expect(page.locator('.form-error')).toContainText(/[Kk]ontroln/, { timeout: 20_000 })
   })
 
   test('ispravan unos ide na provjeru i forma se zaključa', async () => {
     await page.getByLabel(/^JMBG/).fill(JMBG_ISPRAVAN)
-    await page.getByRole('button', { name: /Pošalji na provjeru/ }).click()
-    await expect(page.locator('.verif-state.wait')).toContainText('Provjera je u toku', { timeout: 25_000 })
-    await expect(page.getByRole('button', { name: /Pošalji na provjeru/ })).toHaveCount(0)
+    await page.getByTestId('verification-submit').click()
+    await expect(page.getByTestId('verification-state')).toContainText('Provjera je u toku', { timeout: 25_000 })
+    await expect(page.getByTestId('verification-submit')).toHaveCount(0)
   })
 })

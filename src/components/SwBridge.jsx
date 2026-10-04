@@ -16,7 +16,7 @@ function SwBridge() {
     if (isUpdateReady()) window.location.reload()
   }, [pathname])
   useEffect(() => {
-    const onReady = () => toast('Nova verzija Poso.ba je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })
+    const onReady = () => toast('Nova verzija Zadatka je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })
     window.addEventListener(UPDATE_EVENT, onReady)
     return () => window.removeEventListener(UPDATE_EVENT, onReady)
   }, [])
@@ -25,14 +25,14 @@ function SwBridge() {
     if (!('serviceWorker' in navigator)) return undefined
     const onMessage = (event) => {
       const data = event.data || {}
-      if (data.type === 'poso:navigate' && data.url) {
+      if ((data.type === 'zadatak:navigate' || data.type === 'poso:navigate') && data.url) {
         try {
           const url = new URL(data.url)
           const path = url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname
           navigate(`${path || '/'}${url.search}`)
         } catch { /* ignore malformed */ }
       }
-      if (data.type === 'poso:resubscribe') syncPush()
+      if (data.type === 'zadatak:resubscribe' || data.type === 'poso:resubscribe') syncPush()
     }
     navigator.serviceWorker.addEventListener('message', onMessage)
     return () => navigator.serviceWorker.removeEventListener('message', onMessage)

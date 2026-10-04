@@ -144,7 +144,7 @@ function ListingDetailPage() {
   const share = async () => {
     const url = window.location.href
     try {
-      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Poso.ba`, url })
+      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Zadatak`, url })
       if (!shared) { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
     } catch { /* user cancelled */ }
   }
@@ -606,7 +606,7 @@ function ListingDetailPage() {
                         ? <img loading="lazy" decoding="async" src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                         : <div className="poster-avatar"><UserRound size={18} /></div>}
                       <div>
-                        <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
+                        <strong>{bid.bidder?.display_name || 'Korisnik Zadatka'}</strong>
                         <p>{bid.message}</p>
                         <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
                         {(isOwner || bid.bidder_id === user?.id) && <OfferReplies bid={bid} userId={user?.id} canWrite={bid.status === 'pending'} />}
@@ -673,7 +673,7 @@ function ListingDetailPage() {
                           <Sparkles size={13} /> {Math.round(provider.match_score)}
                         </span>
                       </div>
-                      <h3>{provider.display_name || 'Korisnik Poso.ba'}</h3>
+                      <h3>{provider.display_name || 'Korisnik Zadatka'}</h3>
                       <div className="rec-card-meta">
                         <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
                         {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
@@ -740,8 +740,8 @@ function ListingDetailPage() {
               {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
               {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
               {expired && <div className="outcome-state cancelled">Rok je prošao</div>}
-              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Poso.ba`}</div>}
-              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Poso.ba Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
+              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Zadatku`}</div>}
+              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Zadatak Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
               {!payment && <HowPaymentWorks />}
             </div>
 
@@ -751,7 +751,7 @@ function ListingDetailPage() {
                 : <div className="poster-avatar"><UserRound size={22} /></div>}
               <div>
                 <small>Objavio</small>
-                <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
+                <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
                 <span>{poster?.city || 'Bosna i Hercegovina'}{poster?.created_at ? ` · član od ${new Date(poster.created_at).getFullYear()}.` : ''}</span>
               </div>
             </Link>

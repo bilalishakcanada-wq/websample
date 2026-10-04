@@ -83,7 +83,7 @@ export const contactInfoMessage = (scan, context = 'tekst') => {
   if (!scan || scan.clean) return null
   const what = scan.kinds.map((kind) => CONTACT_KIND_LABEL[kind] || kind)
   const list = what.length === 1 ? what[0] : `${what.slice(0, -1).join(', ')} i ${what[what.length - 1]}`
-  return `Pravilo #1: izgleda da ${context} sadrži ${list}. Kontakti i društvene mreže nisu dozvoljeni na Poso.ba — sva komunikacija ide kroz platformu. Ukloni to pa pokušaj ponovo.`
+  return `Pravilo #1: izgleda da ${context} sadrži ${list}. Kontakti i društvene mreže nisu dozvoljeni na Zadatku — sva komunikacija ide kroz platformu. Ukloni to pa pokušaj ponovo.`
 }
 
 /** Chat-specific check: contacts only before acceptance, illegal content always. */

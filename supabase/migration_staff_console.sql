@@ -186,7 +186,7 @@ begin
   select p_user_id, id, true, nullif(btrim(p_note), ''), auth.uid() from public.badges where code = p_code
   on conflict (user_id, badge_id) do update set manual = true, note = excluded.note, awarded_by = excluded.awarded_by;
   insert into public.notifications (user_id, type, title, message)
-  values (p_user_id, 'badge', 'Nova značka: ' || v_label, 'Poso.ba tim ti je dodijelio značku „' || v_label || '“. Vidi se na tvom javnom profilu.');
+  values (p_user_id, 'badge', 'Nova značka: ' || v_label, 'Zadatak tim ti je dodijelio značku „' || v_label || '“. Vidi se na tvom javnom profilu.');
   perform public.log_staff_action('badge_grant', p_user_id, jsonb_build_object('code', p_code, 'note', p_note));
 end;
 $$;
@@ -267,7 +267,7 @@ $$;
 create or replace function public.admin_suspend_for(p_user_id uuid, p_hours integer default null, p_reason text default null)
 returns void language plpgsql security definer set search_path = public as $$
 declare
-  v_reason text := coalesce(nullif(btrim(p_reason), ''), case when p_hours is null then 'Trajna suspenzija (Poso.ba tim).' else 'Suspenzija ' || public.duration_label(p_hours) || ' (Poso.ba tim).' end);
+  v_reason text := coalesce(nullif(btrim(p_reason), ''), case when p_hours is null then 'Trajna suspenzija (Zadatak tim).' else 'Suspenzija ' || public.duration_label(p_hours) || ' (Zadatak tim).' end);
 begin
   perform public.staff_guard_target(p_user_id);
   if p_hours is not null and p_hours < 1 then raise exception 'BAD_DURATION'; end if;
@@ -300,7 +300,7 @@ begin
   where user_id = p_user_id;
   perform set_config('poso.system_write', '', true);
   insert into public.moderation_events (user_id, source_table, snippet, action, reviewed_by, reviewed_at)
-  values (p_user_id, 'profiles', 'Suspenziju ukinuo Poso.ba tim.', 'lifted', auth.uid(), now());
+  values (p_user_id, 'profiles', 'Suspenziju ukinuo Zadatak tim.', 'lifted', auth.uid(), now());
   perform public.log_staff_action('lift', p_user_id, '{}'::jsonb);
 end;
 $$;
@@ -309,7 +309,7 @@ create or replace function public.admin_redact(p_kind text, p_id uuid, p_note te
 returns void language plpgsql security definer set search_path = public as $$
 declare
   v_user uuid;
-  v_text constant text := '[uklonjeno od strane Poso.ba tima]';
+  v_text constant text := '[uklonjeno od strane Zadatak tima]';
 begin
   if not public.is_staff() then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   if p_kind = 'message' then
@@ -336,7 +336,7 @@ begin
     update public.listings set status = 'archived' where id = p_id;
   end if;
   insert into public.moderation_events (user_id, source_table, source_id, snippet, action, reviewed_by, reviewed_at)
-  values (v_user, p_kind, p_id, coalesce(nullif(btrim(p_note), ''), 'Uklonio Poso.ba tim'), 'removed', auth.uid(), now());
+  values (v_user, p_kind, p_id, coalesce(nullif(btrim(p_note), ''), 'Uklonio Zadatak tim'), 'removed', auth.uid(), now());
   perform public.log_staff_action('redact', v_user, jsonb_build_object('kind', p_kind, 'id', p_id, 'note', p_note));
 end;
 $$;

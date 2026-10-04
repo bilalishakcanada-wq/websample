@@ -159,7 +159,7 @@ function BadgesTab() {
         <QuickGrant catalog={catalog} onDone={load} />
         <section className="dossier-card">
           <h3><Award size={16} /> Nova značka</h3>
-          <p className="muted-text">Napravi vlastitu značku (npr. „Majstor mjeseca“, „Partner Poso.ba“) i dodjeljuj je ručno iz dosijea korisnika. Vidi se na javnom profilu oko avatara i u listi značaka.</p>
+          <p className="muted-text">Napravi vlastitu značku (npr. „Majstor mjeseca“, „Partner Zadatka“) i dodjeljuj je ručno iz dosijea korisnika. Vidi se na javnom profilu oko avatara i u listi značaka.</p>
           <button type="button" className="primary-button" onClick={() => setEditing('new')}><Plus size={15} /> Napravi značku</button>
         </section>
       </div>

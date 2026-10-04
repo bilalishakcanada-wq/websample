@@ -24,11 +24,11 @@ jobs:
     timeout-minutes: 90
     env:
       E2E_BASE_URL: http://localhost:4175
-      E2E_CLIENT_EMAIL: klijent@test.poso
+      E2E_CLIENT_EMAIL: klijent@test.zadatak
       E2E_CLIENT_PASSWORD: Test12345!
-      E2E_PROVIDER_EMAIL: izvodjac@test.poso
+      E2E_PROVIDER_EMAIL: izvodjac@test.zadatak
       E2E_PROVIDER_PASSWORD: Test12345!
-      E2E_ADMIN_EMAIL: admin@test.poso
+      E2E_ADMIN_EMAIL: admin@test.zadatak
       E2E_ADMIN_PASSWORD: Test12345!
       ROBOT_BASE_URL: http://localhost:4175
     steps:

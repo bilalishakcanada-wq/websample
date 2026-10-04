@@ -2,7 +2,7 @@
  * Sigurnosni sloj za Node servis (KYC orkestrator, webhookovi, fakture).
  *
  * ČITAJ PRIJE UPOTREBE — šta ovaj fajl NE radi:
- * Poso.ba frontend ne prolazi kroz ovaj servis; on zove Supabase direktno.
+ * Zadatak frontend ne prolazi kroz ovaj servis; on zove Supabase direktno.
  * Zato ovdje NEMA zaštite za objavu posla, ponude, poruke ni escrow — napadač
  * bi jednostavno zvao `https://<projekt>.supabase.co/rest/v1/...` i ovaj kod
  * ne bi ni saznao za to. Ograničenje učestalosti za te putanje je u bazi
@@ -20,8 +20,6 @@ import crypto from 'node:crypto'
 
 // ------------------------------------------------------------------ CORS
 const ALLOWED = new Set([
-  'https://poso.ba',
-  'https://www.poso.ba',
   'https://bilalishakcanada-wq.github.io',
   ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:54971', 'http://localhost:4173'] : []),
 ])
@@ -84,7 +82,7 @@ export const sensitiveLimiter = rateLimit({
 /**
  * Pogađanje lozinki/OTP-a: 5 u 15 minuta PO KORISNIČKOM IMENU, ne po IP-u.
  * Napadač sa botnetom mijenja IP; meta ostaje ista. Brojanje po meti hvata i to.
- * (Prijava na Poso.ba ide kroz Supabase Auth, koji ima svoje limite — ovo vrijedi
+ * (Prijava na Zadatak ide kroz Supabase Auth, koji ima svoje limite — ovo vrijedi
  * za OTP i potvrde koje servis sam izdaje.)
  */
 export const bruteForceLimiter = rateLimit({

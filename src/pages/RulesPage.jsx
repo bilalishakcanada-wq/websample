@@ -5,13 +5,13 @@ function RulesPage() {
     <InfoLayout
       eyebrow="Pravna obavještenja"
       title="Uslovi korištenja"
-      lead="Pravila po kojima radi Poso.ba. Kratko, jasno i bez sitnih slova — ako nešto nije jasno, piši nam."
+      lead="Pravila po kojima radi Zadatak. Kratko, jasno i bez sitnih slova — ako nešto nije jasno, piši nam."
       cta={{ eyebrow: 'Pitanje?', text: 'Nejasan ti je neki uslov? Objasnit ćemo.', to: '/kontakt?tema=account', label: 'Kontakt' }}
     >
         <section className="info-section reveal">
           <h2>1. Opšta pravila</h2>
           <p>
-            Poso.ba je platforma koja povezuje korisnike koji traže usluge sa lokalnim izvođačima
+            Zadatak je platforma koja povezuje korisnike koji traže usluge sa lokalnim izvođačima
             u Bosni i Hercegovini. Registracijom prihvatate da ćete koristiti platformu odgovorno,
             u skladu sa zakonima Bosne i Hercegovine i ovim pravilima.
           </p>

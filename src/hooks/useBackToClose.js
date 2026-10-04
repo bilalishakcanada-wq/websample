@@ -39,7 +39,7 @@ export function useBackToClose(open, onClose) {
       }
       return undefined
     }
-    window.history.pushState({ ...(window.history.state || {}), posoOverlay: true }, '')
+    window.history.pushState({ ...(window.history.state || {}), zadatakOverlay: true }, '')
     pushedRef.current = true
     lengthRef.current = window.history.length
     const onPop = () => { pushedRef.current = false; closeRef.current?.() }
@@ -64,7 +64,7 @@ export function useBackSteps(step, first, onStepBack) {
 
   // back on a flow page that already has its entry (a reload, or back from signing in): reuse it
   useEffect(() => {
-    const mark = window.history.state?.posoStep
+    const mark = window.history.state?.zadatakStep
     if (!mark) return
     idRef.current = mark
     pushedRef.current = true
@@ -74,7 +74,7 @@ export function useBackSteps(step, first, onStepBack) {
   useEffect(() => {
     if (active && !pushedRef.current) {
       if (!idRef.current) idRef.current = Math.random().toString(36).slice(2)
-      window.history.pushState({ ...(window.history.state || {}), posoStep: idRef.current }, '')
+      window.history.pushState({ ...(window.history.state || {}), zadatakStep: idRef.current }, '')
       pushedRef.current = true
       lengthRef.current = window.history.length
     } else if (!active && pushedRef.current) {
@@ -86,7 +86,7 @@ export function useBackSteps(step, first, onStepBack) {
   useEffect(() => {
     const onPop = () => {
       // an overlay above our entry closing lands back on it (it carries our mark): not a step back
-      if (!pushedRef.current || window.history.state?.posoStep === idRef.current) return
+      if (!pushedRef.current || window.history.state?.zadatakStep === idRef.current) return
       pushedRef.current = false
       backRef.current?.()
     }

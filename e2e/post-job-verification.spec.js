@@ -64,7 +64,7 @@ test.describe.serial('Objava posla tek poslije potvrde identiteta', () => {
 
   const stamp = Date.now()
   const ime = `Test Objava ${String.fromCharCode(...String(stamp).slice(-6).split('').map((d) => 97 + Number(d)))}`
-  const email = `objava-${stamp}@test.poso`
+  const email = `objava-${stamp}@test.zadatak`
   const naslov = `[E2E] Posao poslije verifikacije ${stamp}`
   /** @type {import('@playwright/test').BrowserContext} */ let userCtx
   /** @type {import('@playwright/test').BrowserContext} */ let adminCtx

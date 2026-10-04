@@ -39,7 +39,7 @@ create or replace function public.display_name_of(p_name text)
 returns text language sql immutable as $$
   with n as (select btrim(regexp_replace(coalesce(p_name, ''), '\s+', ' ', 'g')) as v)
   select case
-    when n.v = '' then 'Korisnik Poso.ba'
+    when n.v = '' then 'Korisnik Zadatka'
     when position(' ' in n.v) = 0 then initcap(n.v)
     else initcap(split_part(n.v, ' ', 1)) || ' ' || upper(left(reverse(split_part(reverse(n.v), ' ', 1)), 1)) || '.'
   end from n;

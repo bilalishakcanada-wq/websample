@@ -23,7 +23,7 @@ const firstNameOf = (displayName) => (displayName || '').trim().split(/\s+/)[0] 
 const TIER_HINT = {
   top: 'Verifikovan, 10+ recenzija sa prosjekom 4.8+. Najviši nivo povjerenja.',
   trusted: 'Verifikovan i dokazano pouzdan kroz recenzije.',
-  verified: 'Identitet i struka provjereni od strane Poso.ba tima.',
+  verified: 'Identitet i struka provjereni od strane Zadatak tima.',
   new: 'Novi korisnik — još nema dovoljno istorije za ocjenu.',
   unverified: 'Struka još nije provjerena. Traži recenzije i portfolio prije dogovora.',
 }
@@ -230,7 +230,7 @@ function PublicProfilePage() {
                           ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="review-avatar" />
                           : <div className="review-avatar review-avatar-fallback"><UserRound size={16} /></div>}
                         <div>
-                          <strong>{review.reviewer?.display_name || 'Korisnik Poso.ba'}</strong>
+                          <strong>{review.reviewer?.display_name || 'Korisnik Zadatka'}</strong>
                           <div className="review-card-rating">
                             <Stars value={review.rating} />
                             <span>{formatBosnianDate(review.created_at)}</span>

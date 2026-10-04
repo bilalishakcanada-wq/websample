@@ -48,7 +48,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     })
     map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
     mapRef.current = map
-    if (import.meta.env.DEV) window.__posoMap = map
+    if (import.meta.env.DEV) window.__zadatakMap = map
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
 
     map.on('load', () => {

@@ -3,8 +3,8 @@
 const pw = process.env.ROBOT_PASSWORD || 'Test12345!'
 
 export const ACCOUNTS = {
-  client: { email: process.env.ROBOT_CLIENT_EMAIL || 'klijent@test.poso', password: process.env.ROBOT_CLIENT_PASSWORD || pw },
-  provider: { email: process.env.ROBOT_PROVIDER_EMAIL || 'izvodjac@test.poso', password: process.env.ROBOT_PROVIDER_PASSWORD || pw },
-  admin: { email: process.env.ROBOT_ADMIN_EMAIL || 'admin@test.poso', password: process.env.ROBOT_ADMIN_PASSWORD || pw },
-  newbie: { email: process.env.ROBOT_NEWBIE_EMAIL || 'novi@test.poso', password: process.env.ROBOT_NEWBIE_PASSWORD || pw },
+  client: { email: process.env.ROBOT_CLIENT_EMAIL || 'klijent@test.zadatak', password: process.env.ROBOT_CLIENT_PASSWORD || pw },
+  provider: { email: process.env.ROBOT_PROVIDER_EMAIL || 'izvodjac@test.zadatak', password: process.env.ROBOT_PROVIDER_PASSWORD || pw },
+  admin: { email: process.env.ROBOT_ADMIN_EMAIL || 'admin@test.zadatak', password: process.env.ROBOT_ADMIN_PASSWORD || pw },
+  newbie: { email: process.env.ROBOT_NEWBIE_EMAIL || 'novi@test.zadatak', password: process.env.ROBOT_NEWBIE_PASSWORD || pw },
 }

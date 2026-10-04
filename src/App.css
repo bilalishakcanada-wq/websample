@@ -12011,7 +12011,7 @@ body:has(.profile-cta-bar) .support-chat {
 @media (max-width: 900px) { .wallet-stats, .wallet-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* =========================================================================
-   Poso.ba Pay — accept sheet, job payment card, admin escrow
+   Zadatak Pay — accept sheet, job payment card, admin escrow
    ========================================================================= */
 .pay-sheet { display: grid; gap: 14px; }
 .pay-sheet-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; }

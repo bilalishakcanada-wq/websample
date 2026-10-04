@@ -5,7 +5,7 @@ import InfoLayout from '../components/InfoLayout'
 function BusinessPage() {
   return (
     <InfoLayout
-      eyebrow="Poso.ba za firme"
+      eyebrow="Zadatak za firme"
       title="Radna snaga na zahtjev, bez zapošljavanja"
       lead="Kancelarija, lokal, magacin ili više lokacija — objavi šta treba i dobij ponude provjerenih izvođača iz grada u kom radiš. Isti nalog, isti proces, samo više poslova."
       cta={{ eyebrow: 'Veći obim?', text: 'Za redovne potrebe u više gradova dogovaramo direktnu podršku.', to: '/kontakt?tema=business', label: 'Kontaktiraj nas' }}

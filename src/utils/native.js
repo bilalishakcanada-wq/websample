@@ -66,7 +66,7 @@ export async function setupNative() {
     plugin('App')?.addListener?.('appUrlOpen', async ({ url }) => {
       if (!url?.startsWith(NATIVE_AUTH_CALLBACK)) return
       try { await plugin('Browser')?.close?.() } catch { /* already closed */ }
-      const parsed = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://poso.ba/auth/callback'))
+      const parsed = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://localhost/auth/callback'))
       const hash = new URLSearchParams(parsed.hash.replace(/^#/, ''))
       const { supabase } = await import('../lib/supabase')
       let error = null
@@ -113,9 +113,9 @@ function setupPhotoSource() {
 }
 
 function choosePhotoSource(onPick) {
-  document.getElementById('poso-photo-source')?.remove()
+  document.getElementById('zadatak-photo-source')?.remove()
   const sheet = document.createElement('div')
-  sheet.id = 'poso-photo-source'
+  sheet.id = 'zadatak-photo-source'
   sheet.setAttribute('role', 'dialog')
   sheet.setAttribute('aria-label', 'Dodaj sliku')
   sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;background:rgba(6,21,48,.45);font-family:Manrope,system-ui,sans-serif'

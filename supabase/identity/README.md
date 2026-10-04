@@ -169,7 +169,7 @@ upozorenja prikaže. Odobrenje uvijek potpisuje moderator, koji uz predmet vidi 
 razloge i mjere kvaliteta.
 
 Oznaka uređaja je gruba (platforma, jezik, rezolucija, vremenska zona), ne izlazi
-iz Poso.ba i služi samo da se vidi kad isti uređaj šalje više identiteta.
+iz Zadatka i služi samo da se vidi kad isti uređaj šalje više identiteta.
 
 ### Testovi
 `e2e/identity-quality.spec.js`: mutna slika odbijena uz objašnjenje, tamna dobija

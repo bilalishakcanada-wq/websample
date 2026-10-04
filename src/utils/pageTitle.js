@@ -1,12 +1,12 @@
 import { SITE_PAGES } from '../data/siteMap'
 
-const BRAND = 'Poso.ba'
+const BRAND = 'Zadatak'
 const STATIC = {
-  '/': 'Poso.ba — Objavi posao, izaberi najboljeg. Riješeno.',
+  '/': 'Zadatak — Objavi posao, izaberi najboljeg. Riješeno.',
   '/search': 'Pretraži poslove',
   '/objavi': 'Objavi posao',
   '/start': 'Dobro došao/la',
-  '/intro': 'Kako radi Poso.ba',
+  '/intro': 'Kako radi Zadatak',
   '/moji-poslovi': 'Moji poslovi',
   '/messages': 'Poruke',
   '/login': 'Prijava',

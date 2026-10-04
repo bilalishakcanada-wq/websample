@@ -89,12 +89,12 @@ const parseBody = (schema) => (req, res, next) => {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.status(supabase ? 200 : 503).json({ status: supabase ? 'ok' : 'degraded', app: 'poso.ba', timestamp: new Date().toISOString() })
+  res.status(supabase ? 200 : 503).json({ status: supabase ? 'ok' : 'degraded', app: 'zadatak', timestamp: new Date().toISOString() })
 })
 
 app.get('/api/config', (req, res) => {
   res.json({
-    appName: process.env.VITE_APP_NAME || 'Poso.ba',
+    appName: process.env.VITE_APP_NAME || 'Zadatak',
     defaultLocale: process.env.VITE_DEFAULT_LOCALE || 'bs',
     paymentsEnabled: false,
     paymentProvider: 'not_configured',

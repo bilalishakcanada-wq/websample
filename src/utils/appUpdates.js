@@ -4,9 +4,9 @@
  *    the page never mixes old and new hashed chunks;
  *  - if a lazy route chunk fails to load (old build gone from the CDN), reload once.
  */
-const RELOAD_FLAG = 'poso-chunk-reload'
+const RELOAD_FLAG = 'zadatak-chunk-reload'
 
-export const UPDATE_EVENT = 'poso:update-ready'
+export const UPDATE_EVENT = 'zadatak:update-ready'
 let updateReady = false
 export const isUpdateReady = () => updateReady
 

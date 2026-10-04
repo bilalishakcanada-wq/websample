@@ -1,4 +1,4 @@
-// Poso.ba — AI image moderation for Rule #1 (no contact details on the platform).
+// Zadatak — AI image moderation for Rule #1 (no contact details on the platform).
 //
 // Two ways in:
 //   1. A signed-in user right after uploading (Authorization: Bearer <jwt>) —

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Private local copy of the Poso.ba database with test accounts, for the robot and the e2e tests.
+# Private local copy of the Zadatak database with test accounts, for the robot and the e2e tests.
 # Nothing here touches the live site. Needs Docker and Node (the Supabase CLI runs through npx).
 #   bash robot/local-db/setup.sh            (from the repo root)
 # Afterwards .env.local points the site at the local database; build and serve with
 #   npx vite build && npx vite preview --port 4175
-# Test logins (password Test12345!): klijent@test.poso (client, ID approved, 5000 KM),
-# izvodjac@test.poso (worker, ID approved), admin@test.poso (ADMIN), novi@test.poso (fresh account).
+# Test logins (password Test12345!): klijent@test.zadatak (client, ID approved, 5000 KM),
+# izvodjac@test.zadatak (worker, ID approved), admin@test.zadatak (ADMIN), novi@test.zadatak (fresh account).
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 HERE="$REPO/robot/local-db"
@@ -24,7 +24,8 @@ for f in "$HERE"/migrations/*.sql; do $P -f "$f" >/dev/null || { echo "FAILED at
 for f in identity/bids_require_verified identity/jobs_require_verified security/05_marketplace_scam_guards payments/01_card_topup_and_payouts \
          airtasker/01_task_schedule_and_expiry payments/02_price_increase_and_cancellation_policy \
          airtasker/02_search_due_dates airtasker/03_saved_tasks airtasker/04_reach_and_travel airtasker/05_quote_requests \
-         offers/bid_replies security/06_private_uploads security/07_phone_run_false_positives; do
+         offers/bid_replies security/06_private_uploads security/07_phone_run_false_positives \
+         branding/01_zadatak_rebrand; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   echo "applying supabase/$f.sql"
   $P -f "$REPO/supabase/$f.sql" >/dev/null || { echo "FAILED at supabase/$f.sql"; exit 1; }
@@ -38,11 +39,11 @@ SR=$(echo "$STATUS" | python3 -c "import sys,json;print(json.load(sys.stdin)['SE
 ANON=$(echo "$STATUS" | python3 -c "import sys,json;print(json.load(sys.stdin)['ANON_KEY'])")
 for u in klijent izvodjac admin novi; do
   curl -s -X POST http://127.0.0.1:54321/auth/v1/admin/users -H "apikey: $SR" -H "Authorization: Bearer $SR" -H 'content-type: application/json' \
-    -d "{\"email\":\"$u@test.poso\",\"password\":\"Test12345!\",\"email_confirm\":true,\"user_metadata\":{\"full_name\":\"Test $u Korisnik\"}}" >/dev/null
+    -d "{\"email\":\"$u@test.zadatak\",\"password\":\"Test12345!\",\"email_confirm\":true,\"user_metadata\":{\"full_name\":\"Test $u Korisnik\"}}" >/dev/null
 done
 bash "$HERE/reset.sh"
 $P <<'SQL'
-insert into user_roles(user_id, role_id) select p.user_id, r.id from profiles p, roles r where p.email = 'admin@test.poso' and r.name = 'ADMIN' on conflict do nothing;
+insert into user_roles(user_id, role_id) select p.user_id, r.id from profiles p, roles r where p.email = 'admin@test.zadatak' and r.name = 'ADMIN' on conflict do nothing;
 SQL
 printf 'VITE_SUPABASE_URL=http://127.0.0.1:54321\nVITE_SUPABASE_ANON_KEY=%s\nVITE_NO_PWA=1\n' "$ANON" > "$REPO/.env.local"
 echo "ROBOT_SUPABASE_ANON_KEY=$ANON" > "$HERE/.anon"

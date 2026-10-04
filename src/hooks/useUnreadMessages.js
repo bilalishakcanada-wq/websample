@@ -27,8 +27,8 @@ export function useUnreadMessages(userId) {
       queryClient.invalidateQueries({ queryKey: keys.inbox(userId) })
     }
     const stop = messageService.subscribeToMine(userId, bump)
-    window.addEventListener('poso:messages-read', bump)
-    return () => { stop(); window.removeEventListener('poso:messages-read', bump) }
+    window.addEventListener('zadatak:messages-read', bump)
+    return () => { stop(); window.removeEventListener('zadatak:messages-read', bump) }
   }, [userId, queryClient])
   return data || 0
 }

@@ -148,7 +148,7 @@ begin
 
   insert into public.notifications (user_id, type, title, message, link) values
     (v_row.provider_id, 'job', 'Povećanje cijene odobreno 🎉',
-     'Klijent je odobrio +' || trim(to_char(v_req.amount_km, 'FM999G999D00')) || ' KM. Nova cijena je ' || trim(to_char(v_amount, 'FM999G999D00')) || ' KM i osigurana je na Poso.ba.',
+     'Klijent je odobrio +' || trim(to_char(v_req.amount_km, 'FM999G999D00')) || ' KM. Nova cijena je ' || trim(to_char(v_amount, 'FM999G999D00')) || ' KM i osigurana je na Zadatku.',
      '/listings/' || v_row.listing_id::text);
   return v_row;
 end $fn$;
@@ -255,7 +255,7 @@ begin
      'job', 'Zatražen je prekid posla',
      case when v_resp = v_me then 'Druga strana traži sporazumni prekid i preuzima odgovornost.'
           else 'Druga strana traži prekid i navodi da si ti odgovoran/na. Ako se ne slažeš, odbij ili otvori spor.' end
-     || ' Dok ne odgovoriš, novac ostaje osiguran na Poso.ba.',
+     || ' Dok ne odgovoriš, novac ostaje osiguran na Zadatku.',
      '/listings/' || p_listing::text);
   return v_req;
 end $fn$;

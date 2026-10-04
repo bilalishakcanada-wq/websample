@@ -1,4 +1,4 @@
-// Poso.ba — AI trust agent.
+// Zadatak — AI trust agent.
 //
 // Reads everything the platform knows about an account (profile, listings,
 // bids, messages, reviews, Rule #1 events, reports) and writes a trust
@@ -25,7 +25,7 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-const SYSTEM = `You are the trust & safety analyst for Poso.ba, a Bosnian services marketplace (like Airtasker).
+const SYSTEM = `You are the trust & safety analyst for Zadatak, a Bosnian services marketplace (like Airtasker).
 You receive a dossier about one account and must judge how trustworthy it is and whether it is trying to abuse the platform.
 
 Rule #1 of the platform: no phone numbers, emails, links or social media anywhere except in messages after a bid is accepted.

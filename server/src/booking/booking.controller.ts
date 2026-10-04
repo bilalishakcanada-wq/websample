@@ -1,7 +1,7 @@
 /**
  * Booking kontroler (Node/NestJS).
  *
- * ČITAJ PRIJE UPOTREBE: ovo NIJE mjesto gdje se pravila brane. Poso.ba frontend
+ * ČITAJ PRIJE UPOTREBE: ovo NIJE mjesto gdje se pravila brane. Zadatak frontend
  * zove Supabase direktno, pa bi napadač ovaj servis jednostavno preskočio.
  * Pravila žive u bazi (supabase/booking/*.sql): matrica prelaza, FOR UPDATE,
  * zabrana jednostranog otkazivanja, nepromjenjiv chat.

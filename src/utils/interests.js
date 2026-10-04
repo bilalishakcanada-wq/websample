@@ -7,7 +7,7 @@
  * and show something new. Everything stays on this device (localStorage) — nothing is sent,
  * and the same code runs on desktop web, phone web and the Capacitor app.
  */
-const KEY = 'poso-interests-v1'
+const KEY = 'zadatak-interests-v1'
 const DAY = 24 * 3600 * 1000
 const HALF_LIFE_DAYS = 14
 const SEEN_DAYS = 5

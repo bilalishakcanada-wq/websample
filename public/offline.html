@@ -32,8 +32,8 @@
     document.getElementById('retry').addEventListener('click', go)
     window.addEventListener('online', go)
     try {
-      var last = Number(sessionStorage.getItem('posoRetry') || 0)
-      if (navigator.onLine && Date.now() - last > 15000) { sessionStorage.setItem('posoRetry', String(Date.now())); go() }
+      var last = Number(sessionStorage.getItem('zadatakRetry') || 0)
+      if (navigator.onLine && Date.now() - last > 15000) { sessionStorage.setItem('zadatakRetry', String(Date.now())); go() }
     } catch (e) { /* storage blocked: wait for the button */ }
   })()
 </script>

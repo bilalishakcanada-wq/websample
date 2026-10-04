@@ -77,7 +77,7 @@ function MessagesPage() {
   const loading = inboxQuery.isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('poso-chat-tips') !== 'hidden' } catch { return true } })
+  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('zadatak-chat-tips') !== 'hidden' } catch { return true } })
   const listRef = useRef(null)
   const inputRef = useRef(null)
   const imageRef = useRef(null)
@@ -98,7 +98,7 @@ function MessagesPage() {
   const chatState = active?.chat_state || 'open'
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
-  // and the rows are patched locally: markRead's 'poso:messages-read' event already refreshes inbox + badge
+  // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
   useEffect(() => {
     if (!activeId || !threadQuery.data || markingRef.current) return
     const ids = threadQuery.data.filter((row) => row.receiver_id === user.id && !row.read_at).map((row) => row.id)
@@ -244,7 +244,7 @@ function MessagesPage() {
     }
   }
 
-  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('poso-chat-tips', 'hidden') } catch { /* ignore */ } }
+  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('zadatak-chat-tips', 'hidden') } catch { /* ignore */ } }
 
   // group the thread by day for separators
   const grouped = useMemo(() => {

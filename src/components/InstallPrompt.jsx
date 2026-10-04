@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Download, Share, X } from 'lucide-react'
 import { isNativeApp } from '../utils/native'
 
-const DISMISS_KEY = 'poso:install-dismissed'
+const DISMISS_KEY = 'zadatak:install-dismissed'
 const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
 

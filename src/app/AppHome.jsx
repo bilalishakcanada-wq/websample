@@ -77,7 +77,7 @@ function PosterHome({ firstName }) {
   const start = (text) => {
     haptic('light')
     const draft = { form: { title: (text || '').slice(0, 70), timing: '', date: '', mode: '', location: '', description: '', category: '', price: '' }, step: 0 }
-    try { localStorage.setItem('poso-post-draft', JSON.stringify(draft)) } catch { /* ignore */ }
+    try { localStorage.setItem('zadatak-post-draft', JSON.stringify(draft)) } catch { /* ignore */ }
     navigate('/objavi')
   }
 

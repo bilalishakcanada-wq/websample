@@ -25,14 +25,14 @@ function SwBridge() {
     if (!('serviceWorker' in navigator)) return undefined
     const onMessage = (event) => {
       const data = event.data || {}
-      if (data.type === 'poso:navigate' && data.url) {
+      if ((data.type === 'zadatak:navigate' || data.type === 'poso:navigate') && data.url) {
         try {
           const url = new URL(data.url)
           const path = url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname
           navigate(`${path || '/'}${url.search}`)
         } catch { /* ignore malformed */ }
       }
-      if (data.type === 'poso:resubscribe') syncPush()
+      if (data.type === 'zadatak:resubscribe' || data.type === 'poso:resubscribe') syncPush()
     }
     navigator.serviceWorker.addEventListener('message', onMessage)
     return () => navigator.serviceWorker.removeEventListener('message', onMessage)

@@ -45,7 +45,7 @@ function DesktopHome() {
   const [searchTerm, setSearchTerm] = useState('')
   const [city, setCity] = useState('Sarajevo')
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
-  const [savedTasks, setSavedTasks] = useLocalStorage('poso-saved-tasks', [])
+  const [savedTasks, setSavedTasks] = useLocalStorage('zadatak-saved-tasks', [])
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
   const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)

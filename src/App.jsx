@@ -85,8 +85,8 @@ function SupportChatSlot() {
   const [asked, setAsked] = useState(false)
   useEffect(() => {
     const ask = () => setAsked(true)
-    window.addEventListener('poso:open-support', ask)
-    return () => window.removeEventListener('poso:open-support', ask)
+    window.addEventListener('zadatak:open-support', ask)
+    return () => window.removeEventListener('zadatak:open-support', ask)
   }, [])
   const [wasOnHelpPage, setWasOnHelpPage] = useState(onHelpPage)
   if (wasOnHelpPage !== onHelpPage) { setWasOnHelpPage(onHelpPage); setAsked(false) }

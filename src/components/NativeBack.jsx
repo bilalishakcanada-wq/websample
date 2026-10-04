@@ -20,7 +20,7 @@ function NativeBack() {
     let gone = false
     const onBack = () => {
       const state = window.history.state || {}
-      if (state.posoOverlay || state.posoStep || canGoBackInApp()) { window.history.back(); return }
+      if (state.zadatakOverlay || state.zadatakStep || canGoBackInApp()) { window.history.back(); return }
       const up = parentOf(hereRef.current.pathname, hereRef.current.search)
       if (up) navigate(up, { replace: true })
       // minimize keeps the WebView alive, so reopening is instant instead of a full reload behind the splash

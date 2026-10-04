@@ -39,7 +39,7 @@ function HelpPage() {
   const results = useMemo(() => searchHelp(query, audience), [query, audience])
   const grouped = useMemo(() => HELP_AUDIENCES.map((group) => ({ ...group, items: results.filter((item) => item.audience === group.id) })).filter((group) => group.items.length > 0), [results])
   const popular = HELP_ARTICLES.filter((article) => ['post-job', 'fees', 'rule-one', 'contact-unlock', 'badges', 'photos'].includes(article.id))
-  const openSupport = () => window.dispatchEvent(new CustomEvent('poso:open-support'))
+  const openSupport = () => window.dispatchEvent(new CustomEvent('zadatak:open-support'))
 
   return (
     <div className="help-page">

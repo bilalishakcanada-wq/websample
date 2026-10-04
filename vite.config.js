@@ -14,7 +14,7 @@ const base = process.env.VITE_BASE || '/'
  * paints unstyled.
  */
 const asyncCss = () => ({
-  name: 'poso-async-css',
+  name: 'zadatak-async-css',
   apply: 'build',
   transformIndexHtml: (html, ctx) => {
     html = html.replace(
@@ -35,7 +35,7 @@ const asyncCss = () => ({
  * A tiny inline script shows it only on phones, only on the home path, only when nobody is signed in.
  */
 const prerenderWelcome = () => ({
-  name: 'poso-prerender',
+  name: 'zadatak-prerender',
   apply: 'build',
   enforce: 'post',
   transformIndexHtml: {
@@ -66,9 +66,9 @@ const prerenderWelcome = () => ({
  * meta tag, never into the JS, so chunks whose code did not change keep their names (and caches) across deploys.
  */
 const buildId = () => ({
-  name: 'poso-build-id',
+  name: 'zadatak-build-id',
   apply: 'build',
-  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="poso-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
+  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="zadatak-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
 })
 
 /**
@@ -82,11 +82,11 @@ const buildId = () => ({
  * cards lifted or buttons highlighted.
  */
 const pruneUnusedCss = () => ({
-  name: 'poso-prune-css',
+  name: 'zadatak-prune-css',
   apply: 'build',
   enforce: 'pre',
   transform(code, id) {
-    if (process.env.POSO_KEEP_CSS) return null // debug: ship the stylesheet as written
+    if (process.env.ZADATAK_KEEP_CSS) return null // debug: ship the stylesheet as written
     if (!/src[\\/](App|index|app[\\/]app)\.css$/.test(id.split('?')[0])) return null
     const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
     const source = [...walk('src').filter((f) => /\.(jsx?|mjs|html)$/.test(f)), 'index.html'].map((f) => readFileSync(f, 'utf8')).join('\n')

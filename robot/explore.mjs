@@ -367,7 +367,7 @@ async function crawl(browser, profileName, roleName, state) {
   const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block' })
   await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
-  if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('poso-mode', m) } catch { /* private mode */ } }, role.mode)
+  if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {})
   const page = await context.newPage()

@@ -20,8 +20,6 @@ import crypto from 'node:crypto'
 
 // ------------------------------------------------------------------ CORS
 const ALLOWED = new Set([
-  'https://poso.ba',
-  'https://www.poso.ba',
   'https://bilalishakcanada-wq.github.io',
   ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:54971', 'http://localhost:4173'] : []),
 ])

@@ -16,7 +16,7 @@ const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') || ''
 const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID') || ''
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || ''
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://poso.ba'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://bilalishakcanada-wq.github.io/websample'
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })

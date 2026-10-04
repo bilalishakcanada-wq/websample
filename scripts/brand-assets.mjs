@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const fontsDir = resolve(root, 'assets/fonts')
 // Let librsvg find the bundled Manrope (Google Fonts, OFL) without touching system fonts.
 mkdirSync(fontsDir, { recursive: true })
-writeFileSync(resolve(fontsDir, 'fonts.conf'), `<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>${fontsDir}</dir><cachedir>/tmp/poso-fontconfig</cachedir></fontconfig>`)
+writeFileSync(resolve(fontsDir, 'fonts.conf'), `<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>${fontsDir}</dir><cachedir>/tmp/zadatak-fontconfig</cachedir></fontconfig>`)
 process.env.FONTCONFIG_FILE = resolve(fontsDir, 'fonts.conf')
 
 const NAVY = '#0d2a52'

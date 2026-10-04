@@ -1,4 +1,4 @@
--- Zadatak Pay — secure payments, the Airtasker way (migration poso_pay).
+-- Zadatak Pay — secure payments, the Airtasker way (originally applied as migration poso_pay).
 --
 --   1. client accepts an offer  -> the offer amount moves from the client's balance into escrow
 --                                   (job_payments.status = 'funded', listing -> 'assigned')

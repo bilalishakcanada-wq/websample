@@ -49,8 +49,8 @@ function SupportChat({ openRequested = false }) {
 
   useEffect(() => {
     const show = () => setOpen(true)
-    window.addEventListener('poso:open-support', show)
-    return () => window.removeEventListener('poso:open-support', show)
+    window.addEventListener('zadatak:open-support', show)
+    return () => window.removeEventListener('zadatak:open-support', show)
   }, [])
 
   useEffect(() => {

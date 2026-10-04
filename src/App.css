@@ -12885,3 +12885,14 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 /* the help chat kept a 200px message area while loading and grew to 320px when the greeting arrived,
    so the whole panel jumped up; a steady height (shrinking only on short screens) keeps it still */
 .support-chat-messages { height: 320px; min-height: 0; flex: 1 1 auto; }
+
+/* "Prije objave potvrdi identitet": on the post-a-job form until the ID is approved */
+.post-gate-notice { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin: 0 0 16px;
+  border-radius: 14px; border: 1px solid #f0dca8; background: #fff8e6; color: var(--accent-ink); text-align: left; }
+.post-gate-notice svg { flex-shrink: 0; margin-top: 2px; }
+.post-gate-notice strong { display: block; color: var(--text); margin-bottom: 2px; }
+.post-gate-notice p { margin: 0 0 4px; color: var(--text-soft); font-size: .9rem; line-height: 1.5; }
+.post-gate-notice .post-gate-keep { font-size: .82rem; }
+.post-gate-notice.rejected { border-color: #f3c9c9; background: #fdf0f0; color: var(--danger-ink); }
+.post-gate-notice.compact { padding: 10px 12px; }
+.post-gate-link { display: inline-block; margin-top: 4px; font-weight: 700; color: var(--primary); }

@@ -12,6 +12,8 @@ export const authService = {
     const cleanedEmail = sanitizeText(email).toLowerCase()
 
     if (!cleanedName) throw new Error('Ime je obavezno.')
+    // the same rule as the database (is_valid_full_name): with one word or a digit, the ID check later fails
+    if (!/^\p{L}[\p{L}'’.-]*(\s+\p{L}[\p{L}'’.-]*)+$/u.test(cleanedName)) throw new Error('Upiši ime i prezime, samo slovima (npr. Amra Hodžić).')
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
     if (!isStrongPassword(password)) throw new Error('Lozinka mora imati najmanje 8 znakova i sadržavati veliko, malo slovo i broj.')
     if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) throw new Error('Potvrdite sigurnosnu provjeru.')

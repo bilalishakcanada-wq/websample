@@ -19,6 +19,8 @@ import ImagePicker from '../components/ImagePicker'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
+import IdentityGateNotice from '../components/IdentityGateNotice'
+import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const STEPS = [
   { id: 'basics', label: 'Naslov i rok' },
@@ -48,6 +50,10 @@ function PostTaskPage() {
   const quoteEnabled = useQuoteRequestsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
+  // a new job needs an approved ID (editing one already published does not); the form stays
+  // open to fill in and the draft is kept, only publishing waits for the check
+  const postGate = usePostGate(user?.id, !editId)
+  const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // a half-written job survives a refresh or an accidental click away; editing or copying a job
   // starts from that job and leaves the draft alone
   const freshPost = !editId && !copyId
@@ -142,6 +148,8 @@ function PostTaskPage() {
 
   const submit = async () => {
     setError('')
+    if (postGate === 'needed' || postGate === 'rejected') { navigate(postVerifyHref(postBack)); return }
+    if (postGate === 'pending') return
     setSaving(true)
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
@@ -187,6 +195,7 @@ function PostTaskPage() {
 
       <main className="wizard-body">
         {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
+        {(step === 0 || step === STEPS.length - 1) && <IdentityGateNotice gate={postGate} back={postBack} />}
         {step === 0 && (
           <section className="wizard-panel">
             <h1>Počnimo od osnovnog</h1>
@@ -372,8 +381,8 @@ function PostTaskPage() {
           </button>
         )}
         {step === STEPS.length - 1 && (
-          <button type="button" className="primary-button wizard-next" disabled={saving} onClick={submit}>
-            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao'}
+          <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending'} onClick={submit}>
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
           </button>
         )}
       </footer>

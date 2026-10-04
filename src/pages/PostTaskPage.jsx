@@ -194,6 +194,7 @@ function PostTaskPage() {
             <label className="wizard-field">
               <span>Naslov posla</span>
               <input
+                data-testid="post-title"
                 value={form.title}
                 onChange={(event) => update({ title: event.target.value })}
                 placeholder="npr. Montaža kuhinjskih elemenata"
@@ -263,6 +264,7 @@ function PostTaskPage() {
             <label className="wizard-field">
               <span>Opis posla</span>
               <textarea
+                data-testid="post-description"
                 value={form.description}
                 onChange={(event) => update({ description: event.target.value })}
                 placeholder="Opišite šta tačno treba uraditi, koliko je veliki posao, da li je potreban alat..."
@@ -317,6 +319,7 @@ function PostTaskPage() {
               <div className="wizard-budget-input">
                 <Wallet size={20} />
                 <input
+                  data-testid="post-price"
                   type="number"
                   min="0"
                   step="1"
@@ -367,7 +370,7 @@ function PostTaskPage() {
       <footer className="wizard-footer">
         {step > 0 && <button type="button" className="ghost-button" onClick={() => setStep((s) => s - 1)}>Nazad</button>}
         {step < STEPS.length - 1 && (
-          <button type="button" className="primary-button wizard-next" disabled={!canContinue()} onClick={goNext}>
+          <button type="button" className="primary-button wizard-next" data-testid="post-next" disabled={!canContinue()} onClick={goNext}>
             Nastavi
           </button>
         )}

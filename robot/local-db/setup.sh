@@ -24,7 +24,7 @@ for f in "$HERE"/migrations/*.sql; do $P -f "$f" >/dev/null || { echo "FAILED at
 for f in identity/bids_require_verified security/05_marketplace_scam_guards payments/01_card_topup_and_payouts \
          airtasker/01_task_schedule_and_expiry payments/02_price_increase_and_cancellation_policy \
          airtasker/02_search_due_dates airtasker/03_saved_tasks airtasker/04_reach_and_travel airtasker/05_quote_requests \
-         offers/bid_replies security/06_private_uploads security/07_phone_run_false_positives \
+         offers/bid_replies security/06_private_uploads security/07_phone_run_false_positives security/09_signed_in_only_functions performance/01_search_radius_first \
          branding/01_zadatak_rebrand; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   echo "applying supabase/$f.sql"

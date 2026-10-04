@@ -3,6 +3,7 @@ import { adminService } from '../../services/adminService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useStaff } from './shared'
 import { withBase } from '../../utils/paths'
+import { SkeletonRows } from '../../components/Skeleton'
 
 /** Every conversation on the platform — admin only. */
 function MessagesTab({ initialConversationId = '' }) {
@@ -38,7 +39,7 @@ function MessagesTab({ initialConversationId = '' }) {
   const term = filter.trim().toLowerCase()
   const visible = term ? conversations.filter((item) => [item.one_name, item.two_name, item.one_member, item.two_member, item.listing_title, item.last_message].some((value) => (value || '').toLowerCase().includes(term))) : conversations
 
-  if (loading && conversations.length === 0) return <div className="page-state">Učitavanje poruka...</div>
+  if (loading && conversations.length === 0) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-support-layout">

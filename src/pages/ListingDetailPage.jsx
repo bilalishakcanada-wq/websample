@@ -448,7 +448,7 @@ function ListingDetailPage() {
             <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : 'Pošalji ponudu'}</h2>
             <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
             <form className="auth-form" onSubmit={submitBid}>
-              <label>Tvoja ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              <label>Tvoja ponuda (KM)<input data-testid="offer-amount" type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
               {Number(bidForm.amount) > 0 && feePercent != null && (
                 <p className="offer-net">Tebi sjeda <strong>{formatPrice(Math.round(Number(bidForm.amount) * (1 - feePercent / 100) * 100) / 100)}</strong> <span>(naknada {feePercent}%)</span></p>
               )}
@@ -462,10 +462,10 @@ function ListingDetailPage() {
                   </div>
                 </div>
               )}
-              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
+              <label>Obrazloženje<textarea data-testid="offer-message" minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
               <ActionError error={bidError} />
-              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
+              <button data-testid="offer-submit" type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>
           </section>
@@ -615,7 +615,7 @@ function ListingDetailPage() {
                         <b>{formatPrice(bid.amount)}</b>
                         {isOwner && bid.status === 'pending' && (
                           <div className="bid-owner-actions">
-                            <button type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
+                            <button data-testid="offer-accept" type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
                             <button type="button" className="ghost-button danger-button" onClick={async () => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bid.id, 'rejected') }}><XCircle size={16} /> Odbij</button>
                           </div>
                         )}

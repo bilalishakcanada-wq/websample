@@ -4,6 +4,7 @@ import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, Info, Landmark, L
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import CountUp from '../../components/CountUp'
+import { SkeletonRows } from '../../components/Skeleton'
 
 const KIND = {
   admin_credit: ['Uplata — Zadatak tim', Gift],
@@ -92,7 +93,7 @@ function WalletPage() {
   }
 
   if (error) return <div className="account-section"><div className="form-error">{error}</div></div>
-  if (!wallet) return <div className="account-section"><div className="page-state">Učitavanje balansa…</div></div>
+  if (!wallet) return <div className="account-section"><SkeletonRows n={4} /></div>
 
   const rows = (wallet.transactions || []).filter((row) => filter === 'all' || (filter === 'in' ? Number(row.amount) > 0 : Number(row.amount) < 0))
 

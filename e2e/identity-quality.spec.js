@@ -21,8 +21,8 @@ test.describe('Kvalitet slike i otisak dokumenta', () => {
     acceptDialogs(page)
     await login(page, 'client')
     await page.goto('/account/verifikacija')
-    await page.waitForSelector('.verif-form, .verif-state', { timeout: 20_000 })
-    test.skip(await page.locator('.verif-form').count() === 0,
+    await page.getByTestId('verification-form').or(page.getByTestId('verification-state')).first().waitFor({ timeout: 20_000 })
+    test.skip(await page.getByTestId('verification-form').count() === 0,
       'verifikacija je već poslana — forma je zaključana')
   })
   test.afterAll(async () => { await ctx?.close() })
@@ -30,22 +30,22 @@ test.describe('Kvalitet slike i otisak dokumenta', () => {
   test('mutna slika se odbija prije slanja, sa objašnjenjem', async () => {
     await page.getByLabel(/Ime i prezime/).fill('Test Klijent')
     await page.getByLabel(/^JMBG/).fill(JMBG)
-    await page.locator('.verif-uploads input[type="file"]').first().setInputFiles('e2e/fixtures/mutna.png')
+    await page.getByTestId('verification-uploads').locator('input[type="file"]').first().setInputFiles('e2e/fixtures/mutna.png')
 
-    await expect(page.locator('.verif-nalaz li.lose').filter({ hasText: /mutna/i })).toBeVisible({ timeout: 20_000 })
-    await expect(page.locator('.verif-nalaz li.lose').filter({ hasText: /premala/i })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /Pošalji na provjeru/ })).toBeDisabled()
+    await expect(page.getByTestId('verification-findings').locator('li.lose').filter({ hasText: /mutna/i })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByTestId('verification-findings').locator('li.lose').filter({ hasText: /premala/i })).toHaveCount(0)
+    await expect(page.getByTestId('verification-submit')).toBeDisabled()
   })
 
   test('tamna slika dobija svoju poruku', async () => {
-    await page.locator('.verif-uploads input[type="file"]').first().setInputFiles('e2e/fixtures/tamna.png')
-    await expect(page.locator('.verif-nalaz li.lose').filter({ hasText: /pretamna|svjetl/i })).toBeVisible({ timeout: 20_000 })
-    await expect(page.getByRole('button', { name: /Pošalji na provjeru/ })).toBeDisabled()
+    await page.getByTestId('verification-uploads').locator('input[type="file"]').first().setInputFiles('e2e/fixtures/tamna.png')
+    await expect(page.getByTestId('verification-findings').locator('li.lose').filter({ hasText: /pretamna|svjetl/i })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByTestId('verification-submit')).toBeDisabled()
   })
 
   test('oštra slika prolazi i otključava slanje', async () => {
-    await page.locator('.verif-uploads input[type="file"]').first().setInputFiles('e2e/fixtures/ostra.png')
+    await page.getByTestId('verification-uploads').locator('input[type="file"]').first().setInputFiles('e2e/fixtures/ostra.png')
     await expect(page.locator('.verif-upload').first()).toHaveClass(/ima/, { timeout: 20_000 })
-    await expect(page.getByRole('button', { name: /Pošalji na provjeru/ })).toBeEnabled()
+    await expect(page.getByTestId('verification-submit')).toBeEnabled()
   })
 })

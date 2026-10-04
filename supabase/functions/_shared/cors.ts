@@ -1,6 +1,6 @@
 // CORS for the Edge Functions the website and the app call from the browser.
 //
-// Only Poso.ba's own pages may call them from a browser: the live site, the custom domain, the
+// Only Zadatak's own pages may call them from a browser: the live site, the
 // Android/iOS app shell and local development. Any other site gets 403 before the function runs.
 // Calls without an Origin header (cron jobs, database webhooks, Monri's server) are not browser
 // calls and pass through unchanged; they are protected by their keys and JWT checks, as before.

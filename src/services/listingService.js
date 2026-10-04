@@ -117,7 +117,9 @@ export const listingService = {
     query = query
       .order(orderColumn, { ascending, nullsFirst: false })
 
-    const safeSearch = sanitizeText(search).slice(0, 80).replace(/[%_(),]/g, '')
+    // the words go inside a PostgREST or=(…) filter: characters that end a value or start a new
+    // condition (, ( ) " \ and the LIKE wildcards) are dropped so a search can't add its own conditions
+    const safeSearch = sanitizeText(search).slice(0, 80).replace(/[%_(),"\\*:]/g, '').trim()
     if (safeSearch) {
       query = query.or(`title.ilike.%${safeSearch}%,description.ilike.%${safeSearch}%,category.ilike.%${safeSearch}%`)
     }

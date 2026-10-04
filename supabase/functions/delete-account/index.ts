@@ -2,17 +2,16 @@
 // (the function checks the user's token itself; the gateway must let the CORS preflight through)
 // Requires project secrets SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { withCors } from '../_shared/cors.ts'
 
 const cors = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
+Deno.serve(withCors(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
   const authHeader = req.headers.get('Authorization') || ''
@@ -54,4 +53,4 @@ Deno.serve(async (req) => {
     return json({ error: 'Brisanje naloga nije uspjelo. Pokušajte ponovo.' }, 400)
   }
   return json({ success: true })
-})
+}))

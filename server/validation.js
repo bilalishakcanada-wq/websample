@@ -26,11 +26,13 @@ export const tagSchema = z.object({ name: boundedText(40).min(1).transform((valu
 
 export const authSchema = z.object({
   email: z.string().trim().email().max(254),
-  password: z.string().min(8).max(128),
+  // bcrypt (what Supabase Auth hashes with) only reads the first 72 bytes
+  password: z.string().min(8).max(72),
   captchaToken: z.string().min(1).max(4096),
 })
 
 export const registerSchema = authSchema.extend({
+  password: z.string().min(8).max(72).regex(/[a-z]/).regex(/[A-Z]/).regex(/\d/),
   fullName: boundedText(120).min(2).transform((value) => value.replace(/<[^>]*>/g, '')),
   city: sanitizedText(80).optional(),
   phone: sanitizedText(40).optional(),

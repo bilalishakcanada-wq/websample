@@ -1,4 +1,4 @@
-// Poso.ba — AI support assistant ("Poso").
+// Zadatak — AI support assistant ("Zadatak asistent").
 //
 // The signed-in user sends a message (already stored in support_messages with
 // needs_human=false). The assistant answers from the help articles the client
@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) =>
 
 type Article = { id: string; audience: string; q: string; a: string }
 
-const systemPrompt = (articles: Article[], profile: Record<string, unknown> | null) => `Ti si "Poso", digitalni asistent podrške platforme Poso.ba — bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
+const systemPrompt = (articles: Article[], profile: Record<string, unknown> | null) => `Ti si "Zadatak asistent", digitalni asistent podrške platforme Zadatak — bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
 Pišeš isključivo na bosanskom, jednostavno, toplo i kratko (2–5 rečenica, bez markdown naslova; smiješ koristiti crtice za korake). Obraćaš se sa "ti".
 
 ZNANJE — odgovaraj SAMO na osnovu ovih članaka i činjenica. Ne izmišljaj funkcije, cijene ni rokove kojih ovdje nema:
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
   // conversation so far, oldest first, ending with the user's new message
   const turns = (history || []).reverse()
-    .map((row) => ({ role: row.sender === 'user' ? 'user' : 'assistant', content: `${row.sender === 'admin' ? '[Poso.ba tim] ' : ''}${row.message}` }))
+    .map((row) => ({ role: row.sender === 'user' ? 'user' : 'assistant', content: `${row.sender === 'admin' ? '[Zadatak tim] ' : ''}${row.message}` }))
   if (turns.length === 0 || turns[turns.length - 1].role !== 'user' || turns[turns.length - 1].content !== message) turns.push({ role: 'user', content: message })
   // Anthropic needs alternating roles — merge neighbours with the same role
   const merged: Array<{ role: string; content: string }> = []

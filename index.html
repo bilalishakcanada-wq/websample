@@ -8,12 +8,12 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0d2a52" />
-    <meta name="description" content="Poso.ba — pronađite ili ponudite lokalne usluge u Bosni i Hercegovini." />
+    <meta name="description" content="Zadatak — pronađite ili ponudite lokalne usluge u Bosni i Hercegovini." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Poso.ba" />
-    <title>Poso.ba — Marketplace za usluge</title>
+    <meta name="apple-mobile-web-app-title" content="Zadatak" />
+    <title>Zadatak — Marketplace za usluge</title>
     <script>
       // OAuth return for the installed app / installed web app. The system browser lands here with
       // the session in the hash:
@@ -45,7 +45,7 @@
                 // only when this page is the in-app browser view, not the installed app itself
                 var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true
                 var note = document.getElementById('native-return')
-                if (note && !standalone) { note.style.display = 'grid'; note.querySelector('p').textContent = 'Prijava je uspjela — vrati se u Poso.ba aplikaciju na početnom ekranu.'; note.querySelector('a').style.display = 'none' }
+                if (note && !standalone) { note.style.display = 'grid'; note.querySelector('p').textContent = 'Prijava je uspjela — vrati se u Zadatak aplikaciju na početnom ekranu.'; note.querySelector('a').style.display = 'none' }
               }).catch(function () {})
           }
         } catch (e) { /* ignore */ }
@@ -63,8 +63,8 @@
     </style>
   </head>
   <body>
-    <div id="native-return"><div><p>Prijava je uspjela — vraćamo te u aplikaciju.</p><a href="#">Otvori Poso.ba aplikaciju</a></div></div>
-    <div id="root"><div class="boot-splash" id="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><rect x="248" y="190" width="150" height="598" rx="75" fill="#f5b400"/><circle cx="560" cy="418" r="228" fill="#f5b400"/><circle cx="560" cy="418" r="150" fill="#0d2a52"/><path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Poso.ba</strong></div></div></div>
+    <div id="native-return"><div><p>Prijava je uspjela — vraćamo te u aplikaciju.</p><a href="#">Otvori Zadatak aplikaciju</a></div></div>
+    <div id="root"><div class="boot-splash" id="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><rect x="248" y="190" width="150" height="598" rx="75" fill="#f5b400"/><circle cx="560" cy="418" r="228" fill="#f5b400"/><circle cx="560" cy="418" r="150" fill="#0d2a52"/><path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Zadatak</strong></div></div></div>
     <script>
       // if the app never mounts (a script failed to download on a bad connection) don't leave the
       // splash up forever: offer a reload

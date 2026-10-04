@@ -208,7 +208,7 @@ function AccountLayout() {
             {!profile.onboarding_completed && pathname === '/account/profil' && (
               <div className="profile-setup-banner">
                 <Sparkles size={18} />
-                <div><strong>Dobrodošao/la na Poso.ba!</strong><span>Dopuni osnovne podatke — traje minutu.</span></div>
+                <div><strong>Dobrodošao/la na Zadatak!</strong><span>Dopuni osnovne podatke — traje minutu.</span></div>
               </div>
             )}
             <Outlet />

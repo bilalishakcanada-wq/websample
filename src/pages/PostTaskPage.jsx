@@ -34,7 +34,7 @@ const TIMING_OPTIONS = [
   { id: 'flexible', label: 'Fleksibilan sam' },
 ]
 
-const DRAFT_KEY = 'poso-post-draft-web'
+const DRAFT_KEY = 'zadatak-post-draft-web'
 
 function PostTaskPage() {
   const navigate = useNavigate()

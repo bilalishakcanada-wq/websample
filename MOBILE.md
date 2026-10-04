@@ -1,4 +1,4 @@
-# Poso.ba — mobilna aplikacija (iOS / Android)
+# Zadatak — mobilna aplikacija (iOS / Android)
 
 Web stranica je već PWA (instalira se sa telefona bez app storea). Za App Store / Google Play
 i beta testiranje (TestFlight / Play Internal testing) tu su nativni projekti napravljeni sa Capacitorom:
@@ -37,7 +37,7 @@ Nakon svake promjene web koda **nije potreban novi build** — ljuska učitava l
 Ikone i splash ekrani se prave iz jednog SVG znaka: `node scripts/brand-assets.mjs && npm run app:assets`
 (piše `assets/icon*.png`, `assets/splash*.png`, `public/icons/*`, pa iOS/Android kataloge). Isti znak je i u
 `src/components/BrandMark.jsx` (zaglavlje, prijava, dobrodošlica) i `public/favicon.svg`.
-ID aplikacije: `ba.poso.app`, ime: Poso.ba. iPhone je zaključan na portret; kamera/galerija imaju opise dozvola.
+ID aplikacije: `ba.poso.app`, ime: Zadatak. iPhone je zaključan na portret; kamera/galerija imaju opise dozvola.
 
 ## Ako build „visi“ ili Xcode javlja greške
 - **Disk skoro pun + iCloud „Desktop & Documents“**: macOS izbaci fajlove projekta u oblak (prazni „dataless“ fajlovi) i svaki build/`npm` visi. Rješenje: oslobodi 20+ GB i drži `node_modules` van iCloud-a — `node_modules` je simbolički link na `node_modules.nosync` (iCloud preskače `*.nosync`). Ako se ponovi: `rm -rf node_modules node_modules.nosync && mkdir node_modules.nosync && ln -s node_modules.nosync node_modules && npm install`.
@@ -46,7 +46,7 @@ ID aplikacije: `ba.poso.app`, ime: Poso.ba. iPhone je zaključan na portret; kam
 
 ## Push obavijesti (Web Push)
 
-- Radi u Chrome/Edge/Firefox (Android + desktop) i u Safariju na iOS 16.4+ **samo kad je Poso.ba dodan na početni ekran**.
+- Radi u Chrome/Edge/Firefox (Android + desktop) i u Safariju na iOS 16.4+ **samo kad je Zadatak dodan na početni ekran**.
 - Korisnik ih uključi karticom „Uključi obavijesti“ (nadzorna ploča / poruke) ili u *Postavke → Ovaj uređaj*.
 - Tok: `notifications` insert → trigger `on_notification_push` → Edge Function `send-push` → push servis → `src/sw.js` prikazuje notifikaciju; klik otvara `link` u aplikaciji.
 - Nove obavijesti se prave i za poruke (`on_message_notify`, jedna po razgovoru dok se ne pročita) i ponude (`on_bid_notify`).

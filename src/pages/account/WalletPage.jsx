@@ -6,11 +6,11 @@ import { formatBosnianDate } from '../../utils/dateFormat'
 import CountUp from '../../components/CountUp'
 
 const KIND = {
-  admin_credit: ['Uplata — Poso.ba tim', Gift],
+  admin_credit: ['Uplata — Zadatak tim', Gift],
   bonus: ['Bonus', Sparkles],
   promo: ['Promocija', Sparkles],
   refund: ['Povrat', RefreshCcw],
-  admin_debit: ['Skidanje — Poso.ba tim', Receipt],
+  admin_debit: ['Skidanje — Zadatak tim', Receipt],
   fee: ['Naknada za posao', Receipt],
   purchase: ['Uplata', Receipt],
   payout: ['Isplata', ArrowUpRight],
@@ -119,7 +119,7 @@ function WalletPage() {
 
       <div className="wallet-info">
         <Info size={16} />
-        <span>Ovo je tvoj novac na Poso.ba. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Na račun se isplaćuje zarada od poslova. <Link to="/nivoi">Kako rade naknade →</Link></span>
+        <span>Ovo je tvoj novac na Zadatku. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Na račun se isplaćuje zarada od poslova. <Link to="/nivoi">Kako rade naknade →</Link></span>
       </div>
 
       {notice && <div className="form-success">{notice}</div>}
@@ -139,7 +139,7 @@ function WalletPage() {
       {panel === 'topup' && (
         <form ref={panelRef} className="auth-form wallet-action" onSubmit={topUp}>
           <label>Iznos uplate (KM)<input type="number" inputMode="decimal" min="5" max="2000" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="npr. 100" required /></label>
-          <small className="muted-text">Karticu unosiš na sigurnoj stranici banke (Monri). Poso.ba ne vidi ni ne čuva podatke kartice.</small>
+          <small className="muted-text">Karticu unosiš na sigurnoj stranici banke (Monri). Zadatak ne vidi ni ne čuva podatke kartice.</small>
           {actionError && <div className="form-error">{actionError}</div>}
           <button type="submit" className="primary-button" disabled={busy}><Lock size={15} /> {busy ? 'Otvaram plaćanje…' : 'Nastavi na plaćanje'}</button>
         </form>

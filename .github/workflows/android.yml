@@ -7,7 +7,7 @@
 #    have to uninstall before updating.
 #  • When the signing secrets below exist it also builds a signed RELEASE APK + AAB
 #    (the .aab is what Google Play Console wants):
-#      ANDROID_KEYSTORE_BASE64  – `base64 -i poso-release.keystore | pbcopy`
+#      ANDROID_KEYSTORE_BASE64  – `base64 -i zadatak-release.keystore | pbcopy`
 #      ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
 #
 # The app shell loads the live site (capacitor.config.json → server.url), so the web
@@ -54,7 +54,7 @@ jobs:
       - name: Build web bundle (offline fallback inside the app)
         env:
           VITE_BASE: /
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
           VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
@@ -86,12 +86,12 @@ jobs:
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE" | base64 -d > android/app/poso-release.keystore
+          echo "$KEYSTORE" | base64 -d > android/app/zadatak-release.keystore
           cat >> android/app/build.gradle <<'EOF'
           android {
               signingConfigs {
                   release {
-                      storeFile file("poso-release.keystore")
+                      storeFile file("zadatak-release.keystore")
                       storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
                       keyAlias System.getenv("ANDROID_KEY_ALIAS")
                       keyPassword System.getenv("ANDROID_KEY_PASSWORD")
@@ -114,25 +114,35 @@ jobs:
       - name: Collect
         run: |
           mkdir -p out
-          cp android/app/build/outputs/apk/debug/app-debug.apk out/poso-ba-beta.apk
-          [ -f android/app/build/outputs/apk/release/app-release.apk ] && cp android/app/build/outputs/apk/release/app-release.apk out/poso-ba-release.apk || true
-          [ -f android/app/build/outputs/bundle/release/app-release.aab ] && cp android/app/build/outputs/bundle/release/app-release.aab out/poso-ba-release.aab || true
+          cp android/app/build/outputs/apk/debug/app-debug.apk out/zadatak-beta.apk
+          [ -f android/app/build/outputs/apk/release/app-release.apk ] && cp android/app/build/outputs/apk/release/app-release.apk out/zadatak-release.apk || true
+          [ -f android/app/build/outputs/bundle/release/app-release.aab ] && cp android/app/build/outputs/bundle/release/app-release.aab out/zadatak-release.aab || true
           ls -la out
 
       - uses: actions/upload-artifact@v4
         with:
-          name: poso-ba-android-${{ github.run_number }}
+          name: zadatak-android-${{ github.run_number }}
           path: out/*
+
+      # The files were named poso-ba-* before the rename to Zadatak; drop them so testers only see the new ones.
+      - name: Remove old-named files from the beta release
+        if: ${{ github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for f in poso-ba-beta.apk poso-ba-release.apk poso-ba-release.aab; do
+            gh release delete-asset android-beta "$f" -y -R "${{ github.repository }}" 2>/dev/null || true
+          done
 
       # Stable link for testers: the "android-beta" pre-release always holds the newest build.
       - uses: softprops/action-gh-release@v2
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           tag_name: android-beta
-          name: Poso.ba Android beta
+          name: Zadatak Android beta
           prerelease: true
           body: |
-            Najnovija beta verzija Poso.ba aplikacije za Android (build ${{ github.run_number }}).
+            Najnovija beta verzija aplikacije Zadatak za Android (build ${{ github.run_number }}).
 
-            **Instalacija:** preuzmi `poso-ba-beta.apk` na telefon → otvori → dozvoli instalaciju iz nepoznatih izvora → Instaliraj.
+            **Instalacija:** preuzmi `zadatak-beta.apk` na telefon → otvori → dozvoli instalaciju iz nepoznatih izvora → Instaliraj.
           files: out/*

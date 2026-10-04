@@ -18,7 +18,7 @@ export const notificationService = {
     if (!ids.length) return
     const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).in('id', ids)
     if (error) console.error('Supabase notifications mark-read failed', { message: error.message, code: error.code })
-    else window.dispatchEvent(new CustomEvent('poso:notifications-read')) // badges on the tab screens refresh
+    else window.dispatchEvent(new CustomEvent('zadatak:notifications-read')) // badges on the tab screens refresh
   },
 
   /** Unread count for the signed-in user (RLS scopes the table to them). */

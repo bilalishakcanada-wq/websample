@@ -5,7 +5,7 @@
 export const SITE_PAGES = [
   // ---- Otkrij
   { path: '/kako-radi', title: 'Kako radi', short: 'Od objave posla do završenog rada, korak po korak.', group: 'otkrij', related: ['/vodici', '/zaradi', '/pomoc'] },
-  { path: '/za-biznis', title: 'Poso.ba za firme', short: 'Radna snaga na zahtjev, bez zapošljavanja.', group: 'otkrij', related: ['/kako-radi', '/cijene', '/kontakt'] },
+  { path: '/za-biznis', title: 'Zadatak za firme', short: 'Radna snaga na zahtjev, bez zapošljavanja.', group: 'otkrij', related: ['/kako-radi', '/cijene', '/kontakt'] },
   { path: '/zaradi', title: 'Zaradi novac', short: 'Postani izvođač i pronađi poslove u svom gradu.', group: 'otkrij', related: ['/principi-izvodjaca', '/kako-radi', '/vodici'] },
   { path: '/search', title: 'Pretraži poslove', short: 'Svi otvoreni poslovi na listi i mapi.', group: 'otkrij', app: true },
   { path: '/vodici', title: 'Vodiči za cijene', short: 'Koliko košta posao — iz stvarnih oglasa.', group: 'otkrij', related: ['/kako-radi', '/search', '/cijene'] },
@@ -13,7 +13,7 @@ export const SITE_PAGES = [
   { path: '/cijene', title: 'Planovi i cijene', short: 'Šta je besplatno, a šta donose planovi.', group: 'otkrij', related: ['/kako-radi', '/za-biznis', '/pomoc'] },
 
   // ---- Kompanija
-  { path: '/o-nama', title: 'O nama', short: 'Ko smo, zašto Poso.ba postoji i kuda ide.', group: 'kompanija', related: ['/kako-radi', '/pravila-zajednice', '/kontakt'] },
+  { path: '/o-nama', title: 'O nama', short: 'Ko smo, zašto Zadatak postoji i kuda ide.', group: 'kompanija', related: ['/kako-radi', '/pravila-zajednice', '/kontakt'] },
   { path: '/pravila-zajednice', title: 'Pravila zajednice', short: 'Kako se ponašamo jedni prema drugima.', group: 'kompanija', related: ['/principi-izvodjaca', '/pravila', '/pomoc'] },
   { path: '/principi-izvodjaca', title: 'Principi izvođača', short: 'Šta klijenti mogu očekivati od svakog majstora.', group: 'kompanija', related: ['/zaradi', '/pravila-zajednice', '/kako-radi'] },
   { path: '/pravila', title: 'Uslovi korištenja', short: 'Pravila i uslovi korištenja platforme.', group: 'kompanija', related: ['/privatnost', '/pravila-zajednice', '/pomoc'] },

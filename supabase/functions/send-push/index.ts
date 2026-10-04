@@ -1,4 +1,4 @@
-// Poso.ba — Web Push delivery.
+// Zadatak — Web Push delivery.
 //
 // Called by the on_notification_push trigger (x-sweep-key) for every in-app
 // notification whose user has at least one subscribed device. Encrypts the
@@ -11,7 +11,7 @@ import * as webpush from 'jsr:@negrel/webpush@^0.5.0'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const SITE_URL = (Deno.env.get('SITE_URL') || 'https://bilalishakcanada-wq.github.io/websample').replace(/\/$/, '')
-const CONTACT = Deno.env.get('VAPID_CONTACT') || 'mailto:podrska@poso.ba'
+const CONTACT = Deno.env.get('VAPID_CONTACT') || 'https://bilalishakcanada-wq.github.io/websample/'
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -55,14 +55,14 @@ Deno.serve(async (req) => {
     title: payload.title,
     body: payload.message || '',
     url,
-    tag: payload.type || 'poso',
+    tag: payload.type || 'zadatak',
     id: payload.notification_id || null,
   })
 
   const results = await Promise.all(subs.map(async (sub) => {
     try {
       const subscriber = server.subscribe({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } })
-      await subscriber.pushTextMessage(body, { ttl: 60 * 60 * 24, urgency: 'high', topic: (payload.type || 'poso').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32) })
+      await subscriber.pushTextMessage(body, { ttl: 60 * 60 * 24, urgency: 'high', topic: (payload.type || 'zadatak').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 32) })
       await admin.from('push_subscriptions').update({ last_used_at: new Date().toISOString() }).eq('id', sub.id)
       return 'sent'
     } catch (error) {

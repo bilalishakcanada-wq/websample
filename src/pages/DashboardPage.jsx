@@ -47,7 +47,7 @@ function DashboardPage() {
   const loadError = listingsQuery.error && !listingsQuery.data ? listingsQuery.error.message : ''
 
   const deleteListing = async (listing) => {
-    if (!(await confirmDialog({ title: 'Obrisati oglas?', text: `„${listing.title}“ nestaje sa Poso.ba zajedno sa ponudama.`, confirmLabel: 'Obriši', danger: true }))) return
+    if (!(await confirmDialog({ title: 'Obrisati oglas?', text: `„${listing.title}“ nestaje sa Zadatka zajedno sa ponudama.`, confirmLabel: 'Obriši', danger: true }))) return
     setDeletingId(listing.id)
     setError('')
     try {

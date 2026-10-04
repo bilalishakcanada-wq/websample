@@ -8,10 +8,10 @@ import EarnArt from '../components/EarnArt'
 const formatKM = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 const FAQS = [
-  { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Poso.ba je traži.' },
+  { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Zadatku je traži.' },
   { q: 'Kako se naplaćujem?', a: 'Dogovaraš cijenu direktno sa klijentom kroz ponudu (bid). Naplata unutar platforme dolazi uskoro — trenutno se plaćanje dogovara sa klijentom.' },
   { q: 'Da li moram platiti da se pridružim?', a: 'Ne. Registracija i pregledanje poslova su potpuno besplatni. Plan pretplate je opcionalan za dodatnu vidljivost.' },
-  { q: 'Kako dobijam obavještenja o novim poslovima?', a: 'Aplikaciju možeš instalirati na telefon (Poso.ba radi kao PWA) i dobijati obavještenja čim se objavi posao u tvojoj kategoriji.' },
+  { q: 'Kako dobijam obavještenja o novim poslovima?', a: 'Aplikaciju možeš instalirati na telefon (Zadatak radi kao PWA) i dobijati obavještenja čim se objavi posao u tvojoj kategoriji.' },
   { q: 'Kako izgraditi povjerenje kod klijenata?', a: 'Dodaj portfolio sa slikama prošlih radova, zatraži verifikaciju, i sakupljaj recenzije nakon svakog posla — sve se prikazuje na tvom javnom profilu.' },
 ]
 
@@ -49,10 +49,10 @@ function EarnMoneyPage() {
         <div className="earn-stage-copy">
           <h1>Budi svoj šef</h1>
           <p className="earn-stage-sub">
-            {monthlyPotential ? <>Zaradi do <strong>{formatKM(monthlyPotential)} KM</strong> mjesečno na Poso.ba*</> : <>Ti biraš poslove, termine i cijenu.</>}
+            {monthlyPotential ? <>Zaradi do <strong>{formatKM(monthlyPotential)} KM</strong> mjesečno na Zadatku*</> : <>Ti biraš poslove, termine i cijenu.</>}
           </p>
           <button type="button" className="earn-stage-cta" onClick={() => navigate('/register')}>
-            Pridruži se Poso.ba <ArrowRight size={18} />
+            Pridruži se Zadatku <ArrowRight size={18} />
           </button>
           <small>
             {monthlyPotential
@@ -70,7 +70,7 @@ function EarnMoneyPage() {
           <div className="earn-example-copy">
             <span className="eyebrow small-eyebrow">Primjer iz prakse</span>
             <h2>Koliko možeš zaraditi?</h2>
-            <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Poso.ba — ne izmišljene brojke.</p>
+            <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Zadatku — ne izmišljene brojke.</p>
             <ul className="check-list">
               <li>Ti šalješ ponudu sa svojom cijenom — klijent bira.</li>
               <li>Nema provizije na dogovorenu cijenu.</li>

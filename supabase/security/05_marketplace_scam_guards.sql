@@ -154,8 +154,8 @@ begin
 
   select public.display_name_of(full_name) into v_client_name from public.profiles where user_id = v_listing.user_id;
   insert into public.notifications (user_id, type, title, message, link) values
-    (v_bid.bidder_id, 'job', 'Ponuda prihvaćena — uplata osigurana 🎉', v_client_name || ' je prihvatio/la tvoju ponudu za „' || v_listing.title || '“. ' || trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM je osigurano na Poso.ba; po završetku dobijaš ' || trim(to_char(v_row.net_amount, 'FM999G999D00')) || ' KM.', '/listings/' || v_listing.id::text),
-    (v_listing.user_id, 'job', 'Uplata osigurana', trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM za „' || v_listing.title || '“ se čuva na Poso.ba dok ne potvrdiš da je posao završen.', '/listings/' || v_listing.id::text);
+    (v_bid.bidder_id, 'job', 'Ponuda prihvaćena — uplata osigurana 🎉', v_client_name || ' je prihvatio/la tvoju ponudu za „' || v_listing.title || '“. ' || trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM je osigurano na Zadatku; po završetku dobijaš ' || trim(to_char(v_row.net_amount, 'FM999G999D00')) || ' KM.', '/listings/' || v_listing.id::text),
+    (v_listing.user_id, 'job', 'Uplata osigurana', trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM za „' || v_listing.title || '“ se čuva na Zadatku dok ne potvrdiš da je posao završen.', '/listings/' || v_listing.id::text);
   return v_row;
 end $fn$;
 
@@ -164,7 +164,7 @@ grant execute on function public.accept_offer_and_fund(uuid, numeric) to authent
 
 -- ---------------------------------------- 5. Recenzija samo za plaćen posao
 -- Kao na velikim platformama: ocjenu ostavlja samo druga strana posla koji je
--- prošao kroz Poso.ba i isplaćen je (uključujući djelimičnu isplatu po odluci tima).
+-- prošao kroz Zadatak i isplaćen je (uključujući djelimičnu isplatu po odluci tima).
 create or replace function public.can_review(p_listing uuid, p_reviewee uuid)
 returns boolean
 language sql stable security definer set search_path = public as $fn$

@@ -49,8 +49,8 @@ function SupportChat({ openRequested = false }) {
 
   useEffect(() => {
     const show = () => setOpen(true)
-    window.addEventListener('poso:open-support', show)
-    return () => window.removeEventListener('poso:open-support', show)
+    window.addEventListener('zadatak:open-support', show)
+    return () => window.removeEventListener('zadatak:open-support', show)
   }, [])
 
   useEffect(() => {
@@ -127,7 +127,7 @@ function SupportChat({ openRequested = false }) {
           <div className="support-chat-header">
             <span className="support-chat-who">
               <span className="support-avatar"><Sparkles size={16} /></span>
-              <span><strong>Poso asistent</strong><small>Podrška Poso.ba · obično odgovaramo u par sati</small></span>
+              <span><strong>Zadatak asistent</strong><small>Podrška Zadatka · obično odgovaramo u par sati</small></span>
             </span>
             <button type="button" className="icon-button" onClick={() => setOpen(false)} aria-label="Zatvori"><X size={16} /></button>
           </div>
@@ -143,8 +143,8 @@ function SupportChat({ openRequested = false }) {
                 {loading && <SkeletonLines n={2} />}
                 {!loading && (
                   <div className="support-bubble from-admin support-bubble-assistant">
-                    <small>Poso asistent</small>
-                    Zdravo{user.user_metadata?.full_name ? `, ${String(user.user_metadata.full_name).split(' ')[0]}` : ''}! Ja sam Poso, digitalni asistent. Pitaj me bilo šta o platformi — a ako zapne, tim preuzima u ovom istom razgovoru.
+                    <small>Zadatak asistent</small>
+                    Zdravo{user.user_metadata?.full_name ? `, ${String(user.user_metadata.full_name).split(' ')[0]}` : ''}! Ja sam Zadatak asistent, digitalni pomoćnik. Pitaj me bilo šta o platformi — a ako zapne, tim preuzima u ovom istom razgovoru.
                   </div>
                 )}
                 {!loading && messages.length === 0 && (
@@ -154,7 +154,7 @@ function SupportChat({ openRequested = false }) {
                 )}
                 {messages.filter((item) => !item.message.startsWith('(predaja timu)')).map((item) => (
                   <div key={item.id} className={`support-bubble ${item.sender === 'user' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>
-                    {item.sender !== 'user' && <small>{item.sender === 'assistant' ? 'Poso asistent' : 'Poso.ba tim'} · {timeLabel(item.created_at)}</small>}
+                    {item.sender !== 'user' && <small>{item.sender === 'assistant' ? 'Zadatak asistent' : 'Zadatak tim'} · {timeLabel(item.created_at)}</small>}
                     {item.message}
                     {item.handoff && <span className="support-handoff"><LifeBuoy size={12} /> Tim je obaviješten</span>}
                   </div>

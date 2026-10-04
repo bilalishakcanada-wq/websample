@@ -1,4 +1,4 @@
--- Poso.ba Pay — secure payments, the Airtasker way (migration poso_pay).
+-- Zadatak Pay — secure payments, the Airtasker way (originally applied as migration poso_pay).
 --
 --   1. client accepts an offer  -> the offer amount moves from the client's balance into escrow
 --                                   (job_payments.status = 'funded', listing -> 'assigned')
@@ -119,8 +119,8 @@ begin
 
   select public.display_name_of(full_name) into v_client_name from public.profiles where user_id = v_listing.user_id;
   insert into public.notifications (user_id, type, title, message) values
-    (v_bid.bidder_id, 'job', 'Ponuda prihvaćena — uplata osigurana 🎉', v_client_name || ' je prihvatio/la tvoju ponudu za „' || v_listing.title || '“. ' || trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM je osigurano na Poso.ba; po završetku dobijaš ' || trim(to_char(v_row.net_amount, 'FM999G999D00')) || ' KM.'),
-    (v_listing.user_id, 'job', 'Uplata osigurana', trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM za „' || v_listing.title || '“ se čuva na Poso.ba dok ne potvrdiš da je posao završen.');
+    (v_bid.bidder_id, 'job', 'Ponuda prihvaćena — uplata osigurana 🎉', v_client_name || ' je prihvatio/la tvoju ponudu za „' || v_listing.title || '“. ' || trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM je osigurano na Zadatku; po završetku dobijaš ' || trim(to_char(v_row.net_amount, 'FM999G999D00')) || ' KM.'),
+    (v_listing.user_id, 'job', 'Uplata osigurana', trim(to_char(v_bid.amount, 'FM999G999D00')) || ' KM za „' || v_listing.title || '“ se čuva na Zadatku dok ne potvrdiš da je posao završen.');
   return v_row;
 end;
 $$;
@@ -208,7 +208,7 @@ begin
   update public.job_payments set status = 'disputed', disputed_at = now(), dispute_reason = left(p_reason, 1000), dispute_by = auth.uid() where id = v_row.id returning * into v_row;
   v_other := case when auth.uid() = v_row.client_id then v_row.provider_id else v_row.client_id end;
   insert into public.notifications (user_id, type, title, message)
-  values (v_other, 'job', 'Prijavljen problem sa poslom', v_name || ' je prijavio/la problem za „' || v_title || '“. Uplata je zamrznuta dok Poso.ba tim ne pregleda slučaj.');
+  values (v_other, 'job', 'Prijavljen problem sa poslom', v_name || ' je prijavio/la problem za „' || v_title || '“. Uplata je zamrznuta dok Zadatak tim ne pregleda slučaj.');
   for v_staff in select distinct ur.user_id from public.user_roles ur join public.roles r on r.id = ur.role_id where r.name in ('ADMIN', 'MODERATOR') loop
     insert into public.notifications (user_id, type, title, message)
     values (v_staff, 'support', 'Spor oko uplate — ' || v_title, v_name || ': ' || left(p_reason, 160));

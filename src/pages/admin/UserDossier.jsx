@@ -206,7 +206,7 @@ function Conversations({ dossier, isAdmin }) {
               <div key={item.id} className={`support-bubble ${item.sender_id === dossier.profile.user_id ? 'from-admin' : 'from-user'}`}>
                 <small>{item.sender_id === dossier.profile.user_id ? dossier.profile.full_name : active.partner_name} · {formatBosnianDate(item.created_at)}</small>
                 {item.content}
-                <button type="button" className="bubble-remove" title="Ukloni poruku" onClick={async () => { try { await adminService.redact('message', item.id, 'Uklonio Poso.ba tim'); setThread(await adminService.conversationMessages(active.id)) } catch (requestError) { setError(requestError.message) } }}>×</button>
+                <button type="button" className="bubble-remove" title="Ukloni poruku" onClick={async () => { try { await adminService.redact('message', item.id, 'Uklonio Zadatak tim'); setThread(await adminService.conversationMessages(active.id)) } catch (requestError) { setError(requestError.message) } }}>×</button>
               </div>
             ))}
           </div>

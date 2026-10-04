@@ -43,7 +43,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
     try {
       await paymentService.acceptAndFund(bid.id, amount)
       haptic('medium')
-      toast(`Ponuda prihvaćena — ${money(amount)} je osigurano na Poso.ba.`, { kind: 'success' })
+      toast(`Ponuda prihvaćena — ${money(amount)} je osigurano na Zadatku.`, { kind: 'success' })
       onDone?.()
       onClose()
     } catch (requestError) {
@@ -59,12 +59,12 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
         <div className="sheet-handle" />
         <div className="pay-sheet-head">
           <span className="pay-sheet-icon"><ShieldCheck size={20} /></span>
-          <div><h2>Prihvati ponudu i osiguraj uplatu</h2><p className="muted-text">Novac se čuva na Poso.ba i isplaćuje izvođaču tek kad potvrdiš da je posao završen.</p></div>
+          <div><h2>Prihvati ponudu i osiguraj uplatu</h2><p className="muted-text">Novac se čuva na Zadatku i isplaćuje izvođaču tek kad potvrdiš da je posao završen.</p></div>
           <button type="button" className="icon-button" onClick={onClose} aria-label="Zatvori"><X size={18} /></button>
         </div>
 
         <div className="pay-breakdown">
-          <div><span>Izvođač</span><strong>{providerName || 'Korisnik Poso.ba'}</strong></div>
+          <div><span>Izvođač</span><strong>{providerName || 'Korisnik Zadatka'}</strong></div>
           <div><span>Cijena posla</span><strong>{money(amount)}</strong></div>
           <div><span>Tvoj balans</span><strong className={enough ? '' : 'is-short'}>{wallet ? money(balance) : '…'}</strong></div>
           <div className="pay-breakdown-total"><span>Ostaje na balansu</span><strong>{wallet ? money(Math.max(0, balance - amount)) : '…'}</strong></div>
@@ -104,7 +104,7 @@ export function JobPaymentCard({ payment, role }) {
   return (
     <section className="job-card pay-card">
       <div className="pay-card-head">
-        <h2><ShieldCheck size={18} /> Poso.ba Pay</h2>
+        <h2><ShieldCheck size={18} /> Zadatak Pay</h2>
         <span className={`pill pay-status-${payment.status}`}>
           {{ funded: 'Uplata osigurana', requested: 'Čeka oslobađanje', released: 'Isplaćeno', refunded: 'Vraćeno klijentu', disputed: 'Spor — tim pregleda' }[payment.status]}
         </span>
@@ -131,14 +131,14 @@ export function JobPaymentCard({ payment, role }) {
 
       <p className="pay-note muted-text">
         {payment.status === 'funded' && (role === 'client'
-          ? `Novac je rezervisan na Poso.ba od ${formatBosnianDate(payment.funded_at)} Kad posao bude urađen, oslobodi uplatu — izvođač je dobija odmah.`
+          ? `Novac je rezervisan na Zadatku od ${formatBosnianDate(payment.funded_at)} Kad posao bude urađen, oslobodi uplatu — izvođač je dobija odmah.`
           : `Klijent je platio i novac je sigurno rezervisan (${formatBosnianDate(payment.funded_at)}). Uradi posao, pa zatraži isplatu.`)}
         {payment.status === 'requested' && (role === 'client'
           ? `Izvođač javlja da je posao završen (${formatBosnianDate(payment.requested_at)}). Provjeri i oslobodi uplatu — ili prijavi problem.`
           : `Zatražio si isplatu ${formatBosnianDate(payment.requested_at)} Čeka se da klijent potvrdi.`)}
         {payment.status === 'released' && `Uplata oslobođena ${formatBosnianDate(payment.released_at)} ${role === 'provider' ? `${money(payment.net_amount)} je na tvom balansu.` : 'Hvala — ostavi recenziju izvođaču.'}`}
         {payment.status === 'refunded' && `Posao otkazan ${formatBosnianDate(payment.refunded_at)} — ${money(payment.amount)} vraćeno klijentu. ${payment.resolution || ''}`}
-        {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)} Uplata je zamrznuta; Poso.ba tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
+        {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)} Uplata je zamrznuta; Zadatak tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
       </p>
 
       {/* Radnje su namjerno SAMO u kartici „Tok posla" (WorkFlow): dvije kartice
@@ -151,12 +151,12 @@ export function JobPaymentCard({ payment, role }) {
 export function HowPaymentWorks() {
   return (
     <details className="pay-how">
-      <summary><ShieldCheck size={14} /> Kako radi plaćanje na Poso.ba?</summary>
+      <summary><ShieldCheck size={14} /> Kako radi plaćanje na Zadatku?</summary>
       <ol>
-        <li><strong>Klijent prihvati ponudu</strong> — cijena se rezerviše sa njegovog balansa i čuva na Poso.ba.</li>
+        <li><strong>Klijent prihvati ponudu</strong> — cijena se rezerviše sa njegovog balansa i čuva na Zadatku.</li>
         <li><strong>Izvođač uradi posao</strong> i klikne „Zatraži isplatu“.</li>
         <li><strong>Klijent oslobodi uplatu</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou).</li>
-        <li>Problem? <strong>„Prijavi problem“</strong> zamrzava novac dok Poso.ba tim ne odluči. Otkazivanje prije početka vraća pun iznos.</li>
+        <li>Problem? <strong>„Prijavi problem“</strong> zamrzava novac dok Zadatak tim ne odluči. Otkazivanje prije početka vraća pun iznos.</li>
       </ol>
     </details>
   )

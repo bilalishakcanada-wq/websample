@@ -53,7 +53,7 @@ jobs:
         run: npm run build
         env:
           VITE_NO_PWA: '1'
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
       - name: Install Chromium
         if: steps.gate.outputs.armed == 'true'
@@ -73,7 +73,7 @@ jobs:
             test-results
           retention-days: 7
 
-  # Production host: Cloudflare Pages (edge cache, custom domain poso.ba, proper cache headers from
+  # Production host: Cloudflare Pages (edge cache, a custom domain, proper cache headers from
   # public/_headers). Runs only when CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secrets exist.
   deploy-cloudflare:
     runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
         id: cf
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::notice title=Cloudflare Pages not configured::Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to deploy to poso.ba."
+            echo "::notice title=Cloudflare Pages not configured::Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to deploy to Cloudflare Pages."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -105,14 +105,14 @@ jobs:
         run: npm run build
         env:
           VITE_BASE: /
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
       - name: Create the Pages project once
         if: steps.cf.outputs.ready == 'true'
-        run: npx wrangler pages project create poso-ba --production-branch=main 2>/dev/null || true
+        run: npx wrangler pages project create zadatak --production-branch=main 2>/dev/null || true
       - name: Deploy to Cloudflare Pages
         if: steps.cf.outputs.ready == 'true'
-        run: npx wrangler pages deploy dist --project-name=poso-ba --branch=main --commit-dirty=true
+        run: npx wrangler pages deploy dist --project-name=zadatak --branch=main --commit-dirty=true
 
   build:
     runs-on: ubuntu-latest
@@ -127,7 +127,7 @@ jobs:
       - name: Build (base /websample/)
         env:
           VITE_BASE: /websample/
-          VITE_APP_NAME: Poso.ba
+          VITE_APP_NAME: Zadatak
           VITE_DEFAULT_LOCALE: bs
           VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
           # the anon key is a public client key (it ships inside the JS bundle either way)

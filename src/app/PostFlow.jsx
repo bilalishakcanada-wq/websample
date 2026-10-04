@@ -25,7 +25,7 @@ import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
 
-const DRAFT_KEY = 'poso-post-draft'
+const DRAFT_KEY = 'zadatak-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
 const ALL_CITIES = Object.keys(cityCoordinates)
 const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')

@@ -1,14 +1,14 @@
-# Poso.ba i Airtasker: šta imamo, šta je dodano, šta slijedi
+# Zadatak i Airtasker: šta imamo, šta je dodano, šta slijedi
 
 Airtasker (airtasker.com/au) je uzor za tok posla: klijent objavi posao, izvođači šalju ponude,
 klijent prihvati jednu i novac je osiguran, posao se završi, novac se isplati, obje strane ostave
-recenziju. Ovaj dokument poredi svaki korak s Poso.ba (PC, mobilni web i aplikacija dijele isti kod).
+recenziju. Ovaj dokument poredi svaki korak sa Zadatkom (PC, mobilni web i aplikacija dijele isti kod).
 
 Oznake: ✅ već postoji · 🆕 dodano u ovoj izmjeni · 🔜 predloženo sljedeće · ➡️ radi druga nit
 
 ## 1. Objava posla
 
-| Airtasker | Poso.ba |
+| Airtasker | Zadatak |
 |---|---|
 | Naslov, opis, kategorija (s prijedlogom kategorije) | ✅ |
 | Datum: na dan / prije datuma / fleksibilno | ✅ ranije samo kao tekst u opisu · 🆕 sada pravi podatak (`date_type`, `due_date`) |
@@ -22,7 +22,7 @@ Oznake: ✅ već postoji · 🆕 dodano u ovoj izmjeni · 🔜 predloženo sljed
 
 ## 2. Pretraga poslova
 
-| Airtasker | Poso.ba |
+| Airtasker | Zadatak |
 |---|---|
 | Lista + mapa, filteri (kategorija, udaljenost, cijena, online, bez ponuda) | ✅ |
 | Sortiranje (preporučeno, najnovije, cijena, najbliže) | ✅ |
@@ -35,7 +35,7 @@ Oznake: ✅ već postoji · 🆕 dodano u ovoj izmjeni · 🔜 predloženo sljed
 
 ## 3. Stranica posla, pitanja i ponude
 
-| Airtasker | Poso.ba |
+| Airtasker | Zadatak |
 |---|---|
 | Javna pitanja | ✅ |
 | Ponuda s cijenom i porukom, povlačenje ponude | ✅ |
@@ -79,7 +79,7 @@ prevoz) i taj iznos se računa u platu, pa širi krug. Izvođač to vidi prije p
 - Baza odbija ponudu izvan dosega; izvođač bez grada u profilu mora ga dodati. Grad koji nije na
   našoj karti ne blokira ponudu.
 - Preporučeni poslovi izvođaču ne nude poslove izvan dosega.
-- Novac za put je za sada dogovor koji izvođač vidi i uračuna u ponudu; da ide kroz Poso.ba Pay
+- Novac za put je za sada dogovor koji izvođač vidi i uračuna u ponudu; da ide kroz Zadatak Pay
   kao poseban iznos → ➡️ nit „Plan rollout of enterprise modules“.
 
 ## 4b. Zatraži ponudu (novo)
@@ -97,9 +97,9 @@ opiše posao i pošalje ga samo tom izvođaču.
 
 ## 5. Dodjela, plaćanje, završetak
 
-| Airtasker | Poso.ba |
+| Airtasker | Zadatak |
 |---|---|
-| Novac osiguran pri prihvatanju ponude (Airtasker Pay) | ✅ Poso.ba Pay (za sada samo ručno dodan kredit) |
+| Novac osiguran pri prihvatanju ponude (Airtasker Pay) | ✅ Zadatak Pay (za sada samo ručno dodan kredit) |
 | Poruke otvorene tek nakon dodjele, zaštita kontakata | ✅ |
 | Izvođač traži isplatu, klijent odobrava, automatska isplata nakon roka | ✅ |
 | Revizije, sporovi, zahtjev za otkazivanje | ✅ |
@@ -109,7 +109,7 @@ opiše posao i pošalje ga samo tom izvođaču.
 
 ## 6. Povjerenje
 
-| Airtasker | Poso.ba |
+| Airtasker | Zadatak |
 |---|---|
 | Recenzije obje strane, prosjek zvjezdica | ✅ |
 | Stopa završenih poslova | ✅ |

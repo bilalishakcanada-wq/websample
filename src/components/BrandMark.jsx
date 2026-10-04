@@ -1,4 +1,4 @@
-/** The Poso.ba mark: a "p" whose bowl is a gold badge with a navy check. Same drawing as the app icon
+/** The Zadatak mark: a "p" whose bowl is a gold badge with a navy check. Same drawing as the app icon
  *  (scripts/brand-assets.mjs). `tile` draws it on the navy rounded square; without it the mark sits on
  *  whatever is behind it (e.g. the navy welcome screen). */
 function BrandMark({ size = 34, tile = true, className = '', ...props }) {

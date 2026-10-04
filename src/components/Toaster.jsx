@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react'
 
-const EVENT = 'poso:toast'
+const EVENT = 'zadatak:toast'
 let counter = 0
 
 /**

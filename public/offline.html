@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Poso.ba</title>
+<title>Zadatak</title>
 <style>
   html, body { margin: 0; height: 100%; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
   main { min-height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; box-sizing: border-box; }
@@ -18,7 +18,7 @@
   <div>
     <svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><rect x="248" y="190" width="150" height="598" rx="75" fill="#f5b400"/><circle cx="560" cy="418" r="228" fill="#f5b400"/><circle cx="560" cy="418" r="150" fill="#0d2a52"/><path d="M478 424 L540 486 L650 358" fill="none" stroke="#f5b400" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
     <h1>Nema internet veze</h1>
-    <p>Poso.ba treba internet. Provjeri vezu i pokušaj ponovo.</p>
+    <p>Zadatak treba internet. Provjeri vezu i pokušaj ponovo.</p>
     <button type="button" id="retry">Pokušaj ponovo</button>
   </div>
 </main>
@@ -32,8 +32,8 @@
     document.getElementById('retry').addEventListener('click', go)
     window.addEventListener('online', go)
     try {
-      var last = Number(sessionStorage.getItem('posoRetry') || 0)
-      if (navigator.onLine && Date.now() - last > 15000) { sessionStorage.setItem('posoRetry', String(Date.now())); go() }
+      var last = Number(sessionStorage.getItem('zadatakRetry') || 0)
+      if (navigator.onLine && Date.now() - last > 15000) { sessionStorage.setItem('zadatakRetry', String(Date.now())); go() }
     } catch (e) { /* storage blocked: wait for the button */ }
   })()
 </script>

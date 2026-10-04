@@ -1,4 +1,4 @@
-# Robot za testiranje Poso.ba
+# Robot za testiranje Zadatka
 
 Robot otvara sajt kao čovjek: na računaru, na telefonu, na malom Android telefonu (360 px) i unutar
 Android aplikacije, kao gost, novi korisnik, klijent, izvođač i administrator. Na svakoj stranici
@@ -31,8 +31,8 @@ export $(cat robot/local-db/.anon) && node robot/seed.mjs
 node robot/explore.mjs                # izvještaj: robot-report/report.md
 ```
 
-Test nalozi (lozinka `Test12345!`): `klijent@test.poso`, `izvodjac@test.poso`, `admin@test.poso`,
-`novi@test.poso`. `bash robot/local-db/reset.sh` vraća ih u početno stanje.
+Test nalozi (lozinka `Test12345!`): `klijent@test.zadatak`, `izvodjac@test.zadatak`, `admin@test.zadatak`,
+`novi@test.zadatak`. `bash robot/local-db/reset.sh` vraća ih u početno stanje.
 
 Podešavanja (env): `ROBOT_BASE_URL`, `ROBOT_PROFILES=desktop,phone,small,app`,
 `ROBOT_ROLES=guest,newbie,client,provider,admin`, `ROBOT_MAX_PAGES=45`, `ROBOT_CLICKS=0` (samo gleda),

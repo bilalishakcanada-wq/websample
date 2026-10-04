@@ -14,13 +14,13 @@
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
         <!-- navy behind the system bars (older WebViews pad them with the window background) -->
-        <item name="android:windowBackground">@color/posoNavy</item>
+        <item name="android:windowBackground">@color/zadatakNavy</item>
     </style>
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
         <!-- Android 12+ launch screen: brand navy instead of the default white -->
-        <item name="windowSplashScreenBackground">@color/posoNavy</item>
+        <item name="windowSplashScreenBackground">@color/zadatakNavy</item>
     </style>
 </resources>

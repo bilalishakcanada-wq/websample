@@ -1,7 +1,7 @@
 -- ============================================================================
 -- BOOKING ENGINE 01 — ugovor kao state machine
 -- ----------------------------------------------------------------------------
--- Poso.ba VEĆ ima escrow: accept_offer_and_fund skine novac klijentu i drži ga
+-- Zadatak VEĆ ima escrow: accept_offer_and_fund skine novac klijentu i drži ga
 -- na platformi, release/cancel ga puštaju. Ovaj fajl NE pravi escrow ponovo —
 -- dodaje ono što nedostaje da bi escrow bio pošten prema obje strane:
 --

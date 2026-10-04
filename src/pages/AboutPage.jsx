@@ -7,7 +7,7 @@ function AboutPage() {
     <InfoLayout
       eyebrow="Naša priča"
       title="Domaća platforma za usluge, napravljena za BiH"
-      lead="Poso.ba postoji da bi svako ko traži majstora, IT pomoć, čišćenje ili selidbu našao provjerenu osobu u svom gradu — i da bi svako ko nudi svoje umijeće imao pošten put do klijenata, bez posrednika."
+      lead="Zadatak postoji da bi svako ko traži majstora, IT pomoć, čišćenje ili selidbu našao provjerenu osobu u svom gradu — i da bi svako ko nudi svoje umijeće imao pošten put do klijenata, bez posrednika."
       cta={{ eyebrow: 'Pridruži se', text: 'Objavi posao ili napravi profil izvođača — traje minutu.', to: '/register', label: 'Napravi nalog' }}
     >
       <section className="info-section reveal">

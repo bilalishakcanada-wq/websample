@@ -25,7 +25,7 @@ create trigger stamp_listing_outcome_trigger before update of status on public.l
 -- (full bodies: see Supabase migration "job_outcomes_success_rate_badges")
 
 insert into public.badges (code, label, description, icon) values
-  ('founder',        'Osnivački član',  'Među prvih 100 korisnika Poso.ba. Trajna oznaka.', 'crown'),
+  ('founder',        'Osnivački član',  'Među prvih 100 korisnika Zadatka. Trajna oznaka.', 'crown'),
   ('flawless',       'Bez greške',      '10+ završenih poslova i 100% uspješnost.', 'gem'),
   ('local_hero',     'Lokalni heroj',   '10+ završenih poslova u istom gradu.', 'map-pinned'),
   ('veteran',        'Veteran',         'Više od godinu dana na platformi i 20+ završenih poslova.', 'medal'),

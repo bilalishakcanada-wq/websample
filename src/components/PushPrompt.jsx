@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { currentSubscription, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../utils/push'
 import { toast } from './Toaster'
 
-const DISMISS_KEY = 'poso-push-prompt-dismissed'
+const DISMISS_KEY = 'zadatak-push-prompt-dismissed'
 
 /**
  * Soft "turn on notifications" card. Shows once per device to signed-in users

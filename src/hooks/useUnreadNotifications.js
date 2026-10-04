@@ -20,8 +20,8 @@ export function useUnreadNotifications(userId) {
       queryClient.invalidateQueries({ queryKey: keys.notifications(userId) })
     }
     const stop = notificationService.subscribe(userId, bump)
-    window.addEventListener('poso:notifications-read', bump)
-    return () => { stop(); window.removeEventListener('poso:notifications-read', bump) }
+    window.addEventListener('zadatak:notifications-read', bump)
+    return () => { stop(); window.removeEventListener('zadatak:notifications-read', bump) }
   }, [userId, queryClient])
   return data || 0
 }

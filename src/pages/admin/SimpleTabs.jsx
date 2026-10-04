@@ -237,7 +237,7 @@ export function SupportTab() {
             </div>
             <div className="support-chat-messages admin-messages">
               {messages.map((item) => (
-                <div key={item.id} className={`support-bubble ${item.sender === 'admin' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>{item.sender === 'assistant' && <small>Poso asistent (automatski)</small>}{item.message}</div>
+                <div key={item.id} className={`support-bubble ${item.sender === 'admin' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>{item.sender === 'assistant' && <small>Zadatak asistent (automatski)</small>}{item.message}</div>
               ))}
             </div>
             <form className="support-chat-form" onSubmit={sendReply}>

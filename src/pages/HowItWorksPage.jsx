@@ -61,7 +61,7 @@ function HowItWorksPage() {
         <div className="info-section-head"><ShieldCheck size={22} /><div><h2>Pokriveni ste</h2><p>Bilo da objavljuješ ili radiš posao — platforma stoji iza tebe.</p></div></div>
         <div className="info-grid">
           <div className="info-card"><Star size={20} /><strong>Ocjene i recenzije</strong><p>Recenziju može ostaviti samo klijent kome je posao odrađen. Vidiš portfolio, značke, nivo povjerenja i udio prihvaćenih ponuda.</p></div>
-          <div className="info-card"><MessageCircle size={20} /><strong>Komunikacija</strong><p>Od objave do završetka, sve ide kroz Poso.ba. Prihvati ponudu i privatno se dogovori o detaljima.</p></div>
+          <div className="info-card"><MessageCircle size={20} /><strong>Komunikacija</strong><p>Od objave do završetka, sve ide kroz Zadatak. Prihvati ponudu i privatno se dogovori o detaljima.</p></div>
           <div className="info-card"><ShieldCheck size={20} /><strong>Zaštićeni kontakti</strong><p>Broj i email se ne mogu razmijeniti dok ponuda nije prihvaćena — nema neželjenih poziva ni prodaje podataka.</p></div>
           <div className="info-card"><CheckCircle2 size={20} /><strong>Verifikovana struka</strong><p>Majstor šalje dokaz o struci; na profilu jasno piše da li je provjeren i za šta.</p></div>
         </div>
@@ -71,10 +71,10 @@ function HowItWorksPage() {
         <div>
           <span className="eyebrow small-eyebrow">Za izvođače</span>
           <h2>Ti biraš poslove, termine i cijenu</h2>
-          <p className="muted-text">Vidio si posao koji ti odgovara? Pošalji ponudu. Ne odgovara ti termin? Preskoči. Poso.ba se prilagođava tvom rasporedu, ne obrnuto.</p>
+          <p className="muted-text">Vidio si posao koji ti odgovara? Pošalji ponudu. Ne odgovara ti termin? Preskoči. Zadatak se prilagođava tvom rasporedu, ne obrnuto.</p>
         </div>
         <div className="looking-card-actions">
-          <Link to="/zaradi" className="primary-button">Zaradi sa Poso.ba</Link>
+          <Link to="/zaradi" className="primary-button">Zaradi sa Zadatkom</Link>
           <Link to="/principi-izvodjaca" className="ghost-button">Principi izvođača</Link>
         </div>
       </section>

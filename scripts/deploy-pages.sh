@@ -10,7 +10,7 @@ rm -rf .gh-pages && mkdir .gh-pages
 cp -R dist/. .gh-pages/
 cd .gh-pages
 git init -q && git checkout -q -b gh-pages
-git add -A && git -c user.name=poso-deploy -c user.email=deploy@poso.ba commit -qm "Deploy $(date -u +%Y-%m-%dT%H:%MZ)"
+git add -A && git -c user.name=zadatak-deploy -c user.email=deploy@users.noreply.github.com commit -qm "Deploy $(date -u +%Y-%m-%dT%H:%MZ)"
 git push -f "$(git -C .. remote get-url origin)" gh-pages:gh-pages
 cd .. && rm -rf .gh-pages
 echo "Objavljeno: https://bilalishakcanada-wq.github.io/websample/"

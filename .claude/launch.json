@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "poso-dev",
+      "name": "zadatak-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
@@ -12,7 +12,7 @@
       "autoPort": true
     },
     {
-      "name": "poso-dev-54971",
+      "name": "zadatak-dev-54971",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "vite",

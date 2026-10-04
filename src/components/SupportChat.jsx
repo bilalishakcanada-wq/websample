@@ -4,9 +4,11 @@ import { BookOpen, LifeBuoy, Send, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supportService } from '../services/supportService'
 import { HELP_ARTICLES, findHelpAnswer } from '../data/helpArticles'
+import { SITE_GUIDE, findGuideEntry } from '../data/siteGuide'
 import { SkeletonLines } from './Skeleton'
 
 const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
+const GUIDE = SITE_GUIDE.map(({ path, title, where }) => ({ path, title, where }))
 
 const QUICK = [
   ['Kako objavim posao?', 'Kako objavim posao?'],
@@ -79,11 +81,12 @@ function SupportChat({ openRequested = false }) {
   const assistantReply = async (text) => {
     setTyping(true)
     try {
-      const ai = await supportService.askAssistant(text, ARTICLES)
+      const ai = await supportService.askAssistant(text, ARTICLES, GUIDE)
       if (ai.configured && ai.message) { push(ai.message); return }
       await new Promise((resolve) => setTimeout(resolve, 600))
       const wantsHuman = HUMAN.test(text) || SERIOUS.test(text)
-      const article = wantsHuman ? null : findHelpAnswer(text)
+      const place = wantsHuman ? null : findGuideEntry(text)
+      const article = wantsHuman ? null : (findHelpAnswer(text) || (place && { a: `${place.title}: ${place.where}` }))
       const handoff = !article
       const reply = article
         ? `${article.a}\n\nAko ti ovo ne pomaže, napiši „tim“ i naš kolega preuzima razgovor.`

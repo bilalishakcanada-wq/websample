@@ -84,6 +84,10 @@ i dok datoteka nije primijenjena pada nazad na `identity_ok()`, pa nikad ne zakl
 nekoga koga baza pušta. Cijeli tok (registracija → ID → odobrenje u adminu → objava)
 pokriva `e2e/post-job-verification.spec.js`.
 
+**Na čekanju:** [`id_badge_counts.sql`](id_badge_counts.sql): značka „Lična karta
+verifikovana" (stranica Značke) i odobren JMBG tok su ista stvar. `identity_verified()`
+prihvata i značku, a odobrenje kroz JMBG tok dodjeljuje značku (i već odobrenima).
+
 ## Zašto postojeći nalozi nisu zaključani
 
 Bez `grandfather_before` platforma bi se preko noći zaključala svima — uključujući

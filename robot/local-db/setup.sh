@@ -21,7 +21,7 @@ $P -c "create extension if not exists pg_cron; create extension if not exists pg
 $P -f "$REPO/supabase/schema.sql" >/dev/null 2>&1 || true
 for f in "$HERE"/migrations/*.sql; do $P -f "$f" >/dev/null || { echo "FAILED at $f"; exit 1; }; done
 # 2. SQL applied live after the snapshot, then SQL that open work adds (only files present in this checkout)
-for f in identity/bids_require_verified identity/jobs_require_verified security/05_marketplace_scam_guards payments/01_card_topup_and_payouts \
+for f in identity/bids_require_verified identity/jobs_require_verified identity/id_badge_counts security/05_marketplace_scam_guards payments/01_card_topup_and_payouts \
          airtasker/01_task_schedule_and_expiry payments/02_price_increase_and_cancellation_policy \
          airtasker/02_search_due_dates airtasker/03_saved_tasks airtasker/04_reach_and_travel airtasker/05_quote_requests \
          offers/bid_replies security/06_private_uploads security/07_phone_run_false_positives \

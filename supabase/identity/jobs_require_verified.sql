@@ -1,7 +1,8 @@
 -- ============================================================================
 -- Posao objavljuju SAMO korisnici s potvrđenim identitetom — bez prelaznog roka
 -- ----------------------------------------------------------------------------
--- NIJE PRIMIJENJENO. Čeka izričito odobrenje vlasnika.
+-- Primijenjeno na produkciju 04.10.2026. (migracija jobs_require_verified), po
+-- odobrenju vlasnika: obje strane trebaju potvrđenu ličnu kartu.
 --
 -- Danas objava posla koristi identity_ok(), koja pušta i svaki nalog napravljen
 -- prije grandfather_before (25.09.2026. 16:00 UTC). Ovo uvodi za OBJAVU POSLA

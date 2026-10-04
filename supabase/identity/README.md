@@ -76,7 +76,7 @@ rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; oslanja se na
 `migration_identity_state_protection.sql` (već na produkciji). Sučelje (`useOfferGate`) već pita
 `identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
 
-**Na čekanju:** [`jobs_require_verified.sql`](jobs_require_verified.sql) isto to radi za
+**Primijenjeno 04.10.2026.:** [`jobs_require_verified.sql`](jobs_require_verified.sql) isto to radi za
 **objavu posla**: novi posao objavljuje samo odobren identitet ili tim (`can_post_job()`),
 bez prelaznog roka; uređivanje već objavljenih poslova ostaje slobodno. Usput vraća i
 provjeru suspenzije pri objavi. Forma za objavu (računar i telefon) pita `can_post_job()`

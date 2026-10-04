@@ -29,16 +29,18 @@ const DataProvider = persister
 // the stylesheet loads without blocking the boot screen; React mounts only once it has applied
 const cssReady = () => {
   const links = [...document.querySelectorAll('link[rel="preload"][as="style"], link[rel="stylesheet"]')].filter((link) => /\/assets\/.*\.css/.test(link.href))
-  return Promise.all(links.map((link) => {
-    // the link's own onload="…" normally turns the preload into a stylesheet; browsers too old for the
-    // page's security policy ('unsafe-hashes') block that handler, so make sure it happens here too
-    if (link.rel === 'preload') link.rel = 'stylesheet'
-    return link.sheet ? Promise.resolve() : new Promise((resolve) => {
+  // the link's own onload="…" turns the preload into a stylesheet; browsers too old for the page's
+  // security policy ('unsafe-hashes') block that handler, so the switch is repeated here when needed
+  const applied = (link) => { if (link.rel === 'preload') link.rel = 'stylesheet' }
+  return Promise.all(links.map((link) => (link.sheet && link.rel === 'stylesheet' ? Promise.resolve() : new Promise((resolve) => {
+    link.addEventListener('load', () => {
+      if (link.rel !== 'preload') return resolve()
       link.addEventListener('load', resolve, { once: true })
-      link.addEventListener('error', resolve, { once: true })
-      window.setTimeout(resolve, 4000) // never wait forever on a stalled stylesheet
-    })
-  }))
+      applied(link)
+    }, { once: true })
+    link.addEventListener('error', resolve, { once: true })
+    window.setTimeout(() => { applied(link); resolve() }, 4000) // never wait forever on a stalled stylesheet
+  }))))
 }
 
 // safety net: whatever happens, the pre-rendered overlay never outlives the first seconds

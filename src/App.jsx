@@ -75,6 +75,7 @@ import { useMediaQuery } from './hooks/useMediaQuery'
 import DialogHost from './components/DialogHost'
 import ViewTransitions from './components/ViewTransitions'
 import NativeBack from './components/NativeBack'
+import { RealtimeSync } from './hooks/useRealtimeSync'
 
 // the support chat lives only on the help pages, so its code (and the help articles) load only there
 const SupportChat = lazy(lazyImport(() => import('./components/SupportChat')))
@@ -114,6 +115,7 @@ function App() {
       <ViewTransitions />
       <NativeBack />
       <SwBridge />
+      <RealtimeSync />
       <SiteHeader />
       <SupportChatSlot />
       <InstallPrompt />

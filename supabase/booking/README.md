@@ -120,3 +120,18 @@ oslobodi uplatu ranije → novac ode, a kartica i dalje piše „Izvođač radi 
 i nudi „Predaj rad" za plaćen posao. Umjesto krpljenja svake funkcije posebno,
 stanje sada prati novac trigerom `job_payments_sync_work_state` — vrijedi i za
 funkcije koje se dodaju kasnije. Postojeći redovi su usklađeni.
+
+## booking/04 — zaštita od prevare (05.10.2026.)
+
+`04_fraud_shield.sql` (pustiti POSLIJE `security/09`, jer 09 inače ponovo otvara `job_transition`):
+
+| Rupa prije (provjereno na živoj bazi) | Sada |
+|---|---|
+| Vlasnik je API pozivom mijenjao `listings.status`: plaćen posao nazad u „published", „completed" bez isplate, „cancelled" sa krivicom izvođača. | `listings_status_guard`: dok postoji uplata status mijenja samo tok posla; `assigned`/`archived` samo sistem; završen/otkazan je konačan. Dugme „Posao završen" i dalje radi za stare poslove bez uplate. |
+| `job_transition()` se mogao zvati direktno: strana koja traži prekid sama upiše „cancelled" i zaključa novac. | Izvršava ga samo platforma, kroz akcije sa provjerama. |
+| Stari `request_job_payment` / `open_job_dispute` mijenjali status mimo state machine-a. | Zatvoreni; aplikacija koristi `submit_work` i `open_dispute`. |
+| `bidder_metrics()` svakome otkrivao ko je dao ponudu. | Samo vlasniku posla i timu. |
+| Ništa nije garantovalo da red u `job_payments` odgovara skinutom novcu. | Pri nastanku: ponuda, strane, tačan iznos, tačna naknada i `escrow_hold` istog iznosa u istoj transakciji. Poslije: strane i uslovi nepromjenjivi, iznos samo raste uz plaćenu razliku. |
+| Nije bilo dokaza da je izvođač bio na licu mjesta. | `work_proofs` + `add_work_proof`: slika kamerom u aplikaciji (bez galerije), GPS + UTC utisnuti na sliku, serversko vrijeme prijema, udaljenost od posla, SHA-256 (ista slika ne prolazi dvaput). Posao na terenu se ne predaje bez slike PRIJE i svježe slike POSLIJE. Online poslovi i ugovori stariji od ovog fajla nisu pogođeni. |
+
+Testovi: `e2e/proof-flow.spec.js` (lažna kamera + GPS u Chromiumu) i ručni SQL napadi na lokalnoj kopiji baze.

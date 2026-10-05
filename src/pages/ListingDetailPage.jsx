@@ -578,7 +578,7 @@ function ListingDetailPage() {
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
                 <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
-                <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+                <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
               </>
             )}
 

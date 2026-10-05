@@ -17,6 +17,10 @@ const friendly = (error) => {
   if (text.includes('ALREADY_FUNDED')) return 'Za ovaj posao je već osigurana uplata.'
   if (text.includes('BAD_STATUS')) return 'Ova radnja trenutno nije moguća — osvježi stranicu.'
   if (text.includes('REASON_REQUIRED')) return 'Opiši problem u bar par riječi.'
+  // foto dokaz i zaključan tok posla (supabase/booking/04): baza već piše razumljivu poruku iza koda
+  const human = text.match(/^(FOTO_PRIJE_OBAVEZAN|FOTO_POSLIJE_OBAVEZAN|PRVO_SLIKA_PRIJE|DOKAZ_ZASTARIO|DOKAZ_VEC_KORISTEN|DOKAZ_NEISPRAVAN|DOKAZ_NIJE_MOGUC|GPS_OBAVEZAN|GPS_PRESLAB|STATUS_ZAKLJUCAN|ESCROW_NIJE_OSIGURAN|ESCROW_ZAKLJUCAN): (.+)$/)
+  if (human) return human[2].charAt(0).toUpperCase() + human[2].slice(1)
+  if (text.includes('NEDOZVOLJEN_PRELAZ')) return 'Ova radnja nije moguća u ovom koraku posla — osvježi stranicu.'
   if (text.includes('SUSPENDED')) return 'Nalog je suspendovan.'
   if (text.includes('FORBIDDEN')) return 'Nemaš ovlaštenje za ovu radnju.'
   return 'Radnja nije uspjela. Pokušaj ponovo.'
@@ -123,10 +127,32 @@ export const paymentService = {
     }
     return urls
   },
-  requestPayment: (listingId) => call('request_job_payment', { p_listing_id: listingId }),
+  // --- foto dokaz na licu mjesta (supabase/booking/04) ----------------------------
+  /** { available, rows }: available=false dok tabela nije u bazi, pa se dio ne prikazuje i ne blokira predaju. */
+  async proofs(paymentId) {
+    const { data, error } = await supabase
+      .from('work_proofs')
+      .select('id, kind, photo_url, lat, lng, accuracy_m, captured_at, received_at, distance_m, source')
+      .eq('payment_id', paymentId)
+      .order('received_at', { ascending: true })
+    if (error) return { available: false, rows: [] }
+    return { available: true, rows: data || [] }
+  },
+  /** Utisnuta slika iz ProofCamera → skladište → zapis sa GPS-om, vremenom i otiskom. */
+  async addProof({ userId, payment, kind, shot }) {
+    const path = `${userId}/proof/${payment.id}/${kind}-${Date.now()}.jpg`
+    const { error } = await supabase.storage.from('media').upload(path, shot.blob, { cacheControl: '31536000', contentType: 'image/jpeg' })
+    if (error) throw new Error('Slika se nije mogla poslati. Provjeri internet i pokušaj ponovo.')
+    const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+    return call('add_work_proof', {
+      p_listing: payment.listing_id, p_kind: kind, p_photo_url: url, p_sha256: shot.sha256,
+      p_lat: shot.lat, p_lng: shot.lng, p_accuracy_m: Math.round(shot.accuracy * 10) / 10,
+      p_captured_at: shot.capturedAt, p_source: shot.source,
+    })
+  },
+
   releasePayment: (listingId) => call('release_job_payment', { p_listing_id: listingId }),
   cancelJob: (listingId, reason = null) => call('cancel_job_payment', { p_listing_id: listingId, p_reason: reason }),
-  openDispute: (listingId, reason) => call('open_job_dispute', { p_listing_id: listingId, p_reason: reason }),
 
   /** Realtime: refresh when the other side moves the job forward. */
   subscribe(listingId, onChange) {

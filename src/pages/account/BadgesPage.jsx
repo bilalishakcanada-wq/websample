@@ -6,6 +6,7 @@ import { useAccount } from './AccountLayout'
 import { accountService, LICENCES } from '../../services/accountService'
 import { formatBosnianPhone, isValidBosnianPhone, digitsOnly } from '../../utils/phone'
 import { withBase } from '../../utils/paths'
+import { BadgeVault } from '../../components/BadgeVault'
 
 const LICENCE_ICON = { electrician: Zap, plumber: Droplets, gas: Flame, hvac: Thermometer, construction: HardHat, driver: Car }
 
@@ -141,6 +142,9 @@ function BadgesPage() {
       <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onChange={onFile} />
       {error && <div className="form-error">{error}</div>}
       {message && <div className="form-success">{message}</div>}
+
+      <h3 className="account-sub">Tvoja kolekcija</h3>
+      <BadgeVault userId={user.id} earnedBadges={bundle?.badges} />
 
       <h3 className="account-sub">Značke identiteta</h3>
       <div className="badge-grid">

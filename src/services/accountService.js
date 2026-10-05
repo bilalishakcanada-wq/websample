@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
+import { isStrongPassword } from '../utils/validation'
+import { passwordUpdateError } from './authService'
 
 const LICENCE_TYPES = ['electrician', 'plumber', 'gas', 'hvac', 'construction', 'driver']
 
@@ -175,9 +177,10 @@ export const accountService = {
   },
 
   async changePassword(newPassword) {
-    if (!newPassword || newPassword.length < 8) throw new Error('Lozinka mora imati najmanje 8 znakova.')
+    if (!isStrongPassword(newPassword)) throw new Error('Lozinka mora imati najmanje 8 znakova i sadržavati veliko, malo slovo i broj.')
+    if (newPassword.length > 72) throw new Error('Lozinka može imati najviše 72 znaka.')
     const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) throw new Error(error.message || 'Promjena lozinke nije uspjela.')
+    if (error) throw new Error(passwordUpdateError(error))
   },
 }
 

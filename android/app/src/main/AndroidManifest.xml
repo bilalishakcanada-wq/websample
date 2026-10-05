@@ -48,7 +48,12 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- no CAMERA permission: photos come from the system camera app through the file chooser, which needs none -->
+    <!-- CAMERA + location: the on-site photo proof (ProofCamera) takes the picture inside the app, never from the
+         gallery, and stamps it with GPS and UTC time. Capacitor asks for both only when that screen opens. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

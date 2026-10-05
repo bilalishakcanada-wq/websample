@@ -45,6 +45,7 @@ ID aplikacije: `ba.poso.app`, ime: Zadatak. iPhone je zaključan na portret; kam
 - **iPhone povlačenje s lijeve ivice = nazad** (`allowsBackForwardNavigationGestures`), **120 Hz** na ProMotion ekranima (`CADisableMinimumFrameDurationOnPhone`).
 - **Android 12+ boje sistema (Material You)**: označen tekst, kursor i kvačice dobiju boju telefona; dugmad i zaglavlja ostaju Zadatak boje.
 - **Brzo otvaranje**: u aplikaciji se vlastiti profil i lista poruka čuvaju u memoriji aplikacije (uz poslove i ponude), pa se ekran odmah iscrta i osvježi u pozadini; odjava sve briše (`src/lib/queryClient.js`).
+- **Izvođač je na putu (mapa uživo)**: isti `LiveTracking.jsx` na webu, iOS-u i Androidu; lokacija iz `@capacitor/geolocation` u aplikaciji, iz HTML5 Geolocation u pregledniku (`src/utils/location.js`). Radi dok je Zadatak otvoren (bez praćenja u pozadini).
 - Starije instalirane aplikacije bez plugina rade kao prije; nove funkcije dođu s novim APK-om.
 
 ## Ako build „visi“ ili Xcode javlja greške

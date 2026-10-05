@@ -120,3 +120,9 @@ oslobodi uplatu ranije → novac ode, a kartica i dalje piše „Izvođač radi 
 i nudi „Predaj rad" za plaćen posao. Umjesto krpljenja svake funkcije posebno,
 stanje sada prati novac trigerom `job_payments_sync_work_state` — vrijedi i za
 funkcije koje se dodaju kasnije. Postojeći redovi su usklađeni.
+
+## 05 — „Izvođač je na putu“ (lokacija uživo)
+`05_live_location.sql`: izvođač na plaćenom poslu u toku uključi dijeljenje lokacije, klijent ga vidi
+na mapi uživo (Realtime). Čuva se samo zadnja tačka; vide je samo dvije strane i tim; gasi se kad se
+preda rad, posao završi/prekine/ode u spor, na „Zaustavi“, ili nakon 3 h tišine. Dok SQL nije u bazi,
+dio se na sajtu ne prikazuje. Frontend: `src/components/LiveTracking.jsx`, `src/utils/location.js`.

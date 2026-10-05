@@ -5,6 +5,7 @@ import { paymentService } from '../../services/paymentService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, CreditsDialog, WALLET_KIND_LABEL, formatKM, useStaff } from './shared'
 import { withBase } from '../../utils/paths'
+import { SkeletonRows } from '../../components/Skeleton'
 
 /** Platform-wide balances: totals, quick top-up, top balances and the ledger. */
 function WalletTab() {
@@ -59,7 +60,7 @@ function WalletTab() {
     try { setCandidates(await adminService.listUsers({ term: term.trim(), limit: 6 })) } catch (requestError) { setError(requestError.message) }
   }
 
-  if (!data && !error) return <div className="page-state">Učitavanje balansa...</div>
+  if (!data && !error) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">

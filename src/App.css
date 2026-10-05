@@ -2382,6 +2382,15 @@ button.back-home-link {
   animation: sheet-up 0.25s ease both;
 }
 
+/* on a short phone the price hint pushes the send button below the fold: it stays pinned to the
+   sheet's bottom edge while the fields scroll under it, like a native bottom sheet */
+.offer-sheet .auth-form > button[type="submit"] {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  box-shadow: 0 10px 0 var(--surface), 0 -14px 18px -6px var(--surface);
+}
+
 .sheet-handle {
   width: 42px;
   height: 5px;
@@ -9994,6 +10003,10 @@ body:has(.profile-cta-bar) .support-chat {
   animation: panel-in 0.16s ease both;
 }
 
+.chat-bubble.is-pending {
+  opacity: 0.6;
+}
+
 .chat-bubble p {
   margin: 0;
   white-space: pre-wrap;
@@ -10595,6 +10608,13 @@ body:has(.profile-cta-bar) .support-chat {
   display: flex;
   gap: 14px;
   align-items: flex-start;
+}
+
+/* the badge a job asked for (Značke page opened from a job's "Osvoji značku") */
+.badge-row-item.is-wanted {
+  outline: 2px solid var(--primary);
+  outline-offset: 6px;
+  border-radius: 12px;
 }
 
 .badge-row-icon {
@@ -12674,6 +12694,11 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .idv-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .idv-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.1rem; }
 .idv-row { display: grid; gap: 12px; }
+.idv-beta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.idv-beta > div { flex: 1 1 220px; }
+.idv-beta p { margin: 3px 0 0; font-size: .86rem; }
+.idv-beta.on { border-color: #e0a100; background: #fff8e6; }
+.idv-beta.on .idv-ikona { background: #ffe9b0; color: #8a6100; }
 .idv-row.otvoren { border-color: var(--primary); }
 .idv-main { display: flex; gap: 12px; align-items: flex-start; }
 .idv-ikona { display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;

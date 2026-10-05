@@ -463,6 +463,7 @@
 .ch-day { display: flex; flex-direction: column; gap: 6px; }
 .ch-day-label { align-self: center; margin: 8px 0; padding: 4px 10px; border-radius: 999px; background: #eef2f8; font-size: 0.74rem; font-weight: 700; color: var(--text-soft); }
 .ch-bubble { max-width: 82%; padding: 10px 14px; border-radius: 18px; line-height: 1.45; font-size: 1rem; position: relative; }
+.ch-bubble.is-pending { opacity: 0.6; }
 .ch-bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ch-bubble.theirs { align-self: flex-start; background: #eef2f8; color: var(--text); border-bottom-left-radius: 6px; }
 .ch-bubble.mine { align-self: flex-end; background: var(--primary-strong); color: white; border-bottom-right-radius: 6px; }

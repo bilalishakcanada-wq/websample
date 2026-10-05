@@ -18,8 +18,19 @@ export async function openInSystemBrowser(url) {
   else window.location.assign(url) // older app build without the Browser plugin: plain redirect
 }
 
+/** Phones with 2 GB of memory or two cores: index.css drops blur and endless decorative motion for them. */
+function markLowEndDevice() {
+  try {
+    const memory = navigator.deviceMemory
+    const cores = navigator.hardwareConcurrency
+    if ((memory && memory <= 2) || (cores && cores <= 2)) document.documentElement.classList.add('is-lowend')
+  } catch { /* ignore */ }
+}
+
 export async function setupNative() {
+  markLowEndDevice()
   if (!isNativeApp()) return
+  setupButtonHaptics()
   try {
     document.documentElement.classList.add('is-native')
     await plugin('StatusBar')?.setStyle({ style: 'DARK' })
@@ -141,8 +152,25 @@ export async function shareLink({ title, text, url }) {
   return false
 }
 
+/**
+ * In the app every main button gives a light tap when pressed, like native buttons do. Runs after the page's
+ * own click handlers (document, bubble phase), so a button that already played a stronger haptic is not doubled.
+ */
+function setupButtonHaptics() {
+  document.addEventListener('click', (event) => {
+    const button = event.target?.closest?.('.ap-btn-primary, .ap-btn-dark, .primary-button, button[type="submit"]')
+    if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
+    haptic('light')
+  })
+}
+
+let lastHapticAt = 0
+
 /** Short tap feedback on important actions (accept offer, release payment). */
 export function haptic(kind = 'light') {
+  const now = Date.now()
+  if (now - lastHapticAt < 120) return // one press, one tap
+  lastHapticAt = now
   if (!isNativeApp()) {
     // installed web app on Android: the Vibration API gives the same tap feedback
     try { navigator.vibrate?.(kind === 'heavy' ? 30 : kind === 'medium' ? 18 : 8) } catch { /* ignore */ }

@@ -57,4 +57,24 @@ export const badgeService = {
       .maybeSingle()
     return data
   },
+
+  /** Sve značke (javne): nivo, težina i uputa za rangiranje. Prije badges/01 SQL-a kolone ne postoje — `*` to podnosi. */
+  async catalog() {
+    const { data, error } = await supabase.from('badges').select('*')
+    if (error) {
+      console.error('Supabase badge catalog fetch failed', { message: error.message, code: error.code })
+      return []
+    }
+    return data || []
+  },
+
+  /** Trezor vlasnika: sve značke, osvojene i zaključane, s napretkom. null dok my_badge_vault nije na bazi. */
+  async myVault() {
+    const { data, error } = await supabase.rpc('my_badge_vault')
+    if (error) {
+      if (error.code !== 'PGRST202') console.error('Supabase badge vault failed', { message: error.message, code: error.code })
+      return null
+    }
+    return data?.badges || []
+  },
 }

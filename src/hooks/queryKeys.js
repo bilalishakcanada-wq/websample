@@ -24,4 +24,6 @@ export const keys = {
   offerReach: (userId, listingId) => ['me', userId, 'offer-reach', listingId],
   quoteRequests: (userId) => ['me', userId, 'quote-requests'],
   quoteRequestsEnabled: ['feature', 'quote-requests'],
+  badgeCatalog: ['badges', 'catalog'],
+  badgeVault: (userId) => ['me', userId, 'badge-vault'],
 }

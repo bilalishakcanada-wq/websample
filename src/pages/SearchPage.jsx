@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { personaliseRanked, rankListings } from '../utils/ranking'
 import { readInterests, recordInterest } from '../utils/interests'
-import { useSearchListings } from '../hooks/queries'
+import { keys, useSearchListings } from '../hooks/queries'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { promotionService } from '../services/promotionService'
+import { PromoBadge } from '../components/Promotion'
 import { useDebounced } from '../hooks/useDebounced'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
@@ -207,20 +210,31 @@ function SearchPage() {
     }
   }, [openMenu])
 
-  const listings = useMemo(() => {
-    let items = rows.map((row) => {
-      const remote = row.is_remote ?? isRemoteLocation(row.location)
-      const point = row.lat != null ? { lat: row.lat, lng: row.lng } : null
-      return {
-        ...row,
-        remote,
-        offers: row.offers ?? row.bids?.[0]?.count ?? 0,
-        photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
-        photoCount: row.image_count ?? (row.listing_images || []).length,
-        distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
-        reach: me?.city ? reachFor(row, me.city) : null,
-      }
-    })
+  // Hitno / VIP jobs that match the same filters: always first, VIP before Hitno (supabase/marketplace/01)
+  const promotedQuery = useQuery({
+    queryKey: keys.promoted(searchParamsForServer),
+    queryFn: () => promotionService.forSearch(searchParamsForServer),
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
+  })
+  const promotedRows = promotedQuery.data || EMPTY
+
+  const decorate = useMemo(() => (row) => {
+    const remote = row.is_remote ?? isRemoteLocation(row.location)
+    const point = row.lat != null ? { lat: row.lat, lng: row.lng } : null
+    return {
+      ...row,
+      remote,
+      offers: row.offers ?? row.bids?.[0]?.count ?? 0,
+      photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
+      photoCount: row.image_count ?? (row.listing_images || []).length,
+      distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
+      reach: me?.city ? reachFor(row, me.city) : null,
+    }
+  }, [origin, me])
+
+  const organic = useMemo(() => {
+    let items = rows.map(decorate)
     if (filters.inReach && me?.city) items = items.filter((item) => item.reach?.status !== 'too_far')
     if (serverRanked && !filters.remoteOnly) {
       return filters.sort === 'recommended' ? personaliseRanked(items, { interests: readInterests(), query: filters.query }) : items
@@ -250,7 +264,16 @@ function SearchPage() {
       items = personaliseRanked(rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance }), { interests: readInterests(), query: filters.query })
     }
     return items
-  }, [rows, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, filters.inReach, me, serverRanked])
+  }, [rows, decorate, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, filters.inReach, me, serverRanked])
+
+  const listings = useMemo(() => {
+    let pinned = promotedRows.map((row) => ({ ...decorate(row), promo: row.promotion_tier }))
+    if (filters.remoteOnly) pinned = pinned.filter((item) => item.remote)
+    if (filters.inReach && me?.city) pinned = pinned.filter((item) => item.reach?.status !== 'too_far')
+    if (pinned.length === 0) return organic
+    const pinnedIds = new Set(pinned.map((item) => item.id))
+    return [...pinned, ...organic.filter((item) => !pinnedIds.has(item.id))]
+  }, [promotedRows, organic, decorate, filters.remoteOnly, filters.inReach, me])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null
@@ -413,14 +436,14 @@ function SearchPage() {
             <article
               key={item.id}
               ref={(node) => { cardRefs.current[item.id] = node }}
-              className={`task-card ${activeId === item.id ? 'active' : ''} ${item.reach?.status === 'too_far' ? 'is-out-of-reach' : ''}`}
+              className={`task-card ${activeId === item.id ? 'active' : ''} ${item.reach?.status === 'too_far' ? 'is-out-of-reach' : ''} ${item.promo ? `is-promo-${item.promo}` : ''}`}
               onMouseEnter={() => setActiveId(item.id)}
               onFocus={() => setActiveId(item.id)}
             >
               <Link to={`/listings/${item.id}`} className={`task-card-link ${item.photo ? 'has-photo' : ''}`}>
                 {item.photo && <div className="task-card-photo"><img src={item.photo} alt="" loading="lazy" decoding="async" />{item.photoCount > 1 && <span>{item.photoCount}</span>}</div>}
                 <div className="task-card-head">
-                  <h3>{item.title}</h3>
+                  <h3><PromoBadge tier={item.promo} />{item.title}</h3>
                   <strong className="task-card-price">{formatPrice(item.price, item.currency)}</strong>
                 </div>
                 <ul className="task-card-facts">

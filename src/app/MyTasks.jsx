@@ -8,7 +8,6 @@ import { savedService } from '../services/savedService'
 import { listingService } from '../services/listingService'
 import { useSaved } from '../hooks/useSaved'
 import { daysUntilDue, scheduleLabel } from '../utils/schedule'
-import { timeAgo } from '../utils/dateFormat'
 import { useMode } from './mode'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { usePresence } from '../hooks/usePresence'
@@ -17,11 +16,10 @@ import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 import { SkeletonMtCard } from '../components/Skeleton'
 import '../components/TaskExtras.css'
+import ProviderDashboard from '../components/ProviderDashboard'
 
 const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'], expired: ['Rok prošao', 'off'] }
-const BID_STATUS = { pending: ['Ponuda poslana', 'open'], accepted: ['Dodijeljen tebi', 'done'], rejected: ['Nije prošla', 'off'], withdrawn: ['Povučena', 'off'] }
 const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani'], ['expired', 'Rok prošao']]
-const BID_FILTERS = [['all', 'Sve ponude'], ['pending', 'Čekaju odgovor'], ['accepted', 'Dodijeljeni meni'], ['rejected', 'Nisu prošle']]
 const EMPTY = []
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 
@@ -61,10 +59,9 @@ function MyTasks() {
   )
 
   const switchTab = (next) => { setParams({ tab: next }, { replace: true }); setFilter('all') }
-  const filters = tab === 'objavljeni' ? JOB_FILTERS : BID_FILTERS
+  const filters = JOB_FILTERS
   const filterLabel = filters.find(([id]) => id === filter)?.[1] || filters[0][1]
   const visibleJobs = useMemo(() => (jobs || []).filter((job) => filter === 'all' || job.status === filter), [jobs, filter])
-  const visibleBids = useMemo(() => (bids || []).filter((bid) => filter === 'all' || bid.status === filter), [bids, filter])
 
   return (
     <div className="ap ap-page mt">
@@ -77,7 +74,7 @@ function MyTasks() {
         </div>
       </div>
 
-      {tab !== 'sacuvano' && <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>}
+      {tab === 'objavljeni' && <button type="button" className="mt-filter" onClick={() => setPick(true)} aria-haspopup="listbox" aria-expanded={pick}>{filterLabel} <ChevronDown size={16} /></button>}
       {pickSheet.mounted && (
         <div className={`ap-sheet-backdrop ${pickSheet.closing ? 'is-closing' : ''}`} inert={pickSheet.closing || undefined} onClick={() => setPick(false)}>
           <div className="ap-sheet" role="listbox" onClick={(event) => event.stopPropagation()}>
@@ -161,9 +158,7 @@ function MyTasks() {
 
       {tab === 'ponude' && (
         <section className="ap-section">
-          {bids === null && <div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div>}
-          {retryCard}
-          {quoteRequests.length > 0 && filter === 'all' && (
+          {quoteRequests.length > 0 && (
             <>
               <h2 className="mt-quote-head">Traže ponudu od tebe ({quoteRequests.length})</h2>
               <div className="mt-list mt-quote-list">
@@ -181,31 +176,7 @@ function MyTasks() {
               </div>
             </>
           )}
-          {bids && bids.length === 0 && !failed && (
-            <div className="ap-empty ap-empty-art">
-              <EmptyBoxMascot />
-              <strong>Još nisi poslao/la nijednu ponudu</strong>
-              <span>Pronađi posao koji ti odgovara i pošalji cijenu.</span>
-              <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>
-            </div>
-          )}
-          {bids && bids.length > 0 && visibleBids.length === 0 && <p className="jd-empty">Nema ponuda u ovom filteru.</p>}
-          <div className="mt-list">
-            {visibleBids.map((bid) => {
-              const [label, tone] = BID_STATUS[bid.status] || BID_STATUS.pending
-              return (
-                <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="mt-card">
-                  <div className="mt-card-head"><strong>{bid.listing?.title || 'Posao'}</strong><em>{money(bid.amount)}</em></div>
-                  <span><MapPin size={14} /> {bid.listing?.location || 'Online'}</span>
-                  <span><CalendarDays size={14} /> Ponuda poslana {timeAgo(bid.created_at)}</span>
-                  <div className="mt-card-foot">
-                    <b className={`mt-state s-${tone}`}>{label}</b>
-                    <small>Tvoja cijena</small>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+          <ProviderDashboard userId={user.id} />
         </section>
       )}
     </div>

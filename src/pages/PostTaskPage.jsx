@@ -13,6 +13,7 @@ import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queri
 import { ConditionsBuilder } from '../components/JobConditions'
 import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { publishListing } from '../services/publishListing'
+import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
 import CityField from '../components/CityField'
@@ -50,6 +51,8 @@ function PostTaskPage() {
   const quoteEnabled = useQuoteRequestsEnabled()
   const conditionsOn = useJobConditionsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  // Hitno / VIP: only for a new job everyone sees (a private request or an edit has nothing to boost)
+  const promotionOptions = usePromotionOptions(user?.id, !editId && !inviteId)
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   // a half-written job survives a refresh or an accidental click away; editing or copying a job
   // starts from that job and leaves the draft alone
@@ -149,6 +152,7 @@ function PostTaskPage() {
     setSaving(true)
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
+      if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       if (freshPost) { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
@@ -372,6 +376,7 @@ function PostTaskPage() {
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>
               {form.mode !== 'remote' && Number(form.travel) > 0 && <div className="wizard-summary-row"><span>Put</span><strong>Plaćam do {form.travel} KM</strong></div>}
             </div>
+            {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => update({ promotion })} options={promotionOptions} />}
           </section>
         )}
 

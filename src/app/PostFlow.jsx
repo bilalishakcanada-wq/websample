@@ -6,6 +6,7 @@ import { serviceCategories } from '../data/categories'
 import { cityCoordinates } from '../data/cityCoordinates'
 import { POPULAR_CITIES } from '../data/siteMap'
 import { publishListing } from '../services/publishListing'
+import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
@@ -62,6 +63,8 @@ function PostFlow() {
   const quoteEnabled = useQuoteRequestsEnabled()
   const conditionsOn = useJobConditionsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  // Hitno / VIP: only for a new job everyone sees (a private request or an edit has nothing to boost)
+  const promotionOptions = usePromotionOptions(user?.id, !editId && !inviteId)
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   // editing and copying start from a job, not the draft, and leave the draft alone
   const freshPost = !editId && !copyId
@@ -184,6 +187,7 @@ function PostFlow() {
     setError('')
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
+      if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       if (freshPost) clearDraft()
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
@@ -350,6 +354,7 @@ function PostFlow() {
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
             {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
+          {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
           {error && <div className="form-error">{error}</div>}
         </section>
       )}

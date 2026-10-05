@@ -26,4 +26,8 @@ export const keys = {
   quoteRequests: (userId) => ['me', userId, 'quote-requests'],
   quoteRequestsEnabled: ['feature', 'quote-requests'],
   jobConditionsEnabled: ['feature', 'job-conditions'],
+  // izdvojeni oglasi (Hitno / VIP) i ploča izvođača
+  promoted: (params) => ['search', 'promoted', params],
+  promotionOptions: (userId) => ['me', userId || 'guest', 'promotion-options'],
+  providerPayments: (userId) => ['me', userId, 'provider-payments'],
 }

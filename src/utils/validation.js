@@ -45,6 +45,17 @@ const POZNATE_GRESKE = [
   { test: /ZAHTJEV_SE_NE_MIJENJA/i, poruka: 'Zahtjev za ponudu se ne može poslati drugom izvođaču. Objavi posao svima ili pošalji novi zahtjev.' },
   { test: /NEMA_ZAHTJEVA/i, poruka: 'Ovaj zahtjev za ponudu nije za tebe.' },
   { test: /PONUDA_POSLANA/i, poruka: 'Već si poslao/la ponudu. Povuci je ako ne možeš preuzeti posao.' },
+  // nova cijena nakon odbijene ponude (marketplace/01)
+  { test: /PONUDA_VEC_CEKA/i, poruka: 'Već imaš ponudu na čekanju za ovaj posao. Izmijeni nju umjesto nove.' },
+  { test: /POSAO_VEC_TVOJ/i, poruka: 'Tvoja ponuda za ovaj posao je već prihvaćena.' },
+  { test: /PREVISE_PONUDA/i, poruka: 'Na ovaj posao si već poslao/la najviše ponuda. Pogledaj druge poslove.' },
+  {
+    test: /ISTA_CIJENA/i,
+    poruka: (tekst) => {
+      const iznos = (tekst.match(/odbio\s+([\d.,]+)\s*KM/) || [])[1]
+      return `Klijent je već odbio ${iznos ? `${iznos} KM` : 'ovu cijenu'}. Pošalji drugačiju cijenu.`
+    },
+  },
   {
     test: /PREDALEKO/i,
     // "PREDALEKO: udaljen/a si 56 km, a za ovaj posao ponude mogu slati izvođači do 15 km"

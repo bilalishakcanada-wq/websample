@@ -28,6 +28,9 @@ jobs:
       E2E_CLIENT_PASSWORD: Test12345!
       E2E_PROVIDER_EMAIL: izvodjac@test.zadatak
       E2E_PROVIDER_PASSWORD: Test12345!
+      # a worker holding every badge a job can require; exists only in this private database
+      E2E_TESTER_EMAIL: majstor@test.zadatak
+      E2E_TESTER_PASSWORD: Test12345!
       ROBOT_BASE_URL: http://localhost:4175
     steps:
       - uses: actions/checkout@v4

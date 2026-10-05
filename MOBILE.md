@@ -39,6 +39,14 @@ Ikone i splash ekrani se prave iz jednog SVG znaka: `node scripts/brand-assets.m
 `src/components/BrandMark.jsx` (zaglavlje, prijava, dobrodošlica) i `public/favicon.svg`.
 ID aplikacije: `ba.poso.app`, ime: Zadatak. iPhone je zaključan na portret; kamera/galerija imaju opise dozvola.
 
+## Nativne funkcije (vlastiti plugin `ZadatakNative`)
+- **Otisak prsta / Face ID prije isplate**: kad klijent odobri rad, oslobodi uplatu ili plati povećanje cijene, i kad izvođač traži isplatu na račun, telefon traži otisak/lice (ili PIN ako ih nema). Bez zaključavanja ekrana ili u pregledniku ostaje samo potvrda u aplikaciji. Kod: `android/app/src/main/java/ba/poso/app/ZadatakNativePlugin.java`, `ios/App/App/ZadatakNative.swift`, `src/utils/biometric.js`.
+- **Android Nazad**: zatvara prozor/listu, pa prethodni ekran, pa ide prema početnoj; na početnoj prvi pritisak kaže „Pritisni Nazad još jednom za izlaz“ (`src/components/NativeBack.jsx`).
+- **iPhone povlačenje s lijeve ivice = nazad** (`allowsBackForwardNavigationGestures`), **120 Hz** na ProMotion ekranima (`CADisableMinimumFrameDurationOnPhone`).
+- **Android 12+ boje sistema (Material You)**: označen tekst, kursor i kvačice dobiju boju telefona; dugmad i zaglavlja ostaju Zadatak boje.
+- **Brzo otvaranje**: u aplikaciji se vlastiti profil i lista poruka čuvaju u memoriji aplikacije (uz poslove i ponude), pa se ekran odmah iscrta i osvježi u pozadini; odjava sve briše (`src/lib/queryClient.js`).
+- Starije instalirane aplikacije bez plugina rade kao prije; nove funkcije dođu s novim APK-om.
+
 ## Ako build „visi“ ili Xcode javlja greške
 - **Disk skoro pun + iCloud „Desktop & Documents“**: macOS izbaci fajlove projekta u oblak (prazni „dataless“ fajlovi) i svaki build/`npm` visi. Rješenje: oslobodi 20+ GB i drži `node_modules` van iCloud-a — `node_modules` je simbolički link na `node_modules.nosync` (iCloud preskače `*.nosync`). Ako se ponovi: `rm -rf node_modules node_modules.nosync && mkdir node_modules.nosync && ln -s node_modules.nosync node_modules && npm install`.
 - **Xcode: „Expression implicitly coerced from 'String?' to 'Any'“ (AppPlugin)** — upozorenje iz Capacitorovog paketa, ne iz našeg koda; bezopasno.

@@ -27,7 +27,7 @@ export const useMyBundle = (userId) => useQuery({
   queryKey: keys.myBundle(userId),
   queryFn: () => profileService.getMyBundle(),
   enabled: Boolean(userId),
-  meta: { persist: false }, // private
+  meta: { persist: 'device' }, // private: kept across restarts only in the app (lib/queryClient.js)
 })
 
 // the poster's own jobs, the tasker's offers and the recommended feed are persisted (user-scoped keys, cleared on
@@ -56,7 +56,7 @@ export const useInbox = (userId) => useQuery({
   queryFn: () => messageService.inbox(),
   enabled: Boolean(userId),
   staleTime: 15 * 1000,
-  meta: { persist: false },
+  meta: { persist: 'device' }, // the app opens Poruke with the last conversations, then refreshes
 })
 
 export const useThread = (conversationId) => useQuery({

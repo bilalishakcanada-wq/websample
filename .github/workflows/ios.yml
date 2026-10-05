@@ -1,0 +1,39 @@
+# Compiles the iOS app for the simulator (no signing, no Apple account needed) so a change to the
+# native iOS code is checked before it reaches main. Installing on a real iPhone still needs a Mac
+# with Xcode and an Apple Developer account (MOBILE.md).
+name: iOS app (compile check)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ios.yml'
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # the shell loads the live site; the bundled copy is only the offline fallback, so an empty one is enough here
+      - name: Placeholder web bundle
+        run: mkdir -p dist && echo '<!doctype html><title>Zadatak</title>' > dist/index.html
+      - run: npx cap sync ios
+      - name: Build for the simulator
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -40
+          exit ${PIPESTATUS[0]}

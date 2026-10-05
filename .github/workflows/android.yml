@@ -24,12 +24,20 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/android.yml'
+  # pull requests that touch the native app get a test build too (the beta release step below runs on main only)
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: android
+  group: android-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -20,6 +20,12 @@ export const queryClient = new QueryClient({
   },
 })
 
+// 'device' = private data (own profile, inbox) that is persisted only inside the iOS/Android app, whose storage
+// is the app's own sandbox on the owner's phone; in a browser it may be a shared computer, so it stays in memory.
+// Either way queryClient.clear() on sign-out wipes it.
+const inApp = () => typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.())
+const persistable = (meta) => meta?.persist !== false && (meta?.persist !== 'device' || inApp())
+
 const storage = (() => {
   try { localStorage.setItem('zadatak-q-test', '1'); localStorage.removeItem('zadatak-q-test'); return localStorage } catch { return null }
 })()
@@ -33,7 +39,7 @@ export const persister = storage ? createSyncStoragePersister({
     ...client,
     clientState: {
       ...client.clientState,
-      queries: client.clientState.queries.filter((q) => q.meta?.persist !== false && JSON.stringify(q.state.data || '').length < 200_000),
+      queries: client.clientState.queries.filter((q) => persistable(q.meta) && JSON.stringify(q.state.data || '').length < 200_000),
     },
   }),
 }) : null
@@ -43,5 +49,5 @@ export const persistOptions = {
   maxAge: 24 * 60 * 60 * 1000,
   // the build id lives in index.html, not in the JS: baked into the entry it renamed ~70 unchanged chunks every deploy
   buster: (typeof document !== 'undefined' && document.querySelector('meta[name="zadatak-build"]')?.content) || 'dev',
-  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && query.meta?.persist !== false },
+  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && persistable(query.meta) },
 }

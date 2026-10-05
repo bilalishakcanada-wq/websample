@@ -1,6 +1,6 @@
 import {
   Award, BadgeCheck, Bike, Car, Coffee, CreditCard, Crown, Droplets, Flag, Flame, Gem, Gift, HardHat, Hammer, Handshake, Heart,
-  IdCard, Leaf, Lock, MapPinned, Medal, Paintbrush, Phone, Rocket, Shield, ShieldCheck, Smile, Sparkles, Star, Sun, Target,
+  IdCard, Leaf, Lock, Mail, MapPinned, Medal, Paintbrush, Phone, Rocket, Shield, ShieldCheck, Smile, Sparkles, Star, Sun, Target,
   Thermometer, ThumbsUp, TrendingUp, Trophy, Truck, Wrench, Zap,
 } from 'lucide-react'
 
@@ -26,6 +26,7 @@ export const BADGE_ICONS = {
   'id-card': IdCard,
   leaf: Leaf,
   lock: Lock,
+  mail: Mail,
   'map-pinned': MapPinned,
   medal: Medal,
   paintbrush: Paintbrush,

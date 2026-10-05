@@ -107,6 +107,8 @@ function setupPhotoSource() {
     if (passThrough || !(input instanceof HTMLInputElement) || input.type !== 'file') return
     const accept = input.getAttribute('accept') || ''
     if (!/image/.test(accept) || /video/.test(accept)) return
+    // foto dokaz (ProofCamera): samo kamera, bez ponude galerije
+    if (input.dataset.cameraOnly) return
     event.preventDefault()
     choosePhotoSource((source) => {
       const accepted = input.getAttribute('accept')

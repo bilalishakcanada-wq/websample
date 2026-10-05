@@ -27,7 +27,7 @@ for f in identity/bids_require_verified security/05_marketplace_scam_guards paym
          airtasker/02_search_due_dates airtasker/03_saved_tasks airtasker/04_reach_and_travel airtasker/05_quote_requests \
          offers/bid_replies offers/job_conditions security/06_private_uploads security/07_phone_run_false_positives security/08_safe_file_links security/09_signed_in_only_functions performance/01_search_radius_first \
          marketplace/01_promoted_and_rebids \
-         branding/01_zadatak_rebrand badges/01_badge_ranking; do
+         branding/01_zadatak_rebrand badges/01_badge_ranking booking/04_fraud_shield; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   echo "applying supabase/$f.sql"
   $P -f "$REPO/supabase/$f.sql" >/dev/null || { echo "FAILED at supabase/$f.sql"; exit 1; }

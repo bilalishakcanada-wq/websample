@@ -5,6 +5,7 @@ import { JobPaymentCard } from '../components/JobPayment'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import { RequirementsList } from '../components/TaskExtras'
+import { ConditionsCard } from '../components/JobConditions'
 import ReachRadar from '../components/ReachRadar'
 import { QuoteRequestCard } from '../components/QuoteRequest'
 import { reachFor, travelLabel } from '../utils/reach'
@@ -23,7 +24,7 @@ const Avatar = ({ url, size = 48 }) => (url
 function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
-    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
+    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
@@ -133,6 +134,11 @@ function JobDetail(props) {
         <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} phone />
 
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
+
+        <ConditionsCard
+          phone conditions={listing.conditions} held={user ? conditionCheck?.held : null} isOwner={isOwner} next={`/listings/${listing.id}`}
+          identityOk={!['needed', 'pending', 'rejected'].includes(offerGate)}
+        />
 
         {requirements.length > 0 && (
           <div className="jd-reqs">

@@ -20,6 +20,12 @@ const POZNATE_GRESKE = [
     poruka: 'Prije ovoga treba potvrditi identitet — provjera traje obično do 24 sata.',
     akcija: { tekst: 'Potvrdi identitet', href: '/account/verifikacija' },
   },
+  {
+    test: /USLOV_POSLA|conditions_required|bids_insert_conditions/i,
+    poruka: 'Klijent za ovaj posao traži značku koju još nemaš. Osvoji je pa pošalji ponudu.',
+    akcija: { tekst: 'Osvoji značku', href: '/account/znacke' },
+  },
+  { test: /USLOVI_ZAKLJUCANI/i, poruka: 'Izvođač je već izabran — uslovi posla se više ne mogu mijenjati.' },
   { test: /SUSPENDED|is_suspended/i, poruka: 'Nalog je privremeno suspendovan, pa ova radnja nije moguća.' },
   { test: /CHAT_JOS_NIJE_OTVOREN/i, poruka: 'Dopisivanje počinje kada klijent prihvati ponudu i osigura uplatu.' },
   { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },

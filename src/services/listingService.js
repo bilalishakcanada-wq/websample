@@ -15,11 +15,20 @@ const pickExtras = (payload) => Object.fromEntries(EXTRA_COLUMNS.filter((key) =>
 // an open job whose date has passed reads as 'expired' right away (the server flips it within minutes)
 const markExpired = (row) => (row && row.status === 'published' && isExpired(row) ? { ...row, status: 'expired' } : row)
 const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([key]) => !EXTRA_COLUMNS.includes(key)))
+// "Uslovi i pogodnosti" (supabase/offers/job_conditions.sql) is newer than the columns above: without it only
+// this column is dropped (the form hides the builder anyway while useJobConditionsEnabled() is false)
+const pickConditions = (payload) => (payload.conditions !== undefined ? { conditions: payload.conditions } : {})
+const withoutConditions = ({ conditions, ...row }) => row // eslint-disable-line no-unused-vars
 
 const QUOTE_OFF = '„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.'
 
-async function writeListing(run, row) {
-  const first = await run(row)
+async function writeListing(run, fullRow) {
+  let row = fullRow
+  let first = await run(row)
+  if (first.error && isMissingColumn(first.error) && row.conditions !== undefined) {
+    row = withoutConditions(row)
+    first = await run(row)
+  }
   if (first.error && isMissingColumn(first.error) && Object.keys(pickExtras(row)).length > 0) {
     // a private quote request must never fall back to a public job
     if (row.invited_provider) throw new Error(QUOTE_OFF)
@@ -246,6 +255,7 @@ export const listingService = {
       status: payload.status || 'draft',
       ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
       ...pickExtras(payload),
+      ...pickConditions(payload),
       // "Zatraži ponudu": only this provider sees the job (set once, on create)
       ...(payload.invited_provider ? { invited_provider: payload.invited_provider } : {}),
     })
@@ -284,6 +294,7 @@ export const listingService = {
       status: payload.status || 'published',
       ...(coordsForLocation(input.location) || { lat: null, lng: null }),
       ...pickExtras(payload),
+      ...pickConditions(payload),
     }
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'PATCH', body: cleanPayload })
 
@@ -301,6 +312,12 @@ export const listingService = {
       throw publicError()
     }
     return data
+  },
+
+  /** True once supabase/offers/job_conditions.sql is on the database (the column and the bid gate come together). */
+  async jobConditionsEnabled() {
+    const { error } = await supabase.rpc('job_perk_codes')
+    return !error
   },
 
   /**

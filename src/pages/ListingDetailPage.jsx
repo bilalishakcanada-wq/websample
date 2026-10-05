@@ -33,7 +33,9 @@ import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
 import OfferReplies from '../components/OfferReplies'
-import { useOfferGate, OFFER_CTA } from '../hooks/useOfferGate'
+import { useOfferGate, useJobConditionCheck, offerCta } from '../hooks/useOfferGate'
+import { ConditionsCard } from '../components/JobConditions'
+import { badgeFixLink, requirementLabel } from '../utils/jobConditions'
 import { recordInterest } from '../utils/interests'
 import { scheduleLabel } from '../utils/schedule'
 import { useSaved } from '../hooks/useSaved'
@@ -96,8 +98,10 @@ function ListingDetailPage() {
     : { title: 'Posao je objavljen!', text: 'Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena.' }
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
-  const offerGate = useOfferGate(user?.id, id)
   const [listing, setListing] = useState(null)
+  const conditionCheck = useJobConditionCheck(user?.id, listing?.conditions?.requires || [])
+  const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
+  const offerLabel = offerCta(offerGate, conditionCheck.missing)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -228,6 +232,13 @@ function ListingDetailPage() {
     }
     if (offerGate === 'too_far') {
       toast('Ovaj posao je predaleko od grada u tvom profilu za ovaj budžet. Pogledaj poslove bliže tebi.', { kind: 'info' })
+      return
+    }
+    // klijent traži značku koju izvođač nema: vodi ga pravo na mjesto gdje je dobija
+    if (offerGate === 'missing_badges') {
+      const first = conditionCheck.missing[0]
+      toast(`Za ovaj posao treba značka: ${conditionCheck.missing.map(requirementLabel).join(', ')}.`, { kind: 'info' })
+      navigate(badgeFixLink(first, `/listings/${id}`))
       return
     }
     if (offerGate === 'pending') {
@@ -483,7 +494,7 @@ function ListingDetailPage() {
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={OFFER_CTA[offerGate]}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={offerLabel} offerGate={offerGate} conditionCheck={conditionCheck}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -559,6 +570,11 @@ function ListingDetailPage() {
             )}
 
             <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} />
+
+            <ConditionsCard
+              conditions={listing.conditions} travelAllowance={listing.travel_allowance} held={user ? conditionCheck.held : null}
+              identityOk={!['needed', 'pending', 'rejected'].includes(offerGate)} isOwner={isOwner} next={`/listings/${id}`}
+            />
 
             {requirements.length > 0 && (
               <section className="job-card">
@@ -718,7 +734,7 @@ function ListingDetailPage() {
             <div className="job-offer-card">
               <span>Okvirni budžet</span>
               <strong>{formatPrice(listing.price, listing.currency)}</strong>
-              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
+              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {offerLabel}</button>}
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
@@ -759,7 +775,7 @@ function ListingDetailPage() {
         </div>
       </main>
 
-      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
+      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> {offerLabel}</button>}
 
       {overlays}
     </div>

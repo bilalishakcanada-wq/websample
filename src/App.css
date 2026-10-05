@@ -12921,3 +12921,25 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .post-gate-notice.rejected { border-color: #f3c9c9; background: #fdf0f0; color: var(--danger-ink); }
 .post-gate-notice.compact { padding: 10px 12px; }
 .post-gate-link { display: inline-block; margin-top: 4px; font-weight: 700; color: var(--primary); }
+
+/* --- foto dokaz na licu mjesta (WorkFlow + ProofCamera, supabase/booking/04) --- */
+.wf-proof { display: grid; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--stroke); background: var(--surface); }
+.wf-proof > strong { display: flex; align-items: center; gap: 6px; }
+.wf-proof-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.wf-proof-item { display: grid; gap: 6px; color: inherit; text-decoration: none; font-size: .78rem; line-height: 1.35; }
+.wf-proof-item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; border: 1px solid var(--stroke); }
+.wf-proof-item small { display: flex; align-items: center; gap: 3px; color: var(--text-soft); }
+.proof-cam { position: fixed; inset: 0; z-index: 2147483000; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #050d1c; color: #fff; }
+.proof-cam-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(12px + env(safe-area-inset-top)) 16px 12px; }
+.proof-cam-top .icon-button { color: #fff; background: rgba(255, 255, 255, .12); }
+.proof-cam-view { position: relative; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: 0 16px; text-align: center; }
+/* absolute: the video's own size must not feed back into the grid row (layout kept resizing, the shutter never settled) */
+.proof-cam-view video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.proof-cam-view video.is-hidden { display: none; }
+.proof-cam-bottom { display: grid; justify-items: center; gap: 10px; padding: 14px 16px calc(18px + env(safe-area-inset-bottom)); text-align: center; }
+.proof-cam-bottom small { color: rgba(255, 255, 255, .7); max-width: 34rem; }
+.proof-cam-gps { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, .12); font-size: .85rem; }
+.proof-cam-gps.ok { background: rgba(31, 168, 92, .28); }
+.proof-cam-warn { color: #ffd38a; font-size: .85rem; }
+.proof-cam-shutter { width: 74px; height: 74px; border-radius: 50%; border: 5px solid rgba(255, 255, 255, .85); background: #fff; color: #0d2a52; display: grid; place-items: center; }
+.proof-cam-shutter:disabled { opacity: .4; }

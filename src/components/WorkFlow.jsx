@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle, BadgeCheck, CheckCircle2, Clock, Handshake, ImagePlus, RotateCcw, Send, TrendingUp, X,
+  AlertTriangle, BadgeCheck, Camera, CheckCircle2, Clock, Handshake, ImagePlus, MapPin, RotateCcw, Send, TrendingUp, X,
 } from 'lucide-react'
 import { paymentService } from '../services/paymentService'
+import ProofCamera from './ProofCamera'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { toast } from './Toaster'
@@ -23,6 +24,27 @@ function Countdown({ until }) {
     <span className={`wf-clock ${hours < 6 ? 'soon' : ''}`} data-testid="workflow-clock">
       <Clock size={14} /> Automatsko odobrenje za {hours > 0 ? `${hours} h ${minutes} min` : `${minutes} min`}
     </span>
+  )
+}
+
+const utcTime = (value) => `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`
+const daleko = (meters) => (meters == null ? null : meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toLocaleString('bs-BA', { maximumFractionDigits: 1 })} km`)
+
+/** Slike prije/poslije sa pečatom — vide ih obje strane i tim. */
+function ProofGallery({ rows }) {
+  if (!rows.length) return null
+  return (
+    <div className="wf-proof-list" data-testid="workflow-proofs">
+      {rows.map((row) => (
+        <a key={row.id} href={row.photo_url} target="_blank" rel="noreferrer" className="wf-proof-item">
+          <img src={row.photo_url} alt={row.kind === 'before' ? 'Slika prije početka' : 'Slika urađenog posla'} loading="lazy" />
+          <span>
+            <strong>{row.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {utcTime(row.captured_at)}
+            <small><MapPin size={11} /> ±{Math.round(row.accuracy_m)} m{row.distance_m != null ? ` · ${daleko(row.distance_m)} od tačke posla` : ''}</small>
+          </span>
+        </a>
+      ))}
+    </div>
   )
 }
 
@@ -48,7 +70,7 @@ const RAZLOZI_SPORA = [
  * ispravke, sporazumni prekid i spor. Pravila su u bazi (supabase/booking) — ovdje
  * su samo dugmad koja odgovaraju trenutnom stanju i ulozi.
  */
-function WorkFlow({ payment, role, user, onChanged }) {
+function WorkFlow({ payment, role, user, onChanged, title = '' }) {
   const [refreshKey, setRefreshKey] = useState(0)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -64,6 +86,8 @@ function WorkFlow({ payment, role, user, onChanged }) {
   const [increase, setIncrease] = useState({ available: false, request: null })
   const [incAmount, setIncAmount] = useState('')
   const [incReason, setIncReason] = useState('')
+  const [proofs, setProofs] = useState({ available: false, rows: [] })
+  const [camera, setCamera] = useState(null)    // null | 'before' | 'after'
   const fileRef = useRef(null)
 
   const state = payment.work_state || 'in_progress'
@@ -74,12 +98,20 @@ function WorkFlow({ payment, role, user, onChanged }) {
     paymentService.workSubmissions(payment.id).then((rows) => alive && setSubmissions(rows))
     paymentService.pendingCancellation(payment.id).then((row) => alive && setCancelReq(row))
     paymentService.pendingPriceIncrease(payment.id).then((row) => alive && setIncrease(row))
+    paymentService.proofs(payment.id).then((row) => alive && setProofs(row))
     return () => { alive = false }
   }, [payment.id, payment.work_state, payment.revision_count, payment.amount, refreshKey])
 
   const latest = submissions[0]
   const mojZahtjevZaPrekid = cancelReq?.requested_by === user?.id
   const preostaloIspravki = Math.max(0, 3 - (payment.revision_count || 0))
+  // posao na terenu: slika prije, i slika poslije novija od zadnje predaje (ista pravila kao submit_work)
+  const trebaFoto = Boolean(payment.proof_required) && proofs.available
+  const imaPrije = proofs.rows.some((row) => row.kind === 'before')
+  const imaPoslije = proofs.rows.some((row) => row.kind === 'after'
+    && (!latest || new Date(row.received_at) > new Date(latest.submitted_at)))
+  const fotoSpreman = !trebaFoto || (imaPrije && imaPoslije)
+  const radiSe = ['in_progress', 'revision'].includes(state)
 
   const run = async (key, fn, poruka) => {
     setBusy(key); setError('')
@@ -163,7 +195,16 @@ function WorkFlow({ payment, role, user, onChanged }) {
     const urls = files.length ? await paymentService.uploadEvidence(user.id, files) : []
     await paymentService.openWorkDispute(payment.listing_id, reasonCode, claim.trim(), urls)
     setForm(null); setClaim(''); setFiles([])
-  }, 'Spor je otvoren — posao je zamrznut dok tim ne odluči.')
+  }, 'Problem je prijavljen — uplata je zamrznuta dok tim ne odluči.')
+
+  const sacuvajSliku = async (shot) => {
+    const kind = camera
+    await paymentService.addProof({ userId: user.id, payment, kind, shot })
+    haptic('medium')
+    toast(kind === 'before' ? 'Slika prije početka je sačuvana.' : 'Slika urađenog posla je sačuvana.', { kind: 'success' })
+    setCamera(null)
+    setRefreshKey((key) => key + 1)
+  }
 
   const naslov = useMemo(() => ({
     in_progress: isClient ? 'Izvođač radi posao' : 'Posao je u toku',
@@ -197,6 +238,29 @@ function WorkFlow({ payment, role, user, onChanged }) {
           )}
         </div>
       )}
+
+      {(trebaFoto || proofs.rows.length > 0) && (
+        <div className="wf-proof" data-testid="workflow-proof">
+          <strong><Camera size={15} /> Foto dokaz na licu mjesta</strong>
+          {!isClient && trebaFoto && radiSe && (
+            <>
+              <p className="muted-text wf-hint">Slikaj kamerom prije početka i kad završiš. Na sliku se utisne lokacija i tačno vrijeme (UTC), pa se vidi da si bio na mjestu posla.</p>
+              <div className="wf-actions">
+                <button type="button" data-testid="proof-before" className={imaPrije ? 'ghost-button' : 'primary-button'} onClick={() => setCamera('before')} disabled={Boolean(busy)}>
+                  {imaPrije ? <CheckCircle2 size={15} /> : <Camera size={15} />} {imaPrije ? 'Slika prije sačuvana · dodaj još' : '1. Slikaj prije početka'}
+                </button>
+                <button type="button" data-testid="proof-after" className={imaPoslije ? 'ghost-button' : 'primary-button'} onClick={() => setCamera('after')} disabled={Boolean(busy) || !imaPrije}>
+                  {imaPoslije ? <CheckCircle2 size={15} /> : <Camera size={15} />} {imaPoslije ? 'Slika poslije sačuvana · dodaj još' : '2. Slikaj urađen posao'}
+                </button>
+              </div>
+            </>
+          )}
+          {isClient && trebaFoto && proofs.rows.length === 0 && <p className="muted-text wf-hint">Izvođač slika stanje prije i poslije rada, sa lokacijom i vremenom. Slike će se pojaviti ovdje.</p>}
+          <ProofGallery rows={proofs.rows} />
+        </div>
+      )}
+
+      {camera && <ProofCamera kind={camera} title={title} onCapture={sacuvajSliku} onClose={() => setCamera(null)} />}
 
       {state === 'cancel_requested' && (
         <p className="wf-note">
@@ -260,10 +324,11 @@ function WorkFlow({ payment, role, user, onChanged }) {
             <ImagePlus size={15} /> {files.length ? `${files.length} ${files.length === 1 ? 'slika' : 'slike'}` : 'Dodaj slike (do 5)'}
           </button>
           <p className="muted-text wf-hint">Dokaz je obavezan: napiši izvještaj (bar 20 znakova) ili dodaj sliku.</p>
+          {!fotoSpreman && <p className="form-error">{imaPrije ? 'Prije predaje slikaj urađen posao (dugme „Slikaj urađen posao“ iznad).' : 'Prije predaje slikaj stanje prije početka i urađen posao (dugmad iznad).'}</p>}
           <div className="wf-actions">
             <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
             <button data-testid="workflow-submit-confirm" type="button" className="primary-button" onClick={predajRad}
-              disabled={busy === 'submit' || (report.trim().length < 20 && files.length === 0)}>
+              disabled={busy === 'submit' || !fotoSpreman || (report.trim().length < 20 && files.length === 0)}>
               <Send size={15} /> {busy === 'submit' ? 'Šaljem…' : 'Predaj rad'}
             </button>
           </div>
@@ -324,6 +389,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
       {/* --- forma: spor ---------------------------------------------------- */}
       {form === 'dispute' && (
         <div className="wf-form">
+          <p className="muted-text wf-hint">Uplata se odmah zamrzava: niko je ne može isplatiti ni vratiti dok Zadatak tim ne pregleda prepisku i dokaze.</p>
           <label htmlFor="wf-reason">Razlog</label>
           <select id="wf-reason" value={reasonCode} onChange={(event) => setReasonCode(event.target.value)}>
             {RAZLOZI_SPORA.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
@@ -340,7 +406,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
             <button type="button" className="ghost-button" onClick={() => setForm(null)}>Odustani</button>
             <button type="button" className="danger-button" onClick={posaljiSpor}
               disabled={busy === 'dispute' || claim.trim().length < 20}>
-              <AlertTriangle size={15} /> {busy === 'dispute' ? 'Šaljem…' : 'Otvori spor'}
+              <AlertTriangle size={15} /> {busy === 'dispute' ? 'Šaljem…' : 'Prijavi problem'}
             </button>
           </div>
         </div>
@@ -394,7 +460,7 @@ function WorkFlow({ payment, role, user, onChanged }) {
           )}
           {['in_progress', 'submitted', 'revision', 'cancel_requested'].includes(state) && (
             <button data-testid="workflow-dispute" type="button" className="ghost-button danger" onClick={() => setForm('dispute')} disabled={Boolean(busy)}>
-              <AlertTriangle size={15} /> Otvori spor
+              <AlertTriangle size={15} /> Prijavi problem
             </button>
           )}
         </div>

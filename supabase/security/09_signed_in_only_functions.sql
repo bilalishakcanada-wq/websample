@@ -29,7 +29,8 @@ declare
     'request_cancellation',
     'respond_cancellation',
     'open_dispute',
-    'job_transition',
+    -- job_transition namjerno nije ovdje: booking/04 ga zatvara i za prijavljene
+    -- (interni korak akcija); ova lista bi ga ponovo otvorila
     'submit_identity',
     'identity_claim_next',
     'identity_decide',

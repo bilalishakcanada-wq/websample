@@ -1,0 +1,221 @@
+/* Rangiranje znački: medalja po nivou, Top 5 na profilu, trezor svih znački. */
+:root {
+  --tier-bronze: #9c5428;
+  --tier-silver: #5f6e85;
+  --tier-gold: #b07c00;
+  --tier-platinum: #0d2a52;
+}
+
+/* ---------------------------------------------------------------- medalja */
+.tier-medal {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--medal-size);
+  height: calc(var(--medal-size) * 52 / 48);
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.16));
+}
+.tier-medal > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tier-medal-icon { position: relative; display: grid; place-items: center; color: var(--badge-color, var(--tier-color)); }
+.tier-medal.tier-bronze { --tier-color: var(--tier-bronze); }
+.tier-medal.tier-silver { --tier-color: var(--tier-silver); }
+.tier-medal.tier-gold { --tier-color: var(--tier-gold); }
+.tier-medal.tier-platinum { --tier-color: var(--tier-platinum); }
+.tier-medal.tier-gold, .tier-medal.tier-platinum { filter: drop-shadow(0 3px 8px rgba(245, 180, 0, 0.28)); }
+.tier-medal.tier-platinum { filter: drop-shadow(0 3px 10px rgba(13, 42, 82, 0.3)); }
+.tier-medal-spark { transform-origin: 40px 7px; animation: medal-spark 2.8s var(--ease-out, ease-out) infinite; }
+@keyframes medal-spark { 0%, 70%, 100% { opacity: 0; transform: scale(0.4); } 80% { opacity: 1; transform: scale(1.1); } }
+.tier-medal.is-locked { filter: grayscale(1); opacity: 0.45; }
+.tier-medal-lock {
+  position: absolute;
+  right: -2px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #475569;
+  color: #fff;
+  border: 2px solid var(--surface, #fff);
+}
+
+/* ---------------------------------------------------------------- Top 5 */
+.badge-showcase { display: grid; gap: 10px; margin: 14px 0 4px; }
+.badge-showcase-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.badge-showcase-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--stroke, #e4ddcd);
+}
+.badge-showcase-item.tier-gold { background: linear-gradient(100deg, #fff8e1, #fff 70%); border-color: #f3dc94; }
+.badge-showcase-item.tier-platinum { background: linear-gradient(100deg, #eaf0ff, #fff 70%); border-color: #c9d6f2; }
+.badge-showcase-text { display: grid; min-width: 0; line-height: 1.2; }
+.badge-showcase-text strong { font-size: 14px; color: var(--text, #101a2c); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge-showcase-text small { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.tier-bronze .badge-showcase-text small { color: var(--tier-bronze); }
+.tier-silver .badge-showcase-text small { color: var(--tier-silver); }
+.tier-gold .badge-showcase-text small { color: var(--tier-gold); }
+.tier-platinum .badge-showcase-text small { color: var(--tier-platinum); }
+.badge-showcase-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
+.badge-showcase-foot small { color: var(--text-soft, #57647a); font-weight: 600; }
+.badge-showcase-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--primary, #0d2a52);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.badge-showcase-all:hover { text-decoration: underline; }
+/* telefon: medalje u jednom redu koji se može listati, natpis ispod */
+.badge-showcase.is-compact .badge-showcase-list { display: flex; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.badge-showcase.is-compact .badge-showcase-item { flex: 0 0 auto; flex-direction: column; gap: 4px; width: 92px; padding: 10px 6px; text-align: center; }
+.badge-showcase.is-compact .badge-showcase-text strong { white-space: normal; font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* ---------------------------------------------------------------- trezor */
+.vault { display: grid; gap: 14px; }
+.vault-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.vault-summary > strong { font-size: 16px; }
+.vault-tier-counts { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--text-soft, #57647a); }
+.vault-tier-count { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.vault-tier-count i { width: 10px; height: 10px; border-radius: 3px; transform: rotate(45deg); }
+.vault-tier-count.tier-bronze i { background: #c77d4a; }
+.vault-tier-count.tier-silver i { background: #a3b0c2; }
+.vault-tier-count.tier-gold i { background: #f5b400; }
+.vault-tier-count.tier-platinum i { background: #0d2a52; }
+.vault-celebrate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--accent-soft, rgba(245, 180, 0, 0.16));
+  color: #6b4b00;
+  font-weight: 600;
+  animation: vault-pop 500ms var(--ease-spring, ease-out) both;
+}
+.vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.vault-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 150px;
+  padding: 16px 10px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke, #e4ddcd);
+  background: var(--surface, #fff);
+  color: var(--text, #101a2c);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--dur-fast, 120ms) var(--ease-out, ease-out), box-shadow var(--dur-fast, 120ms) var(--ease-out, ease-out);
+}
+.vault-tile:hover, .vault-tile.is-open { z-index: 6; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1); }
+.vault-tile:focus-visible { outline: 3px solid var(--accent, #f5b400); outline-offset: 2px; }
+.vault-tile strong { font-size: 13px; line-height: 1.25; }
+.vault-tile.is-locked { background: #f7f7f5; border-style: dashed; }
+.vault-tile.is-locked strong { color: var(--text-soft, #57647a); }
+.vault-tier { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.vault-tier.tier-bronze { color: var(--tier-bronze); }
+.vault-tier.tier-silver { color: var(--tier-silver); }
+.vault-tier.tier-gold { color: var(--tier-gold); }
+.vault-tier.tier-platinum { color: var(--tier-platinum); }
+.vault-tile.is-locked .vault-tier { color: #94a3b8; }
+.vault-tile.is-fresh { border-color: var(--accent, #f5b400); box-shadow: 0 0 0 3px var(--accent-soft, rgba(245, 180, 0, 0.16)); }
+.vault-tile.is-fresh .tier-medal { animation: vault-pop 700ms var(--ease-spring, ease-out) both; }
+.vault-new {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent, #f5b400);
+  color: #3d2b00;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+@keyframes vault-pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.vault-progress { display: grid; gap: 3px; width: 100%; }
+.vault-progress-bar { display: block; height: 5px; border-radius: 99px; background: #e2e8f0; overflow: hidden; }
+.vault-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent, #f5b400); }
+.vault-progress small { font-size: 11px; color: var(--text-soft, #57647a); }
+
+/* objašnjenje: ispod pločice na hover / fokus / dodir (ispod, jer prozor s listanjem ne reže donji rub) */
+.vault-tip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+  width: calc(100% + 12px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--primary-strong, #081b38);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: 0 12px 28px rgba(8, 27, 56, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -6px);
+  transition: opacity var(--dur-fast, 120ms) var(--ease-out, ease-out), transform var(--dur-fast, 120ms) var(--ease-out, ease-out);
+}
+.vault-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-bottom-color: var(--primary-strong, #081b38); }
+.vault-tip b { color: var(--accent, #f5b400); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.vault-tip em { color: #cbd5e1; font-style: normal; font-size: 11px; }
+.vault-tile.is-open .vault-tip { opacity: 1; transform: translate(-50%, 0); }
+.vault-foot { margin: 0; font-size: 13px; }
+.vault-loading .vault-tile { min-height: 150px; border: 0; }
+
+/* prozor: bottom sheet na telefonu, centriran na računaru */
+.vault-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 27, 56, 0.5);
+  animation: vault-fade 160ms ease-out both;
+}
+.vault-panel {
+  width: min(760px, 100%);
+  max-height: min(86vh, 860px);
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 22px;
+  background: var(--bg, #f6f4ee);
+  box-shadow: var(--shadow);
+  animation: vault-rise 260ms var(--ease-out, ease-out) both;
+}
+.vault-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.vault-panel-head h2 { margin: 0; font-size: 20px; }
+@keyframes vault-fade { from { opacity: 0; } }
+@keyframes vault-rise { from { transform: translateY(24px); opacity: 0; } }
+@media (max-width: 640px) {
+  .vault-backdrop { align-items: flex-end; padding: 0; }
+  .vault-panel { border-radius: 22px 22px 0 0; max-height: 88vh; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .vault-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .vault-tile { min-height: 138px; padding: 14px 6px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tier-medal-spark, .vault-celebrate, .vault-tile.is-fresh .tier-medal, .vault-backdrop, .vault-panel { animation: none; }
+}

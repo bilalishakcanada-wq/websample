@@ -18,6 +18,12 @@ function WalletTab() {
   const [message, setMessage] = useState('')
   const [jobs, setJobs] = useState(null)
   const [payouts, setPayouts] = useState([])
+  const [proofs, setProofs] = useState({})     // payment id → foto dokazi (supabase/booking/04)
+  const toggleProofs = async (paymentId) => {
+    if (proofs[paymentId]) { setProofs((current) => { const next = { ...current }; delete next[paymentId]; return next }); return }
+    const { rows } = await paymentService.proofs(paymentId)
+    setProofs((current) => ({ ...current, [paymentId]: rows }))
+  }
 
   const load = () => Promise.all([
     adminService.walletOverview(150).then(setData),
@@ -133,6 +139,26 @@ function WalletTab() {
                 </small>
                 {row.status === 'disputed' && <small className="pay-dispute-text"><AlertTriangle size={12} /> {row.dispute_by === 'client' ? 'Klijent' : 'Izvođač'}: „{row.dispute_reason}“</small>}
                 {row.resolution && <small>Odluka: {row.resolution}</small>}
+                {row.status === 'disputed' && (
+                  <button type="button" className="link-button" onClick={() => toggleProofs(row.id)}>
+                    {proofs[row.id] ? 'Sakrij foto dokaze' : 'Foto dokazi sa lica mjesta'}
+                  </button>
+                )}
+                {proofs[row.id] && (proofs[row.id].length === 0
+                  ? <small>Izvođač nije priložio foto dokaz.</small>
+                  : (
+                    <div className="wf-proof-list">
+                      {proofs[row.id].map((proof) => (
+                        <a key={proof.id} href={proof.photo_url} target="_blank" rel="noreferrer" className="wf-proof-item">
+                          <img src={proof.photo_url} alt={proof.kind === 'before' ? 'Prije' : 'Poslije'} loading="lazy" />
+                          <span>
+                            <strong>{proof.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {new Date(proof.captured_at).toISOString().slice(0, 16).replace('T', ' ')} UTC
+                            <small>GPS {Number(proof.lat).toFixed(5)}, {Number(proof.lng).toFixed(5)} ±{Math.round(proof.accuracy_m)} m{proof.distance_m != null ? ` · ${Math.round(proof.distance_m)} m od tačke posla` : ''}{proof.source === 'camera_file' ? ' · sistemska kamera' : ''}</small>
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  ))}
               </div>
               <div className="pay-admin-side">
                 <b>{formatKM(row.amount)}</b>

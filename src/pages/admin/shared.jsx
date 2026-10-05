@@ -16,6 +16,7 @@ export const STAFF_ACTION_LABEL = {
   suspend: 'Suspenzija', lift: 'Ukinuta suspenzija', redact: 'Uklonjen sadržaj', badge_grant: 'Dodijeljena značka', badge_revoke: 'Uklonjena značka',
   badge_save: 'Značka sačuvana', badge_delete: 'Značka obrisana', moderator_grant: 'Postao moderator', moderator_revoke: 'Uklonjen moderator',
   admin_grant: 'Postao admin', admin_revoke: 'Uklonjen admin',
+  identity_beta_on: 'Beta: lična karta isključena', identity_beta_off: 'Lična karta ponovo obavezna',
 }
 export const WALLET_KIND_LABEL = { admin_credit: 'Uplata (tim)', admin_debit: 'Skidanje (tim)', bonus: 'Bonus', refund: 'Povrat', fee: 'Naknada', payout: 'Isplata', purchase: 'Uplata', promo: 'Promocija', escrow_hold: 'Osigurana uplata za posao', escrow_refund: 'Povrat osigurane uplate', job_income: 'Zarada od posla', card_topup: 'Uplata karticom', payout_hold: 'Isplata na račun (čeka)', payout_return: 'Povrat isplate' }
 export const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`

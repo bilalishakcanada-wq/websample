@@ -1,16 +1,14 @@
 import { UserRound } from 'lucide-react'
 import { badgeIcon } from './badgeIcons'
-
-// Badge priority when there are more than four: verification and rarity first.
-const ORDER = ['verified', 'top_rated', 'founder', 'flawless', 'veteran', 'local_hero', 'reliable', 'fast_responder', 'rising_talent', 'trusted_client']
+import { useTopBadges } from '../hooks/useTopBadges'
 
 /**
  * Round avatar with a trust-tier ring and up to four badge medallions on the
  * rim. `tier` is the trust tier (new/unverified/verified/trusted/top),
- * `badges` are rows from the badges table.
+ * `badges` are rows from the badges table; the four heaviest (weight_score) are shown.
  */
 function AvatarWithBadges({ src, tier = 'unverified', badges = [], size = 128 }) {
-  const sorted = [...badges].sort((a, b) => ORDER.indexOf(a.code) - ORDER.indexOf(b.code)).slice(0, 4)
+  const { top: sorted } = useTopBadges(badges, 4)
   return (
     <div className={`avatar-badged tier-${tier}`} style={{ '--size': `${size}px` }}>
       <div className="avatar-badged-ring">

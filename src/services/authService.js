@@ -26,6 +26,8 @@ export const authService = {
     const cleanedEmail = sanitizeText(email).toLowerCase()
 
     if (!cleanedName) throw new Error('Ime je obavezno.')
+    // the same rule as the database (is_valid_full_name): with one word or a digit, the ID check later fails
+    if (!/^\p{L}[\p{L}'’.-]*(\s+\p{L}[\p{L}'’.-]*)+$/u.test(cleanedName)) throw new Error('Upiši ime i prezime, samo slovima (npr. Amra Hodžić).')
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
     if (!isStrongPassword(password)) throw new Error(WEAK_PASSWORD)
     if (password.length > 72) throw new Error('Lozinka može imati najviše 72 znaka.')

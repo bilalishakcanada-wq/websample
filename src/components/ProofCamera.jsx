@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Camera, LocateFixed, X } from 'lucide-react'
 
 /**
@@ -131,7 +132,8 @@ function ProofCamera({ kind, title, onCapture, onClose }) {
 
   const ready = fix && fix.accuracy <= GOOD_ACCURACY_M && !busy
 
-  return (
+  // portal: a transformed or animated ancestor (job cards) would otherwise make position:fixed relative to it
+  return createPortal(
     <div className="proof-cam" role="dialog" aria-modal="true" aria-label={`Slikaj ${kind === 'before' ? 'prije početka' : 'urađen posao'}`}>
       <div className="proof-cam-top">
         <strong>{kind === 'before' ? 'Slikaj stanje prije početka' : 'Slikaj urađen posao'}</strong>
@@ -167,7 +169,8 @@ function ProofCamera({ kind, title, onCapture, onClose }) {
         )}
         <small>Na sliku se utisne lokacija i vrijeme (UTC). Klijent i Zadatak tim ih vide ako dođe do spora.</small>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -1,0 +1,55 @@
+/* Izdvojeni oglasi: Hitno (žuto) i VIP (zlatno) — forma, stranica posla, kartice u pretrazi */
+.promo-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.2; white-space: nowrap; }
+.promo-badge.is-hitno { background: #fff4c2; color: #7a5200; }
+.promo-badge.is-vip { background: linear-gradient(135deg, #f5b400, #ffd75e); color: #3d2a00; box-shadow: 0 2px 8px rgba(245, 180, 0, 0.35); }
+
+.promo-picker { display: grid; gap: 8px; margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
+.promo-picker legend { padding: 0; margin-bottom: 8px; font-weight: 800; font-size: 1rem; color: var(--text); }
+.promo-picker legend small { font-weight: 600; color: var(--text-soft); }
+.promo-option { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto 20px; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 10px 12px; border-radius: 14px; border: 2px solid var(--stroke); background: var(--surface); color: var(--text); text-align: left; transition: border-color 0.15s ease, background 0.15s ease; }
+.promo-option-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #eef2f8; color: var(--text-soft); }
+.promo-option.is-hitno .promo-option-icon { background: #fff4c2; color: #a16207; }
+.promo-option.is-vip .promo-option-icon { background: #ffe9a8; color: #8a5a00; }
+.promo-option-text { display: grid; gap: 2px; min-width: 0; }
+.promo-option-text strong { font-size: 0.95rem; }
+.promo-option-text small { font-size: 0.8rem; color: var(--text-soft); line-height: 1.35; overflow-wrap: anywhere; }
+.promo-option-text .promo-option-short { color: #b45309; font-weight: 700; }
+.promo-option-price { font-weight: 800; font-size: 0.92rem; white-space: nowrap; }
+.promo-option-check { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; color: white; }
+.promo-option.is-selected { border-color: var(--primary-strong); background: #f3f6ff; }
+.promo-option.is-selected .promo-option-check { background: var(--primary-strong); }
+.promo-option.is-hitno.is-selected { border-color: #eab308; background: #fffbea; }
+.promo-option.is-hitno.is-selected .promo-option-check { background: #ca8a04; }
+.promo-option.is-vip.is-selected { border-color: #f5b400; background: #fff8e1; }
+.promo-option.is-vip.is-selected .promo-option-check { background: #d99a00; }
+.promo-option.is-short { opacity: 0.6; cursor: not-allowed; }
+.promo-picker-note { margin: 2px 0 0; font-size: 0.82rem; color: var(--text-soft); }
+.promo-picker-note a { font-weight: 800; color: var(--primary-strong); }
+
+.promo-card { display: grid; gap: 8px; margin: 14px 0; padding: 14px 16px; border-radius: 16px; border: 1px dashed #e5c56a; background: #fffdf5; }
+.promo-card.is-hitno { border-style: solid; border-color: #f3d36b; background: #fffbea; }
+.promo-card.is-vip { border-style: solid; border-color: #f5b400; background: linear-gradient(135deg, #fff8e1, #fffdf5); }
+.promo-card-head { display: flex; align-items: center; gap: 8px; color: #7a5200; }
+.promo-card-head strong { color: var(--text); font-size: 0.98rem; }
+.promo-card p { margin: 0; font-size: 0.86rem; color: var(--text-soft); }
+.promo-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.promo-buy { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 8px 14px; border-radius: 999px; border: 0; font-weight: 800; font-size: 0.88rem; }
+.promo-buy.is-hitno { background: #fde68a; color: #5c3d00; }
+.promo-buy.is-vip { background: linear-gradient(135deg, #f5b400, #ffd75e); color: #3d2a00; }
+.promo-buy:disabled { opacity: 0.6; }
+.promo-card.is-compact { margin: 10px 0; }
+
+/* kartice u pretrazi */
+.task-card.is-promo-hitno { border-color: #f3d36b; background: #fffbea; box-shadow: 0 0 0 1px #f3d36b inset; }
+.task-card.is-promo-vip { border-color: #f5b400; background: linear-gradient(135deg, #fff8e1 0%, #ffffff 60%); box-shadow: 0 0 0 2px #f5b400 inset, 0 10px 24px rgba(245, 180, 0, 0.16); }
+.task-card .promo-badge { margin-right: 6px; vertical-align: 2px; }
+
+/* nova ponuda nakon odbijanja (stranica posla, izvođač) */
+.rebid-note { display: grid; gap: 4px; margin: 10px 0; padding: 12px 14px; border-radius: 14px; background: #fff4e5; color: #7a3d00; }
+.rebid-note strong { font-size: 0.95rem; }
+.rebid-note span { font-size: 0.84rem; }
+
+/* ponuda koja je upravo stigla uživo */
+@keyframes bid-arrived { from { background-color: #e6fff2; box-shadow: 0 0 0 2px #19b37b; } to { background-color: transparent; box-shadow: 0 0 0 0 transparent; } }
+.is-just-arrived { animation: bid-arrived 2.4s ease-out 1; }
+@media (prefers-reduced-motion: reduce) { .is-just-arrived { animation: none; } }

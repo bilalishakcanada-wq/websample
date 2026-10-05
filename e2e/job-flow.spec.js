@@ -105,9 +105,11 @@ test.describe.serial('Posao od objave do recenzije', () => {
     await client.getByRole('button', { name: 'Pošalji recenziju' }).click()
     await expect(client.locator('.review-done')).toBeVisible({ timeout: 20_000 })
 
-    // the provider sees the job as finished on their dashboard
+    // the provider sees the job as finished, with the money earned, on the provider board
     await provider.goto('/account')
-    await expect(provider.getByTestId(/^dashboard-(listing|bid)$/).filter({ hasText: title })).toContainText('Završen')
+    const board = provider.getByTestId('provider-dashboard')
+    await board.getByTestId('pd-tab-done').click()
+    await expect(board.getByTestId('pd-card-paid').filter({ hasText: title })).toContainText('Isplaćeno')
   })
 
   test('test oglas se briše', async () => {

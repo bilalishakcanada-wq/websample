@@ -10,8 +10,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { keys, useMyBids, useMyListings, useRecommendedListings } from '../hooks/queries'
 import { useAccount } from './account/AccountLayout'
 import { confirmDialog } from '../utils/dialog'
+import ProviderDashboard from '../components/ProviderDashboard'
 
-const BID_LABELS = { pending: 'Čeka odgovor', accepted: 'Dodijeljen tebi', rejected: 'Nije prošla', withdrawn: 'Povučena' }
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 
 const STATUS_LABELS = {
@@ -93,32 +93,13 @@ function DashboardPage() {
         {message && <div className="form-success">{message}</div>}
         {(error || loadError) && <div className="form-error">{error || loadError}</div>}
 
-        {isProvider && bids && bids.length > 0 && (
+        {isProvider && (
           <section className="dashboard-section">
             <div className="rec-heading">
-              <h2>Moje ponude</h2>
-              <p>Poslovi na koje si poslao/la ponudu.</p>
+              <h2>Ploča izvođača</h2>
+              <p>Sve tvoje ponude i poslovi na jednom mjestu: šta čeka klijenta, šta je u toku i šta si zaradio/la.</p>
             </div>
-            {bids.slice(0, 6).map((bid) => (
-              <article data-testid="dashboard-bid" className="dashboard-listing" key={bid.id}>
-                <div className="dashboard-listing-main">
-                  <span className={`status-pill bid-${bid.status}`}>{bid.status === 'accepted' && bid.listing?.status === 'completed' ? 'Završen' : BID_LABELS[bid.status] || bid.status}</span>
-                  <h3><Link to={`/listings/${bid.listing_id}`}>{bid.listing?.title || 'Posao'}</Link></h3>
-                  <div className="dashboard-listing-meta">
-                    <span><MapPin size={14} /> {bid.listing?.location || 'Online'}</span>
-                    <span>Poslano {formatBosnianDate(bid.created_at)}</span>
-                  </div>
-                </div>
-                <div className="dashboard-listing-actions">
-                  <strong>{money(bid.amount)}</strong>
-                  <div className="dashboard-listing-buttons">
-                    <Link className="ghost-button" to={`/listings/${bid.listing_id}`}><Eye size={15} /> Otvori posao</Link>
-                    {bid.status === 'accepted' && <Link className="ghost-button" to={`/messages?listing=${bid.listing_id}`}>Poruke</Link>}
-                  </div>
-                </div>
-              </article>
-            ))}
-            {bids.length > 6 && <Link to="/moji-poslovi?tab=ponude" className="ghost-button">Sve ponude</Link>}
+            <ProviderDashboard userId={user.id} />
           </section>
         )}
 

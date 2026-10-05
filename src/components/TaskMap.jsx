@@ -24,15 +24,21 @@ const toGeoJSON = (listings) => ({
         title: item.title,
         price: item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('bs-BA')} KM`,
         location: item.location || '',
+        promo: item.promo || '',
       },
     })),
 })
+
+// Hitno / VIP pins never hide inside a cluster: they get their own source, drawn on top
+const splitPromoted = (listings) => [listings.filter((item) => !item.promo), listings.filter((item) => item.promo)]
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 function TaskMap({ listings, activeId, onSelect, focus }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const readyRef = useRef(false)
   const popupRef = useRef(null)
+  const vipCountRef = useRef(0)
   const onSelectRef = useRef(onSelect)
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
 
@@ -47,6 +53,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
       attributionControl: { compact: true },
     })
     map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
+    let pulseFrame = 0
     mapRef.current = map
     if (import.meta.env.DEV) window.__zadatakMap = map
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
@@ -116,6 +123,60 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
         paint: { 'text-color': NAVY, 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
       })
 
+      // izdvojeni oglasi: VIP veći zlatni pin sa pulsirajućim prstenom, Hitno žuti pin
+      map.addSource('promoted', { type: 'geojson', data: toGeoJSON([]), promoteId: 'id' })
+      map.addLayer({
+        id: 'promo-halo',
+        type: 'circle',
+        source: 'promoted',
+        filter: ['==', ['get', 'promo'], 'vip'],
+        paint: { 'circle-color': GOLD, 'circle-radius': 16, 'circle-opacity': 0.35, 'circle-stroke-width': 0 },
+      })
+      map.addLayer({
+        id: 'promo-points',
+        type: 'circle',
+        source: 'promoted',
+        paint: {
+          'circle-color': ['case', ['==', ['get', 'promo'], 'vip'], GOLD, '#facc15'],
+          'circle-radius': ['case', ['boolean', ['feature-state', 'active'], false], 14, ['==', ['get', 'promo'], 'vip'], 12, 10],
+          'circle-stroke-width': 3,
+          'circle-stroke-color': ['case', ['==', ['get', 'promo'], 'vip'], NAVY, '#ffffff'],
+        },
+      })
+      map.addLayer({
+        id: 'promo-price',
+        type: 'symbol',
+        source: 'promoted',
+        layout: {
+          'text-field': ['concat', ['case', ['==', ['get', 'promo'], 'vip'], 'VIP · ', 'Hitno · '], ['get', 'price']],
+          'text-size': 12,
+          'text-font': ['Noto Sans Bold'],
+          'text-offset': [1.2, 0],
+          'text-anchor': 'left',
+          'text-allow-overlap': true,
+        },
+        paint: { 'text-color': '#7a4b00', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+      })
+      if (!reducedMotion()) {
+        const started = performance.now()
+        const pulse = (now) => {
+          if (mapRef.current !== map) return
+          const t = ((now - started) % 1600) / 1600
+          if (vipCountRef.current > 0 && map.getLayer('promo-halo')) {
+            map.setPaintProperty('promo-halo', 'circle-radius', 12 + 16 * t)
+            map.setPaintProperty('promo-halo', 'circle-opacity', 0.45 * (1 - t))
+          }
+          pulseFrame = window.requestAnimationFrame(pulse)
+        }
+        pulseFrame = window.requestAnimationFrame(pulse)
+      }
+      map.on('click', 'promo-points', (event) => {
+        const feature = event.features?.[0]
+        if (feature) onSelectRef.current?.(feature.properties.id)
+      })
+      map.on('mouseenter', 'promo-points', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'promo-points', () => { map.getCanvas().style.cursor = '' })
+
       map.on('click', 'clusters', (event) => {
         const feature = event.features?.[0]
         if (!feature) return
@@ -155,6 +216,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     document.addEventListener('animationend', onAnimationEnd, true)
 
     return () => {
+      window.cancelAnimationFrame(pulseFrame)
       timers.forEach((timer) => window.clearTimeout(timer))
       document.removeEventListener('visibilitychange', onVisible)
       document.removeEventListener('animationend', onAnimationEnd, true)
@@ -170,8 +232,11 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     const map = mapRef.current
     if (!map) return undefined
     const apply = () => {
+      const [regular, promoted] = splitPromoted(listings)
+      map.getSource('tasks')?.setData(toGeoJSON(regular))
+      map.getSource('promoted')?.setData(toGeoJSON(promoted))
+      vipCountRef.current = promoted.filter((item) => item.promo === 'vip' && item.lat != null).length
       const data = toGeoJSON(listings)
-      map.getSource('tasks')?.setData(data)
       if (data.features.length === 0) return
       const bounds = new LngLatBounds()
       data.features.forEach((f) => bounds.extend(f.geometry.coordinates))
@@ -201,6 +266,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     if (!map || !readyRef.current) return undefined
     const source = map.getSource('tasks')
     if (!source) return undefined
+    const promotedSource = map.getSource('promoted')
 
     popupRef.current?.remove()
     popupRef.current = null
@@ -208,7 +274,8 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     const active = listings.find((item) => item.id === activeId && item.lat != null)
     listings.forEach((item) => {
       if (item.lat == null) return
-      map.setFeatureState({ source: 'tasks', id: item.id }, { active: item.id === activeId })
+      if (item.promo && promotedSource) map.setFeatureState({ source: 'promoted', id: item.id }, { active: item.id === activeId })
+      else if (!item.promo) map.setFeatureState({ source: 'tasks', id: item.id }, { active: item.id === activeId })
     })
     if (active) {
       popupRef.current = new Popup({ closeButton: false, offset: 14, className: 'task-popup' })

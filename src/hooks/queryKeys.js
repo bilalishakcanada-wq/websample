@@ -28,4 +28,8 @@ export const keys = {
   badgeCatalog: ['badges', 'catalog'],
   badgeVault: (userId) => ['me', userId, 'badge-vault'],
   jobConditionsEnabled: ['feature', 'job-conditions'],
+  // izdvojeni oglasi (Hitno / VIP) i ploča izvođača
+  promoted: (params) => ['search', 'promoted', params],
+  promotionOptions: (userId) => ['me', userId || 'guest', 'promotion-options'],
+  providerPayments: (userId) => ['me', userId, 'provider-payments'],
 }

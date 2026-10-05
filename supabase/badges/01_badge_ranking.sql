@@ -19,6 +19,7 @@
 --  * Na kraju tiho (bez obavijesti) dodijeli nove značke postojećim korisnicima.
 --
 -- Ne zavisi od drugih novih fajlova. Idempotentno: smije se pokrenuti više puta.
+-- Na živoj bazi od 2026-10-05 (u dijelovima: badge_ranking_columns … badge_ranking_backfill).
 -- ============================================================================
 
 -- 1. Nivo, težina, uputa ------------------------------------------------------
@@ -185,21 +186,8 @@ end;
 $$;
 revoke execute on function public.refresh_user_badges(uuid) from public, anon, authenticated;
 
--- E-mail značka čim korisnik klikne link (ne čeka sljedeći posao ili recenziju).
-create or replace function public.on_email_confirmed_badge()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  if new.email_confirmed_at is not null and old.email_confirmed_at is null then
-    perform public.set_badge(new.id, 'email_verified', true);
-  end if;
-  return new;
-end;
-$$;
-revoke execute on function public.on_email_confirmed_badge() from public, anon, authenticated;
-drop trigger if exists on_email_confirmed_badge on auth.users;
-create trigger on_email_confirmed_badge
-  after update of email_confirmed_at on auth.users
-  for each row execute function public.on_email_confirmed_badge();
+-- E-mail značka dolazi pri sljedećem osvježavanju (otvaranje trezora, posao, recenzija).
+-- Okidač na auth.users namjerno nije dodan: Supabase alat ga ne može postaviti na živoj bazi.
 
 -- 4. Trezor (samo vlasnik) --------------------------------------------------------
 create or replace function public.my_badge_vault()

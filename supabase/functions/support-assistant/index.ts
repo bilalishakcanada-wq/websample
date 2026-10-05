@@ -10,6 +10,7 @@
 // keyword matcher and the response says configured:false.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { withCors } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -19,7 +20,6 @@ const MODEL = Deno.env.get('SUPPORT_MODEL') || 'claude-haiku-4-5-20251001'
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 const json = (body: unknown, status = 200) =>
@@ -44,8 +44,7 @@ NIKAD ne traži i ne daj brojeve telefona, emailove ni društvene mreže — to 
 
 Odgovori isključivo JSON-om: {"reply": "tekst za korisnika", "handoff": true|false, "summary": "jedna rečenica za tim (na bosanskom) — problem i šta treba uraditi"}`
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+Deno.serve(withCors(async (req) => {
   const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
   const { data: auth, error: authError } = await admin.auth.getUser(token)
   if (authError || !auth?.user) return json({ error: 'unauthorized' }, 401)
@@ -100,4 +99,4 @@ Deno.serve(async (req) => {
   if (handoff) await admin.rpc('support_handoff', { p_user_id: userId, p_summary: summary })
 
   return json({ configured: true, handoff, message: stored })
-})
+}))

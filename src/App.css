@@ -12906,11 +12906,12 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .wf-proof-item { display: grid; gap: 6px; color: inherit; text-decoration: none; font-size: .78rem; line-height: 1.35; }
 .wf-proof-item img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; border: 1px solid var(--stroke); }
 .wf-proof-item small { display: flex; align-items: center; gap: 3px; color: var(--text-soft); }
-.proof-cam { position: fixed; inset: 0; z-index: 2147483000; display: grid; grid-template-rows: auto 1fr auto; background: #050d1c; color: #fff; }
+.proof-cam { position: fixed; inset: 0; z-index: 2147483000; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #050d1c; color: #fff; }
 .proof-cam-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(12px + env(safe-area-inset-top)) 16px 12px; }
 .proof-cam-top .icon-button { color: #fff; background: rgba(255, 255, 255, .12); }
-.proof-cam-view { position: relative; display: grid; place-items: center; overflow: hidden; padding: 0 16px; text-align: center; }
-.proof-cam-view video { width: 100%; height: 100%; object-fit: contain; }
+.proof-cam-view { position: relative; min-height: 0; display: grid; place-items: center; overflow: hidden; padding: 0 16px; text-align: center; }
+/* absolute: the video's own size must not feed back into the grid row (layout kept resizing, the shutter never settled) */
+.proof-cam-view video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .proof-cam-view video.is-hidden { display: none; }
 .proof-cam-bottom { display: grid; justify-items: center; gap: 10px; padding: 14px 16px calc(18px + env(safe-area-inset-bottom)); text-align: center; }
 .proof-cam-bottom small { color: rgba(255, 255, 255, .7); max-width: 34rem; }

@@ -30,6 +30,12 @@ for f in identity/bids_require_verified security/05_marketplace_scam_guards paym
   echo "applying supabase/$f.sql"
   $P -f "$REPO/supabase/$f.sql" >/dev/null || { echo "FAILED at supabase/$f.sql"; exit 1; }
 done
+# open work from the native-app PR (kept apart from the list above so parallel PRs don't collide on one line)
+for f in booking/05_live_location; do
+  [ -f "$REPO/supabase/$f.sql" ] || continue
+  echo "applying supabase/$f.sql"
+  $P -f "$REPO/supabase/$f.sql" >/dev/null || { echo "FAILED at supabase/$f.sql"; exit 1; }
+done
 
 # 3. database checks (Rule #1 false positives, …)
 $P -f "$HERE/checks.sql"

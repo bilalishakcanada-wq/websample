@@ -5,6 +5,7 @@ import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../util
 import { queryClient } from '../lib/queryClient'
 import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
 import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
+import { cleanConditions } from '../utils/jobConditions'
 
 // the "Kada:" line stays in the description so older app versions still show the date.
 // "Prije: " with the colon: the database's contact-details filter reads "Prije 2026-10-01"
@@ -40,6 +41,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
     status: 'published',
     ...schedule,
     requirements,
+    // badge requirements + perks; the database checks the badges again on every offer
+    conditions: cleanConditions(form.conditions),
     // "Platiću put" only means something for jobs done in person
     travel_allowance: form.mode !== 'remote' && Number(form.travel) > 0 ? Math.min(MAX_TRAVEL_ALLOWANCE, Math.round(Number(form.travel))) : null,
     // "Zatraži ponudu": sent privately to one provider; an edit never changes who it went to

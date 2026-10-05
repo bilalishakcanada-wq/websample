@@ -20,6 +20,18 @@ export const badgeService = {
   },
 
 
+  /**
+   * Kodovi značaka prijavljenog korisnika (user_credentials u bazi, job_conditions.sql).
+   * Dok funkcija nije u bazi, čita javne značke direktno — isti rezultat, bez 'id_verified'
+   * iz JMBG toka (to sučelje ionako provjerava kroz kapiju identiteta).
+   */
+  async myCredentials(userId) {
+    const { data, error } = await supabase.rpc('user_credentials')
+    if (!error && Array.isArray(data)) return data
+    const rows = await this.listForUser(userId)
+    return rows.map((badge) => badge.code)
+  },
+
   async listForUser(userId) {
     const { data, error } = await supabase
       .from('user_badges')

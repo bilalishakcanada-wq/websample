@@ -89,6 +89,13 @@ export const useQuoteRequestsEnabled = () => useQuery({
   staleTime: 10 * 60 * 1000,
 }).data
 
+/** Whether clients can set badge requirements and perks on a job (job_conditions.sql is on the database). */
+export const useJobConditionsEnabled = () => useQuery({
+  queryKey: keys.jobConditionsEnabled,
+  queryFn: () => listingService.jobConditionsEnabled(),
+  staleTime: 10 * 60 * 1000,
+}).data === true
+
 /** Invalidates a set of keys whenever the window regains focus or a custom app event fires. */
 export function useInvalidateOn(eventNames, queryKeys) {
   const queryClient = useQueryClient()

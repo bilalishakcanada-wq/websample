@@ -9,7 +9,9 @@ import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
-import { useQuoteRequestsEnabled } from '../hooks/queries'
+import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { ConditionsBuilder } from '../components/JobConditions'
+import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { publishListing } from '../services/publishListing'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
@@ -46,6 +48,7 @@ function PostTaskPage() {
   // "Zatraži ponudu" from a provider's profile: the job goes only to them
   const zaParam = searchParams.get('za') || ''
   const quoteEnabled = useQuoteRequestsEnabled()
+  const conditionsOn = useJobConditionsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   // a half-written job survives a refresh or an accidental click away; editing or copying a job
@@ -108,6 +111,7 @@ function PostTaskPage() {
           ...current,
           ...(stale ? { timing: 'flexible', date: '', timeOfDay: schedule.timeOfDay } : schedule),
           requirements: listing.requirements || [],
+        conditions: listing.conditions || {},
           travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
           title: listing.title || '',
           category: listing.category || '',
@@ -277,6 +281,12 @@ function PostTaskPage() {
               <span>Obavezni uslovi (opciono)</span>
               <RequirementsEditor value={form.requirements} onChange={(requirements) => update({ requirements })} />
             </div>
+            {conditionsOn && (
+              <div className="wizard-field">
+                <span>Uslovi i pogodnosti (opciono)</span>
+                <ConditionsBuilder value={form.conditions || {}} category={form.category} onChange={(conditions) => update({ conditions })} />
+              </div>
+            )}
             <label className="wizard-field">
               <span>Tagovi (opciono)</span>
               <div className="wizard-tag-row">
@@ -356,6 +366,7 @@ function PostTaskPage() {
               <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : (form.location || '—')}</strong></div>
               <div className="wizard-summary-row"><span>Kada</span><strong>{formScheduleLabel(form)}</strong></div>
+              {conditionsOn && hasConditions(form.conditions) && <div className="wizard-summary-row"><span>Značke i pogodnosti</span><strong>{conditionsSummary(form.conditions)}</strong></div>}
               {form.requirements.length > 0 && <div className="wizard-summary-row"><span>Uslovi</span><strong>{form.requirements.join(' · ')}</strong></div>}
               <div className="wizard-summary-row"><span>Slike</span><strong>{existingImages.filter((item) => !photos.removed.includes(item.id)).length + photos.files.length || 'Bez slika'}</strong></div>
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>

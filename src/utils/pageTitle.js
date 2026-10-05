@@ -1,8 +1,9 @@
 import { SITE_PAGES } from '../data/siteMap'
+import { appConfig } from '../config/appConfig'
 
-const BRAND = 'Zadatak'
+const BRAND = appConfig.appName
 const STATIC = {
-  '/': 'Zadatak — Objavi posao, izaberi najboljeg. Riješeno.',
+  '/': `${BRAND} — Objavi posao, izaberi najboljeg. Riješeno.`,
   '/search': 'Pretraži poslove',
   '/objavi': 'Objavi posao',
   '/start': 'Dobro došao/la',

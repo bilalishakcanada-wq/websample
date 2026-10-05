@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
+import { appConfig } from '../config/appConfig'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/messages']
 
@@ -72,7 +73,7 @@ function SiteFooter() {
           <div className="site-footer-brand">
             <BrandMark size={42} className="brand-mark" />
             <div>
-              <strong>Zadatak</strong>
+              <strong>{appConfig.appName}</strong>
               <span>Marketplace za usluge u Bosni i Hercegovini</span>
             </div>
           </div>

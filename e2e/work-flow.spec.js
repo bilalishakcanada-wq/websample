@@ -35,16 +35,16 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
 
   test('posao se objavi, prihvati i plati', async () => {
     await client.goto('/objavi')
-    await client.getByPlaceholder('npr. Montaža kuhinjskih elemenata').fill(title)
+    await client.getByTestId('post-title').fill(title)
     await client.getByRole('button', { name: 'Fleksibilan sam' }).click()
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('button', { name: 'Online / na daljinu' }).click()
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('combobox').first().selectOption({ label: 'Ostalo' })
-    await client.getByPlaceholder(/Opišite šta tačno treba uraditi/).fill('Automatski test toka posla. Ovaj oglas se briše na kraju testa.')
+    await client.getByTestId('post-description').fill('Automatski test toka posla. Ovaj oglas se briše na kraju testa.')
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('button', { name: 'Nastavi' }).click()   // slike su neobavezne
-    await client.getByPlaceholder(/Ostavite prazno/).fill('1')
+    await client.getByTestId('post-price').fill('1')
     await client.getByRole('button', { name: 'Objavi posao' }).click()
     await expect(client).toHaveURL(/\/listings\/[0-9a-f-]{36}/, { timeout: 30_000 })
     listingUrl = new URL(client.url()).pathname
@@ -53,39 +53,39 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
     await provider.getByRole('button', { name: 'Pošalji ponudu' }).first().click()
     const sheet = provider.getByRole('dialog')
     await sheet.getByLabel('Tvoja ponuda (KM)').fill('1')
-    await sheet.getByPlaceholder(/Napiši zašto si prava osoba/).fill('Automatski test: ponuda za tok posla.')
+    await sheet.getByTestId('offer-message').fill('Automatski test: ponuda za tok posla.')
     await sheet.getByRole('button', { name: 'Pošalji ponudu' }).click()
     await expect(provider.getByText(/Tvoja ponuda:/)).toBeVisible()
 
     await client.goto(listingUrl)
-    await client.getByRole('button', { name: 'Prihvati i plati' }).click()
-    await client.getByRole('button', { name: /Prihvati i osiguraj/ }).click()
+    await client.getByTestId('offer-accept').click()
+    await client.getByTestId('payment-confirm').click()
     await expect(client.getByText(/osigurano na Zadatku/).first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('klijent ne može odobriti rad koji nije predat', async () => {
     await client.goto(listingUrl)
-    await expect(client.locator('.wf-card')).toBeVisible()
-    await expect(client.locator('.wf-head .pill')).toHaveText('Izvođač radi posao')
+    await expect(client.getByTestId('workflow')).toBeVisible()
+    await expect(client.getByTestId('workflow-state')).toHaveText('Izvođač radi posao')
     await expect(client.getByRole('button', { name: /Odobri i isplati/ })).toHaveCount(0)
   })
 
   test('izvođač ne može predati rad bez dokaza', async () => {
     await provider.goto(listingUrl)
     await provider.getByRole('button', { name: /^Predaj rad$/ }).click()
-    await provider.getByLabel('Šta si uradio/la?').fill('kratko')       // ispod 20 znakova
+    await provider.getByTestId('workflow-report').fill('kratko')       // ispod 20 znakova
     await expect(provider.getByRole('button', { name: /Predaj rad/ }).last()).toBeDisabled()
   })
 
   test('izvođač predaje rad, klijentu teče rok od 72 sata', async () => {
-    await provider.getByLabel('Šta si uradio/la?').fill('Montirani svi elementi, police poravnate i provjerene nivelirom.')
+    await provider.getByTestId('workflow-report').fill('Montirani svi elementi, police poravnate i provjerene nivelirom.')
     await provider.getByRole('button', { name: /Predaj rad/ }).last().click()
-    await expect(provider.locator('.wf-head .pill')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
+    await expect(provider.getByTestId('workflow-state')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
 
     await client.goto(listingUrl)
-    await expect(client.locator('.wf-head .pill')).toHaveText('Rad je predat — pregledaj ga')
-    await expect(client.locator('.wf-clock')).toContainText('Automatsko odobrenje')
-    await expect(client.locator('.wf-submission')).toContainText('police poravnate')
+    await expect(client.getByTestId('workflow-state')).toHaveText('Rad je predat — pregledaj ga')
+    await expect(client.getByTestId('workflow-clock')).toContainText('Automatsko odobrenje')
+    await expect(client.getByTestId('workflow-submission')).toContainText('police poravnate')
   })
 
   test('klijent traži ispravku, izvođač predaje ponovo', async () => {
@@ -93,28 +93,28 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
     const dialog = client.getByRole('dialog')
     await dialog.getByRole('textbox').fill('Dvije police nisu poravnate, molim ispravi.')
     await dialog.getByRole('button', { name: 'Pošalji' }).click()
-    await expect(client.locator('.wf-head .pill')).toHaveText('Tražio/la si ispravku', { timeout: 20_000 })
+    await expect(client.getByTestId('workflow-state')).toHaveText('Tražio/la si ispravku', { timeout: 20_000 })
 
     await provider.goto(listingUrl)
-    await expect(provider.locator('.wf-head .pill')).toHaveText('Klijent traži ispravku')
+    await expect(provider.getByTestId('workflow-state')).toHaveText('Klijent traži ispravku')
     await provider.getByRole('button', { name: /Predaj ispravljen rad/ }).click()
-    await provider.getByLabel('Šta si uradio/la?').fill('Police su poravnate i ponovo provjerene, sve je po dogovoru.')
+    await provider.getByTestId('workflow-report').fill('Police su poravnate i ponovo provjerene, sve je po dogovoru.')
     await provider.getByRole('button', { name: /Predaj rad/ }).last().click()
-    await expect(provider.locator('.wf-head .pill')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
+    await expect(provider.getByTestId('workflow-state')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
   })
 
   test('klijent odobrava i izvođač dobija novac', async () => {
     await client.goto(listingUrl)
-    await expect(client.locator('.wf-submission')).toContainText('ponovo provjerene')
+    await expect(client.getByTestId('workflow-submission')).toContainText('ponovo provjerene')
     await client.getByRole('button', { name: /Odobri i isplati/ }).click()
     await client.getByRole('dialog').getByRole('button', { name: /Odobri i isplati/ }).click()
-    await expect(client.locator('.wf-head .pill')).toHaveText('Posao je završen', { timeout: 25_000 })
+    await expect(client.getByTestId('workflow-state')).toHaveText('Posao je završen', { timeout: 25_000 })
     await expect(client.getByText(/Uplata oslobođena/).first()).toBeVisible()
   })
 
   test('test oglas se briše', async () => {
     await client.goto('/account')
-    const row = client.locator('article.dashboard-listing', { hasText: title })
+    const row = client.getByTestId('dashboard-listing').filter({ hasText: title })
     await expect(row).toBeVisible()
     await row.getByRole('button', { name: /Obriši/ }).click()
     await client.getByRole('dialog').getByRole('button', { name: 'Obriši', exact: true }).click()

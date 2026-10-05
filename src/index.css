@@ -97,3 +97,27 @@ html.is-native body::before {
   z-index: 2147483647;
   pointer-events: none;
 }
+
+/* =========================================================================
+   Inside the Android / iOS app: no "web page" tells
+   ========================================================================= */
+/* no rubber-band or glow at either edge, and no sideways swipe pulling the page */
+html.is-native, html.is-native body { overscroll-behavior: none; }
+/* long-press on controls and pictures selects nothing and opens no "save image" menu.
+   Text people read or type (job descriptions, chat, inputs) stays selectable so it can be copied. */
+html.is-native :is(button, [role="button"], [role="tab"], [role="radio"], label, nav, .mobile-nav, .site-header, .ap-btn, .primary-button, .ghost-button, .secondary-button, .listing-card, .task-card, .chip, .trade-chip, .check-pill, .ap-option, .ap-card, .ap-goal, img, svg) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html.is-native img { -webkit-user-drag: none; }
+html.is-native :is(input, textarea, [contenteditable="true"]) { -webkit-user-select: text; user-select: text; }
+/* scrolling stays, the scrollbar does not */
+html.is-native * { scrollbar-width: none; }
+html.is-native *::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Older and cheaper phones (2 GB memory or less, few cores): blur and endless decorative motion cost
+   the most frames on a weak GPU, so they go; the look stays the same, only flatter and still. */
+html.is-lowend * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html.is-lowend :is(.float-card, .float-pill, .hero-art-ladder, .hero-swing-group, .hero-star, .earn-art-coin, .earn-art-spark, .wl-card svg, .auth-art) { animation: none !important; }
+html.is-lowend :is(.page-shell, .content-container, .wizard-shell, .account-page, .adm-main, .help-page, .auth-shell) { animation: none; }

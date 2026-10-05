@@ -26,7 +26,7 @@ function Stanje({ predmet }) {
   if (!predmet) return null
   if (predmet.state === 'approved') {
     return (
-      <div className="verif-state ok" role="status">
+      <div data-testid="verification-state" className="verif-state ok" role="status">
         <BadgeCheck size={20} />
         <div>
           <strong>Identitet je potvrđen</strong>
@@ -37,7 +37,7 @@ function Stanje({ predmet }) {
   }
   if (['submitted', 'in_review'].includes(predmet.state)) {
     return (
-      <div className="verif-state wait" role="status">
+      <div data-testid="verification-state" className="verif-state wait" role="status">
         <Clock size={20} />
         <div>
           <strong>Provjera je u toku</strong>
@@ -48,7 +48,7 @@ function Stanje({ predmet }) {
   }
   if (predmet.state === 'rejected') {
     return (
-      <div className="verif-state bad" role="status">
+      <div data-testid="verification-state" className="verif-state bad" role="status">
         <X size={20} />
         <div>
           <strong>Verifikacija nije prošla</strong>
@@ -154,7 +154,7 @@ function VerificationPage() {
       {zakljucano && next && <Link to={next} className="ghost-button verif-back">{next.startsWith('/objavi') ? 'Nazad na objavu posla' : 'Nazad na posao'}</Link>}
 
       {!zakljucano && (
-        <form className="verif-form" onSubmit={posalji}>
+        <form data-testid="verification-form" className="verif-form" onSubmit={posalji}>
           <div className="verif-field">
             <label htmlFor="v-ime">Ime i prezime <span className="req">*</span></label>
             <input id="v-ime" value={ime} onChange={(e) => setIme(e.target.value)} required
@@ -186,7 +186,7 @@ function VerificationPage() {
               placeholder="npr. A1B2C3D4" maxLength={30} />
           </div>
 
-          <div className="verif-uploads">
+          <div data-testid="verification-uploads" className="verif-uploads">
             <input ref={liceRef} type="file" accept="image/*" hidden onChange={(e) => odaberi(e.target.files[0], 'lice')} />
             <input ref={nalicjeRef} type="file" accept="image/*" hidden onChange={(e) => odaberi(e.target.files[0], 'nalicje')} />
             <button type="button" className={`verif-upload ${lice?.ok ? 'ima' : ''} ${lice && !lice.ok ? 'lose' : ''}`} onClick={() => liceRef.current?.click()}>
@@ -208,7 +208,7 @@ function VerificationPage() {
           </div>
 
           {(lice?.problemi?.length > 0 || lice?.upozorenja?.length > 0) && (
-            <ul className="verif-nalaz">
+            <ul data-testid="verification-findings" className="verif-nalaz">
               {lice.problemi.map((t) => <li key={t} className="lose">{t}</li>)}
               {lice.upozorenja.map((t) => <li key={t} className="pazi">{t}</li>)}
             </ul>
@@ -221,7 +221,7 @@ function VerificationPage() {
 
           {greska && <div className="form-error">{greska}</div>}
 
-          <button type="submit" className="primary-button verif-submit" disabled={!spremno || busy}>
+          <button data-testid="verification-submit" type="submit" className="primary-button verif-submit" disabled={!spremno || busy}>
             {busy ? 'Šaljem…' : 'Pošalji na provjeru'}
           </button>
           {!spremno && (

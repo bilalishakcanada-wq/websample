@@ -66,6 +66,12 @@ export const identityService = {
   },
 
   /**
+   * Beta prekidač (samo admin): true = objava i ponude bez lične karte.
+   * Mijenja verification_policy u bazi; isplate i dalje traže identitet.
+   */
+  setBeta: (on) => call('set_identity_beta', { p_on: on }),
+
+  /**
    * Može li prijavljeni korisnik slati ponude, i ako ne, u kojoj je fazi:
    * 'ok' | 'needed' (nije poslao) | 'pending' (tim provjerava) | 'rejected'.
    * Pita istu funkciju kao baza (identity_verified, stroga — bez prelaznog roka;

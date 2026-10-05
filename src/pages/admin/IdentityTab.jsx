@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AlertTriangle, BadgeCheck, Eye, Gauge, IdCard, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, Eye, FlaskConical, Gauge, IdCard, ShieldCheck, X } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { identityService } from '../../services/identityService'
 import { formatBosnianDate } from '../../utils/dateFormat'
-import { promptDialog } from '../../utils/dialog'
+import { confirmDialog, promptDialog } from '../../utils/dialog'
 import { toast } from '../../components/Toaster'
 import { SkeletonList } from '../../components/Skeleton'
+import { useStaff } from './shared'
 
 const SIGNALI = {
   ime_se_razlikuje_od_profila: 'Ime se razlikuje od onog na profilu',
@@ -32,10 +34,53 @@ function Dokument({ path, naslov }) {
 }
 
 /**
+ * Beta prekidač (samo admin): dok je uključen, objava posla i ponude ne traže
+ * ličnu kartu. Važi za SVE korisnike sajta; isplate i dalje traže identitet.
+ * Prekidač je u bazi (verification_policy), pa ga sajt ne može zaobići.
+ */
+function BetaSwitch() {
+  const queryClient = useQueryClient()
+  const [policy, setPolicy] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => { identityService.policy().then(setPolicy).catch(() => {}) }, [])
+  if (!policy) return null
+  const ukljucen = !policy.require_for_jobs && !policy.require_for_bids
+
+  const promijeni = async () => {
+    const ok = await confirmDialog(ukljucen
+      ? { title: 'Uključiti provjeru identiteta?', text: 'Objava posla i ponude ponovo traže potvrđenu ličnu kartu.', confirmLabel: 'Uključi provjeru' }
+      : { title: 'Beta bez lične karte?', text: 'Svi korisnici sajta mogu objavljivati poslove i slati ponude bez potvrđene lične karte. Isplate i dalje traže identitet.', confirmLabel: 'Isključi provjeru', danger: true })
+    if (!ok) return
+    setBusy(true)
+    try {
+      setPolicy(await identityService.setBeta(!ukljucen))
+      queryClient.invalidateQueries({ queryKey: ['me'] })
+      toast(ukljucen ? 'Provjera identiteta je ponovo uključena.' : 'Beta: objava i ponude bez lične karte.', { kind: 'success' })
+    } catch (e) { toast(e.message, { kind: 'error' }) } finally { setBusy(false) }
+  }
+
+  return (
+    <div data-testid="identity-beta" className={`admin-row idv-beta ${ukljucen ? 'on' : ''}`}>
+      <span className="idv-ikona"><FlaskConical size={18} /></span>
+      <div>
+        <strong>{ukljucen ? 'Beta: lična karta se ne traži' : 'Lična karta se traži za objavu i ponude'}</strong>
+        <p className="muted-text">{ukljucen
+          ? 'Svi korisnici mogu objaviti posao i slati ponude bez verifikacije. Isplate i dalje traže identitet.'
+          : 'Za testiranje u beta fazi provjeru možeš privremeno isključiti. Kod verifikacije ostaje isti.'}</p>
+      </div>
+      <button type="button" className={ukljucen ? 'primary-button' : 'secondary-button'} disabled={busy} onClick={promijeni}>
+        {ukljucen ? 'Uključi provjeru ponovo' : 'Isključi za beta test'}
+      </button>
+    </div>
+  )
+}
+
+/**
  * Red za provjeru identiteta. Broj i slike se ne prikazuju dok moderator
  * izričito ne klikne „Otvori podatke" — i svako otvaranje ostaje zapisano.
  */
 function IdentityTab() {
+  const { isAdmin } = useStaff()
   const [red, setRed] = useState(null)
   const [otvoren, setOtvoren] = useState(null)      // { case, podaci }
   const [busy, setBusy] = useState('')
@@ -85,6 +130,8 @@ function IdentityTab() {
         <h2><ShieldCheck size={18} /> Provjera identiteta</h2>
         <span className="muted-text">{red.length === 0 ? 'Nema predmeta na čekanju' : `${red.length} na čekanju`}</span>
       </div>
+
+      {isAdmin && <BetaSwitch />}
 
       {red.length === 0 && (
         <p className="muted-text">Red je prazan. Novi predmeti stižu čim neko pošalje podatke na provjeru.</p>

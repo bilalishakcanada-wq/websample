@@ -170,10 +170,12 @@ function MessagesPage() {
   const unreadTotal = inbox.reduce((sum, item) => sum + Number(item.unread || 0), 0)
 
   const togglePref = async (item, key) => {
+    const flip = (value) => setInbox((current) => current.map((row) => (row.id === item.id ? { ...row, [key]: value } : row)))
+    flip(!item[key])
     try {
       await messageService.setPref(user.id, item.id, { [key]: !item[key] })
-      setInbox((current) => current.map((row) => (row.id === item.id ? { ...row, [key]: !row[key] } : row)))
     } catch (requestError) {
+      flip(item[key])
       setError(requestError.message)
     }
   }
@@ -195,14 +197,23 @@ function MessagesPage() {
     if (sendingRef.current) return
     sendingRef.current = true
     setSending(true)
+    // optimistic: the bubble shows at once (marked pending); the stored row replaces it, or on failure
+    // it is removed and the text goes back into the composer so nothing typed is lost
+    const tempId = `pending-${Date.now()}`
+    setThread((current) => [...current, { id: tempId, sender_id: user.id, receiver_id: active.other_id, content: text, created_at: new Date().toISOString(), pending: true }])
+    setDraft('')
+    inputRef.current?.focus()
     try {
       const created = await messageService.send({ conversationId: active.id, senderId: user.id, receiverId: active.other_id, content: text })
-      setThread((current) => (current.some((item) => item.id === created.id) ? current : [...current, created]))
+      setThread((current) => {
+        const rest = current.filter((item) => item.id !== tempId)
+        return rest.some((item) => item.id === created.id) ? rest : [...rest, created]
+      })
       if (created.content !== text) setNotice('Dio poruke je automatski uklonjen (Pravilo #1).')
-      setDraft('')
-      inputRef.current?.focus()
       loadInbox()
     } catch (requestError) {
+      setThread((current) => current.filter((item) => item.id !== tempId))
+      setDraft((current) => current || text)
       setError(requestError.message)
     } finally {
       sendingRef.current = false
@@ -378,7 +389,7 @@ function MessagesPage() {
                       {group.items.map((item) => {
                         const mine = item.sender_id === user.id
                         return (
-                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''}`}>
+                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                             {item.attachment_type === 'image' && item.attachment_url
                               ? <a href={item.attachment_url} target="_blank" rel="noreferrer" className="chat-image"><img src={item.attachment_url} alt="Slika" loading="lazy" /></a>
                               : <p>{item.content}</p>}
@@ -402,7 +413,7 @@ function MessagesPage() {
                   <form className="chat-composer" onSubmit={sendMessage}>
                     <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
                     <button type="button" className="chat-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={20} /></button>
-                    <textarea
+                    <textarea data-testid="chat-input"
                       ref={inputRef}
                       value={draft}
                       onChange={(event) => setDraft(event.target.value)}
@@ -412,7 +423,7 @@ function MessagesPage() {
                       rows={1}
                       maxLength={2000}
                     />
-                    <button type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
+                    <button data-testid="chat-send" type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
                   </form>
                   <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
                   </>

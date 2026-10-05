@@ -6,11 +6,14 @@ import { serviceCategories } from '../data/categories'
 import { cityCoordinates } from '../data/cityCoordinates'
 import { POPULAR_CITIES } from '../data/siteMap'
 import { publishListing } from '../services/publishListing'
+import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
-import { useQuoteRequestsEnabled } from '../hooks/queries'
+import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { ConditionsBuilder } from '../components/JobConditions'
+import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
@@ -32,7 +35,7 @@ const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review
 const ALL_CITIES = Object.keys(cityCoordinates)
 const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
 
-const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], category: '', price: '', travel: '' }
+const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], conditions: {}, category: '', price: '', travel: '' }
 
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
@@ -60,7 +63,10 @@ function PostFlow() {
   // "Zatraži ponudu" from a provider's profile: the job goes only to them
   const zaParam = searchParams.get('za') || ''
   const quoteEnabled = useQuoteRequestsEnabled()
+  const conditionsOn = useJobConditionsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  // Hitno / VIP: only for a new job everyone sees (a private request or an edit has nothing to boost)
+  const promotionOptions = usePromotionOptions(user?.id, !editId && !inviteId)
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
   // a new job needs an approved ID (editing one already published does not); the flow stays
   // open to fill in and the draft is kept, only publishing waits for the check
@@ -121,6 +127,7 @@ function PostFlow() {
         location: remote ? '' : (listing.location || ''),
         description: (listing.description || '').split('\n\nKada:')[0],
         requirements: listing.requirements || [],
+        conditions: listing.conditions || {},
         category: listing.category || '',
         price: listing.price ?? '',
         travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
@@ -188,6 +195,7 @@ function PostFlow() {
     setError('')
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
+      if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       if (freshPost) clearDraft()
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
@@ -281,6 +289,12 @@ function PostFlow() {
           <span className="ap-hint">Najviše 2000 znakova · bez brojeva telefona i emaila (Pravilo #1)</span>
           <span className="ap-label">Obavezni uslovi</span>
           <RequirementsEditor value={form.requirements || []} onChange={(requirements) => update({ requirements })} />
+          {conditionsOn && (
+            <>
+              <span className="ap-label">Uslovi i pogodnosti</span>
+              <ConditionsBuilder value={form.conditions || {}} category={form.category} onChange={(conditions) => update({ conditions })} />
+            </>
+          )}
         </section>
       )}
 
@@ -344,11 +358,13 @@ function PostFlow() {
             <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.location}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setCatOpen(true)} className={form.category ? '' : 'is-missing'}><span>Kategorija</span><strong>{form.category || 'Odaberi'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(3)}><span>Opis</span><strong className="ap-clamp">{form.description}</strong><ChevronRight size={18} /></button>
+            {conditionsOn && hasConditions(form.conditions) && <button type="button" onClick={() => setStep(3)}><span>Značke i pogodnosti</span><strong className="ap-clamp">{conditionsSummary(form.conditions)}</strong><ChevronRight size={18} /></button>}
             {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
             {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
+          {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
           {error && <div className="form-error">{error}</div>}
         </section>
       )}

@@ -12,9 +12,9 @@ export const accountsConfigured = () => Boolean(ACCOUNTS.client.email && ACCOUNT
 export async function login(page, who) {
   const { email, password } = ACCOUNTS[who]
   await page.goto('/login')
-  await page.getByLabel('Email adresa').fill(email)
-  await page.getByLabel('Lozinka', { exact: true }).fill(password)
-  await page.getByRole('button', { name: 'Nastavi' }).click()
+  await page.getByTestId('login-email').fill(email)
+  await page.getByTestId('password-input').fill(password)
+  await page.getByTestId('login-submit').click()
   // desktop lands on /account, phones on the app home
   await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 })
 }

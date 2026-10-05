@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import NotificationBell from './NotificationBell'
 import { onScroll, scrollOffset } from '../utils/scroll'
+import { appConfig } from '../config/appConfig'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password']
 
@@ -80,10 +81,10 @@ function SiteHeader() {
         <div className="site-header-inner">
           <Link to="/" className="site-logo" aria-label="Zadatak početna">
             <BrandMark size={34} className="site-logo-mark" />
-            <span className="site-logo-text">Zadatak</span>
+            <span className="site-logo-text">{appConfig.appName}</span>
           </Link>
 
-          <Link to="/objavi" className="site-header-cta">Objavi posao</Link>
+          <Link data-testid="header-post-job" to="/objavi" className="site-header-cta">Objavi posao</Link>
 
           <nav className="site-nav" aria-label="Glavna navigacija">
             <div

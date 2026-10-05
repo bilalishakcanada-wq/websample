@@ -10610,6 +10610,13 @@ body:has(.profile-cta-bar) .support-chat {
   align-items: flex-start;
 }
 
+/* the badge a job asked for (Značke page opened from a job's "Osvoji značku") */
+.badge-row-item.is-wanted {
+  outline: 2px solid var(--primary);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
 .badge-row-icon {
   position: relative;
   width: 44px;

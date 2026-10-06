@@ -36,7 +36,7 @@ export function BadgeVault({ userId, earnedBadges }) {
   const [open, setOpen] = useState(null)
   // dodir na otvorenu pločicu je zatvara, osim ako ju je hover ili fokus upravo otvorio (isti dodir)
   const openedAt = useRef(0)
-  const show = (code, event) => { openedAt.current = event.timeStamp; setOpen(code) }
+  const show = (code, event) => { if (open !== code) openedAt.current = event.timeStamp; setOpen(code) }
   const earned = useMemo(() => badges.filter((badge) => badge.earned), [badges])
 
   // značke osvojene od zadnje posjete trezoru dobiju "Novo" i kratku proslavu

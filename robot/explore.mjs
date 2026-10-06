@@ -295,6 +295,8 @@ async function pressButtons(page, run, current, net, profile) {
       if (moved || (await page.locator('[role="dialog"], .modal, .sheet, [aria-modal="true"]').count().catch(() => 0)) > 0) {
         await page.goto(url(current.path)).catch(() => {})
         await settle(page)
+        // the fresh page lost the robot's marks: put them back, or every later press on this page times out unseen
+        await page.evaluate(clickables).catch(() => [])
       }
     }
   }

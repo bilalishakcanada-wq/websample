@@ -250,9 +250,12 @@ begin
   if p_kind = 'after' and not exists (select 1 from public.work_proofs where payment_id = v_pay.id and kind = 'before') then
     raise exception 'PRVO_SLIKA_PRIJE: prvo slikaj stanje prije početka rada' using errcode = 'P0001';
   end if;
-  -- slika mora biti u izvođačevom folderu u našem skladištu, ne bilo koji link
+  -- slika mora biti u izvođačevom folderu u našem skladištu, ne bilo koji link:
+  -- privatni bucket (security/06: vide je samo klijent, izvođač i tim) ili, za aplikaciju
+  -- prije privatnog skladišta, javni "media" bucket
   if p_photo_url is null or p_photo_url like '%..%'
-     or position('/storage/v1/object/public/media/' || auth.uid()::text || '/proof/' in p_photo_url) = 0 then
+     or not (p_photo_url like 'private:uploads/' || auth.uid()::text || '/work/' || p_listing::text || '/%'
+             or position('/storage/v1/object/public/media/' || auth.uid()::text || '/proof/' in p_photo_url) > 0) then
     raise exception 'DOKAZ_NEISPRAVAN: slika nije poslana iz aplikacije' using errcode = 'P0001';
   end if;
   if p_sha256 is null or lower(p_sha256) !~ '^[0-9a-f]{64}$' then

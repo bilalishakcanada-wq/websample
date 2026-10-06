@@ -5,6 +5,8 @@
 .ap { --ap-x: 20px; color: var(--text); }
 .ap-screen { min-height: 100dvh; display: flex; flex-direction: column; background: var(--surface); padding: 0 var(--ap-x) calc(20px + env(safe-area-inset-bottom, 0px)); }
 .ap-page { padding: 0 var(--ap-x) 24px; }
+/* on a computer the site footer sits under these pages: it starts below the fold, so lists loading in can't pull it up and push it away again */
+@media (min-width: 769px) { .ap-page { min-height: calc(100dvh - var(--header-h)); } }
 .ap-top { display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top, 0px)) 0 8px; margin: 0 calc(-1 * var(--ap-x)); padding-left: 10px; padding-right: 14px; }
 .ap-back { display: grid; place-items: center; width: 42px; height: 42px; min-height: 0; border-radius: 12px; background: transparent; color: var(--primary-strong); }
 .ap-cancel { margin-left: auto; min-height: 0; padding: 8px 10px; background: transparent; color: var(--text-soft); font-weight: 700; font-size: 0.88rem; }

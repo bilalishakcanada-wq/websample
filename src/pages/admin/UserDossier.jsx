@@ -1,3 +1,4 @@
+import { PrivateFileLink } from '../../components/PrivateFile'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft, Award, Bot, Check, Coins, ExternalLink, Globe, MapPin, MessageSquare, NotebookPen, ShieldBan, ShieldCheck, Trash2, UserCog, X,
@@ -310,7 +311,7 @@ function Verifications({ dossier, isAdmin, reload }) {
           <div key={request.id} className="admin-row">
             <div>
               <strong>{verificationTitle(request)}</strong>
-              <p className="muted-text">{formatBosnianDate(request.created_at)}{request.document_url && <> · <a href={request.document_url} target="_blank" rel="noreferrer" className="text-link">Pogledaj dokument</a></>}</p>
+              <p className="muted-text">{formatBosnianDate(request.created_at)}{request.document_url && <> · <PrivateFileLink fileRef={request.document_url} className="text-link">Pogledaj dokument</PrivateFileLink></>}</p>
             </div>
             <span className={`tag status-tag-${request.status}`}>{request.status}</span>
             {isAdmin && request.status === 'pending' && (

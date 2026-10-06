@@ -1,3 +1,4 @@
+import { PrivateImage } from '../components/PrivateFile'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
@@ -391,7 +392,7 @@ function MessagesPage() {
                         return (
                           <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                             {item.attachment_type === 'image' && item.attachment_url
-                              ? <a href={item.attachment_url} target="_blank" rel="noreferrer" className="chat-image"><img src={item.attachment_url} alt="Slika" loading="lazy" /></a>
+                              ? <PrivateImage fileRef={item.attachment_url} alt="Slika" className="chat-image" />
                               : <p>{item.content}</p>}
                             <span className="chat-bubble-meta">
                               {timeOf(item.created_at)}

@@ -1,3 +1,4 @@
+import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError } from '../utils/validation'
 
@@ -114,16 +115,16 @@ export const paymentService = {
     call('respond_price_increase', { p_request: requestId, p_accept: accept }),
   cancelPriceIncrease: (requestId) => call('cancel_price_increase', { p_request: requestId }),
 
-  /** Slike kao dokaz idu u isti bucket kao i slike u porukama. */
-  async uploadEvidence(userId, files) {
+  /** Slike kao dokaz idu u privatni bucket: vide ih samo klijent, izvođač i tim. */
+  async uploadEvidence(userId, listingId, files) {
+    const { resizeImage } = await import('../utils/imageResize')
     const urls = []
-    for (const file of files) {
-      const path = `${userId}/work/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-      const { error } = await supabase.storage.from('media').upload(path, file, {
-        cacheControl: '31536000', contentType: file.type,
-      })
-      if (error) throw new Error('Slika se nije mogla poslati.')
-      urls.push(supabase.storage.from('media').getPublicUrl(path).data.publicUrl)
+    for (const original of files) {
+      const file = await resizeImage(original)
+      const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      urls.push(await uploadUserFile({
+        path: `${userId}/work/${listingId}/${name}`, publicPath: `${userId}/work/${name}`, file, cacheControl: '31536000',
+      }).catch(() => { throw new Error('Slika se nije mogla poslati.') }))
     }
     return urls
   },
@@ -140,10 +141,13 @@ export const paymentService = {
   },
   /** Utisnuta slika iz ProofCamera → skladište → zapis sa GPS-om, vremenom i otiskom. */
   async addProof({ userId, payment, kind, shot }) {
-    const path = `${userId}/proof/${payment.id}/${kind}-${Date.now()}.jpg`
-    const { error } = await supabase.storage.from('media').upload(path, shot.blob, { cacheControl: '31536000', contentType: 'image/jpeg' })
-    if (error) throw new Error('Slika se nije mogla poslati. Provjeri internet i pokušaj ponovo.')
-    const url = supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+    const stamp = Date.now()
+    // privatno: <izvođač>/work/<oglas>/... (vide ga klijent, izvođač i tim; add_work_proof provjerava putanju)
+    const url = await uploadUserFile({
+      path: `${userId}/work/${payment.listing_id}/proof-${kind}-${stamp}.jpg`,
+      publicPath: `${userId}/proof/${payment.id}/${kind}-${stamp}.jpg`,
+      file: shot.blob, cacheControl: '31536000', contentType: 'image/jpeg',
+    }).catch(() => { throw new Error('Slika se nije mogla poslati. Provjeri internet i pokušaj ponovo.') })
     return call('add_work_proof', {
       p_listing: payment.listing_id, p_kind: kind, p_photo_url: url, p_sha256: shot.sha256,
       p_lat: shot.lat, p_lng: shot.lng, p_accuracy_m: Math.round(shot.accuracy * 10) / 10,

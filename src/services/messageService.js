@@ -1,3 +1,4 @@
+import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 
@@ -102,12 +103,14 @@ export const messageService = {
     const shrunk = await resizeImage(file)
     const ext = shrunk.type === 'image/webp' ? 'webp' : shrunk.type === 'image/png' ? 'png' : 'jpg'
     const path = `${senderId}/chat/${conversationId}/${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage.from('media').upload(path, shrunk, { cacheControl: '31536000', contentType: shrunk.type })
-    if (uploadError) { console.error('Chat image upload failed', { message: uploadError.message }); throw new Error('Slika nije poslana. Pokušaj ponovo.') }
-    const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+    // private bucket: only the two people in the chat (and the team) can open it
+    const fileRef = await uploadUserFile({ path, file: shrunk, cacheControl: '31536000' }).catch((uploadError) => {
+      console.error('Chat image upload failed', { message: uploadError.message })
+      throw new Error('Slika nije poslana. Pokušaj ponovo.')
+    })
     const { data, error } = await supabase
       .from('messages')
-      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: '📷 Slika', attachment_url: urlData.publicUrl, attachment_type: 'image' })
+      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: '📷 Slika', attachment_url: fileRef, attachment_type: 'image' })
       .select('id, sender_id, receiver_id, content, created_at, attachment_url, attachment_type')
       .single()
     if (error) { console.error('Supabase image message insert failed', { message: error.message, code: error.code }); throw publicError() }

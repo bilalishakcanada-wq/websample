@@ -1,3 +1,4 @@
+import { PrivateImage } from '../components/PrivateFile'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
@@ -117,7 +118,7 @@ function Chat(props) {
               const image = item.attachment_type === 'image' && item.attachment_url
               return (
                 <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
-                  {image ? <a href={item.attachment_url} target="_blank" rel="noreferrer"><img src={item.attachment_url} alt="Slika" loading="lazy" /></a> : <p>{item.content}</p>}
+                  {image ? <PrivateImage fileRef={item.attachment_url} alt="Slika" /> : <p>{item.content}</p>}
                   <span className="ch-meta">{timeOf(item.created_at)}{mine && (item.read_at ? <CheckCheck size={13} className="seen" /> : <Check size={13} />)}</span>
                 </div>
               )

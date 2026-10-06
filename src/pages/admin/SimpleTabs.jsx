@@ -1,3 +1,4 @@
+import { PrivateFileLink } from '../../components/PrivateFile'
 import { useEffect, useRef, useState } from 'react'
 import { Search } from 'lucide-react'
 import { adminService } from '../../services/adminService'
@@ -286,7 +287,7 @@ export function VerificationTab() {
           <div>
             <button type="button" className="adm-userlink" onClick={() => openUser(request.user_id)}><strong>Korisnik {request.user_id.slice(0, 8)}</strong></button>
             <p className="muted-text">{verificationTitle(request)} · {formatBosnianDate(request.created_at)}</p>
-            <a href={request.document_url} target="_blank" rel="noreferrer" className="text-link">Pogledaj dokument</a>
+            <PrivateFileLink fileRef={request.document_url} className="text-link">Pogledaj dokument</PrivateFileLink>
           </div>
           <span className={`tag status-tag-${request.status}`}>{request.status}</span>
           {request.status === 'pending' && (

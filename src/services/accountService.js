@@ -1,3 +1,4 @@
+import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 import { isStrongPassword } from '../utils/validation'
@@ -149,12 +150,14 @@ export const accountService = {
     if (kind === 'licence' && !LICENCE_TYPES.includes(licenceType)) throw new Error('Izaberi vrstu licence.')
     const ext = file.type.split('/')[1]
     const path = `${userId}/${kind}-${licenceType || trade || 'doc'}-${Date.now()}.${ext}`.replace(/[^\w./-]/g, '_')
-    const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '3600' })
-    if (uploadError) { console.error('Verification upload failed', { message: uploadError.message }); throw publicError() }
-    const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
+    // documents go to the private bucket; only the owner and the Zadatak team can open them
+    const documentRef = await uploadUserFile({ path, file }).catch((uploadError) => {
+      console.error('Verification upload failed', { message: uploadError.message })
+      throw publicError()
+    })
     const { data, error } = await supabase
       .from('verification_requests')
-      .insert({ user_id: userId, document_url: urlData.publicUrl, kind, licence_type: licenceType, trade })
+      .insert({ user_id: userId, document_url: documentRef, kind, licence_type: licenceType, trade })
       .select('id, kind, licence_type, trade, status, created_at')
       .single()
     if (error) { console.error('Verification request failed', { message: error.message, code: error.code }); throw publicError() }

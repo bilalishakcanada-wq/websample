@@ -1,3 +1,5 @@
+import { PrivateImage } from './PrivateFile'
+import { usePrivateFile } from '../lib/privateFiles'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle, BadgeCheck, Camera, CheckCircle2, Clock, Handshake, ImagePlus, MapPin, RotateCcw, Send, TrendingUp, X,
@@ -31,20 +33,28 @@ function Countdown({ until }) {
 const utcTime = (value) => `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`
 const daleko = (meters) => (meters == null ? null : meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toLocaleString('bs-BA', { maximumFractionDigits: 1 })} km`)
 
+/** Jedna slika prije/poslije: privatna (potpisan link) ili stari javni link. */
+function ProofItem({ row }) {
+  const { url, failed } = usePrivateFile(row.photo_url)
+  const alt = row.kind === 'before' ? 'Slika prije početka' : 'Slika urađenog posla'
+  return (
+    <a href={url || undefined} target="_blank" rel="noreferrer" className="wf-proof-item">
+      {url ? <img src={url} alt={alt} loading="lazy" />
+        : <span className={failed ? 'private-image-missing' : 'private-image-loading'} role="img" aria-label={alt}>{failed ? 'Slika nije dostupna' : null}</span>}
+      <span>
+        <strong>{row.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {utcTime(row.captured_at)}
+        <small><MapPin size={11} /> ±{Math.round(row.accuracy_m)} m{row.distance_m != null ? ` · ${daleko(row.distance_m)} od tačke posla` : ''}</small>
+      </span>
+    </a>
+  )
+}
+
 /** Slike prije/poslije sa pečatom — vide ih obje strane i tim. */
 function ProofGallery({ rows }) {
   if (!rows.length) return null
   return (
     <div className="wf-proof-list" data-testid="workflow-proofs">
-      {rows.map((row) => (
-        <a key={row.id} href={row.photo_url} target="_blank" rel="noreferrer" className="wf-proof-item">
-          <img src={row.photo_url} alt={row.kind === 'before' ? 'Slika prije početka' : 'Slika urađenog posla'} loading="lazy" />
-          <span>
-            <strong>{row.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {utcTime(row.captured_at)}
-            <small><MapPin size={11} /> ±{Math.round(row.accuracy_m)} m{row.distance_m != null ? ` · ${daleko(row.distance_m)} od tačke posla` : ''}</small>
-          </span>
-        </a>
-      ))}
+      {rows.map((row) => <ProofItem key={row.id} row={row} />)}
     </div>
   )
 }
@@ -129,7 +139,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
   }
 
   const predajRad = () => run('submit', async () => {
-    const urls = files.length ? await paymentService.uploadEvidence(user.id, files) : []
+    const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.submitWork(payment.listing_id, report.trim(), urls)
     setForm(null); setReport(''); setFiles([])
   }, 'Rad je predat — klijent ima 72 sata da pregleda.')
@@ -193,7 +203,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
     prihvati ? 'Prekid je prihvaćen — novac je vraćen klijentu.' : 'Prekid nije prihvaćen; posao se nastavlja.')
 
   const posaljiSpor = () => run('dispute', async () => {
-    const urls = files.length ? await paymentService.uploadEvidence(user.id, files) : []
+    const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.openWorkDispute(payment.listing_id, reasonCode, claim.trim(), urls)
     setForm(null); setClaim(''); setFiles([])
   }, 'Problem je prijavljen — uplata je zamrznuta dok tim ne odluči.')
@@ -233,7 +243,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
           {latest.evidence_urls?.length > 0 && (
             <div className="wf-evidence">
               {latest.evidence_urls.map((url) => (
-                <a key={url} href={url} target="_blank" rel="noreferrer"><img src={url} alt="Dokaz" loading="lazy" /></a>
+                <PrivateImage key={url} fileRef={url} alt="Dokaz" />
               ))}
             </div>
           )}

@@ -12409,6 +12409,13 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .chat-bubble.has-image .chat-bubble-meta { padding: 2px 6px 0; color: var(--text-soft); justify-content: flex-end; }
 .chat-image { display: block; border-radius: 16px; overflow: hidden; max-width: 240px; }
 .chat-image img { display: block; width: 100%; height: auto; max-height: 320px; object-fit: cover; }
+/* private photo while its signed link loads, or when this person may not open it */
+.private-image-loading, .private-image-missing { display: block; width: 180px; height: 140px; border-radius: 16px; background: var(--stroke, #e5e7eb); }
+.private-image-missing { display: grid; place-items: center; padding: 8px; text-align: center; font-size: .78rem; color: var(--text-soft); }
+.wf-evidence .private-image-loading, .wf-evidence .private-image-missing { width: 76px; height: 76px; border-radius: 10px; }
+.wf-proof-item .private-image-loading, .wf-proof-item .private-image-missing { width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 10px; }
+/* "Pogledaj dokument": a link that has to be a button (opens a private document) */
+.private-file-link { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: inherit; }
 
 /* tab bar: unread badge on Poruke */
 .mobile-nav-icon { position: relative; display: inline-grid; place-items: center; }

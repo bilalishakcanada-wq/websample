@@ -24,22 +24,38 @@ export const queryClient = new QueryClient({
 // is the app's own sandbox on the owner's phone; in a browser it may be a shared computer, so it stays in memory.
 // Either way queryClient.clear() on sign-out wipes it.
 const inApp = () => typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.())
-const persistable = (meta) => meta?.persist !== false && (meta?.persist !== 'device' || inApp())
 
 const storage = (() => {
   try { localStorage.setItem('zadatak-q-test', '1'); localStorage.removeItem('zadatak-q-test'); return localStorage } catch { return null }
 })()
 
+/*
+ * Otherwise only data that is either public or this person's own is written to the device. The job
+ * page ('listing') carries other people's offers, and inbox, threads and notifications are private,
+ * so anything not on this list stays in memory and is gone when the app closes.
+ */
+const PERSISTED = {
+  search: true, feed: true, profile: true, badges: true, feature: true,
+  me: new Set(['listings', 'bids', 'recommended', 'taste', 'saved-ids', 'saved']),
+}
+const canPersist = (query) => {
+  const persist = query.meta?.persist
+  if (persist === false) return false
+  if (persist === 'device') return inApp()
+  const [root, , part] = query.queryKey
+  const rule = PERSISTED[root]
+  return rule === true || (rule instanceof Set && rule.has(part))
+}
+
 export const persister = storage ? createSyncStoragePersister({
   storage,
   key: 'zadatak-query-cache',
   throttleTime: 1000,
-  // only small, public-ish lists are worth persisting; per-user private data stays in memory
   serialize: (client) => JSON.stringify({
     ...client,
     clientState: {
       ...client.clientState,
-      queries: client.clientState.queries.filter((q) => persistable(q.meta) && JSON.stringify(q.state.data || '').length < 200_000),
+      queries: client.clientState.queries.filter((q) => canPersist(q) && JSON.stringify(q.state.data || '').length < 200_000),
     },
   }),
 }) : null
@@ -49,5 +65,5 @@ export const persistOptions = {
   maxAge: 24 * 60 * 60 * 1000,
   // the build id lives in index.html, not in the JS: baked into the entry it renamed ~70 unchanged chunks every deploy
   buster: (typeof document !== 'undefined' && document.querySelector('meta[name="zadatak-build"]')?.content) || 'dev',
-  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && persistable(query.meta) },
+  dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && canPersist(query) },
 }

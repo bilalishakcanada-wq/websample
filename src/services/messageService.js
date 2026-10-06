@@ -1,4 +1,4 @@
-import { uploadPrivate } from '../lib/privateFiles'
+import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 
@@ -104,7 +104,7 @@ export const messageService = {
     const ext = shrunk.type === 'image/webp' ? 'webp' : shrunk.type === 'image/png' ? 'png' : 'jpg'
     const path = `${senderId}/chat/${conversationId}/${Date.now()}.${ext}`
     // private bucket: only the two people in the chat (and the team) can open it
-    const fileRef = await uploadPrivate(path, shrunk, { cacheControl: '31536000' }).catch((uploadError) => {
+    const fileRef = await uploadUserFile({ path, file: shrunk, cacheControl: '31536000' }).catch((uploadError) => {
       console.error('Chat image upload failed', { message: uploadError.message })
       throw new Error('Slika nije poslana. Pokušaj ponovo.')
     })

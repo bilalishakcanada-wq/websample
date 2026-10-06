@@ -1,4 +1,4 @@
-import { uploadPrivate } from '../lib/privateFiles'
+import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 import { isStrongPassword } from '../utils/validation'
@@ -150,8 +150,8 @@ export const accountService = {
     if (kind === 'licence' && !LICENCE_TYPES.includes(licenceType)) throw new Error('Izaberi vrstu licence.')
     const ext = file.type.split('/')[1]
     const path = `${userId}/${kind}-${licenceType || trade || 'doc'}-${Date.now()}.${ext}`.replace(/[^\w./-]/g, '_')
-    // documents go to the private bucket; only the owner and the Poso.ba team can open them
-    const documentRef = await uploadPrivate(path, file).catch((uploadError) => {
+    // documents go to the private bucket; only the owner and the Zadatak team can open them
+    const documentRef = await uploadUserFile({ path, file }).catch((uploadError) => {
       console.error('Verification upload failed', { message: uploadError.message })
       throw publicError()
     })

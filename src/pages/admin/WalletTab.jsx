@@ -6,6 +6,23 @@ import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, CreditsDialog, WALLET_KIND_LABEL, formatKM, useStaff } from './shared'
 import { withBase } from '../../utils/paths'
 import { SkeletonRows } from '../../components/Skeleton'
+import { usePrivateFile } from '../../lib/privateFiles'
+
+/** Foto dokaz u sporu: privatna slika (potpisan link) ili stari javni link, sa GPS-om i vremenom. */
+function AdminProof({ proof }) {
+  const { url, failed } = usePrivateFile(proof.photo_url)
+  const alt = proof.kind === 'before' ? 'Prije' : 'Poslije'
+  return (
+    <a href={url || undefined} target="_blank" rel="noreferrer" className="wf-proof-item">
+      {url ? <img src={url} alt={alt} loading="lazy" />
+        : <span className={failed ? 'private-image-missing' : 'private-image-loading'} role="img" aria-label={alt}>{failed ? 'Slika nije dostupna' : null}</span>}
+      <span>
+        <strong>{alt}</strong> · {new Date(proof.captured_at).toISOString().slice(0, 16).replace('T', ' ')} UTC
+        <small>GPS {Number(proof.lat).toFixed(5)}, {Number(proof.lng).toFixed(5)} ±{Math.round(proof.accuracy_m)} m{proof.distance_m != null ? ` · ${Math.round(proof.distance_m)} m od tačke posla` : ''}{proof.source === 'camera_file' ? ' · sistemska kamera' : ''}</small>
+      </span>
+    </a>
+  )
+}
 
 /** Platform-wide balances: totals, quick top-up, top balances and the ledger. */
 function WalletTab() {
@@ -148,15 +165,7 @@ function WalletTab() {
                   ? <small>Izvođač nije priložio foto dokaz.</small>
                   : (
                     <div className="wf-proof-list">
-                      {proofs[row.id].map((proof) => (
-                        <a key={proof.id} href={proof.photo_url} target="_blank" rel="noreferrer" className="wf-proof-item">
-                          <img src={proof.photo_url} alt={proof.kind === 'before' ? 'Prije' : 'Poslije'} loading="lazy" />
-                          <span>
-                            <strong>{proof.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {new Date(proof.captured_at).toISOString().slice(0, 16).replace('T', ' ')} UTC
-                            <small>GPS {Number(proof.lat).toFixed(5)}, {Number(proof.lng).toFixed(5)} ±{Math.round(proof.accuracy_m)} m{proof.distance_m != null ? ` · ${Math.round(proof.distance_m)} m od tačke posla` : ''}{proof.source === 'camera_file' ? ' · sistemska kamera' : ''}</small>
-                          </span>
-                        </a>
-                      ))}
+                      {proofs[row.id].map((proof) => <AdminProof key={proof.id} proof={proof} />)}
                     </div>
                   ))}
               </div>

@@ -1,12 +1,13 @@
 import { SITE_PAGES } from '../data/siteMap'
+import { appConfig } from '../config/appConfig'
 
-const BRAND = 'Poso.ba'
+const BRAND = appConfig.appName
 const STATIC = {
-  '/': 'Poso.ba — Objavi posao, izaberi najboljeg. Riješeno.',
+  '/': `${BRAND} — Objavi posao, izaberi najboljeg. Riješeno.`,
   '/search': 'Pretraži poslove',
   '/objavi': 'Objavi posao',
   '/start': 'Dobro došao/la',
-  '/intro': 'Kako radi Poso.ba',
+  '/intro': 'Kako radi Zadatak',
   '/moji-poslovi': 'Moji poslovi',
   '/messages': 'Poruke',
   '/login': 'Prijava',

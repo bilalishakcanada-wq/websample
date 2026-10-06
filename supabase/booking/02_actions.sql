@@ -115,7 +115,7 @@ begin
   insert into public.notifications (user_id, type, title, message, link) values
     (case when auth.uid() = v_row.client_id then v_row.provider_id else v_row.client_id end,
      'job', 'Zatražen je prekid posla',
-     'Druga strana traži sporazumni prekid. Dok ne odgovoriš, novac ostaje osiguran na Poso.ba.',
+     'Druga strana traži sporazumni prekid. Dok ne odgovoriš, novac ostaje osiguran na Zadatku.',
      '/listings/' || p_listing::text);
   return v_req;
 end $fn$;
@@ -191,7 +191,7 @@ begin
   insert into public.notifications (user_id, type, title, message, link) values
     (case when v_role = 'client' then v_row.provider_id else v_row.client_id end,
      'job', 'Otvoren je spor',
-     'Posao je zamrznut dok Poso.ba tim ne pregleda dokaze i prepisku. Novac ostaje osiguran.',
+     'Posao je zamrznut dok Zadatak tim ne pregleda dokaze i prepisku. Novac ostaje osiguran.',
      '/listings/' || p_listing::text);
   return v_dispute;
 end $fn$;

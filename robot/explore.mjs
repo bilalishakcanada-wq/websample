@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Poso.ba test robot: opens the site like a person would, on a desktop, a phone, a small phone and
+// Zadatak test robot: opens the site like a person would, on a desktop, a phone, a small phone and
 // inside the Android app, as a guest, a new account, a client, a worker and an admin. On every
 // screen it follows the links, presses the buttons, and writes down whatever goes wrong:
 // JavaScript crashes, console errors, failed requests, error screens, pages that scroll sideways,
@@ -367,7 +367,7 @@ async function crawl(browser, profileName, roleName, state) {
   const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block' })
   await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
-  if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('poso-mode', m) } catch { /* private mode */ } }, role.mode)
+  if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {})
   const page = await context.newPage()
@@ -433,7 +433,7 @@ function writeReport() {
   const warns = items.filter((f) => f.severity === 'warn')
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify({ base: BASE, stats, findings: items }, null, 2))
   const lines = [
-    '# Poso.ba robot report',
+    '# Zadatak robot report',
     '',
     `Site: ${BASE}  ·  ${stats.pages} pages and ${stats.clicks} button presses in ${Math.round((Date.now() - stats.started) / 1000)} s  ·  profiles: ${PROFILE_NAMES.join(', ')}  ·  roles: ${ROLE_NAMES.join(', ')}`,
     '',

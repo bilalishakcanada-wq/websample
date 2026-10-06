@@ -3,9 +3,9 @@ import { publicError, sanitizeText } from '../utils/validation'
 
 export const supportService = {
   /** Ask the AI assistant. Resolves { configured:false } when the API key is missing so the caller can fall back. */
-  async askAssistant(message, articles) {
+  async askAssistant(message, articles, guide = []) {
     try {
-      const { data, error } = await supabase.functions.invoke('support-assistant', { body: { message, articles } })
+      const { data, error } = await supabase.functions.invoke('support-assistant', { body: { message, articles, guide } })
       if (error) throw error
       return data || { configured: false }
     } catch (invokeError) {

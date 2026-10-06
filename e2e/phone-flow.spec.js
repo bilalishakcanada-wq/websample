@@ -1,4 +1,4 @@
-// The money path on phones, the way most people use Poso.ba: the client posts a job through the
+// The money path on phones, the way most people use Zadatak: the client posts a job through the
 // one-question-per-screen flow, the worker sends an offer from the phone job page, the client
 // accepts and secures the payment, and both write in the chat. Runs on an iPhone and on a small 360 px Android screen.
 import { test, expect, devices } from '@playwright/test'
@@ -74,7 +74,7 @@ for (const [screen, phone] of Object.entries(SCREENS)) test.describe.serial(`Tel
     await provider.getByRole('button', { name: 'Pošalji ponudu' }).first().click()
     const sheet = provider.getByRole('dialog')
     await sheet.getByLabel('Tvoja ponuda (KM)').fill('20')
-    await sheet.getByPlaceholder(/Napiši zašto si prava osoba/).fill('Automatski test sa telefona: ponuda robota, sve uključeno.')
+    await sheet.getByTestId('offer-message').fill('Automatski test sa telefona: ponuda robota, sve uključeno.')
     const send = sheet.getByRole('button', { name: 'Pošalji ponudu' })
     await expect(send).toBeInViewport() // must be reachable on a phone screen
     await send.click()
@@ -86,17 +86,17 @@ for (const [screen, phone] of Object.entries(SCREENS)) test.describe.serial(`Tel
     await client.goto(listingUrl)
     await client.getByRole('tab', { name: /Ponude/ }).click()
     await client.getByRole('button', { name: 'Prihvati', exact: true }).first().click()
-    const pay = client.getByRole('button', { name: /Prihvati i osiguraj/ })
+    const pay = client.getByTestId('payment-confirm')
     await expect(pay).toBeInViewport()
     await pay.click()
-    await expect(client.getByText(/osigurano na Poso\.ba|Uplata je osigurana/).first()).toBeVisible({ timeout: 20_000 })
+    await expect(client.getByText(/osigurano na Zadatku|Uplata je osigurana/).first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('poruke na telefonu stižu odmah', async () => {
     const listingId = listingUrl.split('/').pop()
     await client.goto(`/messages?listing=${listingId}`)
     await provider.goto(`/messages?listing=${listingId}`)
-    const box = (page) => page.getByPlaceholder('Napiši poruku…')
+    const box = (page) => page.getByTestId('chat-input')
     await expect(box(client)).toBeVisible()
     await expect(box(provider)).toBeVisible()
     await expect(box(client)).toBeInViewport()

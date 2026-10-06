@@ -72,7 +72,7 @@ function RegisterPage() {
     <AuthLayout title="Napravi svoj račun">
       <form onSubmit={handleSubmit} className="auth-form">
         <fieldset className={`account-type-picker ${isPhone && next ? 'is-collapsed' : ''}`}>
-          <legend>Kako želiš koristiti Poso.ba?</legend>
+          <legend>Kako želiš koristiti Zadatak?</legend>
           {ACCOUNT_TYPES.map(({ value, label, hint, icon: Icon }) => (
             <button
               key={value}
@@ -133,7 +133,7 @@ function RegisterPage() {
         </div>
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}</div>}
-        <button type="submit" className="primary-button auth-submit" disabled={loading}>
+        <button data-testid="register-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Registracija...' : 'Nastavi'}
         </button>
       </form>

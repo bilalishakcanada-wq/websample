@@ -18,8 +18,19 @@ export async function openInSystemBrowser(url) {
   else window.location.assign(url) // older app build without the Browser plugin: plain redirect
 }
 
+/** Phones with 2 GB of memory or two cores: index.css drops blur and endless decorative motion for them. */
+function markLowEndDevice() {
+  try {
+    const memory = navigator.deviceMemory
+    const cores = navigator.hardwareConcurrency
+    if ((memory && memory <= 2) || (cores && cores <= 2)) document.documentElement.classList.add('is-lowend')
+  } catch { /* ignore */ }
+}
+
 export async function setupNative() {
+  markLowEndDevice()
   if (!isNativeApp()) return
+  setupButtonHaptics()
   try {
     document.documentElement.classList.add('is-native')
     await plugin('StatusBar')?.setStyle({ style: 'DARK' })
@@ -66,7 +77,7 @@ export async function setupNative() {
     plugin('App')?.addListener?.('appUrlOpen', async ({ url }) => {
       if (!url?.startsWith(NATIVE_AUTH_CALLBACK)) return
       try { await plugin('Browser')?.close?.() } catch { /* already closed */ }
-      const parsed = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://poso.ba/auth/callback'))
+      const parsed = new URL(url.replace(NATIVE_AUTH_CALLBACK, 'https://localhost/auth/callback'))
       const hash = new URLSearchParams(parsed.hash.replace(/^#/, ''))
       const { supabase } = await import('../lib/supabase')
       let error = null
@@ -96,6 +107,8 @@ function setupPhotoSource() {
     if (passThrough || !(input instanceof HTMLInputElement) || input.type !== 'file') return
     const accept = input.getAttribute('accept') || ''
     if (!/image/.test(accept) || /video/.test(accept)) return
+    // foto dokaz (ProofCamera): samo kamera, bez ponude galerije
+    if (input.dataset.cameraOnly) return
     event.preventDefault()
     choosePhotoSource((source) => {
       const accepted = input.getAttribute('accept')
@@ -113,9 +126,9 @@ function setupPhotoSource() {
 }
 
 function choosePhotoSource(onPick) {
-  document.getElementById('poso-photo-source')?.remove()
+  document.getElementById('zadatak-photo-source')?.remove()
   const sheet = document.createElement('div')
-  sheet.id = 'poso-photo-source'
+  sheet.id = 'zadatak-photo-source'
   sheet.setAttribute('role', 'dialog')
   sheet.setAttribute('aria-label', 'Dodaj sliku')
   sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;background:rgba(6,21,48,.45);font-family:Manrope,system-ui,sans-serif'
@@ -141,8 +154,25 @@ export async function shareLink({ title, text, url }) {
   return false
 }
 
+/**
+ * In the app every main button gives a light tap when pressed, like native buttons do. Runs after the page's
+ * own click handlers (document, bubble phase), so a button that already played a stronger haptic is not doubled.
+ */
+function setupButtonHaptics() {
+  document.addEventListener('click', (event) => {
+    const button = event.target?.closest?.('.ap-btn-primary, .ap-btn-dark, .primary-button, button[type="submit"]')
+    if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
+    haptic('light')
+  })
+}
+
+let lastHapticAt = 0
+
 /** Short tap feedback on important actions (accept offer, release payment). */
 export function haptic(kind = 'light') {
+  const now = Date.now()
+  if (now - lastHapticAt < 120) return // one press, one tap
+  lastHapticAt = now
   if (!isNativeApp()) {
     // installed web app on Android: the Vibration API gives the same tap feedback
     try { navigator.vibrate?.(kind === 'heavy' ? 30 : kind === 'medium' ? 18 : 8) } catch { /* ignore */ }

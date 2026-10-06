@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
  * "tasker" (Zaradi — I do jobs). The choice lives on the device; the profile's
  * account_type seeds it. Screens read it with useMode().
  */
-const KEY = 'poso-mode'
-const EVENT = 'poso:mode'
+const KEY = 'zadatak-mode'
+const EVENT = 'zadatak:mode'
 
 export const MODES = { poster: 'poster', tasker: 'tasker' }
 

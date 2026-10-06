@@ -21,7 +21,7 @@ export const queryClient = new QueryClient({
 })
 
 const storage = (() => {
-  try { localStorage.setItem('poso-q-test', '1'); localStorage.removeItem('poso-q-test'); return localStorage } catch { return null }
+  try { localStorage.setItem('zadatak-q-test', '1'); localStorage.removeItem('zadatak-q-test'); return localStorage } catch { return null }
 })()
 
 /*
@@ -29,7 +29,10 @@ const storage = (() => {
  * ('listing') carries other people's offers, and inbox, threads and notifications are private,
  * so anything not on this list stays in memory and is gone when the app closes.
  */
-const PERSISTED = { search: true, feed: true, profile: true, me: new Set(['listings', 'bids', 'recommended', 'taste']) }
+const PERSISTED = {
+  search: true, feed: true, profile: true, badges: true, feature: true,
+  me: new Set(['listings', 'bids', 'recommended', 'taste', 'saved-ids', 'saved']),
+}
 const canPersist = (query) => {
   if (query.meta?.persist === false) return false
   const [root, , part] = query.queryKey
@@ -39,7 +42,7 @@ const canPersist = (query) => {
 
 export const persister = storage ? createSyncStoragePersister({
   storage,
-  key: 'poso-query-cache',
+  key: 'zadatak-query-cache',
   throttleTime: 1000,
   serialize: (client) => JSON.stringify({
     ...client,
@@ -54,6 +57,6 @@ export const persistOptions = {
   persister,
   maxAge: 24 * 60 * 60 * 1000,
   // the build id lives in index.html, not in the JS: baked into the entry it renamed ~70 unchanged chunks every deploy
-  buster: (typeof document !== 'undefined' && document.querySelector('meta[name="poso-build"]')?.content) || 'dev',
+  buster: (typeof document !== 'undefined' && document.querySelector('meta[name="zadatak-build"]')?.content) || 'dev',
   dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && canPersist(query) },
 }

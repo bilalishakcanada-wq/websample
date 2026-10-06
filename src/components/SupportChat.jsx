@@ -4,9 +4,11 @@ import { BookOpen, LifeBuoy, Send, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { supportService } from '../services/supportService'
 import { HELP_ARTICLES, findHelpAnswer } from '../data/helpArticles'
+import { SITE_GUIDE, findGuideEntry } from '../data/siteGuide'
 import { SkeletonLines } from './Skeleton'
 
 const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
+const GUIDE = SITE_GUIDE.map(({ path, title, where }) => ({ path, title, where }))
 
 const QUICK = [
   ['Kako objavim posao?', 'Kako objavim posao?'],
@@ -49,8 +51,8 @@ function SupportChat({ openRequested = false }) {
 
   useEffect(() => {
     const show = () => setOpen(true)
-    window.addEventListener('poso:open-support', show)
-    return () => window.removeEventListener('poso:open-support', show)
+    window.addEventListener('zadatak:open-support', show)
+    return () => window.removeEventListener('zadatak:open-support', show)
   }, [])
 
   useEffect(() => {
@@ -79,11 +81,12 @@ function SupportChat({ openRequested = false }) {
   const assistantReply = async (text) => {
     setTyping(true)
     try {
-      const ai = await supportService.askAssistant(text, ARTICLES)
+      const ai = await supportService.askAssistant(text, ARTICLES, GUIDE)
       if (ai.configured && ai.message) { push(ai.message); return }
       await new Promise((resolve) => setTimeout(resolve, 600))
       const wantsHuman = HUMAN.test(text) || SERIOUS.test(text)
-      const article = wantsHuman ? null : findHelpAnswer(text)
+      const place = wantsHuman ? null : findGuideEntry(text)
+      const article = wantsHuman ? null : (findHelpAnswer(text) || (place && { a: `${place.title}: ${place.where}` }))
       const handoff = !article
       const reply = article
         ? `${article.a}\n\nAko ti ovo ne pomaže, napiši „tim“ i naš kolega preuzima razgovor.`
@@ -127,7 +130,7 @@ function SupportChat({ openRequested = false }) {
           <div className="support-chat-header">
             <span className="support-chat-who">
               <span className="support-avatar"><Sparkles size={16} /></span>
-              <span><strong>Poso asistent</strong><small>Podrška Poso.ba · obično odgovaramo u par sati</small></span>
+              <span><strong>Zadatak asistent</strong><small>Podrška Zadatka · obično odgovaramo u par sati</small></span>
             </span>
             <button type="button" className="icon-button" onClick={() => setOpen(false)} aria-label="Zatvori"><X size={16} /></button>
           </div>
@@ -143,8 +146,8 @@ function SupportChat({ openRequested = false }) {
                 {loading && <SkeletonLines n={2} />}
                 {!loading && (
                   <div className="support-bubble from-admin support-bubble-assistant">
-                    <small>Poso asistent</small>
-                    Zdravo{user.user_metadata?.full_name ? `, ${String(user.user_metadata.full_name).split(' ')[0]}` : ''}! Ja sam Poso, digitalni asistent. Pitaj me bilo šta o platformi — a ako zapne, tim preuzima u ovom istom razgovoru.
+                    <small>Zadatak asistent</small>
+                    Zdravo{user.user_metadata?.full_name ? `, ${String(user.user_metadata.full_name).split(' ')[0]}` : ''}! Ja sam Zadatak asistent, digitalni pomoćnik. Pitaj me bilo šta o platformi — a ako zapne, tim preuzima u ovom istom razgovoru.
                   </div>
                 )}
                 {!loading && messages.length === 0 && (
@@ -154,7 +157,7 @@ function SupportChat({ openRequested = false }) {
                 )}
                 {messages.filter((item) => !item.message.startsWith('(predaja timu)')).map((item) => (
                   <div key={item.id} className={`support-bubble ${item.sender === 'user' ? 'from-user' : 'from-admin'} ${item.sender === 'assistant' ? 'support-bubble-assistant' : ''}`}>
-                    {item.sender !== 'user' && <small>{item.sender === 'assistant' ? 'Poso asistent' : 'Poso.ba tim'} · {timeLabel(item.created_at)}</small>}
+                    {item.sender !== 'user' && <small>{item.sender === 'assistant' ? 'Zadatak asistent' : 'Zadatak tim'} · {timeLabel(item.created_at)}</small>}
                     {item.message}
                     {item.handoff && <span className="support-handoff"><LifeBuoy size={12} /> Tim je obaviješten</span>}
                   </div>

@@ -29,7 +29,7 @@ insert into public.termination_reasons (code, label_bs, applies_to, strike_weigh
   ('quality',           'Posao nije urađen po dogovoru',                   'provider', 1, true,  30),
   ('scope_change',      'Klijent je promijenio obim posla bez dogovora',   'client',   1, false, 40),
   ('payment_refused',   'Klijent odbija platiti dogovoreno',               'client',   2, true,  50),
-  ('off_platform',      'Traži plaćanje mimo Poso.ba',                     'both',     3, true,  60),
+  ('off_platform',      'Traži plaćanje mimo Zadatka',                     'both',     3, true,  60),
   ('harassment',        'Neprimjereno ponašanje ili uznemiravanje',        'both',     3, true,  70),
   ('false_identity',    'Lažni identitet ili podaci',                      'both',     3, true,  80),
   ('mutual',            'Sporazumni raskid (bez strajka)',                 'both',     0, false, 90)

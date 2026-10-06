@@ -1,4 +1,4 @@
-// Poso.ba — AI image moderation for Rule #1 (no contact details on the platform).
+// Zadatak — AI image moderation for Rule #1 (no contact details on the platform).
 //
 // Two ways in:
 //   1. A signed-in user right after uploading (Authorization: Bearer <jwt>) —
@@ -10,6 +10,7 @@
 // "unconfigured" and are visible to admins.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { withCors } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -19,7 +20,6 @@ const MODEL = Deno.env.get('MODERATION_MODEL') || 'claude-haiku-4-5-20251001'
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sweep-key',
 }
 const json = (body: unknown, status = 200) =>
@@ -126,8 +126,7 @@ async function enforce(item: QueueItem, verdict: Verdict) {
   }).eq('id', item.id)
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+Deno.serve(withCors(async (req) => {
 
   let mode: 'sweep' | 'user'
   let userId: string | null = null
@@ -170,4 +169,4 @@ Deno.serve(async (req) => {
   }
 
   return json({ mode, configured: Boolean(ANTHROPIC_KEY), processed: results.length, results })
-})
+}, 'authorization, x-client-info, apikey, content-type, x-sweep-key'))

@@ -1,4 +1,4 @@
-# Poso.ba — arhitektura proširenja (RBAC, KYC, depoziti, Trust & Safety)
+# Zadatak — arhitektura proširenja (RBAC, KYC, depoziti, Trust & Safety)
 
 Dokument opisuje kako se pet novih modula uklapaju u postojeću platformu i kako
 KYC i AI-detekcija komuniciraju sa jezgrom sistema.

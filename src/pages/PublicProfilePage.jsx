@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { usePublicProfile, useQuoteRequestsEnabled } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Sparkles, Star, UserRound } from 'lucide-react'
+import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Star, UserRound } from 'lucide-react'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
 import AvatarWithBadges from '../components/AvatarWithBadges'
-import BadgeChip from '../components/BadgeChip'
+import BadgeShowcase from '../components/BadgeShowcase'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -23,7 +23,7 @@ const firstNameOf = (displayName) => (displayName || '').trim().split(/\s+/)[0] 
 const TIER_HINT = {
   top: 'Verifikovan, 10+ recenzija sa prosjekom 4.8+. Najviši nivo povjerenja.',
   trusted: 'Verifikovan i dokazano pouzdan kroz recenzije.',
-  verified: 'Identitet i struka provjereni od strane Poso.ba tima.',
+  verified: 'Identitet i struka provjereni od strane Zadatak tima.',
   new: 'Novi korisnik — još nema dovoljno istorije za ocjenu.',
   unverified: 'Struka još nije provjerena. Traži recenzije i portfolio prije dogovora.',
 }
@@ -150,6 +150,8 @@ function PublicProfilePage() {
             <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
           </div>
 
+          <BadgeShowcase badges={badges} isOwn={isOwnProfile} userId={userId} />
+
           <div className="meet-stats">
             <div className="meet-stat">
               <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'} <Star size={18} fill="currentColor" /></strong>
@@ -188,15 +190,6 @@ function PublicProfilePage() {
             </div>
           )}
 
-          {badges.length > 0 && (
-            <details className="badge-legend-box">
-              <summary><Sparkles size={14} /> Šta znače značke na slici ({badges.length})</summary>
-              <ul className="badge-legend">
-                {badges.map((badge) => <li key={badge.code}><BadgeChip badge={badge} /><span>{badge.description}</span></li>)}
-              </ul>
-            </details>
-          )}
-
           {!isOwnProfile && user && (
             <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
           )}
@@ -230,7 +223,7 @@ function PublicProfilePage() {
                           ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="review-avatar" />
                           : <div className="review-avatar review-avatar-fallback"><UserRound size={16} /></div>}
                         <div>
-                          <strong>{review.reviewer?.display_name || 'Korisnik Poso.ba'}</strong>
+                          <strong>{review.reviewer?.display_name || 'Korisnik Zadatka'}</strong>
                           <div className="review-card-rating">
                             <Stars value={review.rating} />
                             <span>{formatBosnianDate(review.created_at)}</span>

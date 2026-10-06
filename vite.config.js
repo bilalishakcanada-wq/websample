@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { readFileSync, readdirSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 
 // Deploy target decides the base path: '/' on a domain (Vercel), '/websample/' on GitHub Pages.
@@ -14,7 +15,7 @@ const base = process.env.VITE_BASE || '/'
  * paints unstyled.
  */
 const asyncCss = () => ({
-  name: 'poso-async-css',
+  name: 'zadatak-async-css',
   apply: 'build',
   transformIndexHtml: (html, ctx) => {
     html = html.replace(
@@ -35,7 +36,7 @@ const asyncCss = () => ({
  * A tiny inline script shows it only on phones, only on the home path, only when nobody is signed in.
  */
 const prerenderWelcome = () => ({
-  name: 'poso-prerender',
+  name: 'zadatak-prerender',
   apply: 'build',
   enforce: 'post',
   transformIndexHtml: {
@@ -66,9 +67,9 @@ const prerenderWelcome = () => ({
  * meta tag, never into the JS, so chunks whose code did not change keep their names (and caches) across deploys.
  */
 const buildId = () => ({
-  name: 'poso-build-id',
+  name: 'zadatak-build-id',
   apply: 'build',
-  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="poso-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
+  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="zadatak-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
 })
 
 /**
@@ -82,11 +83,11 @@ const buildId = () => ({
  * cards lifted or buttons highlighted.
  */
 const pruneUnusedCss = () => ({
-  name: 'poso-prune-css',
+  name: 'zadatak-prune-css',
   apply: 'build',
   enforce: 'pre',
   transform(code, id) {
-    if (process.env.POSO_KEEP_CSS) return null // debug: ship the stylesheet as written
+    if (process.env.ZADATAK_KEEP_CSS) return null // debug: ship the stylesheet as written
     if (!/src[\\/](App|index|app[\\/]app)\.css$/.test(id.split('?')[0])) return null
     const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
     const source = [...walk('src').filter((f) => /\.(jsx?|mjs|html)$/.test(f)), 'index.html'].map((f) => readFileSync(f, 'utf8')).join('\n')
@@ -158,6 +159,63 @@ function extractRules(css, wanted) {
 }
 
 // https://vite.dev/config/
+/**
+ * Content-Security-Policy for the built site. GitHub Pages can't send HTTP headers, so it goes in a
+ * <meta http-equiv> tag (Cloudflare Pages reads the same policy from it). It is the browser-side
+ * guard for the login session: if someone ever slipped a script into a page (XSS), the browser
+ * refuses to run any script that isn't one of ours, and refuses to send data to any server
+ * except our own, Supabase and the map tiles.
+ * Inline scripts are allowed only by their exact SHA-256 hash, computed here from the final HTML,
+ * so editing one in index.html needs nothing else. The stylesheet's onload="…" handler is allowed
+ * the same way ('unsafe-hashes'); main.jsx switches the stylesheet on itself in browsers too old for that.
+ * frame-ancestors can't be set from a meta tag; GitHub Pages pages can be framed, Cloudflare's
+ * public/_headers sends X-Frame-Options.
+ */
+const contentSecurityPolicy = () => {
+  let env = {}
+  const sha = (text) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`
+  const decode = (value) => value.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+  return {
+    name: 'zadatak-csp',
+    apply: 'build',
+    enforce: 'post',
+    configResolved(config) { env = config.env || {} },
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        if (process.env.ZADATAK_NO_CSP) return html // debug: build without the policy
+        const supabase = (() => { try { return new URL(env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').origin } catch { return '' } })()
+        const realtime = supabase.replace(/^http/, 'ws')
+        const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => sha(m[1]))
+        const handlers = [...html.matchAll(/\son[a-z]+="([^"]*)"/g)].map((m) => sha(decode(m[1])))
+        const turnstile = 'https://challenges.cloudflare.com'
+        const policy = [
+          "default-src 'self'",
+          `script-src 'self' ${[...new Set(scripts)].join(' ')}${handlers.length ? ` 'unsafe-hashes' ${[...new Set(handlers)].join(' ')}` : ''} ${turnstile}`,
+          // React sets style attributes and a few components inject <style>; styles can't run code
+          "style-src 'self' 'unsafe-inline'",
+          // avatars come from Google/Facebook, photos from Supabase storage
+          "img-src 'self' data: blob: https:",
+          "media-src 'self' data: blob: https:",
+          "font-src 'self' data:",
+          `connect-src 'self' ${supabase} ${realtime} https://tiles.openfreemap.org https://ipwho.is ${turnstile} data: blob:`.replace(/\s+/g, ' '),
+          "worker-src 'self' blob:",
+          `frame-src 'self' ${turnstile}`,
+          "manifest-src 'self'",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self' https://ipg.monri.com https://ipgtest.monri.com",
+          'upgrade-insecure-requests',
+        ]
+        // a local database on http://127.0.0.1 (the test robot) must not be upgraded to https
+        if (/^http:\/\//.test(supabase)) policy.pop()
+        const meta = `<meta http-equiv="Content-Security-Policy" content="${policy.join('; ')}" />`
+        return html.replace(/(<meta charset="[^"]*"\s*\/?>)/i, `$1\n    ${meta}`)
+      },
+    },
+  }
+}
+
 export default defineConfig({
   base,
   optimizeDeps: {
@@ -212,8 +270,8 @@ export default defineConfig({
       // lets the service worker (and push) be tested on the dev server too
       devOptions: { enabled: true, type: 'module', suppressWarnings: true },
       manifest: {
-        name: 'Poso.ba — Marketplace za usluge',
-        short_name: 'Poso.ba',
+        name: 'Zadatak — Marketplace za usluge',
+        short_name: 'Zadatak',
         description: 'Pronađite ili ponudite lokalne usluge u Bosni i Hercegovini.',
         lang: 'bs',
         start_url: base,
@@ -236,5 +294,6 @@ export default defineConfig({
         ],
       },
     }),
+    contentSecurityPolicy(),
   ],
 })

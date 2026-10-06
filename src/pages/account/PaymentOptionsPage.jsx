@@ -6,7 +6,7 @@ function PaymentOptionsPage() {
   const rows = [
     ['/account/placanja', 'Historija plaćanja', 'Sve što si platio/la ili zaradio/la', History],
     ['/account/nacini-placanja', 'Načini plaćanja', 'Kartica za plaćanje i račun za isplate', CreditCard],
-    ['/account/novcanik', 'Balans', 'Stanje na Poso.ba nalogu', Wallet],
+    ['/account/novcanik', 'Balans', 'Stanje na tvom Zadatak nalogu', Wallet],
   ]
   return (
     <div className="account-section">

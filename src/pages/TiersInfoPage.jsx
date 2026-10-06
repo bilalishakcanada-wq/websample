@@ -42,7 +42,7 @@ function TiersInfoPage() {
             </div>
           ))}
         </div>
-        <p className="muted-text">Naknada se obračunava tek kad plaćanje ide kroz Poso.ba Pay. Do tada je informativna i vidiš je u Historiji plaćanja.</p>
+        <p className="muted-text">Naknada se obračunava tek kad plaćanje ide kroz Zadatak Pay. Do tada je informativna i vidiš je u Historiji plaćanja.</p>
       </section>
     </InfoLayout>
   )

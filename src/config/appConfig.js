@@ -1,5 +1,5 @@
 export const appConfig = {
-  appName: import.meta.env.VITE_APP_NAME || 'Poso.ba',
+  appName: import.meta.env.VITE_APP_NAME || 'Zadatak',
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '',
   defaultLocale: import.meta.env.VITE_DEFAULT_LOCALE || 'bs',
   featureFlags: {

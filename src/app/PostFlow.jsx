@@ -6,11 +6,14 @@ import { serviceCategories } from '../data/categories'
 import { cityCoordinates } from '../data/cityCoordinates'
 import { POPULAR_CITIES } from '../data/siteMap'
 import { publishListing } from '../services/publishListing'
+import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
-import { useQuoteRequestsEnabled } from '../hooks/queries'
+import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { ConditionsBuilder } from '../components/JobConditions'
+import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { guessCategory } from '../utils/categoryGuess'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
 import { useKeyboardAvoid } from '../hooks/useKeyboardAvoid'
@@ -24,13 +27,15 @@ import { useFullscreen } from './useFullscreen'
 import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
+import IdentityGateNotice from '../components/IdentityGateNotice'
+import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
-const DRAFT_KEY = 'poso-post-draft'
+const DRAFT_KEY = 'zadatak-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
 const ALL_CITIES = Object.keys(cityCoordinates)
 const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
 
-const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], category: '', price: '', travel: '' }
+const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], conditions: {}, category: '', price: '', travel: '' }
 
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
@@ -58,8 +63,15 @@ function PostFlow() {
   // "Zatraži ponudu" from a provider's profile: the job goes only to them
   const zaParam = searchParams.get('za') || ''
   const quoteEnabled = useQuoteRequestsEnabled()
+  const conditionsOn = useJobConditionsEnabled()
   const inviteId = quoteEnabled && !editId && !copyId && /^[0-9a-f-]{36}$/i.test(zaParam) && zaParam !== user?.id ? zaParam : null
+  // Hitno / VIP: only for a new job everyone sees (a private request or an edit has nothing to boost)
+  const promotionOptions = usePromotionOptions(user?.id, !editId && !inviteId)
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
+  // a new job needs an approved ID (editing one already published does not); the flow stays
+  // open to fill in and the draft is kept, only publishing waits for the check
+  const postGate = usePostGate(user?.id, !editId)
+  const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // editing and copying start from a job, not the draft, and leave the draft alone
   const freshPost = !editId && !copyId
   const draft = useMemo(() => {
@@ -115,6 +127,7 @@ function PostFlow() {
         location: remote ? '' : (listing.location || ''),
         description: (listing.description || '').split('\n\nKada:')[0],
         requirements: listing.requirements || [],
+        conditions: listing.conditions || {},
         category: listing.category || '',
         price: listing.price ?? '',
         travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
@@ -176,10 +189,13 @@ function PostFlow() {
       navigate(`/register?next=${encodeURIComponent(inviteId ? `/objavi?za=${inviteId}` : '/objavi')}`)
       return
     }
+    if (postGate === 'needed' || postGate === 'rejected') { saveDraft(form, step, zaParam); navigate(postVerifyHref(postBack)); return }
+    if (postGate === 'pending') return
     setSaving(true)
     setError('')
     try {
       const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
+      if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       if (freshPost) clearDraft()
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
@@ -206,6 +222,7 @@ function PostFlow() {
       {key === 'title' && (
         <section className="ap-body" key="title">
           {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
+          <IdentityGateNotice gate={postGate} back={postBack} compact />
           <h1 className="ap-title">Počni s naslovom</h1>
           <p className="ap-sub">U par riječi, šta ti treba?</p>
           <input className="ap-input" autoFocus value={form.title} maxLength={70} placeholder="npr. Selidba kauča" aria-label="Naslov posla" onChange={(event) => update({ title: event.target.value })} enterKeyHint="next" onKeyDown={(event) => { if (event.key === 'Enter' && valid) goNext() }} />
@@ -272,6 +289,12 @@ function PostFlow() {
           <span className="ap-hint">Najviše 2000 znakova · bez brojeva telefona i emaila (Pravilo #1)</span>
           <span className="ap-label">Obavezni uslovi</span>
           <RequirementsEditor value={form.requirements || []} onChange={(requirements) => update({ requirements })} />
+          {conditionsOn && (
+            <>
+              <span className="ap-label">Uslovi i pogodnosti</span>
+              <ConditionsBuilder value={form.conditions || {}} category={form.category} onChange={(conditions) => update({ conditions })} />
+            </>
+          )}
         </section>
       )}
 
@@ -328,17 +351,20 @@ function PostFlow() {
           <h1 className="ap-title">{inviteId ? 'Pošalji zahtjev za ponudu' : 'Spreman/na za ponude?'}</h1>
           <p className="ap-sub">{inviteId ? 'Provjeri detalje. Posao vidi samo izvođač kojem ga šalješ.' : 'Provjeri i objavi kad si spreman/na.'}</p>
           {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
+          <IdentityGateNotice gate={postGate} back={postBack} />
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.location}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setCatOpen(true)} className={form.category ? '' : 'is-missing'}><span>Kategorija</span><strong>{form.category || 'Odaberi'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(3)}><span>Opis</span><strong className="ap-clamp">{form.description}</strong><ChevronRight size={18} /></button>
+            {conditionsOn && hasConditions(form.conditions) && <button type="button" onClick={() => setStep(3)}><span>Značke i pogodnosti</span><strong className="ap-clamp">{conditionsSummary(form.conditions)}</strong><ChevronRight size={18} /></button>}
             {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
             {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
+          {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
           {error && <div className="form-error">{error}</div>}
         </section>
       )}
@@ -347,7 +373,7 @@ function PostFlow() {
         {key === 'photos' && files.length === 0 && existingImages.length === 0 ? (
           <button type="button" className="ap-btn ap-btn-light" onClick={goNext}>Preskoči za sad</button>
         ) : key === 'review' ? (
-          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving} onClick={submit}>{saving ? (inviteId ? 'Šaljem…' : 'Objavljujem…') : user ? (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao') : (inviteId ? 'Prijavi se i pošalji' : 'Prijavi se i objavi')}</button>
+          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving || postGate === 'pending'} onClick={submit}>{saving ? (inviteId ? 'Šaljem…' : 'Objavljujem…') : user ? POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao') : (inviteId ? 'Prijavi se i pošalji' : 'Prijavi se i objavi')}</button>
         ) : (
           <button type="button" className="ap-btn ap-btn-primary" disabled={!valid} onClick={goNext}>Nastavi</button>
         )}

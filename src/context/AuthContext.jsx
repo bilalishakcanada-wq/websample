@@ -121,7 +121,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     // nothing of this account stays cached for the next person on this device
     queryClient.clear()
-    try { localStorage.removeItem('poso-query-cache') } catch { /* ignore */ }
+    try { localStorage.removeItem('zadatak-query-cache') } catch { /* ignore */ }
   }
 
   const refreshSession = async () => {

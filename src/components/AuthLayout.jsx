@@ -1,13 +1,14 @@
 import BrandMark from './BrandMark'
 import { Link } from 'react-router-dom'
 import { DoneMascot } from '../app/Mascots'
+import { appConfig } from '../config/appConfig'
 
 function AuthLayout({ title, subtitle, children, footer }) {
   return (
     <div className="auth-shell">
       <Link to="/" className="auth-logo">
         <BrandMark size={42} className="brand-mark" />
-        <span className="brand-name">Poso.ba</span>
+        <span className="brand-name">{appConfig.appName}</span>
       </Link>
       <div className="auth-art" aria-hidden="true"><DoneMascot /></div>
 

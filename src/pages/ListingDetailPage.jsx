@@ -33,7 +33,9 @@ import { confirmDialog, promptDialog } from '../utils/dialog'
 import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
 import OfferReplies from '../components/OfferReplies'
-import { useOfferGate, OFFER_CTA } from '../hooks/useOfferGate'
+import { useOfferGate, useJobConditionCheck, offerCta } from '../hooks/useOfferGate'
+import { ConditionsCard } from '../components/JobConditions'
+import { badgeFixLink, requirementLabel } from '../utils/jobConditions'
 import { recordInterest } from '../utils/interests'
 import { scheduleLabel } from '../utils/schedule'
 import { useSaved } from '../hooks/useSaved'
@@ -42,6 +44,8 @@ import ReachRadar from '../components/ReachRadar'
 import { QuoteRequestCard } from '../components/QuoteRequest'
 import { useMyCity } from '../hooks/useMyCity'
 import { travelLabel } from '../utils/reach'
+import { PromoBadge, PromoteCard } from '../components/Promotion'
+import { activePromotion } from '../services/promotionService'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -96,8 +100,10 @@ function ListingDetailPage() {
     : { title: 'Posao je objavljen!', text: 'Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena.' }
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
-  const offerGate = useOfferGate(user?.id, id)
   const [listing, setListing] = useState(null)
+  const conditionCheck = useJobConditionCheck(user?.id, listing?.conditions?.requires || [])
+  const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
+  const offerLabel = offerCta(offerGate, conditionCheck.missing)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -144,7 +150,7 @@ function ListingDetailPage() {
   const share = async () => {
     const url = window.location.href
     try {
-      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Poso.ba`, url })
+      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Zadatak`, url })
       if (!shared) { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
     } catch { /* user cancelled */ }
   }
@@ -209,6 +215,12 @@ function ListingDetailPage() {
   }, [isOwner, id])
   const myBid = useMemo(() => bids.find((bid) => bid.bidder_id === user?.id && bid.status !== 'withdrawn'), [bids, user])
   const acceptedBid = useMemo(() => bids.find((bid) => bid.status === 'accepted'), [bids])
+  // rejected while the job is still open: the provider can come back with a new price (marketplace/01)
+  const canRebid = Boolean(user && listing && user.id !== listing.user_id && myBid?.status === 'rejected' && listing.status === 'published' && !acceptedBid && listing.status !== 'expired')
+  // offers that arrive live (useRealtimeSync) flash once; the ones on screen at first paint don't
+  const [firstBidIds, setFirstBidIds] = useState(null)
+  if (firstBidIds === null && core.data) setFirstBidIds(new Set(core.data.bids.map((bid) => bid.id)))
+  const freshBidIds = useMemo(() => new Set(bids.filter((bid) => firstBidIds && !firstBidIds.has(bid.id)).map((bid) => bid.id)), [bids, firstBidIds])
   const tags = useMemo(() => (listing?.listing_tags || []).map((item) => item.tags?.name).filter(Boolean), [listing])
 
   const openBidSheet = () => {
@@ -230,12 +242,20 @@ function ListingDetailPage() {
       toast('Ovaj posao je predaleko od grada u tvom profilu za ovaj budžet. Pogledaj poslove bliže tebi.', { kind: 'info' })
       return
     }
+    // klijent traži značku koju izvođač nema: vodi ga pravo na mjesto gdje je dobija
+    if (offerGate === 'missing_badges') {
+      const first = conditionCheck.missing[0]
+      toast(`Za ovaj posao treba značka: ${conditionCheck.missing.map(requirementLabel).join(', ')}.`, { kind: 'info' })
+      navigate(badgeFixLink(first, `/listings/${id}`))
+      return
+    }
     if (offerGate === 'pending') {
       toast('Identitet se još provjerava — obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
       return
     }
     setBidError('')
     setEditingBid(false)
+    if (canRebid) setBidForm({ amount: '', message: myBid.message || '' })
     setSheetOpen(true)
   }
 
@@ -279,7 +299,7 @@ function ListingDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['me'] })
       setBidForm({ amount: '', message: '' })
       setSheetOpen(false)
-      setMessage('Ponuda je uspješno poslana.'); toast('Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
+      setMessage('Ponuda je uspješno poslana.'); toast(canRebid ? 'Nova cijena je poslana klijentu.' : 'Ponuda poslana. Javit ćemo ti kad klijent odgovori.', { kind: 'success' })
     } catch (requestError) {
       // Cijeli Error, ne samo tekst: odbijanje zbog verifikacije nosi i link (akcija).
       setBidError(requestError)
@@ -445,10 +465,11 @@ function ListingDetailPage() {
         <div className={`sheet-backdrop ${offerSheet.closing ? 'is-closing' : ''}`} inert={offerSheet.closing || undefined} role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
-            <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : 'Pošalji ponudu'}</h2>
+            <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : canRebid ? 'Pošalji novu cijenu' : 'Pošalji ponudu'}</h2>
+            {canRebid && !editingBid && <p className="rebid-note" data-testid="rebid-sheet-note"><strong>Klijent je odbio {formatPrice(myBid.amount)}.</strong><span>Predloži drugu cijenu ili objasni šta je uključeno.</span></p>}
             <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
             <form className="auth-form" onSubmit={submitBid}>
-              <label>Tvoja ponuda (KM)<input type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
+              <label>Tvoja ponuda (KM)<input data-testid="offer-amount" type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
               {Number(bidForm.amount) > 0 && feePercent != null && (
                 <p className="offer-net">Tebi sjeda <strong>{formatPrice(Math.round(Number(bidForm.amount) * (1 - feePercent / 100) * 100) / 100)}</strong> <span>(naknada {feePercent}%)</span></p>
               )}
@@ -462,10 +483,10 @@ function ListingDetailPage() {
                   </div>
                 </div>
               )}
-              <label>Obrazloženje<textarea minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
+              <label>Obrazloženje<textarea data-testid="offer-message" minLength="3" maxLength="2000" value={bidForm.message} onChange={(event) => setBidForm({ ...bidForm, message: event.target.value })} placeholder="Napiši zašto si prava osoba za ovaj posao i šta je uključeno u cijenu." required /></label>
               <RuleOneNotice compact />
               <ActionError error={bidError} />
-              <button type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
+              <button data-testid="offer-submit" type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>
           </section>
@@ -482,8 +503,8 @@ function ListingDetailPage() {
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={OFFER_CTA[offerGate]}
+          isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} canRebid={canRebid} freshBidIds={freshBidIds} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={offerLabel} offerGate={offerGate} conditionCheck={conditionCheck}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -522,6 +543,7 @@ function ListingDetailPage() {
 
             <header className="job-head">
               <div className="job-chips">
+                {listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}
                 <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
                 {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
                 {listing.status === 'assigned' && <span className="pill pill-gold"><Lock size={12} /> Izvođač odabran · uplata osigurana</span>}
@@ -560,6 +582,11 @@ function ListingDetailPage() {
 
             <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} />
 
+            <ConditionsCard
+              conditions={listing.conditions} travelAllowance={listing.travel_allowance} held={user ? conditionCheck.held : null}
+              identityOk={!['needed', 'pending', 'rejected'].includes(offerGate)} isOwner={isOwner} next={`/listings/${id}`}
+            />
+
             {requirements.length > 0 && (
               <section className="job-card">
                 <h2>Obavezni uslovi</h2>
@@ -578,7 +605,7 @@ function ListingDetailPage() {
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
                 <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
-                <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+                <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
               </>
             )}
 
@@ -601,12 +628,12 @@ function ListingDetailPage() {
               {bids.length === 0 ? <p className="muted-text">Još nema ponuda. Budi prvi koji će poslati ponudu.</p> : (
                 <div className="offers-list">
                   {bids.map((bid) => (
-                    <article className={`offer-row bid-row status-${bid.status}`} key={bid.id}>
+                    <article className={`offer-row bid-row status-${bid.status} ${freshBidIds.has(bid.id) ? 'is-just-arrived' : ''}`} key={bid.id}>
                       {bid.bidder?.avatar_url
                         ? <img loading="lazy" decoding="async" src={bid.bidder.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
                         : <div className="poster-avatar"><UserRound size={18} /></div>}
                       <div>
-                        <strong>{bid.bidder?.display_name || 'Korisnik Poso.ba'}</strong>
+                        <strong>{bid.bidder?.display_name || 'Korisnik Zadatka'}</strong>
                         <p>{bid.message}</p>
                         <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
                         {(isOwner || bid.bidder_id === user?.id) && <OfferReplies bid={bid} userId={user?.id} canWrite={bid.status === 'pending'} />}
@@ -615,7 +642,7 @@ function ListingDetailPage() {
                         <b>{formatPrice(bid.amount)}</b>
                         {isOwner && bid.status === 'pending' && (
                           <div className="bid-owner-actions">
-                            <button type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
+                            <button data-testid="offer-accept" type="button" className="primary-button small-button" onClick={() => setBidStatus(bid.id, 'accepted')} disabled={listing.status !== 'published'}><Lock size={15} /> Prihvati i plati</button>
                             <button type="button" className="ghost-button danger-button" onClick={async () => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bid.id, 'rejected') }}><XCircle size={16} /> Odbij</button>
                           </div>
                         )}
@@ -673,7 +700,7 @@ function ListingDetailPage() {
                           <Sparkles size={13} /> {Math.round(provider.match_score)}
                         </span>
                       </div>
-                      <h3>{provider.display_name || 'Korisnik Poso.ba'}</h3>
+                      <h3>{provider.display_name || 'Korisnik Zadatka'}</h3>
                       <div className="rec-card-meta">
                         <span><MapPin size={14} /> {provider.city || 'Bosna i Hercegovina'}</span>
                         {provider.review_count > 0 && <strong>{provider.avg_rating}★</strong>}
@@ -718,7 +745,14 @@ function ListingDetailPage() {
             <div className="job-offer-card">
               <span>Okvirni budžet</span>
               <strong>{formatPrice(listing.price, listing.currency)}</strong>
-              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
+              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {offerLabel}</button>}
+              {canRebid && (
+                <div className="rebid-note" data-testid="rebid-note">
+                  <strong>Klijent je odbio ponudu. Pošalji novu cijenu.</strong>
+                  <span>Posao je još otvoren; klijent vidi samo tvoju najnoviju cijenu.</span>
+                </div>
+              )}
+              {canRebid && <button type="button" className="primary-button full-width" data-testid="rebid-open" onClick={openBidSheet}><Send size={18} /> Pošalji novu cijenu</button>}
               {!isOwner && myBid && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
@@ -740,10 +774,12 @@ function ListingDetailPage() {
               {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
               {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
               {expired && <div className="outcome-state cancelled">Rok je prošao</div>}
-              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Poso.ba`}</div>}
-              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Poso.ba Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
+              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Zadatku`}</div>}
+              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Zadatak Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
               {!payment && <HowPaymentWorks />}
             </div>
+
+            {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} />}
 
             <Link to={`/korisnik/${listing.user_id}`} className="job-poster">
               {poster?.avatar_url
@@ -751,7 +787,7 @@ function ListingDetailPage() {
                 : <div className="poster-avatar"><UserRound size={22} /></div>}
               <div>
                 <small>Objavio</small>
-                <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
+                <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
                 <span>{poster?.city || 'Bosna i Hercegovina'}{poster?.created_at ? ` · član od ${new Date(poster.created_at).getFullYear()}.` : ''}</span>
               </div>
             </Link>
@@ -759,7 +795,7 @@ function ListingDetailPage() {
         </div>
       </main>
 
-      {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> {OFFER_CTA[offerGate]}</button>}
+      {!isOwner && (!myBid || canRebid) && listing.status === 'published' && <button type="button" className="sticky-offer-button primary-button" onClick={openBidSheet}><Send size={18} /> {canRebid ? 'Pošalji novu cijenu' : offerLabel}</button>}
 
       {overlays}
     </div>

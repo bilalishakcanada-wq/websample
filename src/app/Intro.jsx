@@ -14,12 +14,12 @@ const SLIDES = {
   poster: [
     { Art: WrenchMascot, title: 'Uradi bilo šta već danas', text: 'Šta god je na tvojoj listi — od popravke slavine do selidbe — mi ćemo to srediti.' },
     { Art: FindMascot, title: 'Pronađi provjerene majstore', text: 'Cijela zajednica stručnjaka s ocjenama i recenzijama, spremna da ti skine posao s liste.' },
-    { Art: WalletMascot, title: 'Plati tek kad si zadovoljan', text: 'Novac je sigurno rezervisan na Poso.ba dok posao ne bude završen i ti ne oslobodiš uplatu.' },
+    { Art: WalletMascot, title: 'Plati tek kad si zadovoljan', text: 'Novac je sigurno rezervisan na Zadatku dok posao ne bude završen i ti ne oslobodiš uplatu.' },
   ],
   tasker: [
     { Art: BoxMascot, title: 'Biraj poslove u svojoj blizini', text: 'Novi poslovi stižu svaki dan — čišćenje, selidbe, popravke, IT, dizajn i još.' },
     { Art: FindMascot, title: 'Pošalji ponudu za minutu', text: 'Napiši cijenu i kratku poruku. Klijent bira tebe po ocjenama i profilu.' },
-    { Art: EarnMascot, title: 'Naplati sigurno', text: 'Klijent plaća unaprijed na Poso.ba, a tebi zarada sjeda na balans čim posao potvrdi.' },
+    { Art: EarnMascot, title: 'Naplati sigurno', text: 'Klijent plaća unaprijed na Zadatku, a tebi zarada sjeda na balans čim posao potvrdi.' },
   ],
 }
 

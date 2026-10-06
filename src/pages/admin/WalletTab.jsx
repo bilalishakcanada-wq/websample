@@ -5,6 +5,7 @@ import { paymentService } from '../../services/paymentService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { Avatar, CreditsDialog, WALLET_KIND_LABEL, formatKM, useStaff } from './shared'
 import { withBase } from '../../utils/paths'
+import { SkeletonRows } from '../../components/Skeleton'
 
 /** Platform-wide balances: totals, quick top-up, top balances and the ledger. */
 function WalletTab() {
@@ -17,6 +18,12 @@ function WalletTab() {
   const [message, setMessage] = useState('')
   const [jobs, setJobs] = useState(null)
   const [payouts, setPayouts] = useState([])
+  const [proofs, setProofs] = useState({})     // payment id → foto dokazi (supabase/booking/04)
+  const toggleProofs = async (paymentId) => {
+    if (proofs[paymentId]) { setProofs((current) => { const next = { ...current }; delete next[paymentId]; return next }); return }
+    const { rows } = await paymentService.proofs(paymentId)
+    setProofs((current) => ({ ...current, [paymentId]: rows }))
+  }
 
   const load = () => Promise.all([
     adminService.walletOverview(150).then(setData),
@@ -59,7 +66,7 @@ function WalletTab() {
     try { setCandidates(await adminService.listUsers({ term: term.trim(), limit: 6 })) } catch (requestError) { setError(requestError.message) }
   }
 
-  if (!data && !error) return <div className="page-state">Učitavanje balansa...</div>
+  if (!data && !error) return <SkeletonRows n={4} />
 
   return (
     <div className="admin-table">
@@ -113,7 +120,7 @@ function WalletTab() {
 
       {jobs && (
         <section className="dossier-card">
-          <h3><Lock size={16} /> Poso.ba Pay — osigurane uplate</h3>
+          <h3><Lock size={16} /> Zadatak Pay — osigurane uplate</h3>
           <div className="wallet-kpis">
             <div className="wallet-kpi main"><Lock size={18} /><strong>{formatKM(jobs.held)}</strong><span>trenutno osigurano (escrow)</span></div>
             <div className="wallet-kpi"><AlertTriangle size={18} /><strong>{jobs.disputed}</strong><span>otvorenih sporova</span></div>
@@ -132,6 +139,26 @@ function WalletTab() {
                 </small>
                 {row.status === 'disputed' && <small className="pay-dispute-text"><AlertTriangle size={12} /> {row.dispute_by === 'client' ? 'Klijent' : 'Izvođač'}: „{row.dispute_reason}“</small>}
                 {row.resolution && <small>Odluka: {row.resolution}</small>}
+                {row.status === 'disputed' && (
+                  <button type="button" className="link-button" onClick={() => toggleProofs(row.id)}>
+                    {proofs[row.id] ? 'Sakrij foto dokaze' : 'Foto dokazi sa lica mjesta'}
+                  </button>
+                )}
+                {proofs[row.id] && (proofs[row.id].length === 0
+                  ? <small>Izvođač nije priložio foto dokaz.</small>
+                  : (
+                    <div className="wf-proof-list">
+                      {proofs[row.id].map((proof) => (
+                        <a key={proof.id} href={proof.photo_url} target="_blank" rel="noreferrer" className="wf-proof-item">
+                          <img src={proof.photo_url} alt={proof.kind === 'before' ? 'Prije' : 'Poslije'} loading="lazy" />
+                          <span>
+                            <strong>{proof.kind === 'before' ? 'Prije' : 'Poslije'}</strong> · {new Date(proof.captured_at).toISOString().slice(0, 16).replace('T', ' ')} UTC
+                            <small>GPS {Number(proof.lat).toFixed(5)}, {Number(proof.lng).toFixed(5)} ±{Math.round(proof.accuracy_m)} m{proof.distance_m != null ? ` · ${Math.round(proof.distance_m)} m od tačke posla` : ''}{proof.source === 'camera_file' ? ' · sistemska kamera' : ''}</small>
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  ))}
               </div>
               <div className="pay-admin-side">
                 <b>{formatKM(row.amount)}</b>

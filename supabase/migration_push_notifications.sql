@@ -1,5 +1,5 @@
 -- =========================================================================
--- Poso.ba — Web Push notifications
+-- Zadatak — Web Push notifications
 --   * push_subscriptions: one row per browser/device the user allowed
 --   * notifications.link / dedupe_key: where a notification opens + debounce
 --   * new in-app notifications for messages and offers

@@ -1,7 +1,7 @@
 # Uplata karticom i isplata na račun
 
 Provajder: **Monri** (WebPay Form). Radi u KM (BAM) i najrašireniji je procesor
-kartica u BiH. Poso.ba nikad ne vidi broj kartice: korisnik je unosi na Monri
+kartica u BiH. Zadatak nikad ne vidi broj kartice: korisnik je unosi na Monri
 stranici.
 
 ## Tok uplate

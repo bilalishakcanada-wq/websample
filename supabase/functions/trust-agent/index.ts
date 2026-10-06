@@ -1,4 +1,4 @@
-// Poso.ba — AI trust agent.
+// Zadatak — AI trust agent.
 //
 // Reads everything the platform knows about an account (profile, listings,
 // bids, messages, reviews, Rule #1 events, reports) and writes a trust
@@ -10,6 +10,7 @@
 // asking for one user: { "user_id": "..." }.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { withCors } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -19,13 +20,12 @@ const MODEL = Deno.env.get('TRUST_MODEL') || 'claude-haiku-4-5-20251001'
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-sweep-key',
 }
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } })
 
-const SYSTEM = `You are the trust & safety analyst for Poso.ba, a Bosnian services marketplace (like Airtasker).
+const SYSTEM = `You are the trust & safety analyst for Zadatak, a Bosnian services marketplace (like Airtasker).
 You receive a dossier about one account and must judge how trustworthy it is and whether it is trying to abuse the platform.
 
 Rule #1 of the platform: no phone numbers, emails, links or social media anywhere except in messages after a bid is accepted.
@@ -117,8 +117,7 @@ async function processUser(userId: string, autoSuspend: boolean) {
   return { user_id: userId, status: 'assessed', risk_level: result.risk_level, trust_score: result.trust_score, recommended_action: result.recommended_action }
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+Deno.serve(withCors(async (req) => {
   const body = await req.json().catch(() => ({}))
 
   let mode: 'sweep' | 'admin'
@@ -158,4 +157,4 @@ Deno.serve(async (req) => {
     }
   }
   return json({ mode, configured: true, auto_suspend: autoSuspend, processed: results.length, results })
-})
+}, 'authorization, x-client-info, apikey, content-type, x-sweep-key'))

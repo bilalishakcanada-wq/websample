@@ -117,7 +117,7 @@ function Chat(props) {
               const mine = item.sender_id === user.id
               const image = item.attachment_type === 'image' && item.attachment_url
               return (
-                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${image ? 'has-image' : ''}`}>
+                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                   {image ? <PrivateImage fileRef={item.attachment_url} alt="Slika" /> : <p>{item.content}</p>}
                   <span className="ch-meta">{timeOf(item.created_at)}{mine && (item.read_at ? <CheckCheck size={13} className="seen" /> : <Check size={13} />)}</span>
                 </div>
@@ -135,8 +135,8 @@ function Chat(props) {
         <form className="ch-composer" onSubmit={sendMessage}>
           <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
           <button type="button" className="ch-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={22} /></button>
-          <textarea ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} placeholder="Napiši poruku…" aria-label="Poruka" rows={1} maxLength={2000} enterKeyHint="send" />
-          <button type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
+          <textarea data-testid="chat-input" ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} placeholder="Napiši poruku…" aria-label="Poruka" rows={1} maxLength={2000} enterKeyHint="send" />
+          <button data-testid="chat-send" type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
         </form>
       ) : (
         <ChatStateNotice state={chatState} listingId={active.listing_id} />

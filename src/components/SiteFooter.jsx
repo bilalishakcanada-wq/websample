@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
+import { appConfig } from '../config/appConfig'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/messages']
 
@@ -72,16 +73,16 @@ function SiteFooter() {
           <div className="site-footer-brand">
             <BrandMark size={42} className="brand-mark" />
             <div>
-              <strong>Poso.ba</strong>
+              <strong>{appConfig.appName}</strong>
               <span>Marketplace za usluge u Bosni i Hercegovini</span>
             </div>
           </div>
           <div className="site-footer-trust">
             <span><ShieldCheck size={14} /> Moderirani oglasi</span>
             <span><MessageCircle size={14} /> Zaštićena komunikacija</span>
-            <a href="mailto:podrska@poso.ba"><Mail size={14} /> podrska@poso.ba</a>
+            <Link to="/kontakt"><Mail size={14} /> Piši podršci</Link>
           </div>
-          <span className="site-footer-copy">© {new Date().getFullYear()} Poso.ba. Sva prava zadržana.</span>
+          <span className="site-footer-copy">© {new Date().getFullYear()} Zadatak. Sva prava zadržana.</span>
         </div>
       </div>
     </footer>

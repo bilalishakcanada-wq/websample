@@ -67,7 +67,7 @@ function MobileNav() {
       {/* one pill that glides to the active tab */}
       {active >= 0 && <span className="mobile-nav-indicator" aria-hidden="true" style={{ '--tab': active }} />}
       {tabs.map(([to, label, Icon], index) => (
-        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" onClick={(event) => onTab(event, to, index)} onPointerDown={() => prefetchRoute(to)}>
+        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" data-testid={`nav-${to === '/' ? 'home' : to.slice(1).replace(/\//g, '-')}`} onClick={(event) => onTab(event, to, index)} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">
             <Icon size={22} strokeWidth={isActiveStroke(to, pathname)} />
             {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}

@@ -1,3 +1,4 @@
+import './utils/storageRename'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AuthProvider } from './context/AuthContext.jsx'
@@ -29,10 +30,17 @@ const DataProvider = persister
 // the stylesheet loads without blocking the boot screen; React mounts only once it has applied
 const cssReady = () => {
   const links = [...document.querySelectorAll('link[rel="preload"][as="style"], link[rel="stylesheet"]')].filter((link) => /\/assets\/.*\.css/.test(link.href))
+  // the link's own onload="…" turns the preload into a stylesheet; browsers too old for the page's
+  // security policy ('unsafe-hashes') block that handler, so the switch is repeated here when needed
+  const applied = (link) => { if (link.rel === 'preload') link.rel = 'stylesheet' }
   return Promise.all(links.map((link) => (link.sheet && link.rel === 'stylesheet' ? Promise.resolve() : new Promise((resolve) => {
-    link.addEventListener('load', resolve, { once: true })
+    link.addEventListener('load', () => {
+      if (link.rel !== 'preload') return resolve()
+      link.addEventListener('load', resolve, { once: true })
+      applied(link)
+    }, { once: true })
     link.addEventListener('error', resolve, { once: true })
-    window.setTimeout(resolve, 4000) // never wait forever on a stalled stylesheet
+    window.setTimeout(() => { applied(link); resolve() }, 4000) // never wait forever on a stalled stylesheet
   }))))
 }
 

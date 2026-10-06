@@ -56,7 +56,8 @@ starost.
 `identity_ok(user)` je tačno kad je identitet odobren **ili** je nalog stariji od
 prelaznog roka **ili** je korisnik član tima.
 
-Prekidači su u tabeli `verification_policy` (mijenja se samo migracijom):
+Prekidači su u tabeli `verification_policy` (mijenja se migracijom, a `require_for_jobs`
+i `require_for_bids` i beta prekidačem ispod):
 
 | prekidač | zadano | značenje |
 |---|---|---|
@@ -64,6 +65,14 @@ Prekidači su u tabeli `verification_policy` (mijenja se samo migracijom):
 | `require_for_bids` | ✅ | bez verifikacije se ne može poslati ponuda |
 | `require_for_chat` | ❌ | dopisivanje ostaje otvoreno |
 | `grandfather_before` | trenutak migracije | **postojeći nalozi su izuzeti** |
+
+### Beta prekidač (`beta_skip_identity.sql`)
+
+Za beta testiranje admin u konzoli (Identitet → „Isključi za beta test") postavlja
+`require_for_jobs` i `require_for_bids` na `false` kroz `set_identity_beta(true)`; tada
+objava posla i ponude ne traže ličnu kartu, za **sve** korisnike. Isplate i dalje traže
+odobren identitet. „Uključi provjeru ponovo" vraća oba na `true`. Svaka promjena ide u
+dnevnik tima. Datoteka pri primjeni prekidač uključuje.
 
 Provedeno dvostruko: RLS politika (`listings`, `bids`) i trigger koji daje jasnu
 poruku `VERIFIKACIJA_POTREBNA` umjesto tihog RLS odbijanja.
@@ -75,6 +84,18 @@ nalog radi normalno; poslije odobrenja novi nalog prolazi. 18/18 E2E prolazi.
 rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; oslanja se na
 `migration_identity_state_protection.sql` (već na produkciji). Sučelje (`useOfferGate`) već pita
 `identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
+
+**Primijenjeno 04.10.2026.:** [`jobs_require_verified.sql`](jobs_require_verified.sql) isto to radi za
+**objavu posla**: novi posao objavljuje samo odobren identitet ili tim (`can_post_job()`),
+bez prelaznog roka; uređivanje već objavljenih poslova ostaje slobodno. Usput vraća i
+provjeru suspenzije pri objavi. Forma za objavu (računar i telefon) pita `can_post_job()`
+i dok datoteka nije primijenjena pada nazad na `identity_ok()`, pa nikad ne zaključa
+nekoga koga baza pušta. Cijeli tok (registracija → ID → odobrenje u adminu → objava)
+pokriva `e2e/post-job-verification.spec.js`.
+
+**Na čekanju:** [`id_badge_counts.sql`](id_badge_counts.sql): značka „Lična karta
+verifikovana" (stranica Značke) i odobren JMBG tok su ista stvar. `identity_verified()`
+prihvata i značku, a odobrenje kroz JMBG tok dodjeljuje značku (i već odobrenima).
 
 ## Zašto postojeći nalozi nisu zaključani
 
@@ -161,7 +182,7 @@ upozorenja prikaže. Odobrenje uvijek potpisuje moderator, koji uz predmet vidi 
 razloge i mjere kvaliteta.
 
 Oznaka uređaja je gruba (platforma, jezik, rezolucija, vremenska zona), ne izlazi
-iz Poso.ba i služi samo da se vidi kad isti uređaj šalje više identiteta.
+iz Zadatka i služi samo da se vidi kad isti uređaj šalje više identiteta.
 
 ### Testovi
 `e2e/identity-quality.spec.js`: mutna slika odbijena uz objašnjenje, tamna dobija

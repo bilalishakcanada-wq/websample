@@ -67,7 +67,7 @@ export async function enablePush() {
     subscription = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) })
   }
   await save(subscription)
-  try { localStorage.setItem('poso-push', 'on') } catch { /* ignore */ }
+  try { localStorage.setItem('zadatak-push', 'on') } catch { /* ignore */ }
   return 'granted'
 }
 
@@ -85,5 +85,5 @@ export async function disablePush({ keepDevice = false } = {}) {
   if (!subscription) return
   try { await supabase.rpc('delete_push_subscription', { p_endpoint: subscription.endpoint }) } catch { /* ignore */ }
   if (!keepDevice) { try { await subscription.unsubscribe() } catch { /* ignore */ } }
-  try { localStorage.removeItem('poso-push') } catch { /* ignore */ }
+  try { localStorage.removeItem('zadatak-push') } catch { /* ignore */ }
 }

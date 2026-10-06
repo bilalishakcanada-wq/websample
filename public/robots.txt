@@ -5,4 +5,4 @@ Disallow: /admin
 Disallow: /mod
 Disallow: /messages
 Disallow: /moji-poslovi
-Sitemap: https://poso.ba/sitemap.xml
+Sitemap: https://bilalishakcanada-wq.github.io/websample/sitemap.xml

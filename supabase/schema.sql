@@ -1,4 +1,4 @@
--- Poso.ba production-ready schema foundation
+-- Zadatak production-ready schema foundation
 -- IMPORTANT: Payment tables are prepared but provider remains unimplemented.
 
 create extension if not exists "pgcrypto";

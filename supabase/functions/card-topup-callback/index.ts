@@ -1,4 +1,4 @@
-// Poso.ba — Monri callback: the only place a card payment becomes balance.
+// Zadatak — Monri callback: the only place a card payment becomes balance.
 //
 // Monri POSTs the transaction as JSON and signs it with
 //   Authorization: WP3-callback sha512(MONRI_KEY + raw body)

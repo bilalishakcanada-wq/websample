@@ -5,11 +5,14 @@ import { JobPaymentCard } from '../components/JobPayment'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import { RequirementsList } from '../components/TaskExtras'
+import { ConditionsCard } from '../components/JobConditions'
 import ReachRadar from '../components/ReachRadar'
 import { QuoteRequestCard } from '../components/QuoteRequest'
 import { reachFor, travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
+import { PromoBadge, PromoteCard } from '../components/Promotion'
+import { activePromotion } from '../services/promotionService'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -22,8 +25,8 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
-    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
@@ -42,9 +45,10 @@ function JobDetail(props) {
     : isOwner
     ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
-        : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Poso.ba.' : 'Dogovorite detalje u porukama.']
+        : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Zadatku.' : 'Dogovorite detalje u porukama.']
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
             : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
+    : canRebid ? ['Klijent je odbio ponudu.', `Pošalji novu cijenu (odbijeno: ${money(myBid.amount)}). Posao je još otvoren.`]
     : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
         ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
@@ -81,6 +85,7 @@ function JobDetail(props) {
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
+        {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>Izmijeni ponudu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
         {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
@@ -93,13 +98,14 @@ function JobDetail(props) {
       </section>
 
       <section className="jd-sheet">
-        <h1 className="jd-title">{listing.title}</h1>
+        <h1 className="jd-title">{listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}{listing.title}</h1>
+        {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} compact />}
 
         {!isOwner && (
           <Link to={`/korisnik/${listing.user_id}`} className="jd-poster">
             <Avatar url={poster?.avatar_url} size={44} />
             <div>
-              <strong>{poster?.display_name || 'Korisnik Poso.ba'}</strong>
+              <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
               <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član!' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '—'}.`}</span>
             </div>
             <ChevronRight size={18} />
@@ -134,6 +140,11 @@ function JobDetail(props) {
 
         <p className="jd-desc">{descriptionBody?.trim() || 'Vlasnik nije dodao detaljan opis.'}</p>
 
+        <ConditionsCard
+          phone conditions={listing.conditions} held={user ? conditionCheck?.held : null} isOwner={isOwner} next={`/listings/${listing.id}`}
+          identityOk={!['needed', 'pending', 'rejected'].includes(offerGate)}
+        />
+
         {requirements.length > 0 && (
           <div className="jd-reqs">
             <h3>Obavezni uslovi</h3>
@@ -162,7 +173,7 @@ function JobDetail(props) {
         {payment && (isOwner || user?.id === payment.provider_id) && (
           <div className="jd-payment">
             <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
-            <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+            <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
           </div>
         )}
 
@@ -184,7 +195,7 @@ function JobDetail(props) {
               const m = metrics[bid.bidder_id]
               const mine = bid.bidder_id === user?.id
               return (
-                <article key={bid.id} className={`jd-offer status-${bid.status}`}>
+                <article key={bid.id} className={`jd-offer status-${bid.status} ${freshBidIds?.has(bid.id) ? 'is-just-arrived' : ''}`}>
                   <div className="jd-offer-head">
                     <Link to={`/korisnik/${bid.bidder_id}`} aria-label={`Profil: ${bid.bidder?.display_name || 'izvođač'}`}><Avatar url={bid.bidder?.avatar_url} size={56} /></Link>
                     <div className="jd-offer-who">

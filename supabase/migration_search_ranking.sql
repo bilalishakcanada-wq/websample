@@ -1,5 +1,5 @@
 -- ============================================================================
--- Poso.ba — search & matching in Postgres (applied 2026-09-21 through the Supabase
+-- Zadatak — search & matching in Postgres (applied 2026-09-21 through the Supabase
 -- migration history: search_ranking_foundation, provider_stats_and_bid_counts,
 -- search_listings_and_providers_rpcs, search_tsquery_light_stemming,
 -- search_listings_fuzzy_fallback, matching_uses_provider_stats,

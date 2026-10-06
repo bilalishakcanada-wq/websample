@@ -27,7 +27,7 @@ const FILTERS = [
 ]
 
 const SAFETY_TIPS = [
-  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Poso.ba poruke — tako je sve zabilježeno ako nešto krene po zlu.',
+  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Zadatak poruke — tako je sve zabilježeno ako nešto krene po zlu.',
   'Broj telefona i kontakt razmjenjujete tek kad je ponuda prihvaćena — do tada ih platforma automatski uklanja.',
   'Nikad ne plaćajte unaprijed van platforme i ne dijelite brojeve kartica ni lične dokumente.',
   'Oružje, droga, falsifikati i slično su zabranjeni — takve poruke se automatski uklanjaju, a nalog dobija opomenu.',
@@ -78,7 +78,7 @@ function MessagesPage() {
   const loading = inboxQuery.isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('poso-chat-tips') !== 'hidden' } catch { return true } })
+  const [tipsOpen, setTipsOpen] = useState(() => { try { return localStorage.getItem('zadatak-chat-tips') !== 'hidden' } catch { return true } })
   const listRef = useRef(null)
   const inputRef = useRef(null)
   const imageRef = useRef(null)
@@ -99,7 +99,7 @@ function MessagesPage() {
   const chatState = active?.chat_state || 'open'
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
-  // and the rows are patched locally: markRead's 'poso:messages-read' event already refreshes inbox + badge
+  // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
   useEffect(() => {
     if (!activeId || !threadQuery.data || markingRef.current) return
     const ids = threadQuery.data.filter((row) => row.receiver_id === user.id && !row.read_at).map((row) => row.id)
@@ -171,10 +171,12 @@ function MessagesPage() {
   const unreadTotal = inbox.reduce((sum, item) => sum + Number(item.unread || 0), 0)
 
   const togglePref = async (item, key) => {
+    const flip = (value) => setInbox((current) => current.map((row) => (row.id === item.id ? { ...row, [key]: value } : row)))
+    flip(!item[key])
     try {
       await messageService.setPref(user.id, item.id, { [key]: !item[key] })
-      setInbox((current) => current.map((row) => (row.id === item.id ? { ...row, [key]: !row[key] } : row)))
     } catch (requestError) {
+      flip(item[key])
       setError(requestError.message)
     }
   }
@@ -188,7 +190,7 @@ function MessagesPage() {
     const scan = scanChatMessage(text, active.contacts_allowed)
     if (!scan.clean) {
       setError(scan.kinds.includes('prohibited')
-        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Poso.ba.'
+        ? 'Ova poruka nije poslana: sadrži zabranjen sadržaj (oružje, droga, falsifikati i slično). Takve stvari se ne rade na Zadatku.'
         : `${contactInfoMessage(scan, 'poruka')} Kontakt možete razmijeniti čim ponuda bude prihvaćena.`)
       return
     }
@@ -196,14 +198,23 @@ function MessagesPage() {
     if (sendingRef.current) return
     sendingRef.current = true
     setSending(true)
+    // optimistic: the bubble shows at once (marked pending); the stored row replaces it, or on failure
+    // it is removed and the text goes back into the composer so nothing typed is lost
+    const tempId = `pending-${Date.now()}`
+    setThread((current) => [...current, { id: tempId, sender_id: user.id, receiver_id: active.other_id, content: text, created_at: new Date().toISOString(), pending: true }])
+    setDraft('')
+    inputRef.current?.focus()
     try {
       const created = await messageService.send({ conversationId: active.id, senderId: user.id, receiverId: active.other_id, content: text })
-      setThread((current) => (current.some((item) => item.id === created.id) ? current : [...current, created]))
+      setThread((current) => {
+        const rest = current.filter((item) => item.id !== tempId)
+        return rest.some((item) => item.id === created.id) ? rest : [...rest, created]
+      })
       if (created.content !== text) setNotice('Dio poruke je automatski uklonjen (Pravilo #1).')
-      setDraft('')
-      inputRef.current?.focus()
       loadInbox()
     } catch (requestError) {
+      setThread((current) => current.filter((item) => item.id !== tempId))
+      setDraft((current) => current || text)
       setError(requestError.message)
     } finally {
       sendingRef.current = false
@@ -245,7 +256,7 @@ function MessagesPage() {
     }
   }
 
-  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('poso-chat-tips', 'hidden') } catch { /* ignore */ } }
+  const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('zadatak-chat-tips', 'hidden') } catch { /* ignore */ } }
 
   // group the thread by day for separators
   const grouped = useMemo(() => {
@@ -330,7 +341,7 @@ function MessagesPage() {
                   <div className="chat-safety-banner">
                     <div>
                       <strong>Kako prepoznati prevaru i sigurno sarađivati?</strong>
-                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Poso.ba poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
+                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Zadatak poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
                     </div>
                     <button type="button" onClick={hideTips} aria-label="Zatvori"><X size={18} /></button>
                   </div>
@@ -379,7 +390,7 @@ function MessagesPage() {
                       {group.items.map((item) => {
                         const mine = item.sender_id === user.id
                         return (
-                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''}`}>
+                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                             {item.attachment_type === 'image' && item.attachment_url
                               ? <PrivateImage fileRef={item.attachment_url} alt="Slika" className="chat-image" />
                               : <p>{item.content}</p>}
@@ -403,7 +414,7 @@ function MessagesPage() {
                   <form className="chat-composer" onSubmit={sendMessage}>
                     <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
                     <button type="button" className="chat-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={20} /></button>
-                    <textarea
+                    <textarea data-testid="chat-input"
                       ref={inputRef}
                       value={draft}
                       onChange={(event) => setDraft(event.target.value)}
@@ -413,7 +424,7 @@ function MessagesPage() {
                       rows={1}
                       maxLength={2000}
                     />
-                    <button type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
+                    <button data-testid="chat-send" type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
                   </form>
                   <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
                   </>

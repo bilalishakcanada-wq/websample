@@ -10,7 +10,7 @@ import { publicError } from '../utils/validation'
  */
 /**
  * Gruba oznaka uređaja: platforma, jezik, rezolucija, vremenska zona.
- * Nije praćenje po webu — ne izlazi iz Poso.ba i služi samo da se vidi kad isti
+ * Nije praćenje po webu — ne izlazi iz Zadatka i služi samo da se vidi kad isti
  * uređaj šalje više različitih identiteta.
  */
 function deviceFingerprint() {
@@ -33,6 +33,10 @@ const call = async (fn, args) => {
     // poruke iz baze su već na našem jeziku i namijenjene korisniku
     if (/JMBG_NEISPRAVAN|JMBG_VEC_KORISTEN|DOKUMENT_VEC_KORISTEN|SLIKA_MUTNA|MALOLJETAN|IME_I_PREZIME|SLIKA_DOKUMENTA|VEC_RIJESENO|RAZLOG_ODBIJANJA/.test(poruka)) {
       throw new Error(poruka.replace(/^[A-Z_]+:\s*/, ''))
+    }
+    // ime na profilu (jedna riječ ili cifra) ne prolazi pravilo baze, pa se ni predmet ne može upisati
+    if (/FULL_NAME_INVALID/.test(poruka)) {
+      throw new Error('Ime na tvom profilu treba imati ime i prezime, samo slovima. Ispravi ga u Profilu, pa pošalji ponovo.')
     }
     console.error('Identity RPC failed', { fn, message: error.message, code: error.code })
     throw publicError()
@@ -62,6 +66,12 @@ export const identityService = {
   },
 
   /**
+   * Beta prekidač (samo admin): true = objava i ponude bez lične karte.
+   * Mijenja verification_policy u bazi; isplate i dalje traže identitet.
+   */
+  setBeta: (on) => call('set_identity_beta', { p_on: on }),
+
+  /**
    * Može li prijavljeni korisnik slati ponude, i ako ne, u kojoj je fazi:
    * 'ok' | 'needed' (nije poslao) | 'pending' (tim provjerava) | 'rejected'.
    * Pita istu funkciju kao baza (identity_verified, stroga — bez prelaznog roka;
@@ -72,6 +82,29 @@ export const identityService = {
     try {
       const [policy, predmet, strict] = await Promise.all([this.policy(), this.mine().catch(() => null), supabase.rpc('identity_verified')])
       if (!policy.require_for_bids) return 'ok'
+      let ok = strict.error ? null : strict.data
+      if (ok === null) {
+        const blagi = await supabase.rpc('identity_ok')
+        ok = blagi.error ? true : blagi.data
+      }
+      if (ok) return 'ok'
+      if (predmet && ['submitted', 'in_review'].includes(predmet.state)) return 'pending'
+      if (predmet?.state === 'rejected') return 'rejected'
+      return 'needed'
+    } catch { return 'ok' }
+  },
+
+  /**
+   * Smije li prijavljeni korisnik objaviti posao: 'ok' | 'needed' | 'pending' | 'rejected'.
+   * Pita can_post_job() — istu funkciju koju baza provjerava pri objavi (stroga, bez
+   * prelaznog roka; supabase/identity/jobs_require_verified.sql). Dok ta datoteka nije
+   * primijenjena, pita identity_ok() koju baza tada koristi, pa forma nikad ne zaključa
+   * nekoga koga bi baza pustila. Ako upit ne uspije, vraća 'ok' — baza ima zadnju riječ.
+   */
+  async postGate() {
+    try {
+      const [policy, predmet, strict] = await Promise.all([this.policy(), this.mine().catch(() => null), supabase.rpc('can_post_job')])
+      if (!policy.require_for_jobs) return 'ok'
       let ok = strict.error ? null : strict.data
       if (ok === null) {
         const blagi = await supabase.rpc('identity_ok')

@@ -1,4 +1,4 @@
-# Poso.ba
+# Zadatak
 
 **Live (beta):** https://bilalishakcanada-wq.github.io/websample/ — vodič za testere: [BETA.md](BETA.md) · mobilna/native aplikacija: [MOBILE.md](MOBILE.md)
 
@@ -28,7 +28,7 @@ originalnim BiH identitetom.
 - Admin panel (/admin) — podrška, prijave, moderacija oglasa, upravljanje korisnicima
 - Brisanje naloga (GDPR-style) putem Supabase Edge Function-a
 - PWA — instalabilna na telefon (manifest + service worker + ikone), Web Push obavijesti (ponude, poruke, isplate)
-- Poso.ba Pay — balans (pravi novac), rezervacija uplate pri prihvatanju ponude, oslobađanje, sporovi, admin rješavanje
+- Zadatak Pay — balans (pravi novac), rezervacija uplate pri prihvatanju ponude, oslobađanje, sporovi, admin rješavanje
 - Staff konzola (/admin, /mod) — nadzor uživo, dosijei, značke, suspenzije, balans, greške aplikacije
 - Native aplikacija (Capacitor 8): `ios/` (Xcode → simulator / iPhone / TestFlight) i `android/` — GitHub Actions gradi beta APK: https://github.com/bilalishakcanada-wq/websample/releases/tag/android-beta
 - Brend: znak „p✓“ (`src/components/BrandMark.jsx`, `scripts/brand-assets.mjs` → ikone/splash za iOS, Android i PWA) i porodica ilustracija (`src/app/Mascots.jsx`, dev galerija `/dev/ilustracije`)

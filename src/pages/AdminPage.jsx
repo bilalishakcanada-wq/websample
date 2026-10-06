@@ -73,7 +73,7 @@ function AdminPage({ mode = 'admin' }) {
     if (typeof Notification === 'undefined') return
     const result = await Notification.requestPermission()
     setNotifState(result)
-    if (result === 'granted') desktopNotify('Poso.ba obavijesti uključene', 'Dobit ćeš obavijest za svaku poruku podrške i suspenziju.')
+    if (result === 'granted') desktopNotify('Zadatak obavijesti uključene', 'Dobit ćeš obavijest za svaku poruku podrške i suspenziju.')
   }
 
   const quickSearch = (event) => {
@@ -92,7 +92,7 @@ function AdminPage({ mode = 'admin' }) {
         <aside className="adm-rail">
           <div className="adm-brand">
             <span className="adm-brand-mark"><ShieldCheck size={18} /></span>
-            <div><strong>{isAdminMode ? 'Kontrolna soba' : 'Mod panel'}</strong><small>Poso.ba tim</small></div>
+            <div><strong>{isAdminMode ? 'Kontrolna soba' : 'Mod panel'}</strong><small>Zadatak tim</small></div>
           </div>
           <nav className="adm-nav" aria-label="Panel">
             {tabs.map(({ id, label, icon: Icon, counter }) => {

@@ -1,8 +1,8 @@
-// Poso.ba — start a card top-up through Monri WebPay Form.
+// Zadatak — start a card top-up through Monri WebPay Form.
 //
 // The browser calls this with { amount } (KM). We open a card_payments row and
 // return the signed form fields; the browser POSTs them to Monri, where the
-// card is entered (card data never touches Poso.ba). Money reaches the balance
+// card is entered (card data never touches Zadatak). Money reaches the balance
 // only through card-topup-callback, never through the return redirect.
 //
 // Secrets (Supabase → Edge Functions → Secrets):
@@ -12,6 +12,7 @@
 // Without MONRI_KEY/MONRI_AUTHENTICITY_TOKEN card payments are off (503 CARD_PAYMENTS_OFF).
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { withCors } from '../_shared/cors.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -26,7 +27,6 @@ const MAX_KM = 2000
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 const json = (body: unknown, status = 200) =>
@@ -37,8 +37,7 @@ async function sha512(text: string) {
   return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+Deno.serve(withCors(async (req) => {
   if (req.method !== 'POST') return json({ error: 'method' }, 405)
   if (!MONRI_KEY || !MONRI_TOKEN) return json({ error: 'CARD_PAYMENTS_OFF' }, 503)
 
@@ -72,14 +71,14 @@ Deno.serve(async (req) => {
 
   const currency = 'BAM'
   const fields: Record<string, string> = {
-    ch_full_name: (profile.full_name || 'Poso.ba korisnik').slice(0, 30),
+    ch_full_name: (profile.full_name || 'Zadatak korisnik').slice(0, 30),
     ch_address: 'N/A',
     ch_city: (profile.city || 'Sarajevo').slice(0, 30),
     ch_zip: '71000',
     ch_country: 'BA',
     ch_phone: (profile.phone || '000000').slice(0, 30),
     ch_email: (profile.email || user.email || '').slice(0, 100),
-    order_info: `Poso.ba uplata na balans ${amount.toFixed(2)} KM`,
+    order_info: `Zadatak uplata na balans ${amount.toFixed(2)} KM`,
     order_number: orderNumber,
     amount: String(amountMinor),
     currency,
@@ -92,4 +91,4 @@ Deno.serve(async (req) => {
     callback_url_override: `${SUPABASE_URL}/functions/v1/card-topup-callback`,
   }
   return json({ action: MONRI_FORM, fields, order_number: orderNumber, test_mode: !LIVE })
-})
+}))

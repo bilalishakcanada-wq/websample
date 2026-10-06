@@ -126,13 +126,14 @@ function AdminPage({ mode = 'admin' }) {
             <span className="adm-live"><span className="admin-live-dot" /> uživo</span>
           </header>
 
-          {overview && !openUserId && (
+          {/* the tiles are there before the numbers arrive, so the tab below doesn't jump down */}
+          {!openUserId && (
             <div className="adm-kpis">
               {KPIS.map(([key, label, subKey, subTemplate]) => (
                 <div key={key} className={`adm-kpi kpi-${key}`}>
-                  <strong><CountUp value={overview[key] ?? 0} /></strong>
+                  <strong>{overview ? <CountUp value={overview[key] ?? 0} /> : '–'}</strong>
                   <span>{label}</span>
-                  <small>{subKey ? subTemplate.replace('{v}', overview[subKey] ?? 0) : subTemplate}</small>
+                  <small>{!overview ? ' ' : subKey ? subTemplate.replace('{v}', overview[subKey] ?? 0) : subTemplate}</small>
                 </div>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight,
 import { JobPaymentCard } from '../components/JobPayment'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
+import LiveTracking from '../components/LiveTracking'
 import { RequirementsList } from '../components/TaskExtras'
 import { ConditionsCard } from '../components/JobConditions'
 import ReachRadar from '../components/ReachRadar'
@@ -172,6 +173,7 @@ function JobDetail(props) {
         )}
         {payment && (isOwner || user?.id === payment.provider_id) && (
           <div className="jd-payment">
+            <LiveTracking payment={payment} listing={listing} role={isOwner ? 'client' : 'provider'} />
             <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
             <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
           </div>

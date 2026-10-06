@@ -6,6 +6,7 @@ import { paymentService } from '../services/paymentService'
 import ProofCamera from './ProofCamera'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
+import { confirmPaymentIdentity } from '../utils/biometric'
 import { toast } from './Toaster'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 
@@ -139,7 +140,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       text: 'Uplata odmah ide izvođaču. Ovo se ne može poništiti.',
       confirmLabel: 'Odobri i isplati',
     })
-    if (!ok) return
+    if (!ok || !(await confirmPaymentIdentity(`Isplata za posao: ${km(payment.amount)}`))) return
     run('approve', () => paymentService.approveWork(payment.listing_id), 'Odobreno — izvođač je dobio uplatu.')
   }
 
@@ -159,7 +160,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       text: 'Izvođač odmah dobija novac, bez dokaza o obavljenom poslu. Ovo se ne može poništiti.',
       confirmLabel: 'Oslobodi uplatu', danger: true,
     })
-    if (!ok) return
+    if (!ok || !(await confirmPaymentIdentity(`Isplata za posao: ${km(payment.amount)}`))) return
     run('release', () => paymentService.releasePayment(payment.listing_id), 'Uplata je oslobođena izvođaču.')
   }
 
@@ -179,7 +180,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       text: `Iznos se odmah skida s tvog balansa i čuva na Zadatku zajedno s ostatkom. Nova cijena posla je ${km(Number(payment.amount) + Number(increase.request.amount_km))}.`,
       confirmLabel: 'Odobri i plati',
     })
-    if (!ok) return
+    if (!ok || !(await confirmPaymentIdentity(`Plaćanje +${km(increase.request.amount_km)} za posao`))) return
     run('incresp', () => paymentService.respondPriceIncrease(increase.request.id, true), 'Povećanje je odobreno i plaćeno.')
   }
 

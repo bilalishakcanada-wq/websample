@@ -8,6 +8,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerPlugin(ZadatakNativePlugin.class); // before super: the bridge is built there
         super.onCreate(savedInstanceState);
         WebView webView = getBridge() != null ? getBridge().getWebView() : null;
         if (webView == null) return;

@@ -20,6 +20,7 @@ import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../util
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
 import WorkFlow from '../components/WorkFlow'
+import LiveTracking from '../components/LiveTracking'
 import { paymentService } from '../services/paymentService'
 import { setPageTitle } from '../utils/pageTitle'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -604,6 +605,7 @@ function ListingDetailPage() {
 
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
+                <LiveTracking payment={payment} listing={listing} role={isOwner ? 'client' : 'provider'} />
                 <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
                 <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
               </>

@@ -5,6 +5,7 @@ import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
+import { confirmPaymentIdentity } from '../../utils/biometric'
 
 const KIND = {
   admin_credit: ['Uplata — Zadatak tim', Gift],
@@ -78,6 +79,7 @@ function WalletPage() {
 
   const withdraw = async (event) => {
     event.preventDefault()
+    if (!(await confirmPaymentIdentity(`Isplata ${amount} KM na tvoj račun`))) return
     setBusy(true)
     setActionError('')
     try {

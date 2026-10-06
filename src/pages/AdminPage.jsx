@@ -105,9 +105,11 @@ function AdminPage({ mode = 'admin' }) {
             })}
           </nav>
           <div className="adm-rail-foot">
-            {notifState !== 'granted' && notifState !== 'unsupported' && (
+            {notifState === 'default' && (
               <button type="button" className="adm-notif" onClick={enableDesktop}><BellRing size={14} /> Uključi obavijesti</button>
             )}
+            {/* once blocked the browser won't ask again, so the button would do nothing: say where to allow them */}
+            {notifState === 'denied' && <small>Obavijesti su blokirane u pregledniku. Dozvoli ih u postavkama sajta.</small>}
             <Link to="/" className="adm-rail-link">← Nazad na stranicu</Link>
             <small>{user.email}</small>
           </div>

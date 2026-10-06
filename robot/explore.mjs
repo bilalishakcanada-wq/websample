@@ -34,7 +34,8 @@ const SLOW_MS = Number(process.env.ROBOT_SLOW_MS || 6000)
 // Requests the sandbox or CI can't reach, or that are expected to fail; not the site's fault.
 const IGNORE_URL = /openfreemap|tiles\.|basemaps|fonts\.(googleapis|gstatic)|challenges\.cloudflare|turnstile|google-analytics|googletagmanager|sentry|\/favicon|\.well-known|web-push|fcm\.googleapis|nominatim/i
 const IGNORE_CONSOLE = [
-  /openfreemap|maplibre|tiles|Failed to load resource/i, // network errors are reported from the request itself
+  // network errors are reported from the request itself; a fetch cut off by leaving the page also logs "Failed to fetch"
+  /openfreemap|maplibre|tiles|Failed to load resource|Failed to fetch(?! dynamically)/i,
   /Download the React DevTools/i,
   /turnstile|challenges\.cloudflare/i,
   /\[vite\]|service ?worker/i,

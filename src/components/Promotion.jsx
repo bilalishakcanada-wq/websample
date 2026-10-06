@@ -19,15 +19,17 @@ const TIER_COPY = {
 }
 const TierIcon = ({ tier, size = 16 }) => (tier === 'vip' ? <Crown size={size} /> : tier === 'hitno' ? <Flame size={size} /> : <Megaphone size={size} />)
 
+const optionsQuery = (userId, enabled) => ({
+  queryKey: keys.promotionOptions(userId),
+  queryFn: () => promotionService.options(),
+  enabled: Boolean(userId) && enabled,
+  staleTime: 60 * 1000,
+  meta: { persist: false },
+})
+
 /** Packages + the signed-in person's balance; null until supabase/marketplace/01 is on the database (UI stays hidden). */
 export function usePromotionOptions(userId, enabled = true) {
-  return useQuery({
-    queryKey: keys.promotionOptions(userId),
-    queryFn: () => promotionService.options(),
-    enabled: Boolean(userId) && enabled,
-    staleTime: 60 * 1000,
-    meta: { persist: false },
-  }).data ?? null
+  return useQuery(optionsQuery(userId, enabled)).data ?? null
 }
 
 /** "Hitno" / "VIP" chip on cards, the map popup and the job page. */
@@ -100,14 +102,15 @@ export async function promoteAfterPublish(listingId, tier) {
 export function PromoteCard({ listing, userId, onDone, compact = false }) {
   const queryClient = useQueryClient()
   const eligible = listing?.status === 'published' && !listing?.invited_provider && listing?.user_id === userId
-  const options = usePromotionOptions(userId, eligible)
+  const { data: options, isPending } = useQuery(optionsQuery(userId, eligible))
   const [busy, setBusy] = useState('')
   const [error, setError] = useState(null)
-  if (!eligible || !options?.plans?.length) return null
+  // the card holds its place while the packages load, so the job details below it don't jump
+  if (!eligible || (!isPending && !options?.plans?.length)) return null
 
   const active = activePromotion(listing)
   const rank = { hitno: 1, vip: 2 }
-  const offers = options.plans.filter((plan) => (rank[plan.tier] || 0) > (rank[active] || 0))
+  const offers = (options?.plans || []).filter((plan) => (rank[plan.tier] || 0) > (rank[active] || 0))
 
   const buy = async (plan) => {
     const ok = await confirmDialog({
@@ -140,6 +143,7 @@ export function PromoteCard({ listing, userId, onDone, compact = false }) {
           : <strong>Brže do ponuda: izdvoji oglas</strong>}
       </div>
       {!active && <p>Izdvojeni poslovi su uvijek na vrhu pretrage u svom radijusu.</p>}
+      {isPending && active !== 'vip' && <div className="promo-card-actions" aria-hidden="true"><span className="sk promo-buy-placeholder" /></div>}
       {offers.length > 0 && (
         <div className="promo-card-actions">
           {offers.map((plan) => (

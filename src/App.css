@@ -12500,12 +12500,12 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 /* ---------- skeletons: one GPU-composited shimmer for every placeholder ---------- */
 /* the feed-style shimmer: a soft grey block with a slow, narrow highlight sweeping left→right,
    all blocks in phase (one timeline), composited (transform only) */
-.sk, .skeleton-card, .detail-skeleton, .ap-skeleton {
+.sk, .skeleton-card, .detail-skeleton {
   position: relative; display: block; overflow: hidden;
   background: #e9ecf1;
   contain: paint;
 }
-.sk::after, .skeleton-card::after, .detail-skeleton::after, .ap-skeleton::after {
+.sk::after, .skeleton-card::after, .detail-skeleton::after {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(100deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 70%);
   transform: translateX(-100%);
@@ -12517,7 +12517,7 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .sk-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
 .sk-rows { display: grid; }
 .sk-page { display: grid; gap: 14px; padding-top: 24px; }
-@media (prefers-reduced-motion: reduce) { .sk::after, .skeleton-card::after, .detail-skeleton::after, .ap-skeleton::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .sk::after, .skeleton-card::after, .detail-skeleton::after { animation: none; } }
 
 /* lazy route loading: hold the page's height so nothing below jumps */
 .route-placeholder { min-height: 100dvh; }

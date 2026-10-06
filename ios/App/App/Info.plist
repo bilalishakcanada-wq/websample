@@ -44,7 +44,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Zadatak koristi kameru da slikaš posao ili profilnu sliku.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Zadatak utisne lokaciju na foto dokaz posla, da se vidi da je izvođač bio na mjestu posla.</string>
+	<string>Zadatak utisne lokaciju na foto dokaz posla, a kad izvođač uključi „Krećem“, klijent vidi na mapi gdje je dok dolazi.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Zadatak koristi mikrofon kad snimaš video za portfolio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

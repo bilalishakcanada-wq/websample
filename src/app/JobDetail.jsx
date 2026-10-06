@@ -175,7 +175,7 @@ function JobDetail(props) {
           <div className="jd-payment">
             <LiveTracking payment={payment} listing={listing} role={isOwner ? 'client' : 'provider'} />
             <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
-            <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} />
+            <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
           </div>
         )}
 

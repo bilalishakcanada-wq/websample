@@ -85,6 +85,18 @@ rok za ponude (samo odobren identitet ili tim). Nije primijenjeno; oslanja se na
 `migration_identity_state_protection.sql` (već na produkciji). Sučelje (`useOfferGate`) već pita
 `identity_verified()` i pada nazad na `identity_ok()` dok ona ne postoji.
 
+**Primijenjeno 04.10.2026.:** [`jobs_require_verified.sql`](jobs_require_verified.sql) isto to radi za
+**objavu posla**: novi posao objavljuje samo odobren identitet ili tim (`can_post_job()`),
+bez prelaznog roka; uređivanje već objavljenih poslova ostaje slobodno. Usput vraća i
+provjeru suspenzije pri objavi. Forma za objavu (računar i telefon) pita `can_post_job()`
+i dok datoteka nije primijenjena pada nazad na `identity_ok()`, pa nikad ne zaključa
+nekoga koga baza pušta. Cijeli tok (registracija → ID → odobrenje u adminu → objava)
+pokriva `e2e/post-job-verification.spec.js`.
+
+**Na čekanju:** [`id_badge_counts.sql`](id_badge_counts.sql): značka „Lična karta
+verifikovana" (stranica Značke) i odobren JMBG tok su ista stvar. `identity_verified()`
+prihvata i značku, a odobrenje kroz JMBG tok dodjeljuje značku (i već odobrenima).
+
 ## Zašto postojeći nalozi nisu zaključani
 
 Bez `grandfather_before` platforma bi se preko noći zaključala svima — uključujući

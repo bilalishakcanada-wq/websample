@@ -3,6 +3,7 @@ import { expect } from '@playwright/test'
 export const ACCOUNTS = {
   client: { email: process.env.E2E_CLIENT_EMAIL, password: process.env.E2E_CLIENT_PASSWORD },
   provider: { email: process.env.E2E_PROVIDER_EMAIL, password: process.env.E2E_PROVIDER_PASSWORD },
+  admin: { email: process.env.E2E_ADMIN_EMAIL, password: process.env.E2E_ADMIN_PASSWORD },
 }
 
 export const accountsConfigured = () => Boolean(ACCOUNTS.client.email && ACCOUNTS.client.password && ACCOUNTS.provider.email && ACCOUNTS.provider.password)

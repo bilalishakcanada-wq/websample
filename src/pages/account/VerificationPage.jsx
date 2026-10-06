@@ -133,6 +133,7 @@ function VerificationPage() {
       })
       setPredmet(row)
       queryClient.invalidateQueries({ queryKey: keys.offerGate(user.id) })
+      queryClient.invalidateQueries({ queryKey: keys.postGate(user.id) })
       toast('Podaci su poslani na provjeru.', { kind: 'success' })
     } catch (error) {
       setGreska(error.message)
@@ -146,11 +147,11 @@ function VerificationPage() {
       <div className="account-section-head">
         <h1>Potvrda identiteta</h1>
         <p className="muted-text">Zadatak drži pravi novac. Zato prije objave posla ili slanja ponude provjeravamo ko je ko — to štiti i tebe i drugu stranu.</p>
-        {!zakljucano && <p className="muted-text">Do potvrde možeš sve pregledati, ali ne i slati ponude. Traje par minuta: ime, JMBG i slika dokumenta.</p>}
+        {!zakljucano && <p className="muted-text">Do potvrde možeš sve pregledati, ali ne i objavljivati poslove ni slati ponude. Traje par minuta: ime, JMBG i slika dokumenta.</p>}
       </div>
 
       <Stanje predmet={predmet} />
-      {zakljucano && next && <Link to={next} className="ghost-button verif-back">Nazad na posao</Link>}
+      {zakljucano && next && <Link to={next} className="ghost-button verif-back">{next.startsWith('/objavi') ? 'Nazad na objavu posla' : 'Nazad na posao'}</Link>}
 
       {!zakljucano && (
         <form data-testid="verification-form" className="verif-form" onSubmit={posalji}>

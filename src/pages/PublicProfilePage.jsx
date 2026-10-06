@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { usePublicProfile, useQuoteRequestsEnabled } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Sparkles, Star, UserRound } from 'lucide-react'
+import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Star, UserRound } from 'lucide-react'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
 import AvatarWithBadges from '../components/AvatarWithBadges'
-import BadgeChip from '../components/BadgeChip'
+import BadgeShowcase from '../components/BadgeShowcase'
 import BackHome from '../components/BackHome'
 import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
@@ -150,6 +150,8 @@ function PublicProfilePage() {
             <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
           </div>
 
+          <BadgeShowcase badges={badges} isOwn={isOwnProfile} userId={userId} />
+
           <div className="meet-stats">
             <div className="meet-stat">
               <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'} <Star size={18} fill="currentColor" /></strong>
@@ -186,15 +188,6 @@ function PublicProfilePage() {
                 </span>
               ))}
             </div>
-          )}
-
-          {badges.length > 0 && (
-            <details className="badge-legend-box">
-              <summary><Sparkles size={14} /> Šta znače značke na slici ({badges.length})</summary>
-              <ul className="badge-legend">
-                {badges.map((badge) => <li key={badge.code}><BadgeChip badge={badge} /><span>{badge.description}</span></li>)}
-              </ul>
-            </details>
           )}
 
           {!isOwnProfile && user && (

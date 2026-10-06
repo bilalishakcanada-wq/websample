@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, MapPin, MoreHorizontal, Play, Star, UserRound } from 'lucide-react'
 import { LastSeen } from '../components/TrustBadge'
-import BadgeChip from '../components/BadgeChip'
+import BadgeShowcase from '../components/BadgeShowcase'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { useFullscreen } from './useFullscreen'
 import { useGoBack } from '../hooks/useGoBack'
@@ -60,6 +60,8 @@ function ProfileView({ bundle, user, onReport }) {
         {isProvider && trust?.completed_jobs > 0 && <li><BadgeCheck size={18} /> {trust.completed_jobs} {trust.completed_jobs === 1 ? 'završen posao' : 'završenih poslova'}{trust.success_rate != null ? ` · ${Math.round(trust.success_rate)}% uspješnost` : ''}</li>}
       </ul>
 
+      <BadgeShowcase badges={badges} isOwn={isOwn} userId={profile.user_id} compact />
+
       <section className="pv-rating">
         {reviewCount > 0
           ? <><h2>Ukupna ocjena {Number(trust?.avg_rating || 0).toFixed(1).replace('.0', '')} <Star size={18} fill="currentColor" /></h2><p>{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</p></>
@@ -86,13 +88,6 @@ function ProfileView({ bundle, user, onReport }) {
           <h3>Ukratko</h3>
           {profile.bio && <p>{profile.bio}</p>}
           {profile.trades?.length > 0 && <div className="pv-chips">{profile.trades.map((trade) => <span key={trade}>{trade}</span>)}</div>}
-        </section>
-      )}
-
-      {badges.length > 0 && (
-        <section className="pv-section">
-          <h3>Značke</h3>
-          <div className="pv-chips">{badges.map((badge) => <BadgeChip key={badge.code} badge={badge} />)}</div>
         </section>
       )}
 

@@ -28,6 +28,8 @@ jobs:
       E2E_CLIENT_PASSWORD: Test12345!
       E2E_PROVIDER_EMAIL: izvodjac@test.zadatak
       E2E_PROVIDER_PASSWORD: Test12345!
+      E2E_ADMIN_EMAIL: admin@test.zadatak
+      E2E_ADMIN_PASSWORD: Test12345!
       # a worker holding every badge a job can require; exists only in this private database
       E2E_TESTER_EMAIL: majstor@test.zadatak
       E2E_TESTER_PASSWORD: Test12345!
@@ -49,7 +51,7 @@ jobs:
         run: |
           nohup npx vite preview --port 4175 --strictPort > preview.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://localhost:4175 >/dev/null && break; sleep 1; done
-      - name: End-to-end tests (post, offer, pay, chat, deliver, approve, review)
+      - name: End-to-end tests (ID check before posting, post, offer, pay, chat, deliver, approve, review)
         # the ID-check tests leave the worker's ID "submitted" (no offers allowed), so they run last
         run: |
           npx playwright test $(ls e2e/*.spec.js | grep -v identity)

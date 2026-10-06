@@ -27,6 +27,8 @@ import { useFullscreen } from './useFullscreen'
 import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
+import IdentityGateNotice from '../components/IdentityGateNotice'
+import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const DRAFT_KEY = 'zadatak-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
@@ -66,6 +68,10 @@ function PostFlow() {
   // Hitno / VIP: only for a new job everyone sees (a private request or an edit has nothing to boost)
   const promotionOptions = usePromotionOptions(user?.id, !editId && !inviteId)
   const clearInvite = () => setSearchParams((params) => { params.delete('za'); return params }, { replace: true })
+  // a new job needs an approved ID (editing one already published does not); the flow stays
+  // open to fill in and the draft is kept, only publishing waits for the check
+  const postGate = usePostGate(user?.id, !editId)
+  const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // editing and copying start from a job, not the draft, and leave the draft alone
   const freshPost = !editId && !copyId
   const draft = useMemo(() => {
@@ -183,6 +189,8 @@ function PostFlow() {
       navigate(`/register?next=${encodeURIComponent(inviteId ? `/objavi?za=${inviteId}` : '/objavi')}`)
       return
     }
+    if (postGate === 'needed' || postGate === 'rejected') { saveDraft(form, step, zaParam); navigate(postVerifyHref(postBack)); return }
+    if (postGate === 'pending') return
     setSaving(true)
     setError('')
     try {
@@ -214,6 +222,7 @@ function PostFlow() {
       {key === 'title' && (
         <section className="ap-body" key="title">
           {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
+          <IdentityGateNotice gate={postGate} back={postBack} compact />
           <h1 className="ap-title">Počni s naslovom</h1>
           <p className="ap-sub">U par riječi, šta ti treba?</p>
           <input className="ap-input" autoFocus value={form.title} maxLength={70} placeholder="npr. Selidba kauča" aria-label="Naslov posla" onChange={(event) => update({ title: event.target.value })} enterKeyHint="next" onKeyDown={(event) => { if (event.key === 'Enter' && valid) goNext() }} />
@@ -342,6 +351,7 @@ function PostFlow() {
           <h1 className="ap-title">{inviteId ? 'Pošalji zahtjev za ponudu' : 'Spreman/na za ponude?'}</h1>
           <p className="ap-sub">{inviteId ? 'Provjeri detalje. Posao vidi samo izvođač kojem ga šalješ.' : 'Provjeri i objavi kad si spreman/na.'}</p>
           {inviteId && <InviteBanner providerId={inviteId} onClear={clearInvite} />}
+          <IdentityGateNotice gate={postGate} back={postBack} />
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
@@ -363,7 +373,7 @@ function PostFlow() {
         {key === 'photos' && files.length === 0 && existingImages.length === 0 ? (
           <button type="button" className="ap-btn ap-btn-light" onClick={goNext}>Preskoči za sad</button>
         ) : key === 'review' ? (
-          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving} onClick={submit}>{saving ? (inviteId ? 'Šaljem…' : 'Objavljujem…') : user ? (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao') : (inviteId ? 'Prijavi se i pošalji' : 'Prijavi se i objavi')}</button>
+          <button type="button" className="ap-btn ap-btn-primary" disabled={!valid || saving || postGate === 'pending'} onClick={submit}>{saving ? (inviteId ? 'Šaljem…' : 'Objavljujem…') : user ? POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao') : (inviteId ? 'Prijavi se i pošalji' : 'Prijavi se i objavi')}</button>
         ) : (
           <button type="button" className="ap-btn ap-btn-primary" disabled={!valid} onClick={goNext}>Nastavi</button>
         )}

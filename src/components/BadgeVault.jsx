@@ -36,7 +36,7 @@ export function BadgeVault({ userId, earnedBadges }) {
   const [open, setOpen] = useState(null)
   // dodir na otvorenu pločicu je zatvara, osim ako ju je hover ili fokus upravo otvorio (isti dodir)
   const openedAt = useRef(0)
-  const show = (code) => { openedAt.current = Date.now(); setOpen(code) }
+  const show = (code, event) => { openedAt.current = event.timeStamp; setOpen(code) }
   const earned = useMemo(() => badges.filter((badge) => badge.earned), [badges])
 
   // značke osvojene od zadnje posjete trezoru dobiju "Novo" i kratku proslavu
@@ -68,9 +68,9 @@ export function BadgeVault({ userId, earnedBadges }) {
               key={badge.code}
               type="button"
               className={`vault-tile ${badge.earned ? 'is-earned' : 'is-locked'} ${fresh.has(badge.code) ? 'is-fresh' : ''} ${isOpen ? 'is-open' : ''}`}
-              onClick={() => (isOpen && Date.now() - openedAt.current > 400 ? setOpen(null) : show(badge.code))}
-              onMouseEnter={() => show(badge.code)}
-              onFocus={() => show(badge.code)}
+              onClick={(event) => (isOpen && event.timeStamp - openedAt.current > 400 ? setOpen(null) : show(badge.code, event))}
+              onMouseEnter={(event) => show(badge.code, event)}
+              onFocus={(event) => show(badge.code, event)}
               onBlur={() => setOpen(null)}
               aria-expanded={isOpen}
               aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}

@@ -157,7 +157,7 @@ export function SuspendDialog({ user, onClose, onDone }) {
         <div className="adm-reason-chips">
           {REASONS.map((item) => <button key={item} type="button" className={reason === item ? 'active' : ''} onClick={() => setReason(item)}>{item}</button>)}
         </div>
-        <textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={2} maxLength={300} placeholder="Kratko objašnjenje…" />
+        <textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={2} maxLength={300} placeholder="Kratko objašnjenje…" aria-label="Razlog (vidi ga korisnik)" />
 
         {error && <div className="form-error">{error}</div>}
         <div className="adm-modal-actions">
@@ -218,7 +218,7 @@ export function CreditsDialog({ user, balance = 0, onClose, onDone }) {
           {CREDIT_AMOUNTS.map((preset) => <button key={preset} type="button" className={Number(amount) === preset ? 'active' : ''} onClick={() => setAmount(String(preset))}>{preset} KM</button>)}
         </div>
         <div className="credits-amount">
-          <input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" />
+          <input type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0,00" aria-label="Iznos (KM)" />
           <span>KM</span>
         </div>
 
@@ -227,7 +227,7 @@ export function CreditsDialog({ user, balance = 0, onClose, onDone }) {
           {(direction === 'add' ? CREDIT_KINDS : DEBIT_KINDS).map(([id, label]) => <button key={id} type="button" className={kind === id ? 'active' : ''} onClick={() => setKind(id)}>{label}</button>)}
         </div>
         <span className="adm-label">Napomena (vidi je korisnik)</span>
-        <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} maxLength={200} placeholder="npr. Bonus dobrodošlice" />
+        <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} maxLength={200} placeholder="npr. Bonus dobrodošlice" aria-label="Napomena (vidi je korisnik)" />
 
         <div className={`credits-preview ${direction}`}>
           <span>Novo stanje</span>

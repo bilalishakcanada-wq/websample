@@ -59,7 +59,7 @@ function BadgeManager({ userId, held, onClose, onChanged }) {
           <button type="button" className="icon-button" onClick={onClose} aria-label="Zatvori"><X size={18} /></button>
         </div>
         <p className="muted-text">Klik dodaje ili uklanja značku. Ručno dodane značke automatika nikad ne uklanja.</p>
-        <input className="adm-filter" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Napomena uz dodjelu (opciono, vidi je samo tim)" maxLength={200} />
+        <input className="adm-filter" value={note} onChange={(event) => setNote(event.target.value)} placeholder="Napomena uz dodjelu (opciono, vidi je samo tim)" aria-label="Napomena uz dodjelu" maxLength={200} />
         {error && <div className="form-error">{error}</div>}
         {groups.map(([kind, title]) => {
           const items = catalog.filter((badge) => badge.kind === kind)
@@ -385,7 +385,7 @@ function Notes({ dossier, reload }) {
       <section className="dossier-card dossier-card-wide">
         <h3><NotebookPen size={16} /> Bilješke tima</h3>
         <form className="dossier-note-form" onSubmit={add}>
-          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={2} maxLength={2000} placeholder="Interna bilješka — korisnik je nikad ne vidi" />
+          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={2} maxLength={2000} placeholder="Interna bilješka — korisnik je nikad ne vidi" aria-label="Interna bilješka" />
           <button type="submit" className="primary-button" disabled={busy || !body.trim()}>{busy ? 'Čuvam…' : 'Dodaj bilješku'}</button>
         </form>
         {error && <div className="form-error">{error}</div>}

@@ -135,3 +135,9 @@ funkcije koje se dodaju kasnije. Postojeći redovi su usklađeni.
 | Nije bilo dokaza da je izvođač bio na licu mjesta. | `work_proofs` + `add_work_proof`: slika kamerom u aplikaciji (bez galerije), GPS + UTC utisnuti na sliku, serversko vrijeme prijema, udaljenost od posla, SHA-256 (ista slika ne prolazi dvaput). Posao na terenu se ne predaje bez slike PRIJE i svježe slike POSLIJE. Online poslovi i ugovori stariji od ovog fajla nisu pogođeni. |
 
 Testovi: `e2e/proof-flow.spec.js` (lažna kamera + GPS u Chromiumu) i ručni SQL napadi na lokalnoj kopiji baze.
+
+## 05 — „Izvođač je na putu“ (lokacija uživo)
+`05_live_location.sql`: izvođač na plaćenom poslu u toku uključi dijeljenje lokacije, klijent ga vidi
+na mapi uživo (Realtime). Čuva se samo zadnja tačka; vide je samo dvije strane i tim; gasi se kad se
+preda rad, posao završi/prekine/ode u spor, na „Zaustavi“, ili nakon 3 h tišine. Dok SQL nije u bazi,
+dio se na sajtu ne prikazuje. Frontend: `src/components/LiveTracking.jsx`, `src/utils/location.js`.

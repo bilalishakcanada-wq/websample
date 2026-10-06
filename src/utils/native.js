@@ -50,7 +50,7 @@ export async function setupNative() {
     window.history.pushState({ usr: null, key: Math.random().toString(36).slice(2, 10), idx }, '', target.pathname + target.search + target.hash)
     window.dispatchEvent(new PopStateEvent('popstate'))
   })
-  if (isAndroidApp()) setupPhotoSource()
+  if (isAndroidApp()) { setupPhotoSource(); applySystemAccent() }
   // the shell shows the live site: after a long time in the background, come back with the newest build,
   // but only when there is one (a blind reload used to redraw everything and, on Android, reload the old build)
   try {
@@ -92,6 +92,23 @@ export async function setupNative() {
       window.location.assign(withBase('/'))
     })
   } catch { /* ignore */ }
+}
+
+/**
+ * Android 12+ (Material You): the phone's wallpaper accent tints the small native-feeling details (text
+ * selection, the typing cursor, checkboxes and switches); brand buttons and headers keep Zadatak's colours.
+ * Needs the ZadatakNative plugin (app builds from October 2026 on); older builds and Android 11- skip it.
+ */
+async function applySystemAccent() {
+  try {
+    const colors = await plugin('ZadatakNative')?.systemColors?.()
+    if (!colors?.accent) return
+    const root = document.documentElement
+    root.style.setProperty('--system-accent', colors.accent)
+    root.style.setProperty('--system-accent-light', colors.accentLight)
+    root.style.setProperty('--system-accent-dark', colors.accentDark)
+    root.classList.add('has-system-accent')
+  } catch { /* plugin missing */ }
 }
 
 /**

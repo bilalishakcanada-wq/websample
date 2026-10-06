@@ -1,0 +1,63 @@
+/* „Izvođač je na putu“ (LiveTracking.jsx): one component for desktop, phone browser and the app. */
+.live-track {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid #dbe3ee;
+  border-radius: 18px;
+  background: #fff;
+}
+.live-track-idle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f3f6fb;
+  color: #3a4a63;
+  font-size: .9rem;
+}
+.live-track-info { display: grid; gap: 6px; align-content: start; }
+.live-track-info p { margin: 0; }
+.live-track-title { display: flex; align-items: center; gap: 8px; color: #0d2a52; font-size: 1.02rem; }
+.live-track-eta { color: #0d2a52; }
+.live-track-btn { justify-self: start; min-height: 44px; margin-top: 4px; }
+.live-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #16a34a; box-shadow: 0 0 0 0 rgba(22, 163, 74, .5);
+  animation: live-pulse 1.6s ease-out infinite;
+}
+@keyframes live-pulse { to { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); } }
+
+.live-map { position: relative; height: 260px; border-radius: 14px; overflow: hidden; background: #eef2f8; }
+.live-map-canvas { position: absolute; inset: 0; }
+.live-map-loading { animation: none; }
+.live-map-recenter {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: grid; place-items: center;
+  width: 44px; height: 44px; border: 0; border-radius: 12px;
+  background: #fff; color: #0d2a52; box-shadow: 0 2px 10px rgba(13, 42, 82, .2);
+  cursor: pointer;
+}
+.live-pin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(13, 42, 82, .35); }
+.live-pin-job { background: #0d2a52; }
+.live-pin-provider { width: 26px; height: 26px; background: #f5b400; transition: transform .3s; }
+
+/* fingers: zoom buttons as big as the recenter one; the app also keeps the map clear of the screen edge */
+@media (pointer: coarse) {
+  .live-map .maplibregl-ctrl-group button { width: 44px; height: 44px; }
+  .live-map .maplibregl-ctrl-bottom-right { margin-bottom: env(safe-area-inset-bottom, 0); }
+}
+/* mouse: hover feedback the phone doesn't need */
+@media (hover: hover) {
+  .live-map-recenter:hover { background: #f3f6fb; }
+  .live-map .maplibregl-ctrl-group button:hover { background: #f3f6fb; }
+}
+/* wide screens: info beside a bigger map */
+@media (min-width: 900px) {
+  .live-track:has(.live-map) { grid-template-columns: minmax(220px, 1fr) 1.6fr; align-items: stretch; }
+  .live-track .live-map { height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }

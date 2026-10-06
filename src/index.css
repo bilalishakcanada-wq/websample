@@ -112,6 +112,10 @@ html.is-native :is(button, [role="button"], [role="tab"], [role="radio"], label,
 }
 html.is-native img { -webkit-user-drag: none; }
 html.is-native :is(input, textarea, [contenteditable="true"]) { -webkit-user-select: text; user-select: text; }
+/* Android 12+ app: the phone's own accent colour (Material You, utils/native.js) on selection, cursor and checkboxes */
+html.has-system-accent ::selection { background: color-mix(in srgb, var(--system-accent) 28%, transparent); }
+html.has-system-accent :is(input, textarea) { caret-color: var(--system-accent); }
+html.has-system-accent :is(input[type="checkbox"], input[type="radio"], input[type="range"]) { accent-color: var(--system-accent); }
 /* scrolling stays, the scrollbar does not */
 html.is-native * { scrollbar-width: none; }
 html.is-native *::-webkit-scrollbar { display: none; width: 0; height: 0; }

@@ -20,13 +20,18 @@ export const queryClient = new QueryClient({
   },
 })
 
+// 'device' = private data (own profile, inbox) that is persisted only inside the iOS/Android app, whose storage
+// is the app's own sandbox on the owner's phone; in a browser it may be a shared computer, so it stays in memory.
+// Either way queryClient.clear() on sign-out wipes it.
+const inApp = () => typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.())
+
 const storage = (() => {
   try { localStorage.setItem('zadatak-q-test', '1'); localStorage.removeItem('zadatak-q-test'); return localStorage } catch { return null }
 })()
 
 /*
- * Only data that is either public or this person's own is written to the device. The job page
- * ('listing') carries other people's offers, and inbox, threads and notifications are private,
+ * Otherwise only data that is either public or this person's own is written to the device. The job
+ * page ('listing') carries other people's offers, and inbox, threads and notifications are private,
  * so anything not on this list stays in memory and is gone when the app closes.
  */
 const PERSISTED = {
@@ -34,7 +39,9 @@ const PERSISTED = {
   me: new Set(['listings', 'bids', 'recommended', 'taste', 'saved-ids', 'saved']),
 }
 const canPersist = (query) => {
-  if (query.meta?.persist === false) return false
+  const persist = query.meta?.persist
+  if (persist === false) return false
+  if (persist === 'device') return inApp()
   const [root, , part] = query.queryKey
   const rule = PERSISTED[root]
   return rule === true || (rule instanceof Set && rule.has(part))

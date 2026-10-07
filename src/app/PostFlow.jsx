@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, Camera, ChevronRight, Delete, Laptop, LocateFixed, Plus, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
-import { cityCoordinates } from '../data/cityCoordinates'
-import { POPULAR_CITIES } from '../data/siteMap'
+import { rememberPlace } from '../data/cityCoordinates'
+import { useLocationSearch } from '../hooks/useLocationSearch'
 import { publishListing } from '../services/publishListing'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
@@ -32,8 +32,6 @@ import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const DRAFT_KEY = 'zadatak-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
-const ALL_CITIES = Object.keys(cityCoordinates)
-const fold = (value) => String(value || '').toLowerCase().replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj')
 
 const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], conditions: {}, category: '', price: '', travel: '' }
 
@@ -271,9 +269,9 @@ function PostFlow() {
           </div>
           {form.mode === 'in-person' && (
             <>
-              <span className="ap-label">Grad</span>
+              <span className="ap-label">Mjesto</span>
               <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen(true)}>
-                <LocateFixed size={18} /> {form.location || 'Unesi grad'}
+                <LocateFixed size={18} /> {form.location || 'Naselje, selo ili grad'}
               </button>
             </>
           )}
@@ -397,27 +395,32 @@ function PostFlow() {
   )
 }
 
-/** Full-screen city search (like a postcode picker): type, or tap a popular city. */
+/** Full-screen place search (like a postcode picker): type a settlement ("Otes"), or tap a popular town. */
 function CitySheet({ value, onPick, onClose }) {
   const [query, setQuery] = useState('')
-  const matches = useMemo(() => {
-    const needle = fold(query.trim())
-    if (!needle) return POPULAR_CITIES
-    return ALL_CITIES.filter((city) => fold(city).includes(needle)).slice(0, 30)
-  }, [query])
+  const { places, loading } = useLocationSearch(query, { limit: 12 })
+  const typed = query.trim()
+  const pick = (place) => {
+    if (place.lat != null) rememberPlace(place.label, place.lat, place.lng)
+    onPick(place.label)
+  }
 
   return (
     <div className="ap ap-screen ap-city">
       <header className="ap-city-top">
-        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Unesi grad" className="ap-input" enterKeyHint="search" />
+        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Naselje, selo ili grad" className="ap-input" enterKeyHint="search" aria-label="Mjesto posla" />
         <button type="button" className="ap-cancel" onClick={onClose}>Odustani</button>
       </header>
-      <div className="ap-city-list">
-        {!query && <span className="ap-label">Popularni gradovi</span>}
-        {matches.map((city) => (
-          <button key={city} type="button" className={city === value ? 'active' : ''} onClick={() => onPick(city)}>{city}</button>
+      <div className="ap-city-list" role="listbox">
+        {!typed && <span className="ap-label">Popularni gradovi</span>}
+        {places.map((place) => (
+          <button key={place.label} type="button" role="option" aria-selected={place.label === value} className={place.label === value ? 'active' : ''} onClick={() => pick(place)}>
+            <span>{place.name}{place.municipality && place.municipality !== place.name && <span className="ap-city-muni">, {place.municipality}</span>}</span>
+            {place.region && <small>{place.kind === 'dio grada' ? 'dio grada · ' : ''}{place.region}</small>}
+          </button>
         ))}
-        {query && matches.length === 0 && <button type="button" onClick={() => onPick(query.trim())}>Koristi „{query.trim()}“</button>}
+        {typed.length >= 2 && !places.length && <span className="ap-label">{loading ? 'Tražim…' : 'Nema takvog mjesta u BiH'}</span>}
+        {typed && !loading && !places.some((place) => place.label === typed) && <button type="button" onClick={() => onPick(typed)}>Koristi „{typed}“</button>}
       </div>
     </div>
   )

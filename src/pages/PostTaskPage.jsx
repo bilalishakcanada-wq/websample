@@ -259,7 +259,7 @@ function PostTaskPage() {
             </div>
             {form.mode === 'in-person' && (
               <div className="wizard-field">
-                <span>Grad</span>
+                <span>Mjesto (naselje, selo ili grad)</span>
                 <CityField id="task-city" value={form.location} onChange={(city) => update({ location: city })} />
               </div>
             )}

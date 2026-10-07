@@ -40,8 +40,9 @@ const cityPoint = (city) => coordsForLocation(city)
  * Where a provider (by their profile city) stands for a job, computed on the device.
  * status: remote | no_limit | ok | too_far | no_city | unknown_city | no_job_location | invited
  * unknown_city: a profile city we can't place on the map; the database doesn't block those either.
+ * myPoint: the profile place's { lat, lng } when the caller already has it (a settlement looked up).
  */
-export const reachFor = (listing, myCity) => {
+export const reachFor = (listing, myCity, myPoint = null) => {
   if (!listing) return null
   // "Zatraži ponudu": the client picked this provider, so distance does not limit the offer
   if (listing.invited_provider) return { status: 'invited', reachKm: null, distanceKm: null }
@@ -49,7 +50,7 @@ export const reachFor = (listing, myCity) => {
   const km = reachKm(listing.price, listing.travel_allowance)
   const job = listing.lat != null && listing.lng != null ? { lat: listing.lat, lng: listing.lng } : cityPoint(listing.location)
   if (!job) return { status: 'no_job_location', reachKm: km, distanceKm: null }
-  const me = cityPoint(myCity)
+  const me = myPoint || cityPoint(myCity)
   if (!me) {
     const status = km == null ? 'no_limit' : String(myCity || '').trim() ? 'unknown_city' : 'no_city'
     return { status, reachKm: km, distanceKm: null }

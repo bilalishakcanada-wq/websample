@@ -19,7 +19,9 @@ import BackHome from '../components/BackHome'
 const TaskMap = lazy(() => import('../components/TaskMap'))
 import { serviceCategories } from '../data/categories'
 import { bosniaCities } from '../data/cities'
-import { cityCoordinates, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
+import { distanceKm, isRemoteLocation, rememberPlace } from '../data/cityCoordinates'
+import { useLocationSearch } from '../hooks/useLocationSearch'
+import { usePlacePoint } from '../hooks/usePlacePoint'
 import { listingService } from '../services/listingService'
 import { profileService } from '../services/profileService'
 import { useAuth } from '../context/AuthContext'
@@ -82,6 +84,8 @@ function FilterMenu({ id, label, active, open, onToggle, children, width }) {
     </div>
   )
 }
+
+const POPULAR_SEARCH_CITIES = bosniaCities.slice(0, 12)
 
 function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -150,10 +154,9 @@ function SearchPage() {
   // picking a category is a strong hint about what someone wants to see more of
   useEffect(() => { if (filters.category) recordInterest('search', { category: filters.category }) }, [filters.category])
 
-  const origin = useMemo(() => {
-    const coords = filters.city ? cityCoordinates[filters.city] : null
-    return coords ? { lat: coords[0], lng: coords[1] } : null
-  }, [filters.city])
+  // a chosen town or settlement ("Otes, Ilidža") is where distance is measured from
+  const origin = usePlacePoint(filters.city)
+  const homePoint = usePlacePoint(me?.city || '')
 
   // Everything — text relevance, distance, competition, the searcher's trades — is ranked in
   // Postgres (search_listings) in one round trip, cached by TanStack Query: revisiting a search
@@ -162,12 +165,12 @@ function SearchPage() {
   // keep the page working.
   const debouncedQuery = useDebounced(filters.query, 200)
   const searchParamsForServer = useMemo(() => {
-    const home = !origin && me?.city ? cityCoordinates[me.city] : null
+    const home = !origin ? homePoint : null
     return {
       query: debouncedQuery,
       category: filters.category,
-      lat: origin?.lat ?? home?.[0] ?? null,
-      lng: origin?.lng ?? home?.[1] ?? null,
+      lat: origin?.lat ?? home?.lat ?? null,
+      lng: origin?.lng ?? home?.lng ?? null,
       // a chosen city filters by radius; the signed-in person's home city only informs the ranking
       radiusKm: origin ? filters.radius : 0,
       includeRemote: origin ? filters.includeRemote : true,
@@ -178,7 +181,7 @@ function SearchPage() {
       sort: filters.remoteOnly ? 'newest' : filters.sort,
       limit: 200,
     }
-  }, [debouncedQuery, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.sort, filters.radius, filters.includeRemote, origin, me])
+  }, [debouncedQuery, filters.category, filters.minPrice, filters.maxPrice, filters.remoteOnly, filters.hasBudget, filters.noOffers, filters.sort, filters.radius, filters.includeRemote, origin, homePoint, me])
   const searchQuery = useSearchListings(searchParamsForServer)
   const [fallbackRows, setFallbackRows] = useState(null)
   const serverRanked = !searchQuery.isError
@@ -229,9 +232,9 @@ function SearchPage() {
       photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
       photoCount: row.image_count ?? (row.listing_images || []).length,
       distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
-      reach: me?.city ? reachFor(row, me.city) : null,
+      reach: me?.city ? reachFor(row, me.city, homePoint) : null,
     }
-  }, [origin, me])
+  }, [origin, me, homePoint])
 
   const organic = useMemo(() => {
     let items = rows.map(decorate)
@@ -259,12 +262,12 @@ function SearchPage() {
     }
     // relevance model: query match, freshness, few offers, completeness, distance, the searcher's trades
     if (filters.sort === 'recommended') {
-      const home = !origin && me?.city ? cityCoordinates[me.city] : null
-      const homeDistance = home ? (item) => (item.lat != null ? distanceKm({ lat: home[0], lng: home[1] }, { lat: item.lat, lng: item.lng }) : null) : null
+      const home = !origin ? homePoint : null
+      const homeDistance = home ? (item) => (item.lat != null ? distanceKm(home, { lat: item.lat, lng: item.lng }) : null) : null
       items = personaliseRanked(rankListings(items, { query: filters.query, skills: me?.trades || [], homeDistance }), { interests: readInterests(), query: filters.query })
     }
     return items
-  }, [rows, decorate, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, filters.inReach, me, serverRanked])
+  }, [rows, decorate, origin, filters.includeRemote, filters.radius, filters.noOffers, filters.sort, filters.query, filters.remoteOnly, filters.inReach, me, homePoint, serverRanked])
 
   const listings = useMemo(() => {
     let pinned = promotedRows.map((row) => ({ ...decorate(row), promo: row.promotion_tier }))
@@ -298,7 +301,7 @@ function SearchPage() {
   }
 
   const toggleMenu = (id) => setOpenMenu((current) => (current === id ? '' : id))
-  const filteredCities = bosniaCities.filter((name) => name.toLowerCase().includes(citySearch.toLowerCase())).slice(0, 12)
+  const { places: cityMatches, loading: citySearching } = useLocationSearch(citySearch, { limit: 12, popular: POPULAR_SEARCH_CITIES })
   const locationLabel = filters.city
     ? `${filters.radius === 0 ? 'Cijela BiH' : `${filters.radius} km`} · ${filters.city}${filters.includeRemote ? ' i online' : ''}`
     : 'Cijela BiH i online'
@@ -347,20 +350,21 @@ function SearchPage() {
         <FilterMenu id="location" label={locationLabel} active={Boolean(filters.city)} open={openMenu === 'location'} onToggle={toggleMenu} width={360}>
           <label className="popover-search">
             <MapPin size={15} />
-            <input placeholder="Upiši grad..." value={citySearch} onChange={(event) => setCitySearch(event.target.value)} autoFocus />
+            <input placeholder="Upiši naselje ili grad..." value={citySearch} onChange={(event) => setCitySearch(event.target.value)} autoFocus />
           </label>
           <div className="popover-list">
             <button type="button" className={`popover-option ${!filters.city ? 'active' : ''}`} onClick={() => update({ city: '' })}>Cijela BiH</button>
-            {filteredCities.map((name) => (
-              <button key={name} type="button" className={`popover-option ${filters.city === name ? 'active' : ''}`} onClick={() => { update({ city: name }); setCitySearch('') }}>
-                {name}
+            {cityMatches.map((place) => (
+              <button key={place.label} type="button" className={`popover-option ${filters.city === place.label ? 'active' : ''}`} onClick={() => { if (place.lat != null) rememberPlace(place.label, place.lat, place.lng); update({ city: place.label }); setCitySearch('') }}>
+                <span>{place.name}{place.municipality && place.municipality !== place.name && <span className="muted-text">, {place.municipality}</span>}</span>
               </button>
             ))}
+            {citySearch.trim().length >= 2 && !cityMatches.length && <p className="muted-text">{citySearching ? 'Tražim…' : 'Nema takvog mjesta u BiH.'}</p>}
           </div>
           {filters.city && (
             <>
               <div className="popover-section">
-                <span>Udaljenost od grada</span>
+                <span>Udaljenost od mjesta</span>
                 <div className="radius-options">
                   {RADIUS_OPTIONS.map((option) => (
                     <button key={option.value} type="button" className={`radius-chip ${filters.radius === option.value ? 'active' : ''}`} onClick={() => update({ radius: option.value })}>{option.label}</button>

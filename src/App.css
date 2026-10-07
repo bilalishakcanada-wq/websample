@@ -9268,6 +9268,48 @@ body:has(.profile-cta-bar) .support-chat {
   border-radius: 12px;
 }
 
+/* settlement type-ahead: "Otes, Ilidža" + canton on a second line */
+.city-field-list .place-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.city-field-list .place-text strong {
+  font-weight: 700;
+}
+
+.city-field-list .place-muni {
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.city-field-list .place-text small {
+  flex-basis: 100%;
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.city-field-list button > svg {
+  flex: none;
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.city-field-icon .spin {
+  animation: place-spin 0.8s linear infinite;
+}
+
+@keyframes place-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .city-field-icon .spin { animation: none; }
+}
+
 /* country strip (replaces the old all-categories block) */
 .country-strip {
   display: flex;

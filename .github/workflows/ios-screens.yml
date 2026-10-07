@@ -9,6 +9,9 @@ on:
     paths:
       - '.github/workflows/ios-screens.yml'
 
+permissions:
+  contents: write
+
 jobs:
   screens:
     runs-on: macos-15
@@ -69,6 +72,16 @@ jobs:
           sleep 25
           xcrun simctl io "$UDID" screenshot "shots/99-safari-pretraga.png"
           ls -la shots
+      # also on the ios-screens branch, so the pictures open straight on GitHub (and on a phone)
+      - name: Save the pictures on the ios-screens branch
+        if: always()
+        run: |
+          cd shots
+          git init -q -b ios-screens
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "iPhone screenshots ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ios-screens
       - uses: actions/upload-artifact@v4
         if: always()
         with:

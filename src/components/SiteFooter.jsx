@@ -82,7 +82,7 @@ function SiteFooter() {
             <span><MessageCircle size={14} /> Zaštićena komunikacija</span>
             <Link to="/kontakt"><Mail size={14} /> Piši podršci</Link>
           </div>
-          <span className="site-footer-copy">© {new Date().getFullYear()} Zadatak. Sva prava zadržana.</span>
+          <span className="site-footer-copy">© {new Date().getFullYear()} Zadatak. Sva prava zadržana. Naselja: <a href="https://www.geonames.org" target="_blank" rel="noopener noreferrer">GeoNames</a> i <a href="https://whosonfirst.org" target="_blank" rel="noopener noreferrer">Who's On First</a> (CC BY 4.0).</span>
         </div>
       </div>
     </footer>

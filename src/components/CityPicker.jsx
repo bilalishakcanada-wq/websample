@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { Check, MapPin, Search, X } from 'lucide-react'
 import { featuredCities, otherCitiesImage } from '../data/featuredCities'
 import { bosniaCities } from '../data/cities'
+import { rememberPlace } from '../data/cityCoordinates'
+import { useLocationSearch } from '../hooks/useLocationSearch'
 
 function CityPicker({ value, onChange, onClose }) {
   const [query, setQuery] = useState('')
 
-  const filteredAll = query.trim()
-    ? bosniaCities.filter((city) => city.toLowerCase().includes(query.trim().toLowerCase()))
-    : bosniaCities
+  // nothing typed: every town; typing: towns and settlements ("Otes" → Otes, Ilidža · Otes, Kakanj)
+  const { places, loading } = useLocationSearch(query, { limit: 20, popular: bosniaCities })
 
-  const pick = (city) => {
+  const pick = (city, place) => {
+    if (place?.lat != null) rememberPlace(place.label, place.lat, place.lng)
     onChange(city)
     onClose()
   }
@@ -45,16 +47,16 @@ function CityPicker({ value, onChange, onClose }) {
 
         <div className="city-picker-search">
           <Search size={16} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ili pretraži svoj grad..." autoFocus />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ili upiši svoje naselje ili grad..." autoFocus />
         </div>
 
         <div className="city-picker-list">
-          {filteredAll.map((city) => (
-            <button key={city} type="button" className={`city-list-item ${value === city ? 'selected' : ''}`} onClick={() => pick(city)}>
-              <MapPin size={14} /> {city}
+          {places.map((place) => (
+            <button key={place.label} type="button" className={`city-list-item ${value === place.label ? 'selected' : ''}`} onClick={() => pick(place.label, place)}>
+              <MapPin size={14} /> <span>{place.name}{place.municipality && place.municipality !== place.name && <span className="muted-text">, {place.municipality}</span>}</span>
             </button>
           ))}
-          {filteredAll.length === 0 && <p className="muted-text">Nema rezultata.</p>}
+          {places.length === 0 && <p className="muted-text">{loading ? 'Tražim…' : 'Nema rezultata.'}</p>}
         </div>
       </div>
     </div>

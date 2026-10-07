@@ -572,3 +572,8 @@
 @media (max-width: 768px) {
   .jd-top:has(.jd-menu), .ch-head:has(.jd-menu) { z-index: 200; }
 }
+
+/* place search: "Otes, Ilidža" with the canton under it */
+.ap-city-list button { display: flex; flex-direction: column; justify-content: center; gap: 1px; }
+.ap-city-list .ap-city-muni { color: var(--text-soft); font-weight: 500; }
+.ap-city-list button small { color: var(--text-soft); font-size: 0.74rem; font-weight: 500; }

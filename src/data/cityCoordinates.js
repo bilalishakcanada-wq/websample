@@ -99,12 +99,38 @@ export const isRemoteLocation = (location) => /online|daljin|remote/i.test(locat
 
 const normalise = (value) => (value || '').toLowerCase().trim()
 
-// Exact name first, then the longest city name contained in the text
-// ("Novi Grad Sarajevo" beats "Sarajevo" for "Novi Grad Sarajevo, BiH").
+// Settlements ("Otes, Ilidža") come from the database (public.bih_locations, ~19 500 places), so their
+// points are remembered here once seen (picked in the type-ahead, or looked up for a profile), and kept
+// on the device so the next visit knows them without asking.
+const PLACES_KEY = 'zadatak:places'
+const MAX_REMEMBERED = 300
+const placePoints = new Map()
+try {
+  const saved = JSON.parse(globalThis.localStorage?.getItem(PLACES_KEY) || '[]')
+  if (Array.isArray(saved)) saved.forEach(([label, lat, lng]) => placePoints.set(label, { lat, lng }))
+} catch { /* private mode / no storage: remember for this visit only */ }
+
+export function rememberPlace(label, lat, lng) {
+  if (!label || !Number.isFinite(lat) || !Number.isFinite(lng) || cityCoordinates[label]) return
+  placePoints.delete(label)
+  placePoints.set(label, { lat, lng })
+  while (placePoints.size > MAX_REMEMBERED) placePoints.delete(placePoints.keys().next().value)
+  try {
+    globalThis.localStorage?.setItem(PLACES_KEY, JSON.stringify([...placePoints].map(([name, point]) => [name, point.lat, point.lng])))
+  } catch { /* full or blocked storage */ }
+}
+
+export const knowsPlace = (label) => Boolean(label && (cityCoordinates[label.trim()] || placePoints.has(label.trim())))
+
+// Exact town name first, then a remembered settlement, then the longest town name contained in the
+// text ("Novi Grad Sarajevo" beats "Sarajevo" for "Novi Grad Sarajevo, BiH"; an unknown "Otes, Ilidža"
+// falls back to Ilidža until its own point is known).
 export function coordsForLocation(location) {
   if (!location || isRemoteLocation(location)) return null
   const exact = cityCoordinates[location.trim()]
   if (exact) return { lat: exact[0], lng: exact[1] }
+  const place = placePoints.get(location.trim())
+  if (place) return { ...place }
   const text = normalise(location)
   let best = null
   for (const [name, [lat, lng]] of Object.entries(cityCoordinates)) {

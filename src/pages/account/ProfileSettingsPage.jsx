@@ -137,7 +137,7 @@ function ProfileSettingsPage() {
         </label>
         <div className="account-field">
           <span>Lokacija</span>
-          <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} label="Grad" />
+          <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} label="Mjesto (naselje ili grad)" />
         </div>
         <label className="account-field">
           <span>Email</span>

@@ -1,0 +1,1 @@
+import{n as e}from"./native-Be_9PHIg.js";var t=()=>e()?window.Capacitor?.Plugins?.ZadatakNative:null;async function n(e){let n=t();if(!n?.confirmIdentity)return!0;try{return!(await n.biometricInfo())?.available||!!(await n.confirmIdentity({title:`Potvrdi isplatu`,reason:e}))?.ok}catch{return!0}}export{n as t};

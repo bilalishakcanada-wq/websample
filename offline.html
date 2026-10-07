@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Zadatak</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+  main { min-height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; box-sizing: border-box; }
+  h1 { font-size: 1.3rem; margin: 18px 0 8px; }
+  p { margin: 0 0 22px; opacity: 0.85; line-height: 1.5; }
+  button { font: inherit; font-weight: 800; border: 0; border-radius: 999px; padding: 14px 26px; background: #f5b400; color: #0d2a52; }
+  svg { width: 72px; height: 72px; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><path d="M330 265 H713 L330 713 H560" fill="none" stroke="#f5b400" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/><circle cx="706" cy="713" r="96" fill="#f5b400"/><path d="M664 716 L695 747 L748 685" fill="none" stroke="#0d2a52" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/></g></svg>
+    <h1>Nema internet veze</h1>
+    <p>Zadatak treba internet. Provjeri vezu i pokušaj ponovo.</p>
+    <button type="button" id="retry">Pokušaj ponovo</button>
+  </div>
+</main>
+<script>
+  // The app shows this page when the site can't load. Android also shows it for a 404 (a deep link
+  // GitHub Pages can't serve directly), so when the phone is online go straight back to the home page (not again within 15 s, so a real outage
+  // can't loop).
+  (function () {
+    var HOME = 'https://bilalishakcanada-wq.github.io/websample/'
+    function go() { location.replace(HOME) }
+    document.getElementById('retry').addEventListener('click', go)
+    window.addEventListener('online', go)
+    try {
+      var last = Number(sessionStorage.getItem('zadatakRetry') || 0)
+      if (navigator.onLine && Date.now() - last > 15000) { sessionStorage.setItem('zadatakRetry', String(Date.now())); go() }
+    } catch (e) { /* storage blocked: wait for the button */ }
+  })()
+</script>
+</body>
+</html>

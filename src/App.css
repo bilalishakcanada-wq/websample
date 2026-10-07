@@ -8827,6 +8827,7 @@ body:has(.profile-cta-bar) .support-chat {
   height: 100%;
   border-radius: 50%;
   padding: 4px;
+  background: conic-gradient(from 200deg, var(--ring), #ffffff, var(--ring));
   background: conic-gradient(from 200deg, var(--ring), color-mix(in srgb, var(--ring) 55%, white), var(--ring));
 }
 
@@ -11663,6 +11664,7 @@ body:has(.profile-cta-bar) .support-chat {
   border-radius: 12px;
   display: grid;
   place-items: center;
+  background: #f1f4f9;
   background: color-mix(in srgb, var(--badge-color, var(--primary)) 14%, white);
   color: var(--badge-color, var(--primary));
 }
@@ -11708,7 +11710,7 @@ body:has(.profile-cta-bar) .support-chat {
 .badge-grant-row select { padding: 0.5rem 0.7rem; border-radius: 10px; border: 1px solid var(--stroke); font: inherit; }
 
 /* custom-coloured badges anywhere on the site */
-.badge-pill.badge-colored { background: color-mix(in srgb, var(--badge-color) 14%, white); color: var(--badge-color); }
+.badge-pill.badge-colored { background: #f1f4f9; background: color-mix(in srgb, var(--badge-color) 14%, white); color: var(--badge-color); }
 .avatar-medal.badge-colored { background: var(--badge-color); color: white; }
 
 @media (max-width: 1100px) {

@@ -216,6 +216,21 @@ const contentSecurityPolicy = () => {
   }
 }
 
+/**
+ * Older phones (iOS Safari before 15.4, Android WebView before 108) don't know `dvh` and drop the whole
+ * declaration: sheets lose their max-height and the chat loses its height. Every declaration that uses
+ * dvh gets the same value in vh right before it; browsers that know dvh take the second one.
+ */
+const viewportFallbacks = () => ({
+  name: 'zadatak-dvh-fallback',
+  enforce: 'pre',
+  transform(code, id) {
+    if (!/\.css(\?|$)/.test(id) || !code.includes('dvh')) return null
+    return code.replace(/([{;/]\s*)([a-z-]+)(\s*:\s*)([^;{}]*\ddvh\b[^;{}]*?)(\s*)(?=[;}])/g,
+      (_, lead, prop, colon, value, ws) => `${lead}${prop}${colon}${value.replace(/(\d)dvh\b/g, '$1vh')};${prop}${colon}${value}${ws}`)
+  },
+})
+
 export default defineConfig({
   base,
   optimizeDeps: {
@@ -228,6 +243,8 @@ export default defineConfig({
     target: 'es2022',
     cssCodeSplit: true,
     cssMinify: 'lightningcss',
+    // the oldest phones the site supports: keeps the vh fallbacks above in the minified CSS
+    cssTarget: ['safari14', 'chrome87', 'firefox90', 'edge88'],
     chunkSizeWarningLimit: 600,
     rolldownOptions: {
       output: {
@@ -244,6 +261,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    viewportFallbacks(),
     buildId(),
     pruneUnusedCss(),
     asyncCss(),

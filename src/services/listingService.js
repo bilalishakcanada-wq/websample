@@ -201,7 +201,7 @@ export const listingService = {
       const file = allowed.has(original.type) ? await resizeImage(original) : original
       if (!allowed.has(file.type) || file.size > 5 * 1024 * 1024) throw new Error('Slika mora biti JPG, PNG ili WEBP i manja od 5 MB.')
       const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
-      const path = `${userId}/listings/${listingId}/${crypto.randomUUID()}.${ext}`
+      const path = `${userId}/listings/${listingId}/${crypto.randomUUID ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`}.${ext}`
       // every upload gets a fresh random name, so browsers may keep it for a year
       const { error: uploadError } = await supabase.storage.from('media').upload(path, file, { cacheControl: '31536000', contentType: file.type })
       if (uploadError) {

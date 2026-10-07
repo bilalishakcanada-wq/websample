@@ -9,7 +9,7 @@ const RATE_LIMITED = 'Previše pokušaja u kratkom periodu. Sačekajte par minut
 const WEAK_PASSWORD = 'Lozinka mora imati najmanje 8 znakova i sadržavati veliko, malo slovo i broj.'
 const isRateLimited = (error) => error?.status === 429 || /rate_limit/.test(error?.code || '')
 // Supabase couldn't send the email (its built-in sender only reaches the project team until our own mail server is set)
-const EMAIL_DOWN = 'Email trenutno ne možemo poslati. Piši nam u chatu podrške (dolje desno) i pomoći ćemo ti.'
+export const EMAIL_DOWN = 'Email trenutno ne možemo poslati. Javi nam se preko stranice Kontakt i pomoći ćemo ti.'
 const isEmailDown = (error) => error?.code === 'email_address_not_authorized' || /error sending .*email/i.test(error?.message || '')
 
 let enabledProvidersPromise = null

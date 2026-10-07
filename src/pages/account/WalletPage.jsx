@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, Info, Landmark, Lock, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
-import { accountService } from '../../services/accountService'
+import { accountService, CARD_OFF } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
@@ -143,7 +143,12 @@ function WalletPage() {
         <form ref={panelRef} className="auth-form wallet-action" onSubmit={topUp}>
           <label>Iznos uplate (KM)<input type="number" inputMode="decimal" min="5" max="2000" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="npr. 100" required /></label>
           <small className="muted-text">Karticu unosiš na sigurnoj stranici banke (Monri). Zadatak ne vidi ni ne čuva podatke kartice.</small>
-          {actionError && <div className="form-error">{actionError}</div>}
+          {actionError && (
+            <div className="form-error">
+              {actionError}
+              {actionError === CARD_OFF && <> <Link to={`/pomoc?chat=1&msg=${encodeURIComponent(`Želim uplatiti ${amount || '…'} KM na balans.`)}`}>Piši timu</Link></>}
+            </div>
+          )}
           <button type="submit" className="primary-button" disabled={busy}><Lock size={15} /> {busy ? 'Otvaram plaćanje…' : 'Nastavi na plaćanje'}</button>
         </form>
       )}

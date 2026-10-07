@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <!-- signed-in screens start with API calls: open the connection while the HTML is still parsing -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <!-- fonts are found only after the first screen renders, so slow phones repainted every title (Archivo) and
+         every line with č ć š ž đ (the small latin-ext files) seconds later -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin-ext.woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />

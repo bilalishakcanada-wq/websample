@@ -1,0 +1,89 @@
+# Screenshots of the real iOS app on an iPhone simulator (GitHub macOS runner, no Mac needed).
+# Runs by hand (Actions → "iOS app screenshots" → Run workflow) or when this file changes in a PR.
+# The pictures are in the run's "ios-screens" artifact.
+name: iOS app screenshots
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/ios-screens.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  screens:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # the app loads the live site; the bundled copy is only the offline fallback
+      - name: Placeholder web bundle
+        run: mkdir -p dist && echo '<!doctype html><title>Zadatak</title>' > dist/index.html
+      - run: npx cap sync ios
+      - name: Build for the simulator
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO build | tail -20
+          exit ${PIPESTATUS[0]}
+      - name: Boot an iPhone with a notch and home bar
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          devs = [d for rt, ds in json.load(sys.stdin)['devices'].items() if 'iOS' in rt for d in ds]
+          pick = next((d for name in ('iPhone 16', 'iPhone 15', 'iPhone 16 Pro', 'iPhone 15 Pro') for d in devs if d['name'] == name), None) or next(d for d in devs if d['name'].startswith('iPhone'))
+          print(pick['udid'])")
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance light
+          xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcrun simctl list devices | grep "$UDID"
+      - name: Open the app on each screen and take pictures
+        run: |
+          APP=$(find build/Build/Products -name 'App.app' -maxdepth 3 | head -1)
+          SITE=https://bilalishakcanada-wq.github.io/websample/
+          mkdir -p shots
+          n=1
+          # the app always opens its start address: point it at each screen in turn
+          for path in "" "search" "kako-radi" "aplikacija" "login" "register" "pomoc" "cijene"; do
+            python3 -c "
+          import json, sys
+          p = sys.argv[1] + '/capacitor.config.json'
+          c = json.load(open(p)); c['server']['url'] = sys.argv[2]; json.dump(c, open(p, 'w'))" "$APP" "$SITE$path"
+            xcrun simctl terminate "$UDID" ba.poso.app 2>/dev/null || true
+            xcrun simctl install "$UDID" "$APP"
+            xcrun simctl launch "$UDID" ba.poso.app
+            sleep 25
+            name=$(printf '%02d-%s' $n "${path:-pocetna}")
+            xcrun simctl io "$UDID" screenshot "shots/$name.png"
+            n=$((n+1))
+          done
+          # the same site in Safari on the iPhone, for comparison
+          xcrun simctl terminate "$UDID" ba.poso.app || true
+          xcrun simctl openurl "$UDID" "${SITE}search"
+          sleep 25
+          xcrun simctl io "$UDID" screenshot "shots/99-safari-pretraga.png"
+          ls -la shots
+      # also on the ios-screens branch, so the pictures open straight on GitHub (and on a phone)
+      - name: Save the pictures on the ios-screens branch
+        if: always()
+        run: |
+          cd shots
+          git init -q -b ios-screens
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "iPhone screenshots ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ios-screens
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-screens
+          path: shots/

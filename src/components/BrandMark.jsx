@@ -1,8 +1,12 @@
+import { useId } from 'react'
+
 /** The Zadatak mark: a rounded gold "Z" whose bottom stroke ends in a gold badge with a navy check
  *  ("zadatak riješen"). Same drawing as the app icon (scripts/brand-assets.mjs). `tile` draws it on the
  *  navy rounded square; without it the mark sits on whatever is behind it (e.g. the navy welcome screen). */
 function BrandMark({ size = 34, tile = true, className = '', ...props }) {
-  const id = tile ? 'bm-tile' : 'bm-flat'
+  // unique per mark: two marks on one page (the hidden top bar and the sidebar) must not share gradient ids,
+  // or the visible one points at gradients inside the hidden one and draws empty
+  const id = `${tile ? 'bm-tile' : 'bm-flat'}${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   return (
     <svg
       width={size}

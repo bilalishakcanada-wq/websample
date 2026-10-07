@@ -3,11 +3,13 @@ import { CircleCheck, ClipboardList, MessageCircle, Search, UserRound } from 'lu
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { navigateWithTransition } from '../utils/viewTransition'
 import { haptic } from '../utils/native'
+import './Navigation.css'
 import { prefetchRoute, warmMainRoutes } from '../utils/prefetch'
 import { useAuth } from '../context/AuthContext'
 import { useUnreadMessages } from '../hooks/useUnreadMessages'
 
-/* Five tabs, like the apps people already know: home, browse, my tasks, messages, account. */
+/* Phone tab bar. Five tabs, like the apps people already know: home, browse, my tasks, messages, account.
+   On a computer the same places sit in the left sidebar (SideNav). */
 const tabs = [
   ['/', 'Uradi', CircleCheck],
   ['/search', 'Pretraži', Search],
@@ -64,15 +66,13 @@ function MobileNav() {
 
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">
-      {/* one pill that glides to the active tab */}
-      {active >= 0 && <span className="mobile-nav-indicator" aria-hidden="true" style={{ '--tab': active }} />}
       {tabs.map(([to, label, Icon], index) => (
         <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" data-testid={`nav-${to === '/' ? 'home' : to.slice(1).replace(/\//g, '-')}`} onClick={(event) => onTab(event, to, index)} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">
-            <Icon size={22} strokeWidth={isActiveStroke(to, pathname)} />
+            <Icon size={24} strokeWidth={index === active ? 2.5 : 1.75} />
             {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}
           </span>
-          <span>{label}</span>
+          <span className="mobile-nav-label" data-label={label}>{label}</span>
         </NavLink>
       ))}
     </nav>
@@ -84,7 +84,5 @@ const scrollHome = () => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
 }
-
-const isActiveStroke = (to, pathname) => ((to === '/' ? pathname === '/' : pathname.startsWith(to)) ? 2.4 : 1.8)
 
 export default MobileNav

@@ -1,0 +1,136 @@
+/* =========================================================================
+   Navigation: tab bar at the bottom on phones, sidebar on the left on computers
+   ========================================================================= */
+
+.mobile-nav, .side-nav { display: none; }
+
+.mobile-nav-icon, .side-nav-icon { position: relative; display: inline-grid; place-items: center; transition: transform 150ms ease-in-out; }
+.mobile-nav-badge { position: absolute; top: -5px; right: -9px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--badge-red, #c8352b); color: #fff; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+
+@keyframes nav-pop { 0% { transform: scale(0.84); } 55% { transform: scale(1.14); } 100% { transform: scale(1); } }
+
+/* ---------- phone: fixed tab bar ---------- */
+@media (max-width: 768px) {
+  .mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 85; /* above every page; sheets and dialogs (94+) still cover it */
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    box-sizing: border-box;
+    height: var(--tabbar-space);
+    margin: 0;
+    padding: 0 4px var(--safe-bottom); /* icons stay clear of the iPhone home bar and the Android gesture bar */
+    background: var(--surface); /* fully solid: nothing scrolling underneath shows through */
+    border-top: 1px solid #e3e7ee;
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    color: var(--text-soft);
+    font-size: 0.66rem;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-nav-item.active { color: var(--primary); font-weight: 800; }
+  .mobile-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: 12px; }
+  /* fixed-height label: going bold never moves the icon or the line the labels sit on */
+  .mobile-nav-label { display: inline-grid; height: 13px; max-width: 100%; overflow: hidden; line-height: 13px; white-space: nowrap; }
+  /* an invisible bold copy keeps each label's width the same whether the tab is active or not */
+  .mobile-nav-label::after { content: attr(data-label); height: 0; font-weight: 800; visibility: hidden; overflow: hidden; }
+  /* a press you can feel: the icon dips while the finger is down */
+  .mobile-nav-item:active .mobile-nav-icon { transform: scale(0.88); }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* the tab you land on gives a small bounce */
+  .mobile-nav-item.active .mobile-nav-icon > svg { animation: nav-pop 320ms var(--ease-out, ease-out) both; }
+}
+
+/* ---------- computer, signed in: fixed sidebar like Instagram on the web ---------- */
+@media (min-width: 769px) {
+  body[data-sidebar='on'] { --sidebar-w: 76px; --header-h: 0px; }
+  body[data-sidebar='on'] .site-header, body[data-sidebar='on'] .site-header-spacer { display: none; }
+  body[data-sidebar='on'] #root { padding-left: var(--sidebar-w); }
+
+  .side-nav {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 85;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: var(--sidebar-w);
+    padding: calc(20px + var(--safe-top)) 12px 18px;
+    background: var(--surface);
+    border-right: 1px solid #e3e7ee;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  .side-nav-logo { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 7px; margin-bottom: 22px; border-radius: 12px; color: var(--primary); text-decoration: none; }
+  .side-nav-wordmark { display: none; font-family: var(--font-display-narrow, inherit); font-stretch: 80%; font-size: 1.45rem; font-weight: 900; letter-spacing: -0.04em; color: var(--primary-strong); }
+  .side-nav-list { display: grid; gap: 4px; }
+  .side-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.98rem;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+  .side-nav-item:hover { background: #f1f3f7; }
+  .side-nav-item:hover .side-nav-icon { transform: scale(1.06); }
+  .side-nav-item:active .side-nav-icon { transform: scale(0.9); }
+  .side-nav-item.active { color: var(--primary); font-weight: 800; }
+  .side-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .side-nav-label { display: none; white-space: nowrap; }
+  .side-nav-more { margin-top: auto; padding-top: 12px; }
+  .side-nav-menu {
+    position: fixed; /* outside the sidebar's scroll box, so the narrow sidebar doesn't clip it */
+    left: 12px;
+    bottom: 78px;
+    z-index: 86;
+    display: grid;
+    gap: 2px;
+    width: 250px;
+    padding: 8px;
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 14px 40px rgba(6, 21, 48, 0.18), 0 0 0 1px rgba(6, 21, 48, 0.06);
+  }
+  .side-nav-menu a, .side-nav-menu button { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-weight: 600; text-align: left; text-decoration: none; cursor: pointer; }
+  .side-nav-menu a:hover, .side-nav-menu button:hover { background: #f1f3f7; }
+  .side-nav-menu hr { margin: 4px 0; border: 0; border-top: 1px solid #e3e7ee; }
+}
+@media (min-width: 1280px) {
+  body[data-sidebar='on'] { --sidebar-w: 244px; }
+  .side-nav-label, .side-nav-wordmark { display: inline; }
+}
+@media (min-width: 769px) and (prefers-reduced-motion: no-preference) {
+  .side-nav-item.active .side-nav-icon > svg { animation: nav-pop 320ms var(--ease-out, ease-out) both; }
+  .side-nav-menu { animation: side-menu-in 160ms var(--ease-out, ease-out) both; }
+  /* the sidebar stays put while the page beside it crossfades */
+  .side-nav { view-transition-name: side-nav; }
+  ::view-transition-old(side-nav) { display: none; }
+  ::view-transition-new(side-nav) { animation: none; }
+}
+@keyframes side-menu-in { from { opacity: 0; transform: translateY(6px); } }

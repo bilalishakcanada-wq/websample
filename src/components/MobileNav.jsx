@@ -72,7 +72,7 @@ function MobileNav() {
             <Icon size={24} strokeWidth={index === active ? 2.5 : 1.75} />
             {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}
           </span>
-          <span className="mobile-nav-label">{label}</span>
+          <span className="mobile-nav-label" data-label={label}>{label}</span>
         </NavLink>
       ))}
     </nav>

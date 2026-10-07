@@ -23,7 +23,7 @@ function AboutPage() {
         <div className="info-card"><MapPin size={20} /><strong>Lokalno i domaće</strong><p>Bosanski jezik, domaći gradovi, cijene u KM. Napravljeno ovdje, za ovdje.</p></div>
         <div className="info-card"><ShieldCheck size={20} /><strong>Povjerenje se mjeri</strong><p>Verifikacija struke, Bayesov prosjek ocjena i pet nivoa povjerenja — ne sudimo po jednoj recenziji.</p></div>
         <div className="info-card"><Users size={20} /><strong>Zajednica sa pravilima</strong><p>Zaštićeni kontakti do prihvaćene ponude, moderacija oglasa i tim koji čita svaku prijavu.</p></div>
-        <div className="info-card"><Sparkles size={20} /><strong>Bez skrivenih troškova</strong><p>Objava, ponude i poruke su besplatni. Nema provizije na dogovorenu cijenu.</p></div>
+        <div className="info-card"><Sparkles size={20} /><strong>Bez skrivenih troškova</strong><p>Objava, ponude i poruke su besplatni. Naknadu izvođača obje strane vide prije prihvatanja ponude.</p></div>
       </section>
 
       <section className="info-section reveal">
@@ -39,7 +39,7 @@ function AboutPage() {
       <section className="info-section reveal">
         <h2>Kuda idemo</h2>
         <p>
-          Sljedeće što stiže: plaćanje unutar platforme (novac stoji sigurno dok posao nije gotov), planovi za veću vidljivost,
+          Plaćanje kroz platformu već radi: novac stoji sigurno dok posao nije gotov. Sljedeće što stiže: uplata karticom
           i podrška za firme koje redovno trebaju izvođače u više gradova. Sve najavljujemo emailom prije nego što krene.
         </p>
       </section>

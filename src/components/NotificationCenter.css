@@ -1,0 +1,132 @@
+/* Notification center: filter pills, day groups and category-coloured cards. */
+.notif-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -4px 14px;
+  padding: 2px 4px 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.notif-filters::-webkit-scrollbar { display: none; }
+.notif-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  color: var(--text-soft);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.notif-pill:hover { border-color: var(--primary); color: var(--primary); }
+.notif-pill.is-active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.notif-pill-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.7rem;
+  background: var(--accent);
+  color: var(--primary-strong);
+}
+@media (max-width: 720px) { .notif-pill { min-height: 40px; } }
+
+.notif-group + .notif-group { margin-top: 18px; }
+.notif-group-head {
+  margin: 0 0 8px 2px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.notif-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  --notif-tone: #1d4ed8;
+  --notif-tone-bg: #dbeafe;
+}
+.notif-card.is-unread { background: #f3f7ff; border-color: #d3e1fb; }
+.notif-cat-finance { --notif-tone: #15803d; --notif-tone-bg: #dcfce7; }
+.notif-cat-offer { --notif-tone: #a16207; --notif-tone-bg: #fef3c7; }
+.notif-cat-job { --notif-tone: var(--primary); --notif-tone-bg: var(--primary-soft); }
+.notif-cat-message { --notif-tone: #7c3aed; --notif-tone-bg: #ede9fe; }
+.notif-cat-system { --notif-tone: #1d4ed8; --notif-tone-bg: #dbeafe; }
+
+.notif-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--notif-tone-bg);
+  color: var(--notif-tone);
+}
+.notif-card-body { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.notif-card-body strong { overflow-wrap: anywhere; color: var(--text); }
+.notif-card.is-unread .notif-card-body strong { font-weight: 800; }
+.notif-card-body p { margin: 0; color: var(--text-soft); font-size: 0.9rem; overflow-wrap: anywhere; }
+.notif-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.notif-card-meta time { font-size: 0.74rem; color: var(--text-soft); }
+.notif-card-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.notif-card-action:hover { background: var(--primary-strong); color: #fff; }
+@media (max-width: 720px) { .notif-card-action { min-height: 40px; padding: 0 16px; } }
+.notif-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 42, 82, 0.15);
+  flex-shrink: 0;
+  align-self: center;
+}
+.notif-card .notif-list-open { align-self: center; margin-left: 0; }
+
+.notif-filter-empty { padding: 28px 12px; text-align: center; color: var(--text-soft); }
+
+/* the header bell's dropdown uses the same colours */
+.notif-panel li button span.notif-panel-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--notif-tone-bg);
+  color: var(--notif-tone);
+  --notif-tone: #1d4ed8;
+  --notif-tone-bg: #dbeafe;
+}
+.notif-panel li button span.notif-cat-finance { --notif-tone: #15803d; --notif-tone-bg: #dcfce7; }
+.notif-panel li button span.notif-cat-offer { --notif-tone: #a16207; --notif-tone-bg: #fef3c7; }
+.notif-panel li button span.notif-cat-job { --notif-tone: var(--primary); --notif-tone-bg: var(--primary-soft); }
+.notif-panel li button span.notif-cat-message { --notif-tone: #7c3aed; --notif-tone-bg: #ede9fe; }
+.notif-panel li button.unread { background: #f3f7ff; }

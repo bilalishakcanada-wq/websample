@@ -12,19 +12,19 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
 /** Removes every file under `prefix/` in a bucket, sub-folders included (list() shows folders with id null). */
-async function removeFolder(admin: ReturnType<typeof createClient>, bucket: string, prefix: string) {
+async function removeFolder(storage: ReturnType<typeof createClient>['storage'], bucket: string, prefix: string) {
   const files: string[] = []
   const folders = [prefix]
   while (folders.length > 0) {
     const folder = folders.pop()!
     for (let offset = 0; ; offset += 1000) {
-      const { data, error } = await admin.storage.from(bucket).list(folder, { limit: 1000, offset })
+      const { data, error } = await storage.from(bucket).list(folder, { limit: 1000, offset })
       if (error || !data?.length) break
       for (const entry of data) (entry.id ? files : folders).push(`${folder}/${entry.name}`)
       if (data.length < 1000) break
     }
   }
-  for (let i = 0; i < files.length; i += 1000) await admin.storage.from(bucket).remove(files.slice(i, i + 1000))
+  for (let i = 0; i < files.length; i += 1000) await storage.from(bucket).remove(files.slice(i, i + 1000))
 }
 
 Deno.serve(withCors(async (req) => {
@@ -53,7 +53,7 @@ Deno.serve(withCors(async (req) => {
   // ID documents and licences, chat photos, proof of work. The rows go with the account; the files
   // would otherwise stay in storage for good.
   for (const bucket of ['avatars', 'media', 'identity', 'uploads']) {
-    try { await removeFolder(admin, bucket, userId) } catch (err) { console.error('file cleanup failed', bucket, String(err)) }
+    try { await removeFolder(admin.storage, bucket, userId) } catch (err) { console.error('file cleanup failed', bucket, String(err)) }
   }
 
   // photos of their jobs (the rows cascade with the profile); older uploads may sit outside their folder

@@ -48,7 +48,7 @@
 /* fingers: zoom buttons as big as the recenter one; the app also keeps the map clear of the screen edge */
 @media (pointer: coarse) {
   .live-map .maplibregl-ctrl-group button { width: 44px; height: 44px; }
-  .live-map .maplibregl-ctrl-bottom-right { margin-bottom: env(safe-area-inset-bottom, 0); }
+  .live-map .maplibregl-ctrl-bottom-right { margin-bottom: var(--safe-bottom); }
 }
 /* mouse: hover feedback the phone doesn't need */
 @media (hover: hover) {

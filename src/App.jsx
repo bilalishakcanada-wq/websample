@@ -66,7 +66,7 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import InstallPrompt from './components/InstallPrompt'
 import ScrollToTop from './components/ScrollToTop'
-import MobileNav from './components/MobileNav'
+import NavigationBar from './components/NavigationBar'
 import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
@@ -178,7 +178,7 @@ function App() {
       </Suspense>
       </RouteGuard>
       <SiteFooter />
-      <MobileNav />
+      <NavigationBar />
       <Toaster />
       <DialogHost />
     </BrowserRouter>

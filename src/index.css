@@ -25,6 +25,14 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Safe areas (notch, home bar, Android gesture bar). Inside the Android app Capacitor puts the real insets
+     in --safe-area-inset-* because older Android WebViews report env() as 0; elsewhere env() is used. */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  /* phone tab bar: its own height, and the room it takes with the home bar under it */
+  --tabbar-h: 60px;
+  --tabbar-space: calc(var(--tabbar-h) + var(--safe-bottom));
+
   --bg: #f5f7fb;
   --surface: #ffffff;
   --surface-alt: #eef5ff;
@@ -93,7 +101,7 @@ html.is-native body::before {
   top: 0;
   left: 0;
   right: 0;
-  height: env(safe-area-inset-top, 0px);
+  height: var(--safe-top);
   background: #081b38;
   z-index: 2147483647;
   pointer-events: none;

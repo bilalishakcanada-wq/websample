@@ -214,7 +214,7 @@
 @keyframes vault-rise { from { transform: translateY(24px); opacity: 0; } }
 @media (max-width: 640px) {
   .vault-backdrop { align-items: flex-end; padding: 0; }
-  .vault-panel { border-radius: 22px 22px 0 0; max-height: 88vh; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .vault-panel { border-radius: 22px 22px 0 0; max-height: 88vh; padding: 18px 16px calc(18px + var(--safe-bottom)); }
   .vault-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
   .vault-tile { min-height: 138px; padding: 14px 6px 10px; }
 }

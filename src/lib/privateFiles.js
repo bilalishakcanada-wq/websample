@@ -15,6 +15,15 @@ const cache = new Map() // ref -> { url, expires }
 
 export const isPrivateRef = (value) => typeof value === 'string' && value.startsWith(PREFIX)
 
+// Chat photos sent before the private bucket kept a public "media" link in the message, which can't be
+// changed (messages are evidence). Their files were moved to "uploads" under the same path
+// (supabase/functions/move-private-files), so such a link is opened from there.
+const OLD_CHAT_LINK = /\/storage\/v1\/object\/public\/media\/([0-9a-f-]{36}\/chat\/[^?#]+)/
+const movedChatRef = (value) => {
+  const match = typeof value === 'string' ? value.match(OLD_CHAT_LINK) : null
+  return match ? `${PREFIX}${decodeURIComponent(match[1])}` : null
+}
+
 let enabled = false
 let askedAt = 0
 /** True once security/06 is on the database. A "yes" is kept; a "no" is asked again after a minute. */
@@ -47,6 +56,8 @@ export async function uploadUserFile({ path, publicPath = path, file, cacheContr
 
 /** Signed link for a reference ('' if this person may not open it); old public links are returned as they are. */
 export async function privateFileUrl(ref) {
+  const moved = movedChatRef(ref)
+  if (moved) return (await privateFileUrl(moved)) || ref // not moved yet: the old link still works
   if (!isPrivateRef(ref)) return ref || ''
   const hit = cache.get(ref)
   if (hit && hit.expires > Date.now()) return hit.url
@@ -58,7 +69,8 @@ export async function privateFileUrl(ref) {
 
 /** { url, failed }: url is '' while the signed link loads. */
 export function usePrivateFile(ref) {
-  const initial = isPrivateRef(ref) ? cache.get(ref)?.url || '' : ref || ''
+  const key = movedChatRef(ref) || ref
+  const initial = isPrivateRef(key) ? cache.get(key)?.url || '' : ref || ''
   const [state, setState] = useState({ ref, url: initial, failed: false })
   useEffect(() => {
     let active = true

@@ -8,6 +8,9 @@ import { assertAllowed, clearAttempts, recordAttempt } from '../utils/authThrott
 const RATE_LIMITED = 'Previše pokušaja u kratkom periodu. Sačekajte par minuta i pokušajte ponovo.'
 const WEAK_PASSWORD = 'Lozinka mora imati najmanje 8 znakova i sadržavati veliko, malo slovo i broj.'
 const isRateLimited = (error) => error?.status === 429 || /rate_limit/.test(error?.code || '')
+// Supabase couldn't send the email (its built-in sender only reaches the project team until our own mail server is set)
+export const EMAIL_DOWN = 'Email trenutno ne možemo poslati. Javi nam se preko stranice Kontakt i pomoći ćemo ti.'
+const isEmailDown = (error) => error?.code === 'email_address_not_authorized' || /error sending .*email/i.test(error?.message || '')
 
 let enabledProvidersPromise = null
 
@@ -55,6 +58,7 @@ export const authService = {
       if (error.code === 'user_already_exists') throw new Error('Nalog sa ovim emailom već postoji. Pokušajte se prijaviti.')
       if (error.code === 'weak_password') throw new Error('Lozinka je preslaba. Koristite najmanje 8 znakova, veliko i malo slovo i broj.')
       if (isRateLimited(error)) throw new Error(RATE_LIMITED)
+      if (isEmailDown(error)) throw new Error(EMAIL_DOWN)
       if (error.code === 'captcha_failed') throw new Error('Sigurnosna provjera nije prošla. Osvježite stranicu i pokušajte ponovo.')
       if (error.code === 'email_address_invalid') throw new Error('Ova email adresa nije prihvaćena. Provjerite da li je ispravno unesena.')
       throw publicError()
@@ -164,6 +168,7 @@ export const authService = {
 
     if (error) {
       if (isRateLimited(error)) throw new Error(RATE_LIMITED)
+      if (isEmailDown(error)) throw new Error(EMAIL_DOWN)
       throw publicError()
     }
     recordAttempt('reset', cleanedEmail)

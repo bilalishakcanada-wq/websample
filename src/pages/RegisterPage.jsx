@@ -9,6 +9,7 @@ import { serviceCategories } from '../data/categories'
 import { getMode } from '../app/mode'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
+import { EMAIL_DOWN } from '../services/authService'
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove i biram ponude', icon: Briefcase },
@@ -132,7 +133,7 @@ function RegisterPage() {
           )}
         </div>
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
-        {error && <div className="form-error">{error}</div>}
+        {error && <div className="form-error">{error}{error === EMAIL_DOWN && <> <Link to="/kontakt?tema=account">Otvori Kontakt</Link></>}</div>}
         <button data-testid="register-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Registracija...' : 'Nastavi'}
         </button>

@@ -1278,6 +1278,12 @@ button {
   font-weight: 700;
 }
 
+.form-error a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .form-success {
   padding: 0.8rem 1rem;
   background: rgba(25, 179, 123, 0.1);

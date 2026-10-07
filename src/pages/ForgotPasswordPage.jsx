@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { authService } from '../services/authService'
+import { authService, EMAIL_DOWN } from '../services/authService'
 import AuthLayout from '../components/AuthLayout'
 
 function ForgotPasswordPage() {
@@ -31,7 +31,7 @@ function ForgotPasswordPage() {
           <input id="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={email} onChange={(event) => setEmail(event.target.value)} required />
           <label htmlFor="email">Email adresa</label>
         </div>
-        {error && <div className="form-error">{error}</div>}
+        {error && <div className="form-error">{error}{error === EMAIL_DOWN && <> <Link to="/kontakt?tema=account">Otvori Kontakt</Link></>}</div>}
         {message && <div className="form-success">{message}</div>}
         <button type="submit" className="primary-button auth-submit" disabled={loading}>{loading ? 'Šaljem...' : 'Pošalji link'}</button>
       </form>

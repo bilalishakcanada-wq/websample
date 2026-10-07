@@ -11,6 +11,22 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } })
 
+/** Removes every file under `prefix/` in a bucket, sub-folders included (list() shows folders with id null). */
+async function removeFolder(storage: ReturnType<typeof createClient>['storage'], bucket: string, prefix: string) {
+  const files: string[] = []
+  const folders = [prefix]
+  while (folders.length > 0) {
+    const folder = folders.pop()!
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await storage.from(bucket).list(folder, { limit: 1000, offset })
+      if (error || !data?.length) break
+      for (const entry of data) (entry.id ? files : folders).push(`${folder}/${entry.name}`)
+      if (data.length < 1000) break
+    }
+  }
+  for (let i = 0; i < files.length; i += 1000) await storage.from(bucket).remove(files.slice(i, i + 1000))
+}
+
 Deno.serve(withCors(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
@@ -33,7 +49,14 @@ Deno.serve(withCors(async (req) => {
     .or(`client_id.eq.${userId},provider_id.eq.${userId}`).in('status', ['funded', 'requested', 'disputed'])
   if ((openPayments || 0) > 0) return json({ error: 'Imaš posao sa osiguranom uplatom u toku. Završi ga ili otkaži, pa obriši nalog.' }, 409)
 
-  // photos of their jobs (the rows cascade with the profile)
+  // everything they uploaded sits under their own folder: profile photo, portfolio, job photos,
+  // ID documents and licences, chat photos, proof of work. The rows go with the account; the files
+  // would otherwise stay in storage for good.
+  for (const bucket of ['avatars', 'media', 'identity', 'uploads']) {
+    try { await removeFolder(admin.storage, bucket, userId) } catch (err) { console.error('file cleanup failed', bucket, String(err)) }
+  }
+
+  // photos of their jobs (the rows cascade with the profile); older uploads may sit outside their folder
   const { data: jobs } = await admin.from('listings').select('id').eq('user_id', userId)
   const jobIds = (jobs || []).map((job) => job.id)
   if (jobIds.length > 0) {

@@ -10,6 +10,7 @@ export const SITE_PAGES = [
   { path: '/search', title: 'Pretraži poslove', short: 'Svi otvoreni poslovi na listi i mapi.', group: 'otkrij', app: true },
   { path: '/vodici', title: 'Vodiči za cijene', short: 'Koliko košta posao — iz stvarnih oglasa.', group: 'otkrij', related: ['/kako-radi', '/search', '/cijene'] },
   { path: '/pomoc', title: 'Često postavljena pitanja', short: 'Odgovori na najčešća pitanja i live chat.', group: 'otkrij', related: ['/kako-radi', '/kontakt', '/pravila'] },
+  { path: '/aplikacija', title: 'Aplikacija za telefon', short: 'Zadatak na Androidu i iPhoneu.', group: 'otkrij', related: ['/kako-radi', '/pomoc', '/zaradi'] },
   { path: '/cijene', title: 'Planovi i cijene', short: 'Šta je besplatno, a šta donose planovi.', group: 'otkrij', related: ['/kako-radi', '/za-biznis', '/pomoc'] },
 
   // ---- Kompanija

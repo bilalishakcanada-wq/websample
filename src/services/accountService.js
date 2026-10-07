@@ -7,8 +7,9 @@ import { passwordUpdateError } from './authService'
 const LICENCE_TYPES = ['electrician', 'plumber', 'gas', 'hvac', 'construction', 'driver']
 
 // Greške uplate/isplate iz baze i Edge funkcija → rečenica koju korisnik razumije.
+export const CARD_OFF = 'Plaćanje karticom trenutno nije dostupno. Uplatu na balans dogovori s timom.'
 const PAY_ERRORS = [
-  [/CARD_PAYMENTS_OFF/, 'Plaćanje karticom još nije uključeno. Do tada uplatu dogovaraš s timom.'],
+  [/CARD_PAYMENTS_OFF/, CARD_OFF],
   [/TOO_MANY_ATTEMPTS/, 'Previše pokušaja plaćanja zaredom. Pokušaj ponovo za 10 minuta.'],
   [/BAD_AMOUNT/, 'Uplata može biti od 5 do 2.000 KM.'],
   [/SUSPENDED/, 'Nalog je suspendovan, pa uplata i isplata nisu moguće.'],
@@ -31,6 +32,11 @@ export const accountService = {
   async startCardTopup(amount) {
     const { data, error } = await supabase.functions.invoke('card-topup-start', { body: { amount: Number(amount) } })
     if (error) {
+      // funkcija nije objavljena dok Monri nije ugovoren: Supabase vrati 404, a preglednik
+      // to često vidi kao blokiran zahtjev (preflight bez CORS zaglavlja)
+      if (error.name === 'FunctionsFetchError' || error.name === 'FunctionsRelayError' || error.context?.status === 404) {
+        throw new Error(CARD_OFF)
+      }
       let code = error.message || ''
       try { code = JSON.stringify(await error.context.json()) } catch { /* nije JSON */ }
       throw payError(code)

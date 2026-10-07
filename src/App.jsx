@@ -25,6 +25,7 @@ const HelpPage = lazy(lazyImport(() => import('./pages/HelpPage')))
 const GuidesPage = lazy(lazyImport(() => import('./pages/GuidesPage')))
 const BusinessPage = lazy(lazyImport(() => import('./pages/BusinessPage')))
 const ContactPage = lazy(lazyImport(() => import('./pages/ContactPage')))
+const AppDownloadPage = lazy(lazyImport(() => import('./pages/AppDownloadPage')))
 const PricingPage = lazy(lazyImport(() => import('./pages/PricingPage')))
 const CommunityGuidelinesPage = lazy(lazyImport(() => import('./pages/CommunityGuidelinesPage')))
 const ProviderPrinciplesPage = lazy(lazyImport(() => import('./pages/ProviderPrinciplesPage')))
@@ -171,6 +172,7 @@ function App() {
         <Route path="/pravila-zajednice" element={<CommunityGuidelinesPage />} />
         <Route path="/principi-izvodjaca" element={<ProviderPrinciplesPage />} />
         <Route path="/privatnost" element={<PrivacyPage />} />
+        <Route path="/aplikacija" element={<AppDownloadPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Redirect to="/404" />} />

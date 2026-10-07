@@ -39,7 +39,7 @@ export const HELP_ARTICLES = [
   { id: 'verification', audience: 'provider', q: 'Koliko traje verifikacija dokumenata?', keywords: ['verifik', 'dokument', 'koliko traje', 'na čekanju', 'odobr'],
     a: 'Obično isti ili sljedeći radni dan. Dok čekaš, u Značkama piše „Na čekanju“. Ako je dokument nečitak ili se ime ne poklapa sa profilom, zahtjev bude odbijen — pošalji ponovo jasniju sliku.' },
   { id: 'payouts', audience: 'provider', q: 'Kako primam isplate?', keywords: ['isplat', 'iban', 'račun', 'bank', 'novac', 'kad dobijam pare', 'uplat'],
-    a: 'U „Moj nalog → Načini plaćanja → Primam uplate“ upiši ime vlasnika, banku i IBAN. Do pokretanja Zadatak Pay plaćanje ide direktno između tebe i klijenta po dogovoru; u „Historiji plaćanja“ vidiš sve završene poslove i obračun naknade.' },
+    a: 'U „Moj nalog → Načini plaćanja → Primam uplate“ upiši ime vlasnika, banku i IBAN; račun mora glasiti na tvoje ime. Zaradu s Balansa tražiš u „Moj nalog → Balans → Zatraži isplatu“ (nakon provjere identiteta), a tim je uplati na taj račun. U „Historiji plaćanja“ vidiš sve završene poslove i obračun naknade.' },
   { id: 'balance', audience: 'provider', q: 'Šta je balans na mom nalogu?', keywords: ['balans', 'stanje', 'saldo', 'novčanik', 'novcanik', 'pare na nalogu'],
     a: 'Balans je tvoj novac na Zadatku — vidiš ga u „Moj nalog → Balans“ sa svakom uplatom, naknadom i isplatom. Iz balansa se naplaćuje naknada kad se posao završi; uplate, bonuse i povrate dodaje Zadatak tim. Ako nešto ne štima, piši podršci sa svojim privatnim ID-om.' },
   { id: 'success-rate', audience: 'provider', q: 'Šta je uspješnost i kako je podižem?', keywords: ['uspješnost', 'procenat', 'success', 'rejting'],

@@ -51,7 +51,7 @@ function HelpPage() {
           <h1>Kako ti možemo pomoći?</h1>
           <label className="help-hero-search">
             <Search size={20} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Postavi pitanje — npr. kako dobijam značke, koliko je naknada…" autoFocus />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Postavi pitanje — npr. kako dobijam značke, koliko je naknada…" autoFocus={typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches} />
             {query && <button type="button" onClick={() => setQuery('')} aria-label="Obriši">×</button>}
           </label>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
@@ -34,6 +34,9 @@ function ProgressLine({ progress }) {
 export function BadgeVault({ userId, earnedBadges }) {
   const { loading, badges } = useBadgeVault(userId, earnedBadges)
   const [open, setOpen] = useState(null)
+  // dodir na otvorenu pločicu je zatvara, osim ako ju je hover ili fokus upravo otvorio (isti dodir)
+  const openedAt = useRef(0)
+  const show = (code, event) => { if (open !== code) openedAt.current = event.timeStamp; setOpen(code) }
   const earned = useMemo(() => badges.filter((badge) => badge.earned), [badges])
 
   // značke osvojene od zadnje posjete trezoru dobiju "Novo" i kratku proslavu
@@ -65,9 +68,9 @@ export function BadgeVault({ userId, earnedBadges }) {
               key={badge.code}
               type="button"
               className={`vault-tile ${badge.earned ? 'is-earned' : 'is-locked'} ${fresh.has(badge.code) ? 'is-fresh' : ''} ${isOpen ? 'is-open' : ''}`}
-              onClick={() => setOpen(badge.code)}
-              onMouseEnter={() => setOpen(badge.code)}
-              onFocus={() => setOpen(badge.code)}
+              onClick={(event) => (isOpen && event.timeStamp - openedAt.current > 400 ? setOpen(null) : show(badge.code, event))}
+              onMouseEnter={(event) => show(badge.code, event)}
+              onFocus={(event) => show(badge.code, event)}
               onBlur={() => setOpen(null)}
               aria-expanded={isOpen}
               aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}

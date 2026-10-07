@@ -3,6 +3,8 @@
   --tier-bronze: #9c5428;
   --tier-silver: #5f6e85;
   --tier-gold: #b07c00;
+  /* zlatna za sitan tekst: #b07c00 na bijelom ima samo 3,7:1, ova 5,5:1 */
+  --tier-gold-text: #8a6100;
   --tier-platinum: #0d2a52;
 }
 
@@ -60,7 +62,7 @@
 .badge-showcase-text small { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 .tier-bronze .badge-showcase-text small { color: var(--tier-bronze); }
 .tier-silver .badge-showcase-text small { color: var(--tier-silver); }
-.tier-gold .badge-showcase-text small { color: var(--tier-gold); }
+.tier-gold .badge-showcase-text small { color: var(--tier-gold-text); }
 .tier-platinum .badge-showcase-text small { color: var(--tier-platinum); }
 .badge-showcase-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
 .badge-showcase-foot small { color: var(--text-soft, #57647a); font-weight: 600; }
@@ -132,9 +134,9 @@
 .vault-tier { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .vault-tier.tier-bronze { color: var(--tier-bronze); }
 .vault-tier.tier-silver { color: var(--tier-silver); }
-.vault-tier.tier-gold { color: var(--tier-gold); }
+.vault-tier.tier-gold { color: var(--tier-gold-text); }
 .vault-tier.tier-platinum { color: var(--tier-platinum); }
-.vault-tile.is-locked .vault-tier { color: #94a3b8; }
+.vault-tile.is-locked .vault-tier { color: var(--text-soft, #57647a); }
 .vault-tile.is-fresh { border-color: var(--accent, #f5b400); box-shadow: 0 0 0 3px var(--accent-soft, rgba(245, 180, 0, 0.16)); }
 .vault-tile.is-fresh .tier-medal { animation: vault-pop 700ms var(--ease-spring, ease-out) both; }
 .vault-new {

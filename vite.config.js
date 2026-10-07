@@ -194,9 +194,9 @@ const contentSecurityPolicy = () => {
           `script-src 'self' ${[...new Set(scripts)].join(' ')}${handlers.length ? ` 'unsafe-hashes' ${[...new Set(handlers)].join(' ')}` : ''} ${turnstile}`,
           // React sets style attributes and a few components inject <style>; styles can't run code
           "style-src 'self' 'unsafe-inline'",
-          // avatars come from Google/Facebook, photos from Supabase storage
-          "img-src 'self' data: blob: https:",
-          "media-src 'self' data: blob: https:",
+          // avatars come from Google/Facebook, photos from Supabase storage (named too, for a local http database)
+          `img-src 'self' data: blob: https: ${supabase}`.trim(),
+          `media-src 'self' data: blob: https: ${supabase}`.trim(),
           "font-src 'self' data:",
           `connect-src 'self' ${supabase} ${realtime} https://tiles.openfreemap.org https://ipwho.is ${turnstile} data: blob:`.replace(/\s+/g, ' '),
           "worker-src 'self' blob:",

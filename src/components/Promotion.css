@@ -37,6 +37,7 @@
 .promo-buy.is-hitno { background: #fde68a; color: #5c3d00; }
 .promo-buy.is-vip { background: linear-gradient(135deg, #f5b400, #ffd75e); color: #3d2a00; }
 .promo-buy:disabled { opacity: 0.6; }
+.promo-buy-placeholder { width: 150px; height: 42px; border-radius: 999px; }
 .promo-card.is-compact { margin: 10px 0; }
 
 /* kartice u pretrazi */

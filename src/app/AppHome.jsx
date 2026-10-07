@@ -73,6 +73,9 @@ function PosterHome({ firstName }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [title, setTitle] = useState('')
+  // the poster's own jobs go right under the hero: until we know whether there are any, nothing sits there to be pushed down
+  const ownJobs = useMyListings(user.id)
+  const ownJobsKnown = !ownJobs.isPending || ownJobs.fetchStatus === 'paused'
 
   const start = (text) => {
     haptic('light')
@@ -98,28 +101,32 @@ function PosterHome({ firstName }) {
       <div className="ap-home-body">
         <PushPrompt compact />
         <MyOpenJobs userId={user.id} />
-        <Link to="/account/profil" className="ap-promo" onClick={() => haptic('light')}>
-          <div>
-            <span className="ap-promo-eyebrow">Zadatak za izvođače</span>
-            <strong>Zaradi uz poslove u svom gradu</strong>
-            <p>Pošalji ponudu za minutu — klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
-            <em>Postani izvođač →</em>
-          </div>
-          <EarnMascot />
-        </Link>
-        <section className="ap-section">
-          <h2 className="ap-h2">Treba ti nešto?</h2>
-          <p className="ap-p">Pregledaj najtraženije kategorije</p>
-          <div className="ap-tiles">
-            {TRENDING.map((id) => serviceCategories.find((item) => item.id === id)).filter(Boolean).map(({ id, name, icon: Icon }) => (
-              <button key={id} type="button" className="ap-tile" onClick={() => start(name === 'Majstor za sve' ? '' : `${name}: `)}>
-                <Icon size={20} />
-                <span>{name.split(' i ')[0].split('/')[0]}</span>
-              </button>
-            ))}
-          </div>
-          <Link to="/search" className="ap-more">Sve kategorije <ChevronRight size={16} /></Link>
-        </section>
+        {ownJobsKnown && (
+          <>
+            <Link to="/account/profil" className="ap-promo" onClick={() => haptic('light')}>
+              <div>
+                <span className="ap-promo-eyebrow">Zadatak za izvođače</span>
+                <strong>Zaradi uz poslove u svom gradu</strong>
+                <p>Pošalji ponudu za minutu — klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
+                <em>Postani izvođač →</em>
+              </div>
+              <EarnMascot />
+            </Link>
+            <section className="ap-section">
+              <h2 className="ap-h2">Treba ti nešto?</h2>
+              <p className="ap-p">Pregledaj najtraženije kategorije</p>
+              <div className="ap-tiles">
+                {TRENDING.map((id) => serviceCategories.find((item) => item.id === id)).filter(Boolean).map(({ id, name, icon: Icon }) => (
+                  <button key={id} type="button" className="ap-tile" onClick={() => start(name === 'Majstor za sve' ? '' : `${name}: `)}>
+                    <Icon size={20} />
+                    <span>{name.split(' i ')[0].split('/')[0]}</span>
+                  </button>
+                ))}
+              </div>
+              <Link to="/search" className="ap-more">Sve kategorije <ChevronRight size={16} /></Link>
+            </section>
+          </>
+        )}
       </div>
     </div>
   )
@@ -130,6 +137,8 @@ function TaskerHome({ user, firstName }) {
   const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
+  // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
+  const ready = !loading && bids !== null
 
   return (
     <div className="ap ap-home">
@@ -165,29 +174,30 @@ function TaskerHome({ user, firstName }) {
               </Link>
             ))}
           </div>
-          <Link to="/search" className="ap-more">Svi poslovi <ChevronRight size={16} /></Link>
+          {ready && <Link to="/search" className="ap-more">Svi poslovi <ChevronRight size={16} /></Link>}
         </section>
 
-        <section className="ap-section">
-          <h2 className="ap-h2">Moje ponude</h2>
-          {bids === null && <div className="ap-skeleton" />}
-          {bids && bids.length === 0 && <div className="ap-empty"><strong>Još nisi poslao/la ponudu</strong><span>Otvori posao i klikni „Pošalji ponudu“.</span></div>}
-          {bids && bids.length > 0 && (
-            <div className="ap-list">
-              {bids.map((bid) => {
-                const [label, tone] = BID_STATUS[bid.status] || BID_STATUS.pending
-                return (
-                  <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="ap-row">
-                    <div><strong>{bid.listing?.title || 'Posao'}</strong><span><Users size={13} /> Tvoja ponuda: {money(bid.amount)} · {formatBosnianDate(bid.created_at)}</span></div>
-                    <em className={`ap-pill ap-pill-${tone}`}>{label}</em>
-                    <ChevronRight size={18} />
-                  </Link>
-                )
-              })}
-            </div>
-          )}
-          <Link to="/moji-poslovi?tab=ponude" className="ap-more">Sve ponude <ChevronRight size={16} /></Link>
-        </section>
+        {ready && (
+          <section className="ap-section">
+            <h2 className="ap-h2">Moje ponude</h2>
+            {bids.length === 0 && <div className="ap-empty"><strong>Još nisi poslao/la ponudu</strong><span>Otvori posao i klikni „Pošalji ponudu“.</span></div>}
+            {bids.length > 0 && (
+              <div className="ap-list">
+                {bids.map((bid) => {
+                  const [label, tone] = BID_STATUS[bid.status] || BID_STATUS.pending
+                  return (
+                    <Link key={bid.id} to={`/listings/${bid.listing_id}`} className="ap-row">
+                      <div><strong>{bid.listing?.title || 'Posao'}</strong><span><Users size={13} /> Tvoja ponuda: {money(bid.amount)} · {formatBosnianDate(bid.created_at)}</span></div>
+                      <em className={`ap-pill ap-pill-${tone}`}>{label}</em>
+                      <ChevronRight size={18} />
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+            <Link to="/moji-poslovi?tab=ponude" className="ap-more">Sve ponude <ChevronRight size={16} /></Link>
+          </section>
+        )}
       </div>
     </div>
   )

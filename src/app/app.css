@@ -5,6 +5,8 @@
 .ap { --ap-x: 20px; color: var(--text); }
 .ap-screen { min-height: 100dvh; display: flex; flex-direction: column; background: var(--surface); padding: 0 var(--ap-x) calc(20px + env(safe-area-inset-bottom, 0px)); }
 .ap-page { padding: 0 var(--ap-x) 24px; }
+/* on a computer the site footer sits under these pages: it starts below the fold, so lists loading in can't pull it up and push it away again */
+@media (min-width: 769px) { .ap-page { min-height: calc(100dvh - var(--header-h)); } }
 .ap-top { display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top, 0px)) 0 8px; margin: 0 calc(-1 * var(--ap-x)); padding-left: 10px; padding-right: 14px; }
 .ap-back { display: grid; place-items: center; width: 42px; height: 42px; min-height: 0; border-radius: 12px; background: transparent; color: var(--primary-strong); }
 .ap-cancel { margin-left: auto; min-height: 0; padding: 8px 10px; background: transparent; color: var(--text-soft); font-weight: 700; font-size: 0.88rem; }
@@ -166,8 +168,6 @@
 .ap-pill-off { background: #eef0f4; color: var(--text-soft); }
 .ap-empty { display: grid; gap: 4px; padding: 20px; border-radius: 16px; background: #f3f5f9; text-align: center; color: var(--text-soft); }
 .ap-empty strong { color: var(--primary-strong); }
-.ap-skeleton { height: 72px; border-radius: 16px; } /* shimmer: shared .sk rules in App.css */
-.ap-skeleton + .ap-skeleton { margin-top: 12px; }
 .ap-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .ap-steps li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; }
 .ap-steps li > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--primary-strong); color: var(--accent); font-weight: 800; font-size: 0.9rem; }

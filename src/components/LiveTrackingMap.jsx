@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { Map as MapLibreMap, Marker, NavigationControl, LngLatBounds, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { latinLabels, MAP_STYLE_URL } from '../utils/mapStyle'
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { LocateFixed } from 'lucide-react'
 
 setWorkerUrl(mapWorkerUrl)
 
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron'
 
 const pin = (className, label) => {
   const el = document.createElement('div')
@@ -44,7 +44,7 @@ function LiveTrackingMap({ destination, provider }) {
     const start = pointsRef.current.provider || pointsRef.current.destination
     const map = new MapLibreMap({
       container: boxRef.current,
-      style: STYLE_URL,
+      style: MAP_STYLE_URL,
       center: start ? [start.lng, start.lat] : [17.8, 44.1],
       zoom: start ? 13 : 6.4,
       attributionControl: { compact: true },
@@ -54,6 +54,7 @@ function LiveTrackingMap({ destination, provider }) {
     map.on('dragstart', () => { followRef.current = false })
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
     mapRef.current = map
+    latinLabels(map)
     const { destination: d } = pointsRef.current
     if (d?.lat != null) new Marker({ element: pin('live-pin live-pin-job', 'Mjesto posla') }).setLngLat([d.lng, d.lat]).addTo(map)
     map.on('load', () => frame(false))

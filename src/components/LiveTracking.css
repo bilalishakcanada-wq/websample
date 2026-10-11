@@ -28,7 +28,7 @@
   width: 40px; height: 40px; border-radius: 12px;
   background: #e8f0fc; color: #1d5fbf;
 }
-.live-track-icon.is-waiting { background: #fff6dc; color: #9a6b00; }
+.live-track-icon.is-waiting { background: #eef4ff; color: #0d2a52; }
 
 /* provider: the client asked */
 .live-track-asked { border-color: #9ec0f0; background: #f4f8ff; box-shadow: 0 0 0 3px rgba(29, 95, 191, .08); }

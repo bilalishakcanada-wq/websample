@@ -66,8 +66,13 @@ function LiveTracking({ payment, listing, role }) {
     if (!active || !onSite) return undefined
     let alive = true
     const load = () => {
-      liveLocationService.current(payment.id).then(({ available: ok, row: r }) => { if (alive) { setAvailable(ok); setRow(r) } })
-      liveLocationService.request(payment.id).then(({ available: ok, request: q }) => { if (alive) { setCanAsk(ok); setRequest(q) } })
+      liveLocationService.current(payment.id).then(({ available: ok, row: r }) => {
+        if (!alive) return
+        setAvailable(ok)
+        setRow(r)
+        // asking needs booking/06; only looked up where tracking itself exists
+        if (ok) liveLocationService.request(payment.id).then(({ available: can, request: q }) => { if (alive) { setCanAsk(can); setRequest(q) } })
+      })
     }
     load()
     const off = liveLocationService.subscribe(payment.id, (r) => setRow(r), (q) => setRequest(q))

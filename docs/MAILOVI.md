@@ -56,19 +56,18 @@ prijaviti bez potvrđenog maila.
 
 ## 3. Obavijesti mailom
 
-Nova ponuda, prihvaćena ili odbijena ponuda, zahtjev za ponudu, nova poruka, promjene na poslu,
-novi posao u blizini, uplata, recenzija, značka, provjera i podrška idu i na mail, osim ako je
-korisnik isključio mailove (Nalog → Postavke obavijesti). Isti mail o istoj stvari ide najviše
-jednom u 15 minuta, a najviše 20 mailova dnevno po osobi.
+Obavijesti (objavljen oglas, nova ponuda, dogovoren i završen posao, nova poruka i ostale
+obavijesti) idu preko Resenda s adrese `info@zadatak.com`. Okidač `on_notification_email` na
+`notifications` stavlja mail u red `zadatak_private.transactional_email_outbox`, a funkcija
+`send-transactional-email` ga šalje. Svaki mail dobije nasumično jedan od tri izgleda (A/B/C).
 
 Dijelovi:
-- Edge funkcija `supabase/functions/send-email` (izgled A/B/C nasumično, tekst iz
-  `_shared/notificationEmails.js`)
-- SQL `supabase/communication/02_email_notifications.sql` (tabela `email_log` i okidač na
-  `notifications`)
-- Tajne funkcije: https://supabase.com/dashboard/project/kshzsnceukbpwpgpicsh/functions/secrets
-  - Gmail: `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=<gmail adresa>`,
-    `SMTP_PASS=<app lozinka>`, `EMAIL_FROM=Zadatak <gmail adresa>`
-  - ili Resend: `RESEND_API_KEY`, `EMAIL_FROM=Zadatak <obavijesti@zadatak.ba>`
+- `supabase/functions/send-transactional-email` i `send-branded-email`
+- `supabase/functions/_shared/brandedEmail.ts` (tekstovi i izgled, preko `emailLayouts.js`)
+- Tajne funkcije (`RESEND_API_KEY`, `RESEND_FROM`):
+  https://supabase.com/dashboard/project/kshzsnceukbpwpgpicsh/functions/secrets
 
-Dok tajni nema, funkcija ne šalje ništa i ništa se ne kvari.
+Pregled svih mailova: `node scripts/build-email-templates.mjs --preview email-preview`.
+
+Važno: ove funkcije su prije objavljivane iz lokalnog Codex foldera na računaru. Prije novog
+objavljivanja odatle, prvo povuci najnoviji `main`, inače se vraća stari izgled.

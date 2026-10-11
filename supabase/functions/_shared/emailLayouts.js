@@ -1,5 +1,5 @@
 // Zadatak — email layouts shared by the auth templates (scripts/build-email-templates.mjs)
-// and the notification mail function (supabase/functions/send-email).
+// and the notification mails (supabase/functions/_shared/brandedEmail.ts).
 //
 // Three looks, each with its own Bosnian illustration (public/email/*.png):
 //   A  "Mostar noću"     — dark-blue header and footer, Stari most at night
@@ -187,5 +187,5 @@ ${inner}
 
 /** One finished mail in one look (used for notification mails). */
 export function renderEmail(variant, message, site = SITE_URL) {
-  return emailShell(emailInner(variant, message, site), { title: message.subject || message.title, preheader: message.preheader })
+  return emailShell(emailInner(variant, message, site), { title: message.subject ? escapeHtml(message.subject) : message.title, preheader: message.preheader })
 }

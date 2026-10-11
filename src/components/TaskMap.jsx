@@ -9,8 +9,8 @@ setWorkerUrl(mapWorkerUrl)
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron'
 const BIH_CENTER = [17.8, 44.1]
-const NAVY = '#0d2a52'
-const GOLD = '#f5b400'
+const NAVY = '#0a1f63'
+const GOLD = '#1f5fff'
 
 const toGeoJSON = (listings) => ({
   type: 'FeatureCollection',

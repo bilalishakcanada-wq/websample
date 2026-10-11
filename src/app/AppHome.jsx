@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronRight, MapPin, Search, Users, Truck, Sparkles, Wrench, Armchair, PaintRoller, Laptop, Dog, Package } from 'lucide-react'
-import { EarnMascot } from './Mascots'
+import { CropArt, useShuffle } from '../components/BosniaArt'
 import { useAuth } from '../context/AuthContext'
 import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
@@ -32,6 +32,10 @@ const greeting = () => {
 }
 
 /** Signed-in phone home. Poster face: "Objavi posao. Riješeno." Tasker face: jobs to take. */
+// the little Bosnian characters in the header and the promo card; a random other one every few seconds
+const HEADER_ART = ['diver', 'dzezva', 'navijac', 'majstor', 'somun']
+const PROMO_ART = ['most', 'sebilj', 'somun']
+
 function AppHome() {
   const { user } = useAuth()
   const [mode] = useMode()
@@ -70,6 +74,7 @@ function MyOpenJobs({ userId }) {
 }
 
 function PosterHome({ firstName }) {
+  const artIndex = useShuffle(HEADER_ART.length, 8000)
   const navigate = useNavigate()
   const { user } = useAuth()
   const [title, setTitle] = useState('')
@@ -87,8 +92,9 @@ function PosterHome({ firstName }) {
   return (
     <div className="ap ap-home">
       <section className="ap-hero">
+        {HEADER_ART.map((crop, i) => <CropArt key={crop} crop={crop} className={`ap-hero-art bz-turn ${i === artIndex ? 'is-on' : ''}`} />)}
         <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
-        <h1>Objavi posao. Riješeno.</h1>
+        <h1>Objavi posao. <em>Riješeno.</em></h1>
         <form className="ap-hero-form" onSubmit={(event) => { event.preventDefault(); start(title) }}>
           <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={70} placeholder="U par riječi, šta ti treba?" aria-label="Šta ti treba?" enterKeyHint="go" onFocus={() => prefetchRoute('/objavi')} />
           <button type="submit"><span>Dobij ponude</span><ArrowRight size={18} /></button>
@@ -110,7 +116,7 @@ function PosterHome({ firstName }) {
                 <p>Pošalji ponudu za minutu — klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
                 <em>Postani izvođač →</em>
               </div>
-              <EarnMascot />
+              <CropArt crop={PROMO_ART[artIndex % PROMO_ART.length]} className="ap-promo-art" />
             </Link>
             <section className="ap-section">
               <h2 className="ap-h2">Treba ti nešto?</h2>
@@ -133,6 +139,7 @@ function PosterHome({ firstName }) {
 }
 
 function TaskerHome({ user, firstName }) {
+  const artIndex = useShuffle(HEADER_ART.length, 8000)
   const navigate = useNavigate()
   const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
@@ -143,8 +150,9 @@ function TaskerHome({ user, firstName }) {
   return (
     <div className="ap ap-home">
       <section className="ap-hero ap-hero-tasker">
+        {HEADER_ART.map((crop, i) => <CropArt key={crop} crop={crop} className={`ap-hero-art bz-turn ${i === artIndex ? 'is-on' : ''}`} />)}
         <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
-        <h1>Pronađi posao. Zaradi.</h1>
+        <h1>Pronađi posao. <em>Zaradi.</em></h1>
         <button type="button" className="ap-hero-btn" onClick={() => { haptic('light'); navigate('/search') }} onPointerDown={() => prefetchRoute('/search')}>
           <Search size={18} /> <span>Pregledaj poslove u blizini</span> <ArrowRight size={18} />
         </button>

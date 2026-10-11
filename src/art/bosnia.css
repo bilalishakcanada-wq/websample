@@ -1,0 +1,50 @@
+/* Bosnian illustrations: sizing and the small endless motions inside the drawings.
+   Motions use the separate translate / rotate / scale properties, so they add to a group's own
+   transform attribute (its place in the drawing) instead of replacing it. */
+.bosnia-art { display: block; line-height: 0; }
+.bosnia-art svg { width: 100%; height: 100%; overflow: visible; }
+/* a close-up shows only its frame, nothing of the rest of the drawing */
+.bosnia-art.is-crop svg { overflow: hidden; }
+.bosnia-art :is(.tw, .bob, .swing, .swing-soft, .wave, .pour, .dive, .speed, .splash, .drop, .flap, .peck, .steam, .climb, .spin, .flutter, .fall) { transform-box: fill-box; }
+
+@keyframes bz-tw { 0%, 100% { opacity: 1; scale: 1; } 50% { opacity: .35; scale: .7; } }
+@keyframes bz-bob { 50% { translate: 0 -6px; } }
+@keyframes bz-swing { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
+@keyframes bz-wave { to { translate: -56px 0; } }
+@keyframes bz-pour { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+@keyframes bz-dive { 0%, 100% { translate: 0 0; } 50% { translate: 0 10px; } }
+@keyframes bz-speed { 0% { opacity: 0; translate: 0 20px; } 40% { opacity: .8; } 100% { opacity: 0; translate: 0 -30px; } }
+@keyframes bz-splash { 0%, 100% { scale: 1 1; } 50% { scale: 1 1.12; } }
+@keyframes bz-drop { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+@keyframes bz-flap { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -6px; rotate: -4deg; } }
+@keyframes bz-peck { 0%, 70%, 100% { rotate: 0deg; } 80% { rotate: 10deg; } }
+@keyframes bz-steam { 0% { opacity: 0; translate: 0 6px; } 50% { opacity: .8; } 100% { opacity: 0; translate: 0 -10px; } }
+@keyframes bz-spin { to { rotate: 360deg; } }
+@keyframes bz-flutter { 0%, 100% { rotate: 0deg; } 50% { rotate: 6deg; } }
+@keyframes bz-fall { to { stroke-dashoffset: -36; } }
+
+.bosnia-art .tw { transform-origin: center; animation: bz-tw 2.6s ease-in-out infinite; }
+.bosnia-art .tw:nth-of-type(2n) { animation-delay: .8s; }
+.bosnia-art .tw:nth-of-type(3n) { animation-delay: 1.6s; }
+.bosnia-art .bob { animation: bz-bob 3s ease-in-out infinite; }
+.bosnia-art .swing { transform-box: view-box; transform-origin: 330px 0; animation: bz-swing 4.2s ease-in-out infinite; }
+.bosnia-art .swing-soft { transform-origin: top center; animation: bz-flutter 3.4s ease-in-out infinite; }
+.bosnia-art .wave { animation: bz-wave 3.5s linear infinite; }
+.bosnia-art .pour { animation: bz-pour 1.2s ease-in-out infinite; }
+.bosnia-art .dive { animation: bz-dive 2.4s ease-in-out infinite; }
+.bosnia-art .speed { animation: bz-speed 1.6s ease-out infinite; }
+.bosnia-art .splash { transform-origin: bottom center; animation: bz-splash 1.4s ease-in-out infinite; }
+.bosnia-art .drop { animation: bz-drop 1.4s ease-in-out infinite; }
+.bosnia-art .flap { animation: bz-flap 1.8s ease-in-out infinite; }
+.bosnia-art .peck { transform-origin: bottom center; animation: bz-peck 2.8s ease-in-out infinite; }
+.bosnia-art .steam { animation: bz-steam 2.4s ease-out infinite; }
+.bosnia-art .spin { transform-origin: center; animation: bz-spin 8s linear infinite; }
+.bosnia-art .flutter { transform-origin: top center; animation: bz-flutter 1.6s ease-in-out infinite; }
+.bosnia-art .fall { animation: bz-fall 1s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) { .bosnia-art * { animation: none !important; } }
+html.is-lowend .bosnia-art * { animation: none !important; }
+
+/* scenes that take turns: all stay mounted, one shows, the change is a soft cross-fade */
+.bz-turn { transition: opacity .9s var(--ease-out, ease), transform .9s var(--ease-out, ease); }
+.bz-turn:not(.is-on) { opacity: 0; transform: translateY(14px) scale(.97); pointer-events: none; }

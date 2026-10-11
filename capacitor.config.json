@@ -2,14 +2,14 @@
   "appId": "ba.poso.app",
   "appName": "Zadatak",
   "webDir": "dist",
-  "backgroundColor": "#0d2a52",
+  "backgroundColor": "#0a1f63",
   "ios": {
     "contentInset": "never",
     "limitsNavigationsToAppBoundDomains": false
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#0d2a52"
+    "backgroundColor": "#0a1f63"
   },
   "server": {
     "url": "https://bilalishakcanada-wq.github.io/websample/",
@@ -20,11 +20,11 @@
     "SplashScreen": {
       "launchShowDuration": 1200,
       "launchAutoHide": true,
-      "backgroundColor": "#0d2a52"
+      "backgroundColor": "#1f5fff"
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#081b38",
+      "backgroundColor": "#071647",
       "overlaysWebView": false
     },
     "SystemBars": {

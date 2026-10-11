@@ -22,7 +22,8 @@ import { useLiveListings } from '../../hooks/useLiveListings'
 import CityPicker from '../../components/CityPicker'
 import { useRankedProviders } from '../../hooks/useRankedProviders'
 import { usePlatformStats } from '../../hooks/usePlatformStats'
-import { ArcHeadline, HeroStars, LadderArt, SwingArt } from '../../components/HeroArt'
+import { ArcHeadline, HeroStars } from '../../components/HeroArt'
+import { BosniaArt, SCENES, useShuffle } from '../../components/BosniaArt'
 import { POPULAR_CITIES } from '../../data/siteMap'
 import { withBase } from '../../utils/paths'
 
@@ -89,6 +90,7 @@ function DesktopHome() {
     }
   }, [hasLiveProviders, providers])
 
+  const sceneIndex = useShuffle(SCENES.length, 9000)
   useRevealOnScroll()
 
   return (
@@ -97,8 +99,13 @@ function DesktopHome() {
       <main>
         <section className="hero-stage" id="pocetna">
           <HeroStars />
-          <LadderArt />
-          <SwingArt />
+          {/* Mostar, Baščaršija, ćevapi i navijači: one scene at a time, a random other one every few seconds */}
+          {SCENES.map((scene, i) => (
+            <div key={scene.key} className={`hero-scene bz-turn ${i === sceneIndex ? 'is-on' : ''}`} aria-hidden="true">
+              <BosniaArt name={scene.left} className="hero-scene-left" />
+              <BosniaArt name={scene.right} className="hero-scene-right" />
+            </div>
+          ))}
 
           <div className="hero-stage-inner">
             <ArcHeadline />

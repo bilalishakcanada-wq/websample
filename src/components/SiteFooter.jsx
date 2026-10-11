@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
 import { appConfig } from '../config/appConfig'
+import { BosniaArt } from './BosniaArt'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/messages']
 
@@ -55,6 +56,7 @@ function SiteFooter() {
   return (
     <footer className="site-footer-dark">
       <div className="site-footer-inner">
+        <BosniaArt name="skyline" className="site-footer-skyline" />
         <div className="site-footer-columns">
           {COLUMNS.map((column) => (
             // <details> collapses each group on phones; CSS forces it open on wider screens.

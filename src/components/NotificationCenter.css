@@ -37,7 +37,7 @@
   place-items: center;
   font-size: 0.7rem;
   background: var(--accent);
-  color: var(--primary-strong);
+  color: #fff;
 }
 @media (max-width: 720px) { .notif-pill { min-height: 40px; } }
 
@@ -104,7 +104,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 0 3px rgba(13, 42, 82, 0.15);
+  box-shadow: 0 0 0 3px rgba(10, 31, 99, 0.15);
   flex-shrink: 0;
   align-self: center;
 }

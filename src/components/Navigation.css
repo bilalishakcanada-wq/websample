@@ -38,7 +38,10 @@
     font-weight: 600;
     -webkit-tap-highlight-color: transparent;
   }
-  .mobile-nav-item.active { color: var(--primary); font-weight: 800; }
+  .mobile-nav-item.active { color: var(--accent); font-weight: 800; }
+  /* the active tab sits on a soft blue pill */
+  .mobile-nav-icon { display: grid; place-items: center; width: 56px; height: 30px; border-radius: 999px; transition: transform 150ms ease-in-out, background var(--dur-base, 200ms) ease; }
+  .mobile-nav-item.active .mobile-nav-icon { background: var(--surface-alt); }
   .mobile-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: 12px; }
   /* fixed-height label: going bold never moves the icon or the line the labels sit on */
   .mobile-nav-label { display: inline-grid; height: 13px; max-width: 100%; overflow: hidden; line-height: 13px; white-space: nowrap; }
@@ -100,7 +103,7 @@
   .side-nav-item:hover { background: #f1f3f7; }
   .side-nav-item:hover .side-nav-icon { transform: scale(1.06); }
   .side-nav-item:active .side-nav-icon { transform: scale(0.9); }
-  .side-nav-item.active { color: var(--primary); font-weight: 800; }
+  .side-nav-item.active { color: var(--accent); font-weight: 800; }
   .side-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .side-nav-label { display: none; white-space: nowrap; }
   .side-nav-more { margin-top: auto; padding-top: 12px; }

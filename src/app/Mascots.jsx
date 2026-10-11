@@ -2,10 +2,10 @@
    (navy / gold / mint / cream) with no outlines. Every scene is built from the same `Person`
    so the whole app feels like one family. All scenes share the 300×300 viewBox. */
 
-const NAVY = '#0d2a52'
+const NAVY = '#0a1f63'
 const INK = '#061530'
 const BLUE = '#1d4f8f'
-const GOLD = '#f5b400'
+const GOLD = '#1f5fff'
 const GOLD_DARK = '#d99a00'
 const GOLD_LIGHT = '#ffd86b'
 const MINT = '#8fd3b6'

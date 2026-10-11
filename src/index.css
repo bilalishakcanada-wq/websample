@@ -19,7 +19,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: #111827;
-  background-color: #f6f4ee;
+  background-color: #eef4ff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -56,7 +56,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #f6f4ee;
+  background: #eef4ff;
   color: var(--text);
 }
 
@@ -102,7 +102,7 @@ html.is-native body::before {
   left: 0;
   right: 0;
   height: var(--safe-top);
-  background: #081b38;
+  background: #071647;
   z-index: 2147483647;
   pointer-events: none;
 }

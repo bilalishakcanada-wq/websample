@@ -42,7 +42,7 @@ function stampedJpeg(source, width, height, { kind, title, fix, at }) {
   ].filter(Boolean)
   const pad = Math.round(size * 0.7)
   const band = lines.length * size * 1.35 + pad * 2
-  ctx.fillStyle = 'rgba(8, 27, 56, 0.78)'
+  ctx.fillStyle = 'rgba(7, 22, 71, 0.78)'
   ctx.fillRect(0, h - band, w, band)
   ctx.fillStyle = '#ffffff'
   ctx.textBaseline = 'top'

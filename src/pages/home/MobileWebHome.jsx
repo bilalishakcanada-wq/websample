@@ -1,9 +1,11 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Star } from 'lucide-react'
 import { ArcHeadline, HeroStars } from '../../components/HeroArt'
 import { BosniaArt, SCENES, useShuffle } from '../../components/BosniaArt'
 import { serviceCategories } from '../../data/categories'
 import { usePlatformStats } from '../../hooks/usePlatformStats'
+import { useMobileHomeMotion } from './homeMotion'
 
 const SHOWN = [
   ['handyman', 'popravke u kući'],
@@ -23,9 +25,11 @@ const STEPS = [
 function MobileWebHome() {
   const sceneIndex = useShuffle(SCENES.length, 9000)
   const { proof, loading } = usePlatformStats()
+  const homeRef = useRef(null)
+  useMobileHomeMotion(homeRef)
 
   return (
-    <main className="mw-home">
+    <main className="mw-home" ref={homeRef}>
       <section className="mw-hero">
         <HeroStars />
         <ArcHeadline id="mw-arc" />

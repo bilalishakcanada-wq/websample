@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -26,6 +26,13 @@ import { ArcHeadline, HeroStars } from '../../components/HeroArt'
 import { BosniaArt, SCENES, useShuffle } from '../../components/BosniaArt'
 import { POPULAR_CITIES } from '../../data/siteMap'
 import { withBase } from '../../utils/paths'
+import SplitText from '../../components/reactbits/SplitText'
+import ShinyText from '../../components/reactbits/ShinyText'
+import SpotlightCard from '../../components/reactbits/SpotlightCard'
+import Magnet from '../../components/reactbits/Magnet'
+import '../../components/reactbits/ShinyText.css'
+import '../../components/reactbits/SpotlightCard.css'
+import { useDesktopHomeMotion } from './homeMotion'
 
 const categoryCards = [
   ...mockServiceCategories.map((category) => ({
@@ -92,9 +99,11 @@ function DesktopHome() {
 
   const sceneIndex = useShuffle(SCENES.length, 9000)
   useRevealOnScroll()
+  const shellRef = useRef(null)
+  useDesktopHomeMotion(shellRef)
 
   return (
-    <div className="marketplace-shell">
+    <div className="marketplace-shell" ref={shellRef}>
 
       <main>
         <section className="hero-stage" id="pocetna">
@@ -109,10 +118,23 @@ function DesktopHome() {
 
           <div className="hero-stage-inner">
             <ArcHeadline />
-            <p className="hero-stage-tagline">Objavi posao. Izaberi najboljeg. Riješeno.</p>
+            <SplitText
+              tag="p"
+              className="hero-stage-tagline"
+              text="Objavi posao. Izaberi najboljeg. Riješeno."
+              splitType="words"
+              delay={90}
+              duration={0.7}
+              startDelay={0.45}
+              from={{ opacity: 0, y: 22 }}
+              to={{ opacity: 1, y: 0 }}
+              immediate
+            />
 
             <div className="hero-stage-actions">
-              <Link to="/objavi" className="hero-btn hero-btn-primary">Objavi posao besplatno <ArrowRight size={18} /></Link>
+              <Magnet padding={60} magnetStrength={5}>
+                <Link to="/objavi" className="hero-btn hero-btn-primary">Objavi posao besplatno <ArrowRight size={18} /></Link>
+              </Magnet>
               <Link to="/zaradi" className="hero-btn hero-btn-light">Zaradi kao izvođač</Link>
             </div>
 
@@ -173,7 +195,7 @@ function DesktopHome() {
           <section className="ticker-section reveal">
             <div className="section-heading">
               <div>
-                <span className="eyebrow small-eyebrow">Uživo</span>
+                <span className="eyebrow small-eyebrow"><ShinyText text="Uživo" color="var(--primary)" shineColor="#9cc0ff" speed={2.4} delay={1.2} /></span>
                 <h2>Pogledajte šta se radi upravo sada</h2>
               </div>
             </div>
@@ -443,28 +465,28 @@ function DesktopHome() {
           </div>
 
           <div className="steps-grid reveal-stagger reveal">
-            <div className="step-card">
+            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
               <div className="step-number">1</div>
               <h3>Objavite posao</h3>
               <p>Recite šta vam treba i postavite budget ili željeni termin.</p>
-            </div>
-            <div className="step-card">
+            </SpotlightCard>
+            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
               <div className="step-number">2</div>
               <h3>Primite ponude</h3>
               <p>Primite ponude od provjerenih stručnjaka i usporedite rješenja.</p>
-            </div>
-            <div className="step-card">
+            </SpotlightCard>
+            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
               <div className="step-number">3</div>
               <h3>Platite sigurno</h3>
               <p>Odaberite najbolju uslugu i plaćajte bez stresnog administriranja.</p>
-            </div>
+            </SpotlightCard>
           </div>
         </section>
 
         <section className="boss-band reveal">
           <div className="boss-band-copy">
             <span className="eyebrow small-eyebrow">Zarada</span>
-            <h2>Budi svoj šef.</h2>
+            <h2><ShinyText text="Budi svoj šef." color="#ffffff" shineColor="#8fb6ff" speed={2.6} delay={1.5} /></h2>
             <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Zadatku.</p>
             <ul className="boss-checklist">
               <li><Check size={16} /> Besplatan pristup hiljadama poslova</li>
@@ -492,7 +514,7 @@ function DesktopHome() {
           </div>
 
           <div className="fee-grid reveal-stagger reveal">
-            <div className="fee-card">
+            <SpotlightCard className="fee-card" theme="light" spotlightColor="#1f5fff" intensity={0.5}>
               <span className="fee-card-eyebrow">Klijenti</span>
               <strong className="fee-card-big">0 KM</strong>
               <p>Objava posla, primanje ponuda, poruke i recenzije — sve bez naknade i bez pretplate.</p>
@@ -501,8 +523,8 @@ function DesktopHome() {
                 <li><Check size={15} /> Cijenu biraš iz ponuda</li>
                 <li><Check size={15} /> Uplata se čuva dok posao ne potvrdiš</li>
               </ul>
-            </div>
-            <div className="fee-card featured">
+            </SpotlightCard>
+            <SpotlightCard className="fee-card featured" theme="light" spotlightColor="#1f5fff" intensity={0.6}>
               <span className="fee-card-eyebrow">Izvođači</span>
               <strong className="fee-card-big">9–15%</strong>
               <p>Naknada platforme samo od plaćenog posla — nikad za slanje ponuda. Što više radiš, niža je: Bronza 15%, Srebro 13%, Zlato 11%, Platina 9%.</p>
@@ -512,8 +534,8 @@ function DesktopHome() {
                 <li><Check size={15} /> Nivo raste sa prometom</li>
               </ul>
               <Link to="/nivoi" className="secondary-button plan-button">Kako rade nivoi</Link>
-            </div>
-            <div className="fee-card">
+            </SpotlightCard>
+            <SpotlightCard className="fee-card" theme="light" spotlightColor="#1f5fff" intensity={0.5}>
               <span className="fee-card-eyebrow">Sigurno plaćanje</span>
               <strong className="fee-card-big">Balans</strong>
               <p>Klijent uplati unaprijed, novac stoji na Zadatku dok posao nije završen, pa se oslobađa izvođaču. Spor? Tim pregleda i odluči.</p>
@@ -523,7 +545,7 @@ function DesktopHome() {
                 <li><Check size={15} /> Historija svake uplate</li>
               </ul>
               <Link to="/cijene" className="secondary-button plan-button">Sve o cijenama</Link>
-            </div>
+            </SpotlightCard>
           </div>
         </section>
 

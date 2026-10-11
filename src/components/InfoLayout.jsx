@@ -3,6 +3,7 @@ import { ArrowRight, ChevronRight } from 'lucide-react'
 import BackHome from './BackHome'
 import { pageByPath, relatedPages } from '../data/siteMap'
 import { useRevealOnScroll } from '../hooks/useRevealOnScroll'
+import SplitText from './reactbits/SplitText'
 
 function InfoLayout({ eyebrow, title, lead, children, cta, wide = false }) {
   const { pathname } = useLocation()
@@ -20,7 +21,9 @@ function InfoLayout({ eyebrow, title, lead, children, cta, wide = false }) {
             <span>{page?.title || title}</span>
           </nav>
           {eyebrow && <span className="eyebrow small-eyebrow">{eyebrow}</span>}
-          <h1>{title}</h1>
+          {typeof title === 'string'
+            ? <SplitText tag="h1" text={title} splitType="words" delay={60} duration={0.7} from={{ opacity: 0, y: 26 }} to={{ opacity: 1, y: 0 }} immediate />
+            : <h1>{title}</h1>}
           {lead && <p className="info-lead">{lead}</p>}
         </div>
       </header>

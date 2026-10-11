@@ -67,6 +67,7 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import InstallPrompt from './components/InstallPrompt'
 import ScrollToTop from './components/ScrollToTop'
+import SmoothScroll from './components/SmoothScroll'
 import NavigationBar from './components/NavigationBar'
 import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
@@ -113,6 +114,7 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
+      <SmoothScroll />
       <ViewTransitions />
       <NativeBack />
       <SwBridge />

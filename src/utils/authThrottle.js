@@ -12,6 +12,8 @@ const RULES = {
   login: { max: 5, windowMs: 15 * 60 * 1000 },
   // reset emails for one address: one a minute, 5 an hour
   reset: { max: 5, windowMs: 60 * 60 * 1000, gapMs: 60 * 1000 },
+  // confirmation emails sent again for one address: one a minute, 5 an hour
+  resend: { max: 5, windowMs: 60 * 60 * 1000, gapMs: 60 * 1000 },
   // new accounts from this device: 5 an hour
   register: { max: 5, windowMs: 60 * 60 * 1000 },
 }

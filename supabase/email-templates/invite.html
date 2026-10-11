@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="bs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>Pozvani ste na Zadatak</title></head>
+<body style="margin:0;padding:0;background:#E8EFFF;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#E8EFFF">Prihvatite poziv i napravite svoj račun.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#E8EFFF"><tr><td align="center" style="padding:28px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px">
+{{ $d := "" }}{{ if .Token }}{{ $d = slice .Token 0 1 }}{{ end }}
+{{ if or (eq $d "0") (eq $d "1") (eq $d "2") }}
+<tr><td style="background:#0A1A5C;border-radius:20px 20px 0 0;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="padding-right:10px"><img src="https://bilalishakcanada-wq.github.io/websample/email/logo.png" width="36" height="36" alt="" style="display:block;border:0;border-radius:9px"></td>
+      <td style="font:900 24px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;letter-spacing:-0.5px">Zadatak</td></tr></table></td></tr>
+<tr><td style="background:#0A1A5C;line-height:0"><img src="https://bilalishakcanada-wq.github.io/websample/email/mostar.png" width="600" alt="Ilustracija: Stari most u Mostaru noću" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>
+<tr><td style="background:#FFFFFF;padding:34px 32px">
+  <div style="font:700 12px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;letter-spacing:0.8px;text-transform:uppercase;color:#1F5BFF;margin:0 0 10px">Poziv</div>
+  <h1 style="margin:0 0 12px;font:900 28px/34px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#0A1A5C;letter-spacing:-0.5px">Pozvani ste na Zadatak</h1>
+  <p style="margin:0;font:400 16px/25px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">Pozvani ste da se pridružite Zadataku, platformi gdje ljudi iz cijele BiH objavljuju poslove, a provjereni majstori šalju ponude.</p>
+  
+  
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 8px"><tr>
+      <td style="background:#1F5BFF;border-radius:999px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 34px;font:700 16px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;text-decoration:none;border-radius:999px">Prihvati poziv &rarr;</a></td>
+    </tr></table>
+  <div style="text-align:left"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0"><tr>
+      <td style="background:#F4F7FF;border:1px solid #DCE6FF;border-radius:14px;padding:14px 16px;font:400 13px/20px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">
+        <span style="font-weight:700;color:#0A1A5C">&#128274; Sigurnost:</span> Ne očekujete ovaj poziv? Zanemarite mail, ništa se neće desiti.</td></tr></table><div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8A93A6;margin:18px 0 0">Dugme ne radi? Kopirajte ovaj link u preglednik:<br>
+      <a href="{{ .ConfirmationURL }}" style="color:#1F5BFF;word-break:break-all">{{ .ConfirmationURL }}</a></div></div>
+</td></tr>
+<tr><td style="background:#0A1A5C;border-radius:0 0 20px 20px;padding:32px 32px 28px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Zadatak</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/kako-radi" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Kako radi</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/objavi" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Objavi posao</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/search" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Pronađi posao</a></div>
+    </td>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Pomoć</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pomoc" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Centar za pomoć</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pravila-zajednice" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Pravila zajednice</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/kontakt" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Kontakt</a></div>
+    </td>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Aplikacija</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/aplikacija" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Android i iPhone</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pravila" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Uslovi korištenja</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/privatnost" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Privatnost</a></div>
+    </td>
+    </tr></table>
+    <div style="border-top:1px solid #23347A;margin:22px 0 16px;line-height:0;font-size:0">&nbsp;</div>
+    <div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8FA8F0">Zadatak · Bosna i Hercegovina · Dobri ljudi. Dobri dogovori.<br>Ovaj mail je poslan jer imate Zadatak račun.</div>
+  </td></tr>
+{{ else if or (eq $d "3") (eq $d "4") (eq $d "5") }}
+<tr><td style="padding:4px 4px 18px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="padding-right:10px"><img src="https://bilalishakcanada-wq.github.io/websample/email/logo.png" width="36" height="36" alt="" style="display:block;border:0;border-radius:9px"></td>
+      <td style="font:900 24px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#0A1A5C;letter-spacing:-0.5px">Zadatak</td></tr></table></td></tr>
+<tr><td style="background:#FFFFFF;border-radius:24px;border:1px solid #DCE6FF">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="line-height:0"><img src="https://bilalishakcanada-wq.github.io/websample/email/sofra.png" width="600" alt="Ilustracija: bosanska sofra s kahvom, ćevapima i burekom" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:24px 24px 0 0"></td></tr>
+  <tr><td style="padding:30px 32px 34px">
+    <div style="display:inline-block;background:#E8EFFF;color:#1F5BFF;font:700 12px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;letter-spacing:0.6px;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin:0 0 14px">Poziv</div>
+    <h1 style="margin:0 0 12px;font:900 28px/34px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#0A1A5C;letter-spacing:-0.5px">Pozvani ste na Zadatak</h1>
+    <p style="margin:0;font:400 16px/25px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">Pozvani ste da se pridružite Zadataku, platformi gdje ljudi iz cijele BiH objavljuju poslove, a provjereni majstori šalju ponude.</p>
+  
+  
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 8px"><tr>
+      <td style="background:#0A1A5C;border-radius:999px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 34px;font:700 16px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;text-decoration:none;border-radius:999px">Prihvati poziv &rarr;</a></td>
+    </tr></table>
+  <div style="text-align:left"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0"><tr>
+      <td style="background:#F4F7FF;border:1px solid #DCE6FF;border-radius:14px;padding:14px 16px;font:400 13px/20px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">
+        <span style="font-weight:700;color:#0A1A5C">&#128274; Sigurnost:</span> Ne očekujete ovaj poziv? Zanemarite mail, ništa se neće desiti.</td></tr></table><div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8A93A6;margin:18px 0 0">Dugme ne radi? Kopirajte ovaj link u preglednik:<br>
+      <a href="{{ .ConfirmationURL }}" style="color:#1F5BFF;word-break:break-all">{{ .ConfirmationURL }}</a></div></div>
+  </td></tr></table>
+</td></tr>
+<tr><td style="padding:26px 32px 30px;text-align:center">
+    <div style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8A93A6;margin:0 0 10px"><a href="https://bilalishakcanada-wq.github.io/websample/pomoc" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#1F5BFF;text-decoration:none">Pomoć</a> &nbsp;·&nbsp; <a href="https://bilalishakcanada-wq.github.io/websample/pravila-zajednice" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#1F5BFF;text-decoration:none">Pravila zajednice</a> &nbsp;·&nbsp; <a href="https://bilalishakcanada-wq.github.io/websample/aplikacija" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#1F5BFF;text-decoration:none">Aplikacija</a> &nbsp;·&nbsp; <a href="https://bilalishakcanada-wq.github.io/websample/pravila" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#1F5BFF;text-decoration:none">Uslovi</a></div>
+    <div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8A93A6">Zadatak · Bosna i Hercegovina · Dobri ljudi. Dobri dogovori.<br>Ovaj mail je poslan jer imate Zadatak račun.</div>
+  </td></tr>
+{{ else }}
+<tr><td style="background:#0A1A5C;border-radius:20px 20px 0 0;padding:26px 30px 6px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="padding-right:10px"><img src="https://bilalishakcanada-wq.github.io/websample/email/logo.png" width="36" height="36" alt="" style="display:block;border:0;border-radius:9px"></td>
+      <td style="font:900 24px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;letter-spacing:-0.5px">Zadatak</td></tr></table></td></tr>
+<tr><td style="background:#0A1A5C;padding:18px 30px 22px;text-align:center">
+  <div style="font:700 12px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;letter-spacing:1px;text-transform:uppercase;color:#7FB0FF;margin:0 0 10px">Poziv</div>
+  <div style="font:900 36px/40px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;letter-spacing:-0.5px;text-transform:uppercase">Pozvani ste na Zadatak</div>
+  <div style="font:400 16px/24px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;margin:10px 0 0">Dobri ljudi. Dobri dogovori.</div>
+</td></tr>
+<tr><td style="background:#0A1A5C;line-height:0"><img src="https://bilalishakcanada-wq.github.io/websample/email/carsija.png" width="600" alt="Ilustracija: Sebilj na Baščaršiji" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>
+<tr><td style="background:#FFFFFF;padding:30px 32px 34px;text-align:center">
+  <p style="margin:0;font:400 16px/25px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">Pozvani ste da se pridružite Zadataku, platformi gdje ljudi iz cijele BiH objavljuju poslove, a provjereni majstori šalju ponude.</p>
+  
+  
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:26px auto 8px"><tr>
+      <td style="background:#1F5BFF;border-radius:999px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 34px;font:700 16px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;text-decoration:none;border-radius:999px">Prihvati poziv &rarr;</a></td>
+    </tr></table>
+  <div style="text-align:left"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0"><tr>
+      <td style="background:#F4F7FF;border:1px solid #DCE6FF;border-radius:14px;padding:14px 16px;font:400 13px/20px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#3D4660">
+        <span style="font-weight:700;color:#0A1A5C">&#128274; Sigurnost:</span> Ne očekujete ovaj poziv? Zanemarite mail, ništa se neće desiti.</td></tr></table><div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8A93A6;margin:18px 0 0">Dugme ne radi? Kopirajte ovaj link u preglednik:<br>
+      <a href="{{ .ConfirmationURL }}" style="color:#1F5BFF;word-break:break-all">{{ .ConfirmationURL }}</a></div></div>
+</td></tr>
+<tr><td style="background:#0A1A5C;border-radius:0 0 20px 20px;padding:32px 32px 28px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Zadatak</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/kako-radi" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Kako radi</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/objavi" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Objavi posao</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/search" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Pronađi posao</a></div>
+    </td>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Pomoć</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pomoc" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Centar za pomoć</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pravila-zajednice" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Pravila zajednice</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/kontakt" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Kontakt</a></div>
+    </td>
+      <td valign="top" width="33%" style="padding:0 10px 0 0">
+      <div style="font:700 14px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#FFFFFF;margin:0 0 10px">Aplikacija</div>
+      <div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/aplikacija" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Android i iPhone</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/pravila" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Uslovi korištenja</a></div><div style="margin:0 0 8px"><a href="https://bilalishakcanada-wq.github.io/websample/privatnost" style="font:400 13px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#C7D6FF;text-decoration:none">Privatnost</a></div>
+    </td>
+    </tr></table>
+    <div style="border-top:1px solid #23347A;margin:22px 0 16px;line-height:0;font-size:0">&nbsp;</div>
+    <div style="font:400 12px/18px Figtree, Arial, 'Helvetica Neue', Helvetica, sans-serif;color:#8FA8F0">Zadatak · Bosna i Hercegovina · Dobri ljudi. Dobri dogovori.<br>Ovaj mail je poslan jer imate Zadatak račun.</div>
+  </td></tr>
+{{ end }}
+</table></td></tr></table></body></html>

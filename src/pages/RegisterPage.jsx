@@ -61,7 +61,7 @@ function RegisterPage() {
         trades: offersServices ? trades : [],
       })
       if (result.session) navigate(next || '/account/profil?setup=1')
-      else navigate(`/login?verification=pending${next ? `&next=${encodeURIComponent(next)}` : ''}`)
+      else navigate(`/login?verification=pending${next ? `&next=${encodeURIComponent(next)}` : ''}`, { state: { email: form.email.trim().toLowerCase() } })
     } catch (err) {
       setError(err.message)
     } finally {

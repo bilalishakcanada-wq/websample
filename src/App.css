@@ -7787,7 +7787,6 @@ body:has(.profile-cta-bar) .support-chat {
 .hero-scene-right { position: absolute; right: -14px; top: 4%; width: clamp(210px, 20vw, 300px); aspect-ratio: 400 / 720; }
 .hero-scene .bosnia-art svg { filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25)); }
 @media (max-width: 1080px) { .hero-scene { opacity: .35; } .hero-scene:not(.is-on) { opacity: 0; } }
-@media (max-width: 860px) { .hero-scene { display: none; } }
 
 .hero-art {
   position: absolute;

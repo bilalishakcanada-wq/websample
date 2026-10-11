@@ -180,7 +180,7 @@
   transition: opacity var(--dur-fast, 120ms) var(--ease-out, ease-out), transform var(--dur-fast, 120ms) var(--ease-out, ease-out);
 }
 .vault-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-bottom-color: var(--primary-strong, #081b38); }
-.vault-tip b { color: var(--accent, #0c4ee9); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.vault-tip b { color: var(--accent-light, #7fb0ff); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
 .vault-tip em { color: #cbd5e1; font-style: normal; font-size: 11px; }
 .vault-tile.is-open .vault-tip { opacity: 1; transform: translate(-50%, 0); }
 .vault-foot { margin: 0; font-size: 13px; }

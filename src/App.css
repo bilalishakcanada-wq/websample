@@ -11470,7 +11470,7 @@ body:has(.profile-cta-bar) .support-chat {
 .pill-danger { background: #fdecec; color: #7a1f1f; }
 .pill-warn { background: #cfdcfc; color: #052266; }
 .pill-navy { background: var(--primary); color: white; }
-.pill-gold { background: var(--star); color: var(--primary-strong); }
+.pill-gold { background: var(--star); color: #fff; }
 .pill-soft { background: var(--primary-soft); color: var(--primary-strong); }
 .pill.risk-low, .tag.risk-low { background: #e3f6e9; color: #1d6b3a; }
 .pill.risk-medium, .tag.risk-medium { background: #cfdcfc; color: #052266; }
@@ -11824,7 +11824,7 @@ body:has(.profile-cta-bar) .support-chat {
 .dossier-head .pill { background: rgba(255, 255, 255, 0.14); color: white; }
 .dossier-head .pill-danger { background: rgba(239, 68, 68, 0.35); }
 .dossier-head .pill-ok { background: rgba(25, 179, 123, 0.35); }
-.dossier-head .pill-gold { background: var(--star); color: var(--primary-strong); }
+.dossier-head .pill-gold { background: var(--star); color: #fff; }
 .dossier-head .pill.risk-high { background: rgba(239, 68, 68, 0.4); }
 .dossier-head .pill.risk-medium { background: rgba(12, 78, 233, 0.4); }
 .dossier-head .pill.risk-low { background: rgba(25, 179, 123, 0.35); }
@@ -12514,7 +12514,7 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .qa-row.is-owner { background: rgba(31, 95, 255, 0.12); }
 .qa-row strong { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; }
 .qa-row strong small { font-weight: 500; color: var(--text-soft); }
-.qa-owner-tag { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 999px; background: var(--primary-strong); color: var(--accent); }
+.qa-owner-tag { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 999px; background: var(--primary-strong); color: var(--accent-light); }
 .qa-row p { margin: 4px 0 0; line-height: 1.45; }
 .qa-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .qa-form input { flex: 1 1 260px; min-height: 46px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--stroke); background: var(--surface); font-size: 0.95rem; }

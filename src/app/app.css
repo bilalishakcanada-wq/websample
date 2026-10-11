@@ -129,7 +129,7 @@
 .wl-sheet p { margin: 0 0 4px; text-align: center; font-weight: 600; color: var(--text-soft); font-size: 0.9rem; }
 .wl-btn { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 999px; font-weight: 800; font-size: 1rem; }
 .wl-btn-primary { background: var(--accent); color: #fff; }
-.wl-btn-dark { background: var(--surface-alt); color: var(--accent); }
+.wl-btn-dark { background: var(--surface-alt); color: var(--accent-strong); }
 .wl-link { text-align: center; padding: 6px; font-size: 0.86rem; font-weight: 700; color: var(--primary); }
 @media (prefers-reduced-motion: reduce) { .wl-card svg { animation: none; } }
 

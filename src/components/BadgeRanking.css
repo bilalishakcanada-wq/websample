@@ -2,9 +2,9 @@
 :root {
   --tier-bronze: #9c5428;
   --tier-silver: #5f6e85;
-  --tier-gold: #b07c00;
-  /* zlatna za sitan tekst: #b07c00 na bijelom ima samo 3,7:1, ova 5,5:1 */
-  --tier-gold-text: #8a6100;
+  --tier-gold: #0938a7;
+  /* zlatna za sitan tekst: #0938a7 na bijelom ima samo 3,7:1, ova 5,5:1 */
+  --tier-gold-text: #072c83;
   --tier-platinum: #0d2a52;
 }
 
@@ -24,7 +24,7 @@
 .tier-medal.tier-silver { --tier-color: var(--tier-silver); }
 .tier-medal.tier-gold { --tier-color: var(--tier-gold); }
 .tier-medal.tier-platinum { --tier-color: var(--tier-platinum); }
-.tier-medal.tier-gold, .tier-medal.tier-platinum { filter: drop-shadow(0 3px 8px rgba(245, 180, 0, 0.28)); }
+.tier-medal.tier-gold, .tier-medal.tier-platinum { filter: drop-shadow(0 3px 8px rgba(12, 78, 233, 0.28)); }
 .tier-medal.tier-platinum { filter: drop-shadow(0 3px 10px rgba(13, 42, 82, 0.3)); }
 .tier-medal-spark { transform-origin: 40px 7px; animation: medal-spark 2.8s var(--ease-out, ease-out) infinite; }
 @keyframes medal-spark { 0%, 70%, 100% { opacity: 0; transform: scale(0.4); } 80% { opacity: 1; transform: scale(1.1); } }
@@ -55,7 +55,7 @@
   background: var(--surface, #fff);
   border: 1px solid var(--stroke, #e4ddcd);
 }
-.badge-showcase-item.tier-gold { background: linear-gradient(100deg, #fff8e1, #fff 70%); border-color: #f3dc94; }
+.badge-showcase-item.tier-gold { background: linear-gradient(100deg, #e3ebfe, #fff 70%); border-color: #94b0f3; }
 .badge-showcase-item.tier-platinum { background: linear-gradient(100deg, #eaf0ff, #fff 70%); border-color: #c9d6f2; }
 .badge-showcase-text { display: grid; min-width: 0; line-height: 1.2; }
 .badge-showcase-text strong { font-size: 14px; color: var(--text, #101a2c); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -94,7 +94,7 @@
 .vault-tier-count i { width: 10px; height: 10px; border-radius: 3px; transform: rotate(45deg); }
 .vault-tier-count.tier-bronze i { background: #c77d4a; }
 .vault-tier-count.tier-silver i { background: #a3b0c2; }
-.vault-tier-count.tier-gold i { background: #f5b400; }
+.vault-tier-count.tier-gold i { background: #0c4ee9; }
 .vault-tier-count.tier-platinum i { background: #0d2a52; }
 .vault-celebrate {
   display: flex;
@@ -103,8 +103,8 @@
   margin: 0;
   padding: 10px 14px;
   border-radius: 12px;
-  background: var(--accent-soft, rgba(245, 180, 0, 0.16));
-  color: #6b4b00;
+  background: var(--accent-soft, rgba(12, 78, 233, 0.16));
+  color: #052266;
   font-weight: 600;
   animation: vault-pop 500ms var(--ease-spring, ease-out) both;
 }
@@ -127,7 +127,7 @@
   transition: transform var(--dur-fast, 120ms) var(--ease-out, ease-out), box-shadow var(--dur-fast, 120ms) var(--ease-out, ease-out);
 }
 .vault-tile:hover, .vault-tile.is-open { z-index: 6; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1); }
-.vault-tile:focus-visible { outline: 3px solid var(--accent, #f5b400); outline-offset: 2px; }
+.vault-tile:focus-visible { outline: 3px solid var(--accent, #0c4ee9); outline-offset: 2px; }
 .vault-tile strong { font-size: 13px; line-height: 1.25; }
 .vault-tile.is-locked { background: #f7f7f5; border-style: dashed; }
 .vault-tile.is-locked strong { color: var(--text-soft, #57647a); }
@@ -137,7 +137,7 @@
 .vault-tier.tier-gold { color: var(--tier-gold-text); }
 .vault-tier.tier-platinum { color: var(--tier-platinum); }
 .vault-tile.is-locked .vault-tier { color: var(--text-soft, #57647a); }
-.vault-tile.is-fresh { border-color: var(--accent, #f5b400); box-shadow: 0 0 0 3px var(--accent-soft, rgba(245, 180, 0, 0.16)); }
+.vault-tile.is-fresh { border-color: var(--accent, #0c4ee9); box-shadow: 0 0 0 3px var(--accent-soft, rgba(12, 78, 233, 0.16)); }
 .vault-tile.is-fresh .tier-medal { animation: vault-pop 700ms var(--ease-spring, ease-out) both; }
 .vault-new {
   position: absolute;
@@ -145,7 +145,7 @@
   right: 8px;
   padding: 2px 7px;
   border-radius: 999px;
-  background: var(--accent, #f5b400);
+  background: var(--accent, #0c4ee9);
   color: #3d2b00;
   font-size: 10px;
   font-weight: 800;
@@ -154,7 +154,7 @@
 @keyframes vault-pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .vault-progress { display: grid; gap: 3px; width: 100%; }
 .vault-progress-bar { display: block; height: 5px; border-radius: 99px; background: #e2e8f0; overflow: hidden; }
-.vault-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent, #f5b400); }
+.vault-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent, #0c4ee9); }
 .vault-progress small { font-size: 11px; color: var(--text-soft, #57647a); }
 
 /* objašnjenje: ispod pločice na hover / fokus / dodir (ispod, jer prozor s listanjem ne reže donji rub) */
@@ -180,7 +180,7 @@
   transition: opacity var(--dur-fast, 120ms) var(--ease-out, ease-out), transform var(--dur-fast, 120ms) var(--ease-out, ease-out);
 }
 .vault-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; margin-left: -6px; border: 6px solid transparent; border-bottom-color: var(--primary-strong, #081b38); }
-.vault-tip b { color: var(--accent, #f5b400); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.vault-tip b { color: var(--accent-light, #7fb0ff); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
 .vault-tip em { color: #cbd5e1; font-style: normal; font-size: 11px; }
 .vault-tile.is-open .vault-tip { opacity: 1; transform: translate(-50%, 0); }
 .vault-foot { margin: 0; font-size: 13px; }
@@ -204,7 +204,7 @@
   overflow-y: auto;
   padding: 20px;
   border-radius: 22px;
-  background: var(--bg, #f6f4ee);
+  background: var(--bg, #eef0f6);
   box-shadow: var(--shadow);
   animation: vault-rise 260ms var(--ease-out, ease-out) both;
 }

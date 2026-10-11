@@ -22,7 +22,8 @@ import { useLiveListings } from '../../hooks/useLiveListings'
 import CityPicker from '../../components/CityPicker'
 import { useRankedProviders } from '../../hooks/useRankedProviders'
 import { usePlatformStats } from '../../hooks/usePlatformStats'
-import { ArcHeadline, HeroStars, LadderArt, SwingArt } from '../../components/HeroArt'
+import { ArcHeadline, HeroStars } from '../../components/HeroArt'
+import { BosniaArt, SCENES, useShuffle } from '../../components/BosniaArt'
 import { POPULAR_CITIES } from '../../data/siteMap'
 import { withBase } from '../../utils/paths'
 
@@ -89,6 +90,7 @@ function DesktopHome() {
     }
   }, [hasLiveProviders, providers])
 
+  const sceneIndex = useShuffle(SCENES.length, 9000)
   useRevealOnScroll()
 
   return (
@@ -97,8 +99,13 @@ function DesktopHome() {
       <main>
         <section className="hero-stage" id="pocetna">
           <HeroStars />
-          <LadderArt />
-          <SwingArt />
+          {/* Mostar, Baščaršija, ćevapi i navijači: one scene at a time, a random other one every few seconds */}
+          {SCENES.map((scene, i) => (
+            <div key={scene.key} className={`hero-scene bz-turn ${i === sceneIndex ? 'is-on' : ''}`} aria-hidden="true">
+              <BosniaArt name={scene.left} className="hero-scene-left" />
+              <BosniaArt name={scene.right} className="hero-scene-right" />
+            </div>
+          ))}
 
           <div className="hero-stage-inner">
             <ArcHeadline />
@@ -532,14 +539,9 @@ function DesktopHome() {
 
         <section className="country-strip reveal" aria-label="Regija">
           <span className="country-flag" aria-hidden="true">
-            <svg viewBox="0 0 40 20" width="40" height="20">
-              <rect width="40" height="20" fill="#002395" />
-              <polygon points="10,0 30,0 30,20" fill="#FECB00" />
-              {[0, 1, 2, 3, 4, 5, 6].map((n) => {
-                const x = 9.5 + n * 3.2
-                const y = 1.4 + n * 3.2
-                return <text key={n} x={x} y={y} fontSize="3.2" fill="white" textAnchor="middle" dominantBaseline="middle">★</text>
-              })}
+            <svg viewBox="0 0 24 24" width="22" height="22">
+              <path d="M12 22s7-6.6 7-12.2A7 7 0 0 0 5 9.8C5 15.4 12 22 12 22z" fill="#1f5fff" />
+              <circle cx="12" cy="9.8" r="2.8" fill="#fff" />
             </svg>
           </span>
           <span>Bosna i Hercegovina</span>

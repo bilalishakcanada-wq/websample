@@ -2,12 +2,18 @@ import { Suspense, lazy } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { lazyImport } from '../utils/appUpdates'
+import { isNativeApp } from '../utils/native'
+
+// inside the iOS / Android app or the installed web app, a visitor gets the app's Welcome screen;
+// in a phone browser, the mobile home page
+const inAppShell = () => isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
 
 // each face of the home is its own chunk: a phone only downloads the one it shows
 // (visitor welcome, signed-in home, or the desktop marketing page)
 const Welcome = lazy(lazyImport(() => import('../app/Welcome')))
 const AppHome = lazy(lazyImport(() => import('../app/AppHome')))
 const DesktopHome = lazy(lazyImport(() => import('./home/DesktopHome')))
+const MobileWebHome = lazy(lazyImport(() => import('./home/MobileWebHome')))
 
 // a signed-in phone will show AppHome: start its download now instead of after the session check and first render
 try {
@@ -22,7 +28,7 @@ function HomePage() {
   const { user, loading } = useAuth()
   if (isPhone) {
     if (loading) return <Holding />
-    return <Suspense fallback={<Holding />}>{user ? <AppHome /> : <Welcome />}</Suspense>
+    return <Suspense fallback={<Holding />}>{user ? <AppHome /> : inAppShell() ? <Welcome /> : <MobileWebHome />}</Suspense>
   }
   return (
     <Suspense fallback={<Holding />}>

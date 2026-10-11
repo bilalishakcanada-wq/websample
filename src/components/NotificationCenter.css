@@ -37,7 +37,7 @@
   place-items: center;
   font-size: 0.7rem;
   background: var(--accent);
-  color: var(--primary-strong);
+  color: #fff;
 }
 @media (max-width: 720px) { .notif-pill { min-height: 40px; } }
 
@@ -64,7 +64,7 @@
 }
 .notif-card.is-unread { background: #f3f7ff; border-color: #d3e1fb; }
 .notif-cat-finance { --notif-tone: #15803d; --notif-tone-bg: #dcfce7; }
-.notif-cat-offer { --notif-tone: #a16207; --notif-tone-bg: #fef3c7; }
+.notif-cat-offer { --notif-tone: #0836a0; --notif-tone-bg: #c9d8fc; }
 .notif-cat-job { --notif-tone: var(--primary); --notif-tone-bg: var(--primary-soft); }
 .notif-cat-message { --notif-tone: #7c3aed; --notif-tone-bg: #ede9fe; }
 .notif-cat-system { --notif-tone: #1d4ed8; --notif-tone-bg: #dbeafe; }
@@ -104,7 +104,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--primary);
-  box-shadow: 0 0 0 3px rgba(13, 42, 82, 0.15);
+  box-shadow: 0 0 0 3px rgba(10, 31, 99, 0.15);
   flex-shrink: 0;
   align-self: center;
 }
@@ -126,7 +126,7 @@
   --notif-tone-bg: #dbeafe;
 }
 .notif-panel li button span.notif-cat-finance { --notif-tone: #15803d; --notif-tone-bg: #dcfce7; }
-.notif-panel li button span.notif-cat-offer { --notif-tone: #a16207; --notif-tone-bg: #fef3c7; }
+.notif-panel li button span.notif-cat-offer { --notif-tone: #0836a0; --notif-tone-bg: #c9d8fc; }
 .notif-panel li button span.notif-cat-job { --notif-tone: var(--primary); --notif-tone-bg: var(--primary-soft); }
 .notif-panel li button span.notif-cat-message { --notif-tone: #7c3aed; --notif-tone-bg: #ede9fe; }
 .notif-panel li button.unread { background: #f3f7ff; }

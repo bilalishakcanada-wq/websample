@@ -2,20 +2,20 @@
    (navy / gold / mint / cream) with no outlines. Every scene is built from the same `Person`
    so the whole app feels like one family. All scenes share the 300×300 viewBox. */
 
-const NAVY = '#0d2a52'
+const NAVY = '#0a1f63'
 const INK = '#061530'
 const BLUE = '#1d4f8f'
-const GOLD = '#f5b400'
-const GOLD_DARK = '#d99a00'
-const GOLD_LIGHT = '#ffd86b'
+const GOLD = '#1f5fff'
+const GOLD_DARK = '#0b45ce'
+const GOLD_LIGHT = '#729af8'
 const MINT = '#8fd3b6'
 const MINT_DARK = '#4fae88'
-const CREAM = '#fff4d6'
+const CREAM = '#d8e3fd'
 const MIST = '#e8f4ee'
 const SKY = '#e3ecf7'
 const WHITE = '#ffffff'
 const SKIN = { light: '#f3c6a5', tan: '#d9a066', deep: '#8d5524' }
-const HAIR = { dark: '#2b1d14', brown: '#6b4423', black: '#141414', gold: '#c98a1b' }
+const HAIR = { dark: '#2b1d14', brown: '#6b4423', black: '#141414', gold: '#1b4fc9' }
 
 /* ---------- building blocks ---------- */
 
@@ -245,7 +245,7 @@ export function WalletMascot(props) {
         <ellipse cx="0" cy="10" rx="22" ry="8" fill={GOLD} />
         <ellipse cx="0" cy="2" rx="22" ry="8" fill={GOLD_DARK} />
         <ellipse cx="0" cy="-6" rx="22" ry="8" fill={GOLD} />
-        <text x="0" y="-3" textAnchor="middle" fontSize="8" fontWeight="800" fill={NAVY} fontFamily="Manrope, sans-serif">KM</text>
+        <text x="0" y="-3" textAnchor="middle" fontSize="8" fontWeight="800" fill={NAVY} fontFamily="Figtree, sans-serif">KM</text>
       </g>
     </Svg>
   )
@@ -301,14 +301,14 @@ export function EarnMascot(props) {
         <g key={i} transform={`translate(${x} ${y}) scale(${s})`}>
           <circle r="16" fill={GOLD} />
           <circle r="11" fill="none" stroke={GOLD_DARK} strokeWidth="2" />
-          <text y="4" textAnchor="middle" fontSize="10" fontWeight="800" fill={NAVY} fontFamily="Manrope, sans-serif">KM</text>
+          <text y="4" textAnchor="middle" fontSize="10" fontWeight="800" fill={NAVY} fontFamily="Figtree, sans-serif">KM</text>
         </g>
       ))}
       <g transform="translate(150 236)">
         <rect x="-64" y="-18" width="128" height="36" rx="18" fill={MINT} />
         <circle cx="-44" cy="0" r="10" fill={NAVY} />
         <path d="M-48 0 L-45 3 L-40 -4" fill="none" stroke={MINT} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-        <text x="-26" y="5" fontSize="14" fontWeight="800" fill={NAVY} fontFamily="Manrope, sans-serif">+ 120 KM</text>
+        <text x="-26" y="5" fontSize="14" fontWeight="800" fill={NAVY} fontFamily="Figtree, sans-serif">+ 120 KM</text>
       </g>
     </Svg>
   )
@@ -357,7 +357,7 @@ export function EmptyBoxMascot(props) {
           <path d="M-8 26 Q0 34 8 26" fill="none" stroke={MINT_DARK} strokeWidth="3" strokeLinecap="round" />
         </g>}
       />
-      <text x="228" y="96" fontSize="34" fontWeight="800" fill={GOLD} fontFamily="Manrope, sans-serif">?</text>
+      <text x="228" y="96" fontSize="34" fontWeight="800" fill={GOLD} fontFamily="Figtree, sans-serif">?</text>
     </Svg>
   )
 }

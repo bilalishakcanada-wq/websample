@@ -10,7 +10,7 @@ const FEED_KINDS = [
   ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
   ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'], ['login', 'Prijave na nalog'], ['errors', 'Greške aplikacije'],
 ]
-const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '⭐', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
+const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '★', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
 
 /** Crash reports sent by the app itself (see src/utils/errorReporter.js). */
 function ClientErrors({ openUser }) {

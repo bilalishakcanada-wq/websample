@@ -9,8 +9,8 @@ import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 setWorkerUrl(mapWorkerUrl)
 
 const BIH_CENTER = [17.8, 44.1]
-const NAVY = '#0d2a52'
-const GOLD = '#f5b400'
+const NAVY = '#0a1f63'
+const GOLD = '#1f5fff'
 
 const toGeoJSON = (listings) => ({
   type: 'FeatureCollection',
@@ -138,7 +138,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
         type: 'circle',
         source: 'promoted',
         paint: {
-          'circle-color': ['case', ['==', ['get', 'promo'], 'vip'], GOLD, '#facc15'],
+          'circle-color': ['case', ['==', ['get', 'promo'], 'vip'], GOLD, '#1c5cf3'],
           'circle-radius': ['case', ['boolean', ['feature-state', 'active'], false], 14, ['==', ['get', 'promo'], 'vip'], 12, 10],
           'circle-stroke-width': 3,
           'circle-stroke-color': ['case', ['==', ['get', 'promo'], 'vip'], NAVY, '#ffffff'],
@@ -156,7 +156,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
           'text-anchor': 'left',
           'text-allow-overlap': true,
         },
-        paint: { 'text-color': '#7a4b00', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+        paint: { 'text-color': '#062774', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
       })
       if (!reducedMotion()) {
         const started = performance.now()

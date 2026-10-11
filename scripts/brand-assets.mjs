@@ -3,7 +3,7 @@
 //
 //   node scripts/brand-assets.mjs && npm run app:assets
 //
-// The mark: a rounded gold "Z" whose bottom stroke ends in a gold badge with a navy check — "zadatak" + "riješeno".
+// The mark: a rounded white "Z" whose bottom stroke ends in a white badge with a blue check — "zadatak" + "riješeno".
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -11,16 +11,15 @@ import sharp from 'sharp'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const fontsDir = resolve(root, 'assets/fonts')
-// Let librsvg find the bundled Manrope (Google Fonts, OFL) without touching system fonts.
+// Let librsvg find the bundled Figtree (Google Fonts, OFL) without touching system fonts.
 mkdirSync(fontsDir, { recursive: true })
 writeFileSync(resolve(fontsDir, 'fonts.conf'), `<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>${fontsDir}</dir><cachedir>/tmp/zadatak-fontconfig</cachedir></fontconfig>`)
 process.env.FONTCONFIG_FILE = resolve(fontsDir, 'fonts.conf')
 
-const NAVY = '#0d2a52'
-const NAVY_DEEP = '#071b3a'
-const NAVY_LIGHT = '#17407a'
-const GOLD = '#f5b400'
-const GOLD_DEEP = '#d99a00'
+const NAVY = '#1f5fff'       // tile: bright blue (check mark uses it too)
+const NAVY_DEEP = '#1149e0'
+const NAVY_LIGHT = '#4d86ff'
+const GOLD_DEEP = '#dbe7ff'   // the Z and badge: white fading to pale blue
 
 /** The mark itself, drawn in a 1000×1000 box centred on (500, 500). */
 const mark = (scale = 1, x = 0, y = 0) => `
@@ -40,7 +39,7 @@ const defs = `
       <stop offset="1" stop-color="${NAVY_DEEP}" />
     </linearGradient>
     <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="190" x2="0" y2="790">
-      <stop offset="0" stop-color="#ffc83d" />
+      <stop offset="0" stop-color="#ffffff" />
       <stop offset="1" stop-color="${GOLD_DEEP}" />
     </linearGradient>
     <radialGradient id="glow" cx="0.2" cy="0.1" r="0.9">
@@ -66,8 +65,8 @@ const splash = (dark) => svg(2732, `
   <rect width="2732" height="2732" fill="${dark ? NAVY_DEEP : NAVY}" />
   <rect width="2732" height="2732" fill="url(#glow)" />
   ${mark(0.62, 1056, 890)}
-  <text x="1366" y="1690" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Zadatak</text>
-  <text x="1366" y="1790" text-anchor="middle" font-family="Manrope" font-weight="600" font-size="62" fill="#ffffff" fill-opacity="0.72">Objavi posao. Riješeno.</text>`)
+  <text x="1366" y="1690" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Zadatak</text>
+  <text x="1366" y="1790" text-anchor="middle" font-family="Figtree" font-weight="600" font-size="62" fill="#ffffff" fill-opacity="0.72">Objavi posao. Riješeno.</text>`)
 
 const out = (name) => resolve(root, 'assets', name)
 await sharp(icon).png().toFile(out('icon.png'))

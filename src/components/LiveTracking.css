@@ -28,7 +28,7 @@
   width: 40px; height: 40px; border-radius: 12px;
   background: #e8f0fc; color: #1d5fbf;
 }
-.live-track-icon.is-waiting { background: #eef4ff; color: #0d2a52; }
+.live-track-icon.is-waiting { background: #eef4ff; color: #0a1f63; }
 
 /* provider: the client asked */
 .live-track-asked { border-color: #9ec0f0; background: #f4f8ff; box-shadow: 0 0 0 3px rgba(29, 95, 191, .08); }
@@ -46,8 +46,8 @@
   .live-track-actions .live-track-btn { flex: 1 1 100%; }
 }
 .live-track-info p { margin: 0; }
-.live-track-title { display: flex; align-items: center; gap: 8px; color: #0d2a52; font-size: 1.02rem; }
-.live-track-eta { color: #0d2a52; }
+.live-track-title { display: flex; align-items: center; gap: 8px; color: #0a1f63; font-size: 1.02rem; }
+.live-track-eta { color: #0a1f63; }
 .live-track-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   justify-self: start; min-height: 48px; margin-top: 4px; padding-block: 0; line-height: 1.2;
@@ -68,12 +68,12 @@
   position: absolute; top: 10px; right: 10px; z-index: 2;
   display: grid; place-items: center;
   width: 44px; height: 44px; border: 0; border-radius: 12px;
-  background: #fff; color: #0d2a52; box-shadow: 0 2px 10px rgba(13, 42, 82, .2);
+  background: #fff; color: #0a1f63; box-shadow: 0 2px 10px rgba(10, 31, 99, .2);
   cursor: pointer;
 }
-.live-pin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(13, 42, 82, .35); }
-.live-pin-job { background: #0d2a52; }
-.live-pin-provider { width: 26px; height: 26px; background: #f5b400; transition: transform .3s; }
+.live-pin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(10, 31, 99, .35); }
+.live-pin-job { background: #0a1f63; }
+.live-pin-provider { width: 26px; height: 26px; background: #1f5fff; transition: transform .3s; }
 
 /* fingers: zoom buttons as big as the recenter one; the app also keeps the map clear of the screen edge */
 @media (pointer: coarse) {

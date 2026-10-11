@@ -7,11 +7,11 @@ const formatKM = (value) => `${String(Math.round(Number(value) || 0)).replace(/\
 
 /** Medal illustration per tier — ribbon in our navy/gold, disc in the tier metal. */
 export function TierMedal({ code, size = 64, locked = false }) {
-  const metal = { bronze: ['#c8792c', '#8a4d15'], silver: ['#d9dde3', '#8f97a3'], gold: ['#f5c542', '#b8860b'], platinum: ['#e9f1ff', '#7f9bbf'] }[code] || ['#ccc', '#999']
+  const metal = { bronze: ['#c8792c', '#8a4d15'], silver: ['#d9dde3', '#8f97a3'], gold: ['#4278f5', '#0b3fb8'], platinum: ['#e9f1ff', '#7f9bbf'] }[code] || ['#ccc', '#999']
   return (
     <svg className={`tier-medal ${locked ? 'locked' : ''}`} viewBox="0 0 64 80" width={size} height={size * 1.25} aria-hidden="true">
       <path d="M20 0h24l-6 30H26z" fill="#0d2a52" />
-      <path d="M26 0h12l-3 30h-6z" fill="#f5b400" />
+      <path d="M26 0h12l-3 30h-6z" fill="#0c4ee9" />
       <circle cx="32" cy="52" r="24" fill={metal[1]} />
       <circle cx="32" cy="52" r="19" fill={metal[0]} />
       <circle cx="32" cy="52" r="19" fill="url(#shine)" opacity="0.35" />

@@ -7,7 +7,7 @@ import './BadgeRanking.css'
 const FRAME = {
   bronze: ['#efb98a', '#9c5428'],
   silver: ['#f4f7fb', '#8593a8'],
-  gold: ['#ffe28f', '#d99900'],
+  gold: ['#95b3f9', '#0b45ce'],
   platinum: ['#e3ebff', '#0d2a52'],
 }
 

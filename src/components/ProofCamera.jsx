@@ -42,12 +42,12 @@ function stampedJpeg(source, width, height, { kind, title, fix, at }) {
   ].filter(Boolean)
   const pad = Math.round(size * 0.7)
   const band = lines.length * size * 1.35 + pad * 2
-  ctx.fillStyle = 'rgba(8, 27, 56, 0.78)'
+  ctx.fillStyle = 'rgba(7, 22, 71, 0.78)'
   ctx.fillRect(0, h - band, w, band)
   ctx.fillStyle = '#ffffff'
   ctx.textBaseline = 'top'
   lines.forEach((line, index) => {
-    ctx.font = `${index === 0 ? 800 : 600} ${size}px Manrope, system-ui, sans-serif`
+    ctx.font = `${index === 0 ? 800 : 600} ${size}px Figtree, system-ui, sans-serif`
     ctx.fillText(line, pad, h - band + pad + index * size * 1.35)
   })
   return new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Slika se nije mogla napraviti.'))), 'image/jpeg', 0.86))

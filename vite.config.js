@@ -51,8 +51,9 @@ const prerenderWelcome = () => ({
       const wanted = (selector) => /^(:root|html|body|\*)\s*[,{]?$/.test(selector.trim()) || /^(:root|html|body)$/.test(selector.trim()) || selector.trim() === '*' || prefixes.some((p) => new RegExp(`\\.${p}(-|\\b)`).test(selector)) || /\.hero-arc/.test(selector)
       const critical = extractCss(String(cssAsset.source), wanted)
       // the decision is made in <head> (before any paint) and applied through CSS, so neither
-      // the splash nor the welcome ever flashes: html[data-boot=welcome] picks the welcome
-      const decide = `<script>(function(){try{var phone=window.innerWidth<=768;var signedIn=Object.keys(localStorage).some(function(k){return k.indexOf('sb-')===0&&k.slice(-11)==='-auth-token'});var path=location.pathname.replace(/\\/+$/,'');var home=path===''||path==='${base}'.replace(/\\/+$/,'');if(phone&&!signedIn&&home)document.documentElement.setAttribute('data-boot','welcome')}catch(e){}})()</script>`
+      // the splash nor the welcome ever flashes: html[data-boot=welcome] picks the welcome.
+      // Only inside the app (iOS / Android / installed web app): a phone browser gets the mobile home page instead.
+      const decide = `<script>(function(){try{var phone=window.innerWidth<=768;var signedIn=Object.keys(localStorage).some(function(k){return k.indexOf('sb-')===0&&k.slice(-11)==='-auth-token'});var path=location.pathname.replace(/\\/+$/,'');var home=path===''||path==='${base}'.replace(/\\/+$/,'');var app=Boolean(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;if(phone&&!signedIn&&home&&app)document.documentElement.setAttribute('data-boot','welcome')}catch(e){}})()</script>`
       // the pre-rendered screen is an overlay *outside* React's root: React mounts underneath and the
       // Welcome component removes it once it has painted the same thing — the first paint stays the LCP
       const boot = `${decide}<style id="critical-css">#boot-welcome{display:none;position:fixed;inset:0;z-index:5;overflow:auto}html[data-boot=welcome] #boot-welcome{display:block}html[data-boot=welcome] #boot-splash{display:none}${critical}</style>`
@@ -296,8 +297,8 @@ export default defineConfig({
         scope: base,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#f6f4ee',
-        theme_color: '#0d2a52',
+        background_color: '#eef4ff',
+        theme_color: '#0a1f63',
         categories: ['business', 'productivity'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

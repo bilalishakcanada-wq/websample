@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <!-- signed-in screens start with API calls: open the connection while the HTML is still parsing -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
-    <!-- fonts are found only after the first screen renders, so slow phones repainted every title (Archivo) and
+    <!-- fonts are found only after the first screen renders, so slow phones repainted every title (Bricolage) and
          every line with č ć š ž đ (the small latin-ext files) seconds later -->
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope-latin-ext.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/figtree-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-latin-ext.woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0d2a52" />
+    <meta name="theme-color" content="#0a1f63" />
     <meta name="description" content="Zadatak — pronađite ili ponudite lokalne usluge u Bosni i Hercegovini." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -58,9 +58,9 @@
     </script>
     <style>
       /* branded boot screen until the app mounts (replaced by React) */
-      #native-return { display: none; position: fixed; inset: 0; z-index: 9999; place-items: center; text-align: center; padding: 24px; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
-      #native-return a { display: inline-block; margin-top: 14px; padding: 14px 24px; border-radius: 999px; background: #f5b400; color: #0d2a52; font-weight: 800; text-decoration: none; }
-      .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #0d2a52; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+      #native-return { display: none; position: fixed; inset: 0; z-index: 9999; place-items: center; text-align: center; padding: 24px; background: #0a1f63; color: #fff; font-family: Figtree, system-ui, sans-serif; }
+      #native-return a { display: inline-block; margin-top: 14px; padding: 14px 24px; border-radius: 999px; background: #1f5fff; color: #fff; font-weight: 800; text-decoration: none; }
+      .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #0a1f63; color: #fff; font-family: Figtree, system-ui, sans-serif; }
       .boot-splash div { display: grid; justify-items: center; gap: 14px; animation: boot-in 0.6s ease both; }
       .boot-splash svg { width: 84px; height: 84px; }
       .boot-splash strong { font-size: 1.3rem; letter-spacing: -0.01em; }
@@ -69,7 +69,7 @@
   </head>
   <body>
     <div id="native-return"><div><p>Prijava je uspjela — vraćamo te u aplikaciju.</p><a href="#">Otvori Zadatak aplikaciju</a></div></div>
-    <div id="root"><div class="boot-splash" id="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><path d="M330 265 H713 L330 713 H560" fill="none" stroke="#f5b400" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/><circle cx="706" cy="713" r="96" fill="#f5b400"/><path d="M664 716 L695 747 L748 685" fill="none" stroke="#0d2a52" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Zadatak</strong></div></div></div>
+    <div id="root"><div class="boot-splash" id="boot-splash"><div><svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(-6 23)"><path d="M330 265 H713 L330 713 H560" fill="none" stroke="#ffffff" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/><circle cx="706" cy="713" r="96" fill="#ffffff"/><path d="M664 716 L695 747 L748 685" fill="none" stroke="#1f5fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/></g></svg><strong>Zadatak</strong></div></div></div>
     <script>
       // if the app never mounts (a script failed to download on a bad connection) don't leave the
       // splash up forever: offer a reload
@@ -84,7 +84,7 @@
         var again = document.createElement('a')
         again.textContent = 'Pokušaj ponovo'
         again.href = location.href
-        again.setAttribute('style', 'padding:12px 22px;border-radius:999px;background:#f5b400;color:#0d2a52;font-weight:800;text-decoration:none')
+        again.setAttribute('style', 'padding:12px 22px;border-radius:999px;background:#1f5fff;color:#fff;font-weight:800;text-decoration:none')
         again.onclick = function (e) { e.preventDefault(); location.reload() }
         box.appendChild(note)
         box.appendChild(again)

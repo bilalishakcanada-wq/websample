@@ -20,10 +20,39 @@
   font-size: .9rem;
 }
 .live-track-info { display: grid; gap: 6px; align-content: start; }
+
+/* client: ask for the location (booking/06) */
+.live-track-ask { grid-template-columns: auto 1fr; align-items: start; gap: 12px; }
+.live-track-icon {
+  display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: #e8f0fc; color: #1d5fbf;
+}
+.live-track-icon.is-waiting { background: #eef4ff; color: #0d2a52; }
+
+/* provider: the client asked */
+.live-track-asked { border-color: #9ec0f0; background: #f4f8ff; box-shadow: 0 0 0 3px rgba(29, 95, 191, .08); }
+.live-track-asked .live-track-title { color: #1d5fbf; }
+
+.live-track-left {
+  display: inline-flex; align-items: center; gap: 5px; justify-self: start;
+  padding: 3px 10px; border-radius: 999px;
+  background: #e8f0fc; color: #1d5fbf; font-size: .8rem; font-weight: 600;
+}
+.live-track-actions { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-top: 4px; }
+.live-track-actions .live-track-btn { margin-top: 0; }
+
+@media (max-width: 360px) {
+  .live-track-actions .live-track-btn { flex: 1 1 100%; }
+}
 .live-track-info p { margin: 0; }
 .live-track-title { display: flex; align-items: center; gap: 8px; color: #0d2a52; font-size: 1.02rem; }
 .live-track-eta { color: #0d2a52; }
-.live-track-btn { justify-self: start; min-height: 44px; margin-top: 4px; }
+.live-track-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  justify-self: start; min-height: 48px; margin-top: 4px; padding-block: 0; line-height: 1.2;
+}
+.live-track-btn svg { flex: none; }
 .live-dot {
   width: 10px; height: 10px; border-radius: 50%;
   background: #16a34a; box-shadow: 0 0 0 0 rgba(22, 163, 74, .5);
@@ -32,7 +61,8 @@
 @keyframes live-pulse { to { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); } }
 
 .live-map { position: relative; height: 260px; border-radius: 14px; overflow: hidden; background: #eef2f8; }
-.live-map-canvas { position: absolute; inset: 0; }
+/* beats maplibre’s own `.maplibregl-map { position: relative }`, which loads later with the map chunk */
+.live-map .live-map-canvas { position: absolute; inset: 0; }
 .live-map-loading { animation: none; }
 .live-map-recenter {
   position: absolute; top: 10px; right: 10px; z-index: 2;

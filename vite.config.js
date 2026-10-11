@@ -66,12 +66,20 @@ const prerenderWelcome = () => ({
 /**
  * A build id busts the persisted query cache (src/lib/queryClient.js). It goes into index.html as a
  * meta tag, never into the JS, so chunks whose code did not change keep their names (and caches) across deploys.
+ * The same id is written to version.json, which pages without a service worker (the iOS app's WebView)
+ * poll to notice a new deploy (src/utils/appUpdates.js).
  */
-const buildId = () => ({
-  name: 'zadatak-build-id',
-  apply: 'build',
-  transformIndexHtml: (html) => html.replace('</head>', `    <meta name="zadatak-build" content="${process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())}" />\n  </head>`),
-})
+const buildId = () => {
+  const id = process.env.GITHUB_SHA?.slice(0, 7) || String(Date.now())
+  return {
+    name: 'zadatak-build-id',
+    apply: 'build',
+    transformIndexHtml: (html) => html.replace('</head>', `    <meta name="zadatak-build" content="${id}" />\n  </head>`),
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ build: id }) })
+    },
+  }
+}
 
 /**
  * App.css has grown over many redesigns and still carries rules for screens that no longer exist.

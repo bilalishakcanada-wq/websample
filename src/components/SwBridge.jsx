@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { syncPush } from '../utils/push'
-import { UPDATE_EVENT, isUpdateReady } from '../utils/appUpdates'
+import { UPDATE_EVENT, isUpdateReady, reloadForUpdate } from '../utils/appUpdates'
 import { toast } from './Toaster'
 
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
@@ -13,7 +13,7 @@ function SwBridge() {
 
   // a new version installed while the user was typing: apply it on the next screen change
   useEffect(() => {
-    if (isUpdateReady()) window.location.reload()
+    if (isUpdateReady()) reloadForUpdate()
   }, [pathname])
   useEffect(() => {
     const onReady = () => toast('Nova verzija Zadatka je spremna — primijenit će se na sljedećem ekranu.', { duration: 5000 })

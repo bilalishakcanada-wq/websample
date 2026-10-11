@@ -1,12 +1,12 @@
 -- ============================================================================
--- BOOKING 06 — klijent traži lokaciju, izvođač bira koliko dugo je dijeli
+-- BOOKING 06 — klijent traži lokaciju, dijeljenje traje najviše 2 sata
 -- ----------------------------------------------------------------------------
 -- Nadogradnja na 05 („Izvođač je na putu“). Pravila:
 --   • klijent posla u toku može ZATRAŽITI lokaciju; izvođač dobije obavijest
 --     i sam odluči: „Dijeli lokaciju“ ili „Ne sada“ (klijent dobije odgovor);
 --   • zahtjev nikad ne uključuje GPS: dijeljenje pokreće samo izvođač;
---   • izvođač bira trajanje (30 min / 1 h / 2 h); poslije toga se dijeljenje
---     samo gasi, i baza više ne prima tačke (ni sa starijih verzija aplikacije);
+--   • jedno dijeljenje traje 2 sata (aplikacija šalje p_minutes = 120); poslije
+--     toga se samo gasi, i baza više ne prima tačke (ni sa starijih verzija aplikacije);
 --   • „Stigao sam“ gasi dijeljenje i javi klijentu da je izvođač stigao;
 --   • novi zahtjev najranije 2 minute poslije prethodnog (bez spama).
 -- Treba 05_live_location.sql. Bezbjedno ponovo pokrenuti.

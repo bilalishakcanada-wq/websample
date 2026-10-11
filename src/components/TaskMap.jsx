@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Map as MapLibreMap, NavigationControl, LngLatBounds, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { latinLabels, MAP_STYLE_URL } from '../utils/mapStyle'
 // MapLibre 6 finds its worker next to its own module URL — after bundling that file no
 // longer exists (blank map, no tiles). Let Vite bundle the worker and hand MapLibre the URL.
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 
 setWorkerUrl(mapWorkerUrl)
 
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron'
 const BIH_CENTER = [17.8, 44.1]
 const NAVY = '#0a1f63'
 const GOLD = '#1f5fff'
@@ -47,7 +47,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
 
     const map = new MapLibreMap({
       container: containerRef.current,
-      style: STYLE_URL,
+      style: MAP_STYLE_URL,
       center: BIH_CENTER,
       zoom: 6.4,
       attributionControl: { compact: true },
@@ -55,6 +55,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     map.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
     let pulseFrame = 0
     mapRef.current = map
+    latinLabels(map)
     if (import.meta.env.DEV) window.__zadatakMap = map
     map.on('error', (event) => console.error('Map error', event?.error?.message || event))
 

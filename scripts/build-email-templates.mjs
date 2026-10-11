@@ -11,8 +11,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { emailInner, emailShell, renderEmail } from '../supabase/functions/_shared/emailLayouts.js'
-import { emailMessage } from '../supabase/functions/_shared/notificationEmails.js'
+import { emailInner, emailShell, SITE_URL } from '../supabase/functions/_shared/emailLayouts.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = path.join(root, 'supabase/email-templates')
@@ -147,15 +146,21 @@ async function main() {
         fs.writeFileSync(path.join(dir, `${type}-${v}.html`), fillSample(html))
       }
     }
-    const notifications = [
-      { type: 'offer', title: 'Nova ponuda: 120 KM', message: 'Emir H. je poslao ponudu za posao "Montaža kuhinje u Hrasnici".', link: '/listings/1' },
-      { type: 'offer_accepted', title: 'Ponuda prihvaćena 🎉', message: 'Klijent je prihvatio tvoju ponudu od 120 KM. Novac je osiguran u Zadatak Pay.', link: '/listings/1' },
-      { type: 'message', title: 'Nova poruka — Amra H.', message: '"Može li sutra oko 10 sati?"', link: '/messages' },
-      { type: 'wallet', title: 'Na tvoj balans je uplaćeno 100.00 KM', message: 'Uplata je stigla i možeš je koristiti za plaćanje poslova.', link: '' },
+    // Notification mails (send-transactional-email). Node 22.18+ runs the .ts file directly.
+    const { renderBrandedEmail } = await import('../supabase/functions/_shared/brandedEmail.ts')
+    const url = SITE_URL + '/listings/00000000-0000-4000-8000-000000000001'
+    const samples = [
+      ['JOB_PUBLISHED', { jobTitle: 'Montaža kuhinje u Hrasnici', userName: 'Amra', actionUrl: url }],
+      ['NEW_BID_RECEIVED', { jobTitle: 'Montaža kuhinje u Hrasnici', providerName: 'Emir H.', price: 120, userName: 'Amra', actionUrl: url }],
+      ['JOB_ACCEPTED', { jobTitle: 'Montaža kuhinje u Hrasnici', price: 120, userName: 'Amra', actionUrl: url }],
+      ['JOB_COMPLETED', { jobTitle: 'Montaža kuhinje u Hrasnici', providerName: 'Emir H.', userName: 'Amra', actionUrl: url }],
+      ['NEW_MESSAGE', { userName: 'Amra', actionUrl: SITE_URL + '/messages' }],
+      ['NOTIFICATION', { notificationTitle: 'Na tvoj balans je uplaćeno 100.00 KM', notificationBody: 'Uplata je stigla i možeš je koristiti za plaćanje poslova.', actionUrl: SITE_URL + '/account/novcanik' }],
     ]
-    notifications.forEach((n, i) => {
-      const v = ['A', 'B', 'C', 'A'][i]
-      fs.writeFileSync(path.join(dir, `obavijest-${n.type}-${v}.html`), renderEmail(v, emailMessage(n, { site: 'https://bilalishakcanada-wq.github.io/websample', firstName: 'Amra' }), site))
+    samples.forEach(([type, data], i) => {
+      const v = ['A', 'B', 'C'][i % 3]
+      const { html } = renderBrandedEmail(type, data, v)
+      fs.writeFileSync(path.join(dir, `obavijest-${type}-${v}.html`), html.replaceAll(SITE_URL + '/email/', site + '/email/'))
     })
   }
   console.log(`email templates written to ${path.relative(root, outDir)}`)

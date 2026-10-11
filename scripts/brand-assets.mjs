@@ -11,7 +11,7 @@ import sharp from 'sharp'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const fontsDir = resolve(root, 'assets/fonts')
-// Let librsvg find the bundled Manrope (Google Fonts, OFL) without touching system fonts.
+// Let librsvg find the bundled Figtree (Google Fonts, OFL) without touching system fonts.
 mkdirSync(fontsDir, { recursive: true })
 writeFileSync(resolve(fontsDir, 'fonts.conf'), `<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>${fontsDir}</dir><cachedir>/tmp/zadatak-fontconfig</cachedir></fontconfig>`)
 process.env.FONTCONFIG_FILE = resolve(fontsDir, 'fonts.conf')
@@ -65,8 +65,8 @@ const splash = (dark) => svg(2732, `
   <rect width="2732" height="2732" fill="${dark ? NAVY_DEEP : NAVY}" />
   <rect width="2732" height="2732" fill="url(#glow)" />
   ${mark(0.62, 1056, 890)}
-  <text x="1366" y="1690" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Zadatak</text>
-  <text x="1366" y="1790" text-anchor="middle" font-family="Manrope" font-weight="600" font-size="62" fill="#ffffff" fill-opacity="0.72">Objavi posao. Riješeno.</text>`)
+  <text x="1366" y="1690" text-anchor="middle" font-family="Figtree" font-weight="800" font-size="168" fill="#ffffff" letter-spacing="-4">Zadatak</text>
+  <text x="1366" y="1790" text-anchor="middle" font-family="Figtree" font-weight="600" font-size="62" fill="#ffffff" fill-opacity="0.72">Objavi posao. Riješeno.</text>`)
 
 const out = (name) => resolve(root, 'assets', name)
 await sharp(icon).png().toFile(out('icon.png'))

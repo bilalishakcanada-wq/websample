@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <!-- signed-in screens start with API calls: open the connection while the HTML is still parsing -->
     <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
-    <!-- fonts are found only after the first screen renders, so slow phones repainted every title (Archivo) and
+    <!-- fonts are found only after the first screen renders, so slow phones repainted every title (Bricolage) and
          every line with č ć š ž đ (the small latin-ext files) seconds later -->
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope-latin-ext.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/figtree-latin-ext.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-latin-ext.woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -58,9 +58,9 @@
     </script>
     <style>
       /* branded boot screen until the app mounts (replaced by React) */
-      #native-return { display: none; position: fixed; inset: 0; z-index: 9999; place-items: center; text-align: center; padding: 24px; background: #0a1f63; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+      #native-return { display: none; position: fixed; inset: 0; z-index: 9999; place-items: center; text-align: center; padding: 24px; background: #0a1f63; color: #fff; font-family: Figtree, system-ui, sans-serif; }
       #native-return a { display: inline-block; margin-top: 14px; padding: 14px 24px; border-radius: 999px; background: #1f5fff; color: #fff; font-weight: 800; text-decoration: none; }
-      .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #0a1f63; color: #fff; font-family: Manrope, system-ui, sans-serif; }
+      .boot-splash { position: fixed; inset: 0; display: grid; place-items: center; background: #0a1f63; color: #fff; font-family: Figtree, system-ui, sans-serif; }
       .boot-splash div { display: grid; justify-items: center; gap: 14px; animation: boot-in 0.6s ease both; }
       .boot-splash svg { width: 84px; height: 84px; }
       .boot-splash strong { font-size: 1.3rem; letter-spacing: -0.01em; }

@@ -137,7 +137,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
         type: 'circle',
         source: 'promoted',
         paint: {
-          'circle-color': ['case', ['==', ['get', 'promo'], 'vip'], GOLD, '#facc15'],
+          'circle-color': ['case', ['==', ['get', 'promo'], 'vip'], GOLD, '#1c5cf3'],
           'circle-radius': ['case', ['boolean', ['feature-state', 'active'], false], 14, ['==', ['get', 'promo'], 'vip'], 12, 10],
           'circle-stroke-width': 3,
           'circle-stroke-color': ['case', ['==', ['get', 'promo'], 'vip'], NAVY, '#ffffff'],
@@ -155,7 +155,7 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
           'text-anchor': 'left',
           'text-allow-overlap': true,
         },
-        paint: { 'text-color': '#7a4b00', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
+        paint: { 'text-color': '#062774', 'text-halo-color': '#ffffff', 'text-halo-width': 2 },
       })
       if (!reducedMotion()) {
         const started = performance.now()

@@ -7,12 +7,12 @@ export const C = {
   sky: '#a9c6ff',
   pale: '#e8f0ff',
   white: '#ffffff',
-  yellow: '#ffcf33',
+  bright: '#3d74f5',
   water: '#2c74ff',
   coral: '#ff7a8a',
   mint: '#7fe0b4',
   wood: '#c98b4e',
-  bread: '#f3d39a',
+  bread: '#e8c7a6',
   meat: '#8a4a22',
 }
 const I = C.ink
@@ -80,7 +80,7 @@ export function stariMost() {
     ${limb(`M${cx + 22} ${base - 62}C${cx + 52} ${base - 80} ${cx + 58} ${base - 104} ${cx + 52} ${base - 122}`, C.blue)}
     ${glove(cx + 52, base - 128)}
     ${limb(`M${cx - 24} ${base - 54}C${cx - 44} ${base - 44} ${cx - 50} ${base - 30} ${cx - 50} ${base - 18}`, C.blue)}
-    <rect x="${cx - 78}" y="${base - 26}" width="52" height="34" rx="6" fill="${C.yellow}" stroke="${I}" stroke-width="4.5"/>
+    <rect x="${cx - 78}" y="${base - 26}" width="52" height="34" rx="6" fill="${C.bright}" stroke="${I}" stroke-width="4.5"/>
     <path d="M${cx - 64} ${base - 26}v-8h24v8" fill="none" stroke="${I}" stroke-width="4.5"/>
     <line x1="${cx - 78}" y1="${base - 12}" x2="${cx - 26}" y2="${base - 12}" stroke="${I}" stroke-width="3"/>
     ${glove(cx - 50, base - 22, .9)}
@@ -113,7 +113,7 @@ export function stariMost() {
   <g clip-path="url(#towerclip)">${tower}</g>
   <path d="M0 250L63 168L126 250Z" fill="${C.blue}" stroke="${I}" stroke-width="5" stroke-linejoin="round"/>
   <path d="M30 230L63 188L96 230M44 248L63 222L82 248" fill="none" stroke="#fff" stroke-width="3" opacity=".55"/>
-  <path d="M63 168v-22" stroke="${I}" stroke-width="5" stroke-linecap="round"/><circle cx="63" cy="142" r="6" fill="${C.yellow}" stroke="${I}" stroke-width="4"/>
+  <path d="M63 168v-22" stroke="${I}" stroke-width="5" stroke-linecap="round"/><circle cx="63" cy="142" r="6" fill="${C.bright}" stroke="${I}" stroke-width="4"/>
   <path d="M48 330v-18a15 15 0 0 1 30 0v18Z" fill="${C.navy}" stroke="${I}" stroke-width="4.5"/>
   <path d="M48 410v-18a15 15 0 0 1 30 0v18Z" fill="${C.navy}" stroke="${I}" stroke-width="4.5"/>
   <path d="M54 322v-8a9 9 0 0 1 9-8" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>
@@ -133,7 +133,7 @@ export function stariMost() {
 </svg>`
 }
 
-// the Mostar diver: head-first, arms together, scarf of blue-yellow
+// the Mostar diver: head-first, arms together, scarf of blue and white
 export function diver() {
   const body = `<g class="dive"><g transform="translate(200 330) rotate(160)">
     ${limb('M-14 70C-18 110-16 140-20 168', C.blue, 15)}${limb('M14 70C18 110 16 140 20 168', C.blue, 15)}
@@ -165,7 +165,7 @@ const pigeon = (x, y, s = 1, flip = false, fly = false) => `<g transform="transl
   <path d="M-36 4C-36 -16-14-24 6-20C16-34 34-34 38-20C40-10 34 0 30 6C26 22 6 28-14 24C-28 22-36 14-36 4Z" fill="#f4f7ff" stroke="${I}" stroke-width="4.5" stroke-linejoin="round"/>
   <path d="M14 -6C12 4 6 10-2 12" fill="none" stroke="#7fd0c8" stroke-width="5" stroke-linecap="round"/>
   ${fly ? '' : `<path d="M-24 2C-14-12 4-10 10 2C0 12-14 12-24 2Z" fill="#c4d4f6" stroke="${I}" stroke-width="3.5"/><path d="M-16 4h12M-12 9h10" stroke="${I}" stroke-width="2" opacity=".6"/>`}
-  <circle cx="26" cy="-20" r="3.6" fill="${I}"/><path d="M38 -18L48 -14L38 -12Z" fill="${C.yellow}" stroke="${I}" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="26" cy="-20" r="3.6" fill="${I}"/><path d="M38 -18L48 -14L38 -12Z" fill="${C.bright}" stroke="${I}" stroke-width="3" stroke-linejoin="round"/>
   ${fly ? '' : `<path d="M-4 24v10M8 22v12" stroke="${C.coral}" stroke-width="4" stroke-linecap="round"/>`}
 </g></g>`
 
@@ -180,7 +180,7 @@ export function sebilj() {
     for (let k = -h; k < w + h; k += 12) l += `<line x1="${x + k}" y1="${y}" x2="${x + k + h}" y2="${y + h}" stroke="#fff" stroke-width="2.2"/><line x1="${x + k + h}" y1="${y}" x2="${x + k}" y2="${y + h}" stroke="#fff" stroke-width="2.2"/>`
     return `<clipPath id="${id}"><path d="M${x} ${y + h}V${y + 24}a${w / 2} 24 0 0 1 ${w} 0V${y + h}Z"/></clipPath><path d="M${x} ${y + h}V${y + 24}a${w / 2} 24 0 0 1 ${w} 0V${y + h}Z" fill="${C.navy}"/><g clip-path="url(#${id})" opacity=".85">${l}</g><path d="M${x} ${y + h}V${y + 24}a${w / 2} 24 0 0 1 ${w} 0V${y + h}Z" fill="none" stroke="${I}" stroke-width="4"/>`
   }
-  const tap = (x, y) => `<g transform="translate(${x} ${y})"><rect x="-6" y="0" width="12" height="10" rx="3" fill="${C.yellow}" stroke="${I}" stroke-width="3.5"/><path d="M0 10v6" stroke="${I}" stroke-width="4"/><path class="pour" d="M0 18v38" stroke="#8fd0ff" stroke-width="5" stroke-linecap="round"/></g>`
+  const tap = (x, y) => `<g transform="translate(${x} ${y})"><rect x="-6" y="0" width="12" height="10" rx="3" fill="${C.bright}" stroke="${I}" stroke-width="3.5"/><path d="M0 10v6" stroke="${I}" stroke-width="4"/><path class="pour" d="M0 18v38" stroke="#8fd0ff" stroke-width="5" stroke-linecap="round"/></g>`
   // the burek mascot: rolled spiral pie with a wrench
   let swirl = 'M0 0'
   for (let a = 0; a < Math.PI * 7; a += .3) { const rad = 4 + a * 4.2; swirl += `L${r(Math.cos(a) * rad)} ${r(Math.sin(a) * rad * .62)}` }
@@ -224,8 +224,8 @@ export function sebilj() {
   <path d="M206 344C206 270 250 228 290 228C330 228 374 270 374 344Z" fill="${C.blue2}" stroke="${I}" stroke-width="5"/>
   <path d="M236 344C236 286 260 240 290 230M344 344C344 286 320 240 290 230M290 230V344" fill="none" stroke="${I}" stroke-width="3.5"/>
   <path d="M222 320C224 290 236 266 254 250" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".55"/>
-  <rect x="282" y="206" width="16" height="24" rx="4" fill="${C.yellow}" stroke="${I}" stroke-width="4"/>
-  <circle cx="290" cy="198" r="9" fill="${C.yellow}" stroke="${I}" stroke-width="4"/><path d="M290 189v-22" stroke="${I}" stroke-width="4" stroke-linecap="round"/>
+  <rect x="282" y="206" width="16" height="24" rx="4" fill="${C.bright}" stroke="${I}" stroke-width="4"/>
+  <circle cx="290" cy="198" r="9" fill="${C.bright}" stroke="${I}" stroke-width="4"/><path d="M290 189v-22" stroke="${I}" stroke-width="4" stroke-linecap="round"/>
   ${burek}
   ${pigeon(470, 610, 1)}${pigeon(370, 640, .85, true)}${pigeon(220, 646, .8)}
   ${pigeon(330, 170, .9, false, true)}${pigeon(130, 300, .75, true, true)}
@@ -305,10 +305,10 @@ export function cevapi() {
 </svg>`
 }
 
-// football fan on a rope: blue jersey, blue-yellow-white scarf, ball
+// football fan on a rope: blue jersey, blue and white scarf, ball
 export function navijac() {
   let scarf = ''
-  const cols = [C.blue, C.yellow, '#fff', C.blue, C.yellow, '#fff', C.blue]
+  const cols = [C.blue, C.bright, '#fff', C.blue, C.bright, '#fff', C.blue]
   cols.forEach((c, i) => { scarf += `<rect x="${-70 + i * 20}" y="-10" width="20" height="22" fill="${c}"/>` })
   const ball = `<g transform="translate(110 600)"><g class="spin">
     <circle r="44" fill="#fff" stroke="${I}" stroke-width="5"/>
@@ -326,12 +326,12 @@ export function navijac() {
     ${shoe(160, 636, true)}${shoe(306, 636)}
     <path d="M160 360C160 330 300 330 304 360L318 520C320 556 150 556 148 520Z" fill="${C.blue}" stroke="${I}" stroke-width="5" stroke-linejoin="round"/>
     <path d="M150 470H316" stroke="#fff" stroke-width="5"/>
-    <text x="232" y="520" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="34" fill="#fff" stroke="${I}" stroke-width="1.5">11</text>
+    <text x="232" y="520" text-anchor="middle" font-family="'Bricolage Grotesque', Figtree, sans-serif" font-weight="900" font-size="34" fill="#fff" stroke="${I}" stroke-width="1.5">11</text>
     ${face(232, 400, 1, 'open')}
     <g transform="translate(232 452)">
       <path d="M-74 -10H74V12H-74Z" fill="#fff"/>${scarf}
       <path d="M-74 -10H74V12H-74Z" fill="none" stroke="${I}" stroke-width="4"/>
-      <g class="flutter"><path d="M50 10L60 80L84 76L74 10Z" fill="${C.yellow}" stroke="${I}" stroke-width="4" stroke-linejoin="round"/><path d="M54 30L80 26M58 52L82 48" stroke="${C.blue}" stroke-width="6"/><path d="M60 80l4 10M68 79l4 10M76 78l4 10" stroke="${I}" stroke-width="3" stroke-linecap="round"/></g>
+      <g class="flutter"><path d="M50 10L60 80L84 76L74 10Z" fill="${C.bright}" stroke="${I}" stroke-width="4" stroke-linejoin="round"/><path d="M54 30L80 26M58 52L82 48" stroke="${C.blue}" stroke-width="6"/><path d="M60 80l4 10M68 79l4 10M76 78l4 10" stroke="${I}" stroke-width="3" stroke-linecap="round"/></g>
     </g>
   </g>
   ${ball}

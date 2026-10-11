@@ -14,7 +14,7 @@ import {
 } from './shared'
 
 const ACCOUNT_TYPE = { client: 'Klijent', provider: 'Izvođač', both: 'Klijent i izvođač' }
-const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '⭐', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
+const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '★', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
 const formatKM = (value) => `${Math.round(Number(value) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} KM`
 
 function Stat({ label, value, hint }) {
@@ -253,12 +253,12 @@ function Activity({ userId, dossier }) {
       <section className="dossier-card">
         <h3>Recenzije dobio ({dossier.stats?.reviews_received})</h3>
         {(dossier.reviews_received || []).length === 0 && <p className="muted-text">Nema recenzija.</p>}
-        {(dossier.reviews_received || []).map((item) => <div key={item.id} className="admin-mini-row"><span>⭐ {item.rating} · {item.from_name}: {item.comment}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
+        {(dossier.reviews_received || []).map((item) => <div key={item.id} className="admin-mini-row"><span>★ {item.rating} · {item.from_name}: {item.comment}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
       </section>
       <section className="dossier-card">
         <h3>Recenzije dao ({dossier.stats?.reviews_given})</h3>
         {(dossier.reviews_given || []).length === 0 && <p className="muted-text">Nema recenzija.</p>}
-        {(dossier.reviews_given || []).map((item) => <div key={item.id} className="admin-mini-row"><span>⭐ {item.rating} · za {item.to_name}: {item.comment}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
+        {(dossier.reviews_given || []).map((item) => <div key={item.id} className="admin-mini-row"><span>★ {item.rating} · za {item.to_name}: {item.comment}</span><small>{formatBosnianDate(item.created_at)}</small></div>)}
       </section>
       <section className="dossier-card dossier-card-wide">
         <h3>Podrška ({dossier.stats?.support_messages} poruka)</h3>

@@ -23,13 +23,13 @@
 .pd-card-meta { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-soft); min-width: 0; overflow-wrap: anywhere; }
 .pd-state { justify-self: start; padding: 3px 9px; border-radius: 999px; font-size: 0.76rem; font-weight: 800; background: #eef2f8; color: var(--text-soft); }
 .pd-state.s-pending { background: #e7efff; color: #1d4ed8; }
-.pd-state.s-rejected { background: #fff1e0; color: #9a4b00; }
-.pd-state.s-funded, .pd-state.s-accepted, .pd-state.s-requested { background: #fff7db; color: #7a5200; }
+.pd-state.s-rejected { background: #e2eafd; color: #083192; }
+.pd-state.s-funded, .pd-state.s-accepted, .pd-state.s-requested { background: #dde7fd; color: #062774; }
 .pd-state.s-disputed { background: #fff1f1; color: #8f1c1c; }
 .pd-state.s-paid, .pd-state.s-completed { background: #e7f7ef; color: #14532d; }
-.pd-card-money { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: #7a5200; font-weight: 700; }
+.pd-card-money { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: #062774; font-weight: 700; }
 .pd-card-money.is-paid { color: #15803d; }
-.pd-card.s-rejected { border-color: #f5c48a; }
+.pd-card.s-rejected { border-color: #8aaaf5; }
 .pd-card-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 14px; }
 .pd-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); font-weight: 800; font-size: 0.85rem; text-decoration: none; }
 .pd-btn.is-primary { border-color: var(--primary-strong); background: var(--primary-strong); color: white; }

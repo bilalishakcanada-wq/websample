@@ -148,8 +148,8 @@ function choosePhotoSource(onPick) {
   sheet.id = 'zadatak-photo-source'
   sheet.setAttribute('role', 'dialog')
   sheet.setAttribute('aria-label', 'Dodaj sliku')
-  sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;background:rgba(6,21,48,.45);font-family:Manrope,system-ui,sans-serif'
-  const button = (label, primary) => `<button type="button" data-pick="${label}" style="display:block;width:100%;min-height:52px;margin-top:8px;border:0;border-radius:16px;font:800 1rem Manrope,system-ui,sans-serif;background:${primary ? '#0a1f63' : '#eef2f8'};color:${primary ? '#fff' : '#0a1f63'}">${label}</button>`
+  sheet.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:flex-end;background:rgba(6,21,48,.45);font-family:Figtree,system-ui,sans-serif'
+  const button = (label, primary) => `<button type="button" data-pick="${label}" style="display:block;width:100%;min-height:52px;margin-top:8px;border:0;border-radius:16px;font:800 1rem Figtree,system-ui,sans-serif;background:${primary ? '#0a1f63' : '#eef2f8'};color:${primary ? '#fff' : '#0a1f63'}">${label}</button>`
   sheet.innerHTML = `<div style="width:100%;padding:18px 16px calc(18px + var(--safe-bottom));background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -12px 32px rgba(10, 31, 99,.18)"><strong style="display:block;color:#0a1f63;font-size:1.05rem;margin:2px 4px 6px">Dodaj sliku</strong>${button('Kamera', true)}${button('Galerija', false)}${button('Odustani', false)}</div>`
   const close = () => sheet.remove()
   sheet.addEventListener('click', (event) => {

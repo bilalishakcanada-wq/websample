@@ -40,7 +40,7 @@ function EarnArt() {
         <rect x="36" y="74" width="96" height="7" rx="3" fill="#b9c4d6" />
         <rect x="36" y="87" width="80" height="7" rx="3" fill="#b9c4d6" />
         <rect x="36" y="106" width="64" height="22" rx="11" fill={GOLD} />
-        <text x="68" y="121" textAnchor="middle" fontFamily="Manrope, sans-serif" fontWeight="800" fontSize="12" fill={NAVY_DEEP}>220 KM</text>
+        <text x="68" y="121" textAnchor="middle" fontFamily="Figtree, sans-serif" fontWeight="800" fontSize="12" fill={NAVY_DEEP}>220 KM</text>
         <circle x="0" cx="126" cy="117" r="11" fill={MINT} />
         <path d="M120 117 l4 4 l8 -9" fill="none" stroke={WHITE} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         {/* two smaller rows */}
@@ -59,7 +59,7 @@ function EarnArt() {
           <g className="earn-art-coin" style={{ animationDelay: `${index * 0.6}s` }}>
             <circle r={r} fill={GOLD_DARK} />
             <circle r={r} cx="-2" cy="-2" fill={GOLD} />
-            <text y={r * 0.35} textAnchor="middle" fontFamily="Archivo, Manrope, sans-serif" fontWeight="900" fontSize={r * 0.95} fill={NAVY_DEEP}>KM</text>
+            <text y={r * 0.35} textAnchor="middle" fontFamily="'Bricolage Grotesque', Figtree, sans-serif" fontWeight="900" fontSize={r * 0.95} fill={NAVY_DEEP}>KM</text>
           </g>
         </g>
       ))}

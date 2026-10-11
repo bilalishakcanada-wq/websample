@@ -47,7 +47,7 @@ function stampedJpeg(source, width, height, { kind, title, fix, at }) {
   ctx.fillStyle = '#ffffff'
   ctx.textBaseline = 'top'
   lines.forEach((line, index) => {
-    ctx.font = `${index === 0 ? 800 : 600} ${size}px Manrope, system-ui, sans-serif`
+    ctx.font = `${index === 0 ? 800 : 600} ${size}px Figtree, system-ui, sans-serif`
     ctx.fillText(line, pad, h - band + pad + index * size * 1.35)
   })
   return new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Slika se nije mogla napraviti.'))), 'image/jpeg', 0.86))

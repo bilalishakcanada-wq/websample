@@ -51,4 +51,4 @@ export const BADGE_ICONS = {
 export const badgeIcon = (name) => BADGE_ICONS[name] || Award
 
 // Preset colours for custom badges (navy/gold brand first).
-export const BADGE_COLORS = ['#0d2a52', '#f5b400', '#19b37b', '#7c3aed', '#e11d48', '#0ea5e9', '#f97316', '#475569']
+export const BADGE_COLORS = ['#0d2a52', '#0c4ee9', '#19b37b', '#7c3aed', '#e11d48', '#0ea5e9', '#f97316', '#475569']

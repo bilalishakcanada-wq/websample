@@ -7,8 +7,8 @@ import { HELP_ARTICLES, HELP_AUDIENCES, searchHelp } from '../data/helpArticles'
 /** Isometric-ish navy/gold blocks for the help hero — drawn in code, no stock art. */
 function HelpArt({ side }) {
   const tiles = side === 'left'
-    ? [[20, 120, 90, '#1f5fff'], [110, 70, 70, '#1b4a8a'], [70, 200, 110, '#123c78'], [180, 150, 60, '#ffd257'], [0, 20, 60, '#123c78']]
-    : [[40, 40, 80, '#123c78'], [130, 110, 100, '#1f5fff'], [30, 190, 70, '#1b4a8a'], [160, 20, 60, '#ffd257'], [200, 210, 60, '#123c78']]
+    ? [[20, 120, 90, '#1f5fff'], [110, 70, 70, '#1b4a8a'], [70, 200, 110, '#123c78'], [180, 150, 60, '#5f8df7'], [0, 20, 60, '#123c78']]
+    : [[40, 40, 80, '#123c78'], [130, 110, 100, '#1f5fff'], [30, 190, 70, '#1b4a8a'], [160, 20, 60, '#5f8df7'], [200, 210, 60, '#123c78']]
   return (
     <svg className={`help-art help-art-${side}`} viewBox="0 0 280 300" aria-hidden="true">
       {tiles.map(([x, y, s, c], index) => (

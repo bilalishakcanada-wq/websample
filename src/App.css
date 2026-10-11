@@ -1294,6 +1294,26 @@ button {
   margin-bottom: 16px;
 }
 
+.resend-confirmation {
+  margin-top: 10px;
+  font-weight: 600;
+}
+.resend-confirmation .link-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  min-height: 44px;
+  font: inherit;
+  font-weight: 800;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.resend-confirmation .link-button:disabled { opacity: 0.6; cursor: default; }
+.resend-confirmation .form-error { margin-top: 8px; }
+
 .auth-links {
   margin-top: 18px;
   display: flex;

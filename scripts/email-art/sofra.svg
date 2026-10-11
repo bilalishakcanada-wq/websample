@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" width="1200" height="520">
+  <defs>
+    <path id="spark" d="M0,-12 C1.6,-2.4 2.4,-1.6 12,0 C2.4,1.6 1.6,2.4 0,12 C-1.6,2.4 -2.4,1.6 -12,0 C-2.4,-1.6 -1.6,-2.4 0,-12Z"/>
+    <pattern id="cilim" x="0" y="0" width="80" height="60" patternUnits="userSpaceOnUse">
+      <rect width="80" height="60" fill="#1F5BFF"/>
+      <path d="M40,6 L66,30 L40,54 L14,30Z" fill="#FFFFFF"/>
+      <path d="M40,16 L56,30 L40,44 L24,30Z" fill="#0A1A5C"/>
+      <path d="M40,24 L46,30 L40,36 L34,30Z" fill="#7FB0FF"/>
+      <path d="M0,0 L10,10 L0,20Z M80,0 L70,10 L80,20Z M0,40 L10,50 L0,60Z M80,40 L70,50 L80,60Z" fill="#FFFFFF"/>
+    </pattern>
+    <pattern id="lattice" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="22" height="22" fill="none"/>
+      <path d="M0,0 L0,22 M0,0 L22,0" stroke="#FFFFFF" stroke-width="3"/>
+    </pattern>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E8EFFF" stop-opacity="0"/>
+    </radialGradient>
+    <g id="cevap"><rect x="-26" y="-8" width="52" height="16" rx="8" fill="#8A4B2A" stroke="#0A1A5C" stroke-width="3"/><path d="M-18,-3 L-10,-3 M2,2 L12,2" stroke="#B9703F" stroke-width="2.5" stroke-linecap="round"/></g>
+    <g id="luk"><path d="M-7,0 C-7,-6 7,-6 7,0" fill="none" stroke="#0A1A5C" stroke-width="2.4"/><path d="M-4,0 C-4,-3 4,-3 4,0" fill="none" stroke="#7B8FD8" stroke-width="2"/></g>
+  </defs>
+
+  <!-- wall -->
+  <rect width="1200" height="520" fill="#E8EFFF"/>
+  <circle cx="600" cy="200" r="380" fill="url(#glow)"/>
+  <!-- wall trim -->
+  <path d="M0,74 L1200,74" stroke="#C7D6FF" stroke-width="3"/>
+  <g fill="#C7D6FF"><circle cx="40" cy="74" r="5"/><circle cx="200" cy="74" r="5"/><circle cx="360" cy="74" r="5"/><circle cx="520" cy="74" r="5"/><circle cx="680" cy="74" r="5"/><circle cx="840" cy="74" r="5"/><circle cx="1000" cy="74" r="5"/><circle cx="1160" cy="74" r="5"/></g>
+
+  <!-- arched window with view of the čaršija -->
+  <g>
+    <clipPath id="winclip"><path d="M470,300 L470,170 C470,110 530,92 600,92 C670,92 730,110 730,170 L730,300Z"/></clipPath>
+    <g clip-path="url(#winclip)">
+      <rect x="460" y="80" width="280" height="230" fill="#0E2273"/>
+      <circle cx="680" cy="140" r="20" fill="#FFFFFF"/>
+      <path d="M460,250 L520,212 L560,232 L620,196 L680,226 L740,206 L740,310 L460,310Z" fill="#1F5BFF"/>
+      <path d="M460,276 L740,262 L740,310 L460,310Z" fill="#1442C9"/>
+      <!-- minaret & dome in window -->
+      <rect x="560" y="170" width="10" height="100" fill="#FFFFFF"/><path d="M556,170 L574,170 L565,140Z" fill="#FFFFFF"/>
+      <path d="M520,270 C520,236 580,236 580,270Z" fill="#FFFFFF"/>
+      <rect x="630" y="236" width="40" height="40" fill="#FFFFFF"/><path d="M624,238 L650,214 L676,238Z" fill="#C7D6FF"/>
+      <g fill="#FFFFFF"><use href="#spark" transform="translate(500 130) scale(0.6)"/><use href="#spark" transform="translate(620 120) scale(0.4)"/></g>
+    </g>
+    <path d="M470,300 L470,170 C470,110 530,92 600,92 C670,92 730,110 730,170 L730,300Z" fill="url(#lattice)" fill-opacity="0.0"/>
+    <path d="M470,300 L470,170 C470,110 530,92 600,92 C670,92 730,110 730,170 L730,300Z" fill="none" stroke="#0A1A5C" stroke-width="6"/>
+    <path d="M600,92 L600,300 M470,200 L730,200" stroke="#0A1A5C" stroke-width="4"/>
+    <!-- curtains -->
+    <path d="M454,86 C470,150 450,240 478,320 L440,320 L440,86Z" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+    <path d="M746,86 C730,150 750,240 722,320 L760,320 L760,86Z" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+    <path d="M448,120 L458,120 M446,170 L460,170 M452,230 L464,230 M744,130 L754,130 M740,190 L752,190 M742,260 L756,260" stroke="#1F5BFF" stroke-width="3" stroke-linecap="round"/>
+    <path d="M430,82 L770,82" stroke="#0A1A5C" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- sparkles -->
+  <g fill="#1F5BFF">
+    <use href="#spark" transform="translate(90 130) scale(1.2)"/>
+    <use href="#spark" transform="translate(360 150) scale(0.8)"/>
+    <use href="#spark" transform="translate(860 130) scale(1)"/>
+    <use href="#spark" transform="translate(1110 160) scale(1.3)"/>
+  </g>
+  <g fill="#7FB0FF"><use href="#spark" transform="translate(300 110) scale(0.6)"/><use href="#spark" transform="translate(960 108) scale(0.7)"/></g>
+
+  <!-- table top -->
+  <path d="M0,330 L1200,330 L1200,520 L0,520Z" fill="#FFFFFF"/>
+  <path d="M0,330 L1200,330" stroke="#0A1A5C" stroke-width="5"/>
+  <!-- ćilim runner -->
+  <rect x="0" y="452" width="1200" height="68" fill="url(#cilim)"/>
+  <path d="M0,452 L1200,452 M0,446 L1200,446" stroke="#0A1A5C" stroke-width="4"/>
+  <g stroke="#0A1A5C" stroke-width="3" stroke-linecap="round">
+    <path d="M20,446 L20,438 M60,446 L60,438 M100,446 L100,438 M140,446 L140,438 M180,446 L180,438 M220,446 L220,438 M260,446 L260,438 M300,446 L300,438 M340,446 L340,438 M380,446 L380,438 M420,446 L420,438 M460,446 L460,438 M500,446 L500,438 M540,446 L540,438 M580,446 L580,438 M620,446 L620,438 M660,446 L660,438 M700,446 L700,438 M740,446 L740,438 M780,446 L780,438 M820,446 L820,438 M860,446 L860,438 M900,446 L900,438 M940,446 L940,438 M980,446 L980,438 M1020,446 L1020,438 M1060,446 L1060,438 M1100,446 L1100,438 M1140,446 L1140,438 M1180,446 L1180,438"/>
+  </g>
+
+  <!-- ===== COFFEE SET (left) ===== -->
+  <!-- tray (tabla) -->
+  <ellipse cx="200" cy="400" rx="170" ry="34" fill="#C7D6FF" stroke="#0A1A5C" stroke-width="4"/>
+  <ellipse cx="200" cy="396" rx="150" ry="26" fill="#E8EFFF" stroke="#0A1A5C" stroke-width="2.5"/>
+  <g stroke="#1F5BFF" stroke-width="2" fill="none"><path d="M90,396 C120,412 160,420 200,420 C240,420 280,412 310,396"/></g>
+  <!-- džezva -->
+  <g stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round">
+    <path d="M122,394 L130,322 C132,306 128,296 120,290 L176,290 C168,296 164,306 166,322 L174,394Z" fill="#E0894B"/>
+    <path d="M118,290 L178,290 L182,282 L114,282Z" fill="#F2A66B"/>
+    <path d="M114,282 L100,272" stroke-linecap="round"/>
+    <path d="M174,330 L250,300 L254,310 L176,344Z" fill="#8A4B2A"/>
+    <path d="M128,356 L170,356" stroke-width="2.5"/>
+    <path d="M132,372 L166,372" stroke-width="2.5"/>
+  </g>
+  <g stroke="#FFF2E6" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M136,300 L134,336"/><path d="M140,380 q8,-6 16,0"/></g>
+  <!-- fildžani with blue pattern -->
+  <g stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round">
+    <path d="M200,356 L274,356 L268,384 C266,394 208,394 206,384Z" fill="#C7D6FF"/>
+    <path d="M210,360 L264,360 L258,386 C256,394 218,394 216,386Z" fill="#FFFFFF"/>
+    <ellipse cx="237" cy="360" rx="27" ry="7" fill="#5A3420"/>
+    <path d="M222,374 q15,8 30,0" stroke="#1F5BFF" stroke-width="3" fill="none"/>
+    <circle cx="237" cy="381" r="3" fill="#1F5BFF" stroke-width="1.5"/>
+    <path d="M276,366 L292,366 L288,386 C287,392 262,392 262,386Z" fill="none" stroke-width="0"/>
+  </g>
+  <g stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round">
+    <path d="M286,368 L344,368 L340,388 C338,396 292,396 290,388Z" fill="#C7D6FF"/>
+    <path d="M292,370 L338,370 L334,390 C332,396 298,396 296,390Z" fill="#FFFFFF"/>
+    <ellipse cx="315" cy="370" rx="23" ry="6" fill="#5A3420"/>
+    <path d="M302,382 q13,7 26,0" stroke="#1F5BFF" stroke-width="3" fill="none"/>
+  </g>
+  <!-- steam -->
+  <g stroke="#1F5BFF" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-opacity="0.75">
+    <path d="M230,342 c-10,-14 10,-20 0,-34 c-8,-12 8,-18 2,-28"/>
+    <path d="M246,344 c-8,-12 10,-16 2,-30"/>
+    <path d="M314,352 c-8,-12 8,-18 0,-30"/>
+  </g>
+  <!-- rahat lokum + sugar -->
+  <g stroke="#0A1A5C" stroke-width="3" stroke-linejoin="round">
+    <path d="M60,388 L84,382 L90,400 L66,406Z" fill="#FFC1D2"/>
+    <path d="M82,402 L104,396 L108,414 L86,418Z" fill="#FFFFFF"/>
+    <path d="M60,388 L66,380 L90,374 L84,382Z" fill="#FFDCE6"/>
+    <rect x="276" y="398" width="16" height="14" fill="#FFFFFF"/>
+    <rect x="296" y="402" width="16" height="14" fill="#FFFFFF"/>
+  </g>
+  <g fill="#FFFFFF"><circle cx="70" cy="392" r="1.6"/><circle cx="78" cy="396" r="1.4"/><circle cx="74" cy="386" r="1.2"/></g>
+
+  <!-- ===== ĆEVAPI (center) ===== -->
+  <ellipse cx="600" cy="404" rx="200" ry="44" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="5"/>
+  <ellipse cx="600" cy="400" rx="176" ry="34" fill="none" stroke="#1F5BFF" stroke-width="4"/>
+  <g fill="#1F5BFF"><circle cx="430" cy="404" r="3"/><circle cx="770" cy="404" r="3"/><circle cx="600" cy="444" r="3"/><circle cx="500" cy="436" r="2.5"/><circle cx="700" cy="436" r="2.5"/></g>
+  <!-- somun -->
+  <path d="M460,402 C460,350 740,350 740,402 C740,420 460,420 460,402Z" fill="#F3D9A4" stroke="#0A1A5C" stroke-width="4"/>
+  <path d="M478,370 C520,346 680,346 722,370 C690,360 510,360 478,370Z" fill="#E7C27F" stroke="#0A1A5C" stroke-width="3"/>
+  <g fill="#C9A061"><circle cx="520" cy="356" r="2"/><circle cx="560" cy="350" r="2"/><circle cx="640" cy="350" r="2"/><circle cx="680" cy="356" r="2"/></g>
+  <!-- ćevapi rows -->
+  <use href="#cevap" transform="translate(530 384) rotate(-4)"/>
+  <use href="#cevap" transform="translate(588 380)"/>
+  <use href="#cevap" transform="translate(646 382) rotate(3)"/>
+  <use href="#cevap" transform="translate(556 398) rotate(2)"/>
+  <use href="#cevap" transform="translate(614 396)"/>
+  <use href="#cevap" transform="translate(672 398) rotate(-3)"/>
+  <!-- onion -->
+  <use href="#luk" transform="translate(508 372)"/><use href="#luk" transform="translate(700 372)"/><use href="#luk" transform="translate(600 368)"/>
+  <use href="#luk" transform="translate(560 410)"/><use href="#luk" transform="translate(640 412)"/><use href="#luk" transform="translate(704 404)"/>
+  <!-- kajmak bowl -->
+  <g stroke="#0A1A5C" stroke-width="4">
+    <path d="M770,370 L830,370 C830,396 770,396 770,370Z" fill="#FFFFFF"/>
+    <ellipse cx="800" cy="370" rx="30" ry="8" fill="#FFF8E6"/>
+    <path d="M778,380 q22,10 44,0" stroke="#1F5BFF" stroke-width="3" fill="none"/>
+  </g>
+  <!-- steam over ćevapi -->
+  <g stroke="#1F5BFF" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-opacity="0.6">
+    <path d="M560,346 c-10,-16 10,-22 0,-38"/><path d="M604,340 c-10,-16 10,-22 0,-38 c-6,-10 6,-16 0,-24"/><path d="M648,346 c-10,-16 10,-22 0,-38"/>
+  </g>
+
+  <!-- ===== BUREK (right) ===== -->
+  <ellipse cx="990" cy="398" rx="160" ry="40" fill="#C7D6FF" stroke="#0A1A5C" stroke-width="5"/>
+  <ellipse cx="990" cy="392" rx="144" ry="32" fill="#F2C46D" stroke="#0A1A5C" stroke-width="4"/>
+  <!-- spiral rolls -->
+  <g fill="none" stroke="#B87A2E" stroke-width="3.5" stroke-linecap="round">
+    <ellipse cx="990" cy="392" rx="118" ry="25"/>
+    <ellipse cx="990" cy="392" rx="92" ry="19"/>
+    <ellipse cx="990" cy="392" rx="66" ry="13.5"/>
+    <ellipse cx="990" cy="392" rx="40" ry="8"/>
+    <ellipse cx="990" cy="392" rx="16" ry="3"/>
+  </g>
+  <g fill="#FFE2A3"><ellipse cx="960" cy="378" rx="24" ry="3"/><ellipse cx="1040" cy="384" rx="20" ry="2.6"/><ellipse cx="930" cy="400" rx="22" ry="2.6"/></g>
+  <!-- cut wedge removed -->
+  <path d="M990,392 L1134,392 A144 32 0 0 1 1100,412.6Z" fill="#C7D6FF" stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round"/>
+  <!-- served slice on small plate -->
+  <ellipse cx="1110" cy="438" rx="58" ry="14" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+  <path d="M1076,432 L1146,426 L1138,442 C1120,446 1090,446 1080,442Z" fill="#F2C46D" stroke="#0A1A5C" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M1084,436 L1140,432" stroke="#B87A2E" stroke-width="3"/>
+  <!-- steam -->
+  <g stroke="#1F5BFF" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-opacity="0.6">
+    <path d="M960,360 c-10,-16 10,-22 0,-38"/><path d="M1010,356 c-10,-16 10,-22 0,-38 c-6,-10 6,-16 0,-24"/>
+  </g>
+  <!-- jogurt cup -->
+  <g stroke="#0A1A5C" stroke-width="4">
+    <path d="M840,318 L880,318 L876,372 L844,372Z" fill="#FFFFFF"/>
+    <path d="M846,334 L874,334" stroke="#1F5BFF" stroke-width="5"/>
+  </g>
+
+  <!-- lily vase (ljiljan) -->
+  <g stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round">
+    <path d="M384,330 C370,330 366,300 378,290 L378,276 L398,276 L398,290 C410,300 406,330 392,330Z" fill="#1F5BFF"/>
+    <path d="M374,306 L402,306" stroke="#FFFFFF" stroke-width="3"/>
+    <path d="M388,276 L384,214 M388,276 L404,226 M388,276 L370,236" fill="none" stroke="#2E8B57" stroke-width="3.5"/>
+    <path d="M384,214 C370,196 374,184 384,176 C394,184 398,196 384,214Z" fill="#FFFFFF"/>
+    <path d="M384,214 C364,206 360,196 362,188 C374,190 380,200 384,214Z" fill="#FFFFFF"/>
+    <path d="M384,214 C404,206 408,196 406,188 C394,190 388,200 384,214Z" fill="#FFFFFF"/>
+    <path d="M404,226 C398,208 404,200 414,196 C418,206 414,218 404,226Z" fill="#FFFFFF"/>
+    <path d="M370,236 C360,222 362,212 368,206 C376,214 376,226 370,236Z" fill="#FFFFFF"/>
+  </g>
+  <g fill="#7FB0FF"><circle cx="384" cy="196" r="3"/><circle cx="410" cy="210" r="2.5"/></g>
+
+  <!-- football in blue/white -->
+  <g transform="translate(1150 300)">
+    <circle r="40" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+    <path d="M0,-14 L13,-4 L8,12 L-8,12 L-13,-4Z" fill="#1F5BFF" stroke="#0A1A5C" stroke-width="3"/>
+    <path d="M0,-14 L0,-38 M13,-4 L36,-12 M8,12 L22,32 M-8,12 L-22,32 M-13,-4 L-36,-12" stroke="#0A1A5C" stroke-width="3"/>
+    <path d="M-8,-40 L8,-40 L4,-32 L-4,-32Z M30,-26 L38,-14 L32,-10Z M-30,-26 L-38,-14 L-32,-10Z" fill="#1F5BFF"/>
+    <g fill="#7FB0FF"><use href="#spark" transform="translate(-56 -30) scale(0.5)"/></g>
+  </g>
+</svg>

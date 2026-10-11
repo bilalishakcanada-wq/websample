@@ -23,6 +23,8 @@ export const passwordUpdateError = (error) => {
   return 'Promjena lozinke nije uspjela. Pokušaj ponovo.'
 }
 
+const confirmRedirect = () => `${window.location.origin}${withBase('/account/profil')}?setup=1`
+
 export const authService = {
   async signUp({ fullName, email, password, city, phone, captchaToken, accountType = 'client', trades = [] }) {
     const cleanedName = sanitizeText(fullName)
@@ -42,6 +44,8 @@ export const authService = {
       password,
       options: {
         ...(captchaToken ? { captchaToken } : {}),
+        // the link in the confirmation mail signs the person in and opens profile setup
+        emailRedirectTo: confirmRedirect(),
         data: {
           full_name: cleanedName,
           city: sanitizeText(city),
@@ -87,7 +91,11 @@ export const authService = {
         recordAttempt('login', cleanedEmail)
         throw new Error('Pogrešan email ili lozinka.')
       }
-      if (error.code === 'email_not_confirmed') throw new Error('Molimo potvrdite svoj email prije prijave. Provjerite inbox (i spam folder).')
+      if (error.code === 'email_not_confirmed') {
+        const notConfirmed = new Error('Prvo potvrdite svoj email: kliknite link u mailu koji smo vam poslali (provjerite i spam).')
+        notConfirmed.code = 'email_not_confirmed'
+        throw notConfirmed
+      }
       if (isRateLimited(error)) throw new Error(RATE_LIMITED)
       if (error.code === 'captcha_failed') throw new Error('Sigurnosna provjera nije prošla. Osvježite stranicu i pokušajte ponovo.')
       throw publicError()
@@ -155,6 +163,22 @@ export const authService = {
     const { data, error } = await supabase.auth.getSession()
     if (error) throw publicError()
     return data
+  },
+
+  /** Sends the signup confirmation mail again (the link in it expires after a day). */
+  async resendConfirmation(email) {
+    const cleanedEmail = sanitizeText(email).toLowerCase()
+    if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
+    assertAllowed('resend', cleanedEmail)
+
+    const { error } = await supabase.auth.resend({ type: 'signup', email: cleanedEmail, options: { emailRedirectTo: confirmRedirect() } })
+    if (error) {
+      console.error('Supabase resend failed', { message: error.message, code: error.code, status: error.status })
+      if (isRateLimited(error)) throw new Error(RATE_LIMITED)
+      if (isEmailDown(error)) throw new Error(EMAIL_DOWN)
+      throw publicError()
+    }
+    recordAttempt('resend', cleanedEmail)
   },
 
   async resetPassword(email) {

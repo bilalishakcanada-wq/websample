@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" width="1200" height="520">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1F5BFF"/>
+      <stop offset="1" stop-color="#6E97FF"/>
+    </linearGradient>
+    <path id="spark" d="M0,-12 C1.6,-2.4 2.4,-1.6 12,0 C2.4,1.6 1.6,2.4 0,12 C-1.6,2.4 -2.4,1.6 -12,0 C-2.4,-1.6 -1.6,-2.4 0,-12Z"/>
+    <g id="cloud"><path d="M-60,0 C-62,-18 -40,-26 -28,-18 C-22,-38 8,-40 16,-22 C30,-30 52,-20 50,-4 C64,-2 66,12 52,14 L-56,14 C-70,12 -70,0 -60,0Z" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round"/></g>
+    <g id="pigeon">
+      <path d="M-16,0 C-16,-12 2,-16 10,-8 L18,-12 L16,-4 C16,6 4,10 -6,8 L-22,6Z" fill="#C7D6FF" stroke="#0A1A5C" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M-4,-2 C2,2 8,2 12,-2" fill="none" stroke="#0A1A5C" stroke-width="2"/>
+      <circle cx="12" cy="-9" r="1.6" fill="#0A1A5C"/>
+      <path d="M-2,8 L-3,14 M4,8 L5,14" stroke="#FF7A9A" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M8,-6 C10,-2 12,-2 14,-4" stroke="#7B8FD8" stroke-width="2" fill="none"/>
+    </g>
+    <g id="flyp"><path d="M-14,0 C-8,-12 -2,-10 0,-2 C2,-10 8,-12 14,0 C8,-4 4,-2 0,2 C-4,-2 -8,-4 -14,0Z" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="2.5" stroke-linejoin="round"/></g>
+    <g id="shop">
+      <path d="M0,0 L0,-96 L130,-96 L130,0Z" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+      <path d="M-14,-94 L65,-142 L144,-94Z" fill="#8FA8F0" stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M8,-104 L122,-104 M26,-116 L104,-116 M44,-128 L86,-128" stroke="#0A1A5C" stroke-width="2" stroke-opacity="0.5"/>
+      <!-- kepenci (wooden shutters), upper one opened as awning -->
+      <path d="M12,-80 L118,-80 L128,-62 L2,-62Z" fill="#1F5BFF" stroke="#0A1A5C" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M22,-80 L14,-62 M42,-80 L38,-62 M65,-80 L65,-62 M88,-80 L92,-62 M108,-80 L116,-62" stroke="#FFFFFF" stroke-width="2"/>
+      <rect x="14" y="-58" width="102" height="34" fill="#E8EFFF" stroke="#0A1A5C" stroke-width="3"/>
+      <path d="M8,-22 L122,-22 L122,-12 L8,-12Z" fill="#C7D6FF" stroke="#0A1A5C" stroke-width="3"/>
+    </g>
+  </defs>
+
+  <rect width="1200" height="520" fill="url(#sky)"/>
+  <!-- sun -->
+  <circle cx="900" cy="96" r="40" fill="#FFFFFF" stroke="#0A1A5C" stroke-width="4"/>
+  <g stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" transform="translate(-160 6)"><path d="M1060,30 L1060,40 M1060,140 L1060,150 M1000,90 L1010,90 M1110,90 L1120,90 M1018,48 L1025,55 M1095,125 L1102,132 M1018,132 L1025,125 M1095,55 L1102,48"/></g>
+  <use href="#cloud" transform="translate(180 90)"/>
+  <use href="#cloud" transform="translate(700 60) scale(0.8)"/>
+  <use href="#cloud" transform="translate(470 140) scale(0.6)"/>
+  <g fill="#FFFFFF"><use href="#spark" transform="translate(330 60)"/><use href="#spark" transform="translate(1130 120) scale(0.8)"/><use href="#spark" transform="translate(60 200) scale(0.7)"/></g>
+
+  <!-- Trebević -->
+  <path d="M0,270 C120,220 210,200 320,214 C420,226 470,186 560,180 C660,174 720,214 820,206 C930,198 1020,170 1200,214 L1200,520 L0,520Z" fill="#4F7CF5"/>
+  <path d="M0,300 C140,270 260,262 380,278 C520,296 640,268 760,262 C900,256 1040,282 1200,268 L1200,520 L0,520Z" fill="#3B66E0"/>
+  <!-- cable car line -->
+  <path d="M640,168 C760,190 860,214 1000,264" stroke="#0A1A5C" stroke-width="2.5" fill="none"/>
+  <g stroke="#0A1A5C" stroke-width="3"><line x1="820" y1="203" x2="820" y2="214"/><rect x="808" y="214" width="24" height="18" rx="4" fill="#FF5A5A"/><rect x="813" y="218" width="14" height="7" fill="#FFFFFF" stroke-width="2"/></g>
+
+  <!-- background: sahat-kula + minaret -->
+  <g stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round">
+    <path d="M110,330 L110,170 L156,170 L156,330Z" fill="#FFFFFF"/>
+    <path d="M104,172 L133,130 L162,172Z" fill="#1F5BFF"/>
+    <circle cx="133" cy="200" r="14" fill="#FFFFFF"/>
+    <path d="M133,190 L133,200 L140,204" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M116,240 L150,240 M116,290 L150,290" stroke-width="2"/>
+    <path d="M1040,320 L1040,150 L1058,150 L1058,320Z" fill="#FFFFFF"/>
+    <path d="M1032,180 L1066,180 L1062,192 L1036,192Z" fill="#FFFFFF"/>
+    <path d="M1034,150 L1064,150 L1049,96Z" fill="#1F5BFF"/>
+    <path d="M1049,96 L1049,80" stroke-width="3"/>
+    <path d="M960,320 L960,262 L1080,262 L1080,320Z" fill="#FFFFFF"/>
+    <path d="M968,262 C968,212 1072,212 1072,262Z" fill="#8FA8F0"/>
+  </g>
+
+  <!-- street / kaldrma -->
+  <path d="M0,420 L1200,420 L1200,520 L0,520Z" fill="#E8EFFF"/>
+  <path d="M0,420 L1200,420" stroke="#0A1A5C" stroke-width="4"/>
+  <g stroke="#B7C8F5" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M20,440 q20,-6 40,0 M90,452 q20,-6 40,0 M160,438 q20,-6 40,0 M240,456 q20,-6 40,0 M70,480 q20,-6 40,0 M180,494 q20,-6 40,0 M30,506 q20,-6 40,0 M300,484 q20,-6 40,0"/>
+    <path d="M820,440 q20,-6 40,0 M900,458 q20,-6 40,0 M980,440 q20,-6 40,0 M1060,456 q20,-6 40,0 M1130,440 q20,-6 40,0 M860,494 q20,-6 40,0 M980,500 q20,-6 40,0 M1100,488 q20,-6 40,0"/>
+    <path d="M380,500 q20,-6 40,0 M760,500 q20,-6 40,0 M420,470 q20,-6 40,0 M740,470 q20,-6 40,0"/>
+  </g>
+
+  <!-- shops -->
+  <use href="#shop" transform="translate(180 420)"/>
+  <use href="#shop" transform="translate(830 420)"/>
+  <!-- shop goods: copper pots on left shop -->
+  <g stroke="#0A1A5C" stroke-width="2.5">
+    <path d="M200,388 L212,370 L224,388Z" fill="#E0894B"/><path d="M232,388 C232,374 252,374 252,388Z" fill="#E0894B"/>
+    <path d="M262,388 L266,372 L276,372 L280,388Z" fill="#F2A66B"/><path d="M286,388 C286,370 304,370 304,388Z" fill="#E0894B"/>
+    <path d="M868,388 L878,370 L888,388Z" fill="#FFFFFF"/><rect x="896" y="374" width="22" height="14" fill="#FF7A9A"/><rect x="926" y="372" width="16" height="16" fill="#FFFFFF"/><path d="M950,388 C950,372 970,372 970,388Z" fill="#E0894B"/>
+  </g>
+  <!-- ćevabdžinica sign -->
+  <g stroke="#0A1A5C" stroke-width="3"><rect x="862" y="300" width="80" height="22" rx="4" fill="#FFFFFF"/><path d="M876,311 L928,311" stroke="#1F5BFF" stroke-width="5" stroke-linecap="round"/></g>
+
+  <!-- SEBILJ -->
+  <g stroke="#0A1A5C" stroke-width="4.5" stroke-linejoin="round">
+    <!-- stone steps -->
+    <path d="M466,432 L734,432 L724,412 L476,412Z" fill="#FFFFFF"/>
+    <path d="M484,412 L716,412 L706,396 L494,396Z" fill="#E8EFFF"/>
+    <!-- body -->
+    <path d="M520,396 L520,290 L680,290 L680,396Z" fill="#FFFFFF"/>
+    <!-- lattice arch panels -->
+    <path d="M532,388 L532,320 C532,300 568,300 568,320 L568,388Z" fill="#C7D6FF"/>
+    <path d="M582,388 L582,320 C582,300 618,300 618,320 L618,388Z" fill="#C7D6FF"/>
+    <path d="M632,388 L632,320 C632,300 668,300 668,320 L668,388Z" fill="#C7D6FF"/>
+  </g>
+  <g stroke="#0A1A5C" stroke-width="1.8" fill="none" stroke-opacity="0.75">
+    <path d="M532,330 L568,366 M532,350 L560,378 M532,370 L550,388 M540,316 L568,344 M556,310 L568,322 M568,330 L532,366 M568,350 L540,378 M568,370 L550,388 M560,316 L532,344 M544,310 L532,322"/>
+    <path d="M582,330 L618,366 M582,350 L610,378 M582,370 L600,388 M590,316 L618,344 M606,310 L618,322 M618,330 L582,366 M618,350 L590,378 M618,370 L600,388 M610,316 L582,344 M594,310 L582,322"/>
+    <path d="M632,330 L668,366 M632,350 L660,378 M632,370 L650,388 M640,316 L668,344 M656,310 L668,322 M668,330 L632,366 M668,350 L640,378 M668,370 L650,388 M660,316 L632,344 M644,310 L632,322"/>
+  </g>
+  <g stroke="#0A1A5C" stroke-width="4.5" stroke-linejoin="round">
+    <!-- eaves -->
+    <path d="M478,294 L722,294 L700,272 L500,272Z" fill="#1F5BFF"/>
+    <path d="M486,294 L714,294" stroke-width="3"/>
+    <!-- drum -->
+    <path d="M540,272 L540,252 L660,252 L660,272Z" fill="#FFFFFF"/>
+    <!-- dome -->
+    <path d="M532,254 C532,180 668,180 668,254Z" fill="#1F5BFF"/>
+    <path d="M556,250 C556,206 586,190 600,188" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-opacity="0.6"/>
+    <path d="M600,190 L600,160" stroke-width="3.5"/>
+    <circle cx="600" cy="176" r="5" fill="#7FB0FF" stroke-width="2.5"/>
+    <path d="M594,158 a7,7 0 1 0 12,-6 a5.5,5.5 0 1 1 -12,6z" fill="#7FB0FF" stroke-width="2"/>
+    <!-- fountain spouts -->
+    <path d="M540,396 L540,404 M600,396 L600,404 M660,396 L660,404" stroke-width="3"/>
+  </g>
+  <g stroke="#1F5BFF" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M540,404 q-4,6 -2,10 M600,404 q-4,6 -2,10 M660,404 q-4,6 -2,10"/>
+  </g>
+  <path d="M552,272 L552,262 M576,272 L576,262 M600,272 L600,262 M624,272 L624,262 M648,272 L648,262" stroke="#0A1A5C" stroke-width="2"/>
+
+  <!-- pigeons on the ground -->
+  <use href="#pigeon" transform="translate(430 436)"/>
+  <use href="#pigeon" transform="translate(470 456) scale(-1 1)"/>
+  <use href="#pigeon" transform="translate(520 470)"/>
+  <use href="#pigeon" transform="translate(600 480) scale(-1 1)"/>
+  <use href="#pigeon" transform="translate(680 466)"/>
+  <use href="#pigeon" transform="translate(740 450) scale(-1 1)"/>
+  <use href="#pigeon" transform="translate(560 452) scale(0.85)"/>
+  <use href="#pigeon" transform="translate(650 444) scale(-0.85 0.85)"/>
+  <use href="#pigeon" transform="translate(380 480) scale(-1 1)"/>
+  <!-- grains -->
+  <g fill="#7FB0FF"><circle cx="500" cy="490" r="2"/><circle cx="540" cy="494" r="2"/><circle cx="586" cy="500" r="2"/><circle cx="620" cy="494" r="2"/><circle cx="660" cy="498" r="2"/><circle cx="700" cy="488" r="2"/></g>
+  <!-- flying pigeons -->
+  <use href="#flyp" transform="translate(720 200) scale(1.3)"/>
+  <use href="#flyp" transform="translate(470 230)"/>
+  <use href="#flyp" transform="translate(780 240) scale(0.9)"/>
+  <use href="#flyp" transform="translate(410 190) scale(0.8)"/>
+
+  <!-- MAJSTOR character with ladder and toolbox (right) -->
+  <g transform="translate(1000 300)" stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <!-- ladder on shoulder -->
+    <g transform="rotate(-24)">
+      <path d="M-110,40 L120,40 M-110,64 L120,64" stroke-width="6" stroke="#0A1A5C"/>
+      <path d="M-110,40 L120,40 M-110,64 L120,64" stroke-width="3" stroke="#FFFFFF"/>
+      <path d="M-96,40 L-96,64 M-70,40 L-70,64 M-44,40 L-44,64 M-18,40 L-18,64 M8,40 L8,64 M34,40 L34,64 M60,40 L60,64 M86,40 L86,64 M110,40 L110,64" stroke-width="4"/>
+    </g>
+    <!-- legs -->
+    <path d="M-14,96 L-22,150" stroke-width="16"/>
+    <path d="M-14,96 L-22,150" stroke-width="10" stroke="#1442C9"/>
+    <path d="M14,96 L26,148" stroke-width="16"/>
+    <path d="M14,96 L26,148" stroke-width="10" stroke="#1442C9"/>
+    <path d="M-36,150 C-36,140 -10,140 -10,152 L-10,158 L-38,158Z" fill="#FFFFFF"/>
+    <path d="M14,148 C14,138 42,138 42,150 L42,156 L12,156Z" fill="#FFFFFF"/>
+    <!-- body -->
+    <path d="M-34,100 C-40,60 -30,20 0,18 C30,20 40,60 34,100Z" fill="#1F5BFF"/>
+    <path d="M-20,40 L-20,100 M20,40 L20,100" stroke-width="2.5" stroke="#FFFFFF" stroke-opacity="0.8"/>
+    <rect x="-12" y="56" width="24" height="18" rx="3" fill="#FFFFFF" stroke-width="2.5"/>
+    <!-- head -->
+    <circle cx="0" cy="-6" r="24" fill="#FFE0C2"/>
+    <path d="M-24,-12 C-24,-40 24,-40 24,-12 L30,-10 L-24,-10Z" fill="#FFFFFF"/>
+    <path d="M-20,-14 L28,-14" stroke-width="3"/>
+    <circle cx="-8" cy="-2" r="2.8" fill="#0A1A5C" stroke-width="0"/>
+    <circle cx="10" cy="-2" r="2.8" fill="#0A1A5C" stroke-width="0"/>
+    <path d="M-12,8 C-4,16 8,16 14,8" stroke-width="3" fill="none"/>
+    <path d="M-14,6 C-8,10 -2,10 0,8 C2,10 10,10 16,6" stroke-width="3" fill="#6B4A36"/>
+    <!-- arm holding ladder -->
+    <path d="M-26,40 C-44,40 -46,20 -34,8" stroke-width="14"/>
+    <path d="M-26,40 C-44,40 -46,20 -34,8" stroke-width="8" stroke="#1F5BFF"/>
+    <circle cx="-32" cy="6" r="10" fill="#FFFFFF"/>
+    <!-- arm with toolbox -->
+    <path d="M28,40 C44,56 48,76 46,92" stroke-width="14"/>
+    <path d="M28,40 C44,56 48,76 46,92" stroke-width="8" stroke="#1F5BFF"/>
+    <circle cx="46" cy="96" r="10" fill="#FFFFFF"/>
+    <path d="M30,106 L74,106 L74,136 L30,136Z" fill="#FF5A5A"/>
+    <path d="M40,106 C40,96 64,96 64,106" fill="none" stroke-width="4"/>
+    <path d="M30,118 L74,118" stroke-width="3"/>
+  </g>
+
+  <!-- girl waving (client) left -->
+  <g transform="translate(360 336)" stroke="#0A1A5C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M-8,70 L-10,110 M8,70 L10,110" stroke-width="9"/>
+    <path d="M-20,112 L-4,112 M4,112 L20,112" stroke-width="7"/>
+    <path d="M-26,74 C-28,40 -18,20 0,20 C18,20 28,40 26,74Z" fill="#FFFFFF"/>
+    <path d="M-26,64 L26,64" stroke="#1F5BFF" stroke-width="5"/>
+    <path d="M22,30 C36,22 40,4 36,-6" stroke-width="10"/>
+    <path d="M22,30 C36,22 40,4 36,-6" stroke-width="5" stroke="#FFFFFF"/>
+    <circle cx="36" cy="-10" r="7" fill="#FFE0C2"/>
+    <path d="M-22,30 C-30,44 -30,54 -26,60" stroke-width="10"/>
+    <path d="M-22,30 C-30,44 -30,54 -26,60" stroke-width="5" stroke="#FFFFFF"/>
+    <circle cx="0" cy="0" r="18" fill="#FFE0C2"/>
+    <path d="M-18,-2 C-22,-26 22,-26 18,-2 C14,-12 -10,-16 -18,-2Z" fill="#6B4A36"/>
+    <path d="M14,-12 C26,-8 28,8 22,20" fill="none" stroke="#6B4A36" stroke-width="7"/>
+    <circle cx="-6" cy="2" r="2.2" fill="#0A1A5C" stroke-width="0"/><circle cx="6" cy="2" r="2.2" fill="#0A1A5C" stroke-width="0"/>
+    <path d="M-5,9 C-2,12 3,12 6,9" stroke-width="2.5" fill="none"/>
+  </g>
+  <path d="M410,316 L418,308 M414,326 L426,324" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+</svg>

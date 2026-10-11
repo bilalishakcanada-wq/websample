@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronRight, MapPin, Search, Users, Truck, Sparkles, Wrench, Armchair, PaintRoller, Laptop, Dog, Package } from 'lucide-react'
 import { CropArt, useShuffle } from '../components/BosniaArt'
@@ -15,6 +15,31 @@ import PushPrompt from '../components/PushPrompt'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 import { SkeletonApJob } from '../components/Skeleton'
+import { gsap, onView, reducedMotion, revealWords, useGSAP } from '../lib/motion'
+
+// the hero builds itself the first time Home opens in a session; tab switches after that stay instant
+let heroPlayed = false
+function useHeroMotion(scope) {
+  useGSAP(() => {
+    if (heroPlayed || reducedMotion()) return
+    heroPlayed = true
+    gsap.set('.ap-hero-chips > *', { transition: 'none' }) // their CSS press transition would fight the tween
+    revealWords(scope.current.querySelector('.ap-hero h1'), { scroll: false, stagger: 0.08 })
+    gsap.timeline({ defaults: { ease: 'power3.out' } })
+      .from('.ap-hero-greet', { opacity: 0, y: -8, duration: 0.4 })
+      .from('.ap-hero-form, .ap-hero-btn', { opacity: 0, y: 14, duration: 0.5 }, 0.2)
+      .from('.ap-hero-chips > *', { opacity: 0, x: 28, duration: 0.45, stagger: 0.04, clearProps: 'transform,transition' }, 0.3)
+  }, { scope })
+}
+
+/** Category tiles pop in, one after another, the first time they scroll into view. */
+function useTilesMotion(scope, ready) {
+  useGSAP(() => {
+    if (!ready || reducedMotion() || !scope.current?.querySelector('.ap-tiles')) return
+    gsap.set('.ap-tile', { transition: 'none' })
+    gsap.from('.ap-tile', { opacity: 0, scale: 0.85, y: 12, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.04, clearProps: 'transform,transition', scrollTrigger: onView('.ap-tiles', 'top 95%') })
+  }, { scope, dependencies: [ready] })
+}
 
 const QUICK_IDEAS = [
   ['Pomozi mi sa selidbom', Truck], ['Generalno čišćenje stana', Sparkles], ['Popravi slavinu', Wrench], ['Sastavi namještaj', Armchair],
@@ -81,6 +106,9 @@ function PosterHome({ firstName }) {
   // the poster's own jobs go right under the hero: until we know whether there are any, nothing sits there to be pushed down
   const ownJobs = useMyListings(user.id)
   const ownJobsKnown = !ownJobs.isPending || ownJobs.fetchStatus === 'paused'
+  const homeRef = useRef(null)
+  useHeroMotion(homeRef)
+  useTilesMotion(homeRef, ownJobsKnown)
 
   const start = (text) => {
     haptic('light')
@@ -90,7 +118,7 @@ function PosterHome({ firstName }) {
   }
 
   return (
-    <div className="ap ap-home">
+    <div className="ap ap-home" ref={homeRef}>
       <section className="ap-hero">
         {HEADER_ART.map((crop, i) => <CropArt key={crop} crop={crop} className={`ap-hero-art bz-turn ${i === artIndex ? 'is-on' : ''}`} />)}
         <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>
@@ -146,9 +174,11 @@ function TaskerHome({ user, firstName }) {
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
   // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
   const ready = !loading && bids !== null
+  const homeRef = useRef(null)
+  useHeroMotion(homeRef)
 
   return (
-    <div className="ap ap-home">
+    <div className="ap ap-home" ref={homeRef}>
       <section className="ap-hero ap-hero-tasker">
         {HEADER_ART.map((crop, i) => <CropArt key={crop} crop={crop} className={`ap-hero-art bz-turn ${i === artIndex ? 'is-on' : ''}`} />)}
         <div className="ap-hero-top"><span className="ap-hero-greet">{greeting()}{firstName ? `, ${firstName}` : ''}</span><NotifBellLink className="ap-hero-bell" /></div>

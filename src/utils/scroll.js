@@ -4,7 +4,12 @@
  */
 export const scrollRoot = () => document.getElementById('root')
 
+// the Lenis instance while smooth scrolling runs (computers only, see SmoothScroll.jsx)
+let smooth = null
+export const setSmoothScroller = (instance) => { smooth = instance }
+
 export function scrollToTop() {
+  smooth?.scrollTo(0, { immediate: true, force: true })
   window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   const root = scrollRoot()
   if (root) root.scrollTo({ top: 0, left: 0, behavior: 'instant' })

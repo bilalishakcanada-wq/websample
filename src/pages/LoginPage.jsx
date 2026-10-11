@@ -6,6 +6,30 @@ import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
+import { authService } from '../services/authService'
+
+/** "Didn't get the mail?" — sends the signup confirmation again, with a short cooldown. */
+function ResendConfirmation({ email }) {
+  const [state, setState] = useState({ busy: false, sent: false, error: '' })
+  if (!email) return null
+  const resend = async () => {
+    setState({ busy: true, sent: false, error: '' })
+    try {
+      await authService.resendConfirmation(email)
+      setState({ busy: false, sent: true, error: '' })
+    } catch (err) {
+      setState({ busy: false, sent: false, error: err.message })
+    }
+  }
+  return (
+    <div className="resend-confirmation">
+      {state.sent
+        ? <span>Poslali smo novi mail na <strong>{email}</strong>. Link vrijedi 24 sata.</span>
+        : <button type="button" className="link-button" onClick={resend} disabled={state.busy}>{state.busy ? 'Šaljem...' : 'Nije stigao mail? Pošalji ponovo'}</button>}
+      {state.error && <div className="form-error">{state.error}</div>}
+    </div>
+  )
+}
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -16,6 +40,8 @@ function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
+  const [unconfirmed, setUnconfirmed] = useState(false)
+  const pendingEmail = location.state?.email || ''
   const verificationPending = searchParams.get('verification') === 'pending'
   const oauthFailed = searchParams.get('oauth') === 'failed'
   const isPhone = useMediaQuery('(max-width: 768px)')
@@ -36,12 +62,14 @@ function LoginPage() {
     event.preventDefault()
     setLoading(true)
     setError('')
+    setUnconfirmed(false)
 
     try {
       await login({ ...form, captchaToken })
       navigate(destination)
     } catch (err) {
       setError(err.message)
+      setUnconfirmed(err.code === 'email_not_confirmed')
     } finally {
       setLoading(false)
     }
@@ -51,7 +79,8 @@ function LoginPage() {
     <AuthLayout title="Prijavi se na svoj račun">
       {verificationPending && (
         <div className="form-success">
-          Nalog je napravljen! Provjeri email (i spam folder) i klikni na link za potvrdu prije prijave.
+          Nalog je napravljen! Poslali smo ti mail{pendingEmail ? <> na <strong>{pendingEmail}</strong></> : ''}. Klikni dugme <strong>Potvrdi email</strong> u njemu i odmah si prijavljen/a. Ne vidiš ga? Pogledaj i spam.
+          <ResendConfirmation email={pendingEmail} />
         </div>
       )}
       {oauthFailed && (
@@ -66,7 +95,7 @@ function LoginPage() {
         </div>
         <PasswordField name="password" label="Lozinka" value={form.password} onChange={handleChange} />
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
-        {error && <div className="form-error">{error}</div>}
+        {error && <div className="form-error">{error}{unconfirmed && <ResendConfirmation email={form.email.trim().toLowerCase()} />}</div>}
         <button data-testid="login-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Prijava...' : 'Nastavi'}
         </button>

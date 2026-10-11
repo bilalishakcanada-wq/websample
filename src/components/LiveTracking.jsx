@@ -13,7 +13,7 @@ const SEND_EVERY_MS = 15 * 1000         // send at least this often while moving
 const SEND_AFTER_M = 25                 // …or as soon as the provider moved this far
 const CITY_SPEED = 30 / 3.6             // m/s when the phone doesn't report speed
 const ASK_AGAIN_MS = 2 * 60 * 1000      // same cooldown as request_live_location (booking/06)
-const DURATIONS = [{ min: 30, label: '30 min' }, { min: 60, label: '1 h' }, { min: 120, label: '2 h' }]
+const SHARE_MINUTES = 120                // one sharing lasts 2 h, then stops by itself (sd's choice)
 
 const daleko = (m) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toLocaleString('bs-BA', { maximumFractionDigits: 1 })} km`)
 const ostalo = (ms) => {
@@ -33,25 +33,10 @@ function eta(distance, speed) {
   return min >= 60 ? `oko ${Math.floor(min / 60)} h ${min % 60} min` : `oko ${min} min`
 }
 
-/** „Koliko dugo?“ 30 min · 1 h · 2 h, like live location in Instagram/WhatsApp chats. */
-function DurationPicker({ value, onChange }) {
-  return (
-    <div className="live-track-duration" role="radiogroup" aria-label="Koliko dugo dijeliš lokaciju">
-      <span className="live-track-duration-label"><Clock3 size={14} /> Koliko dugo</span>
-      <div className="live-track-segments">
-        {DURATIONS.map((d) => (
-          <button key={d.min} type="button" role="radio" aria-checked={value === d.min} className={value === d.min ? 'is-on' : ''}
-            onClick={() => { haptic('light'); onChange(d.min) }} data-testid={`live-duration-${d.min}`}>{d.label}</button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 /**
  * „Izvođač je na putu“: one component for the laptop browser, the phone browser and the iOS/Android app.
  *  - client: can ask for the provider's location ("Zatraži lokaciju"); the provider gets a notification and decides;
- *  - provider: shares on their own or answers the request, for 30 min / 1 h / 2 h; "Stigao sam" ends it and tells the client;
+ *  - provider: shares on their own or answers the request, for 2 h at most; "Stigao sam" ends it and tells the client;
  *  - the provider's point moves on the client's map live through Supabase Realtime, with distance and arrival time.
  * Shown only on on-site jobs while the work is in progress, and only once supabase/booking/05 is in the database
  * (asking and the time limit need booking/06; without it the card works as before).
@@ -68,7 +53,6 @@ function LiveTracking({ payment, listing, role }) {
   const [canAsk, setCanAsk] = useState(false)   // booking/06 is in the database
   const [request, setRequest] = useState(null)  // { state: 'pending' | 'declined', requested_at }
   const [sharing, setSharing] = useState(false)
-  const [minutes, setMinutes] = useState(60)
   const [until, setUntil] = useState(null)      // provider: when this sharing ends (ms)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -148,8 +132,8 @@ function LiveTracking({ payment, listing, role }) {
   const start = () => {
     haptic('medium')
     lastSent.current = null
-    firstMinutes.current = minutes
-    setUntil(Date.now() + minutes * 60000)
+    firstMinutes.current = SHARE_MINUTES
+    setUntil(Date.now() + SHARE_MINUTES * 60000)
     setSharing(true)
     setError('')
     toast('Klijent te sada vidi na mapi dok dolaziš.', { kind: 'success' })
@@ -241,11 +225,10 @@ function LiveTracking({ payment, listing, role }) {
         {isProvider && !sharing && (
           <p className="muted-text">
             {asked
-              ? `Zatraženo ${prije(now - askedAt)}. Vidi te samo klijent ovog posla, dok ne stigneš ili ne istekne vrijeme.`
-              : 'Kad kreneš, uključi dijeljenje: klijent vidi gdje si i kad stižeš. Ugasiš ga kad hoćeš.'}
+              ? `Zatraženo ${prije(now - askedAt)}. Vidi te samo klijent ovog posla, najviše 2 sata ili dok ne javiš da si stigao.`
+              : 'Kad kreneš, uključi dijeljenje: klijent vidi gdje si i kad stižeš. Traje najviše 2 sata, a ugasiš ga kad hoćeš.'}
           </p>
         )}
-        {isProvider && !sharing && <DurationPicker value={minutes} onChange={setMinutes} />}
         {isProvider && sharing && <p className="muted-text">Drži Zadatak otvoren dok voziš; lokacija se ne šalje kad je ekran zaključan.</p>}
         {error && <p className="form-error">{error}</p>}
         {isProvider && (

@@ -28,11 +28,14 @@ for f in identity/bids_require_verified security/05_marketplace_scam_guards paym
          airtasker/01_task_schedule_and_expiry airtasker/02_search_due_dates airtasker/03_saved_tasks airtasker/05_quote_requests \
          branding/01_zadatak_rebrand security/08_safe_file_links identity/jobs_require_verified identity/beta_skip_identity \
          badges/01_badge_ranking rollout/2026-10-06_all_pending locations/01_bih_locations locations/02_seed_bih_locations \
-         booking/06_location_request; do
+         booking/06_location_request algorithms/01_places_and_exact_location algorithms/02_search \
+         algorithms/03_matching algorithms/04_embeddings; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   echo "applying supabase/$f.sql"
   $P -f "$REPO/supabase/$f.sql" >/dev/null || { echo "FAILED at supabase/$f.sql"; exit 1; }
 done
+# vectors are made by the live `embed` function; this copy has no edge functions, so don't call it every minute
+$P -c "select cron.unschedule(jobid) from cron.job where jobname = 'embedding-kick';" >/dev/null
 # the live site runs the beta without ID checks; the tests cover the ID gate, so it stays on here
 $P -c "update public.verification_policy set require_for_jobs = true, require_for_bids = true where id;"
 

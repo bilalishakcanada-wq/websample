@@ -8,6 +8,10 @@ import { isValidFullName } from '../../services/profileService'
 import { contactInfoMessage, scanContactInfo } from '../../utils/moderation'
 import { formatBosnianPhone, isValidBosnianPhone } from '../../utils/phone'
 import CityField from '../../components/CityField'
+import ExactLocationPicker from '../../components/ExactLocationPicker'
+import { placeService } from '../../services/placeService'
+import { knowsPlace } from '../../data/cityCoordinates'
+import { queryClient } from '../../lib/queryClient'
 import RuleOneNotice from '../../components/RuleOneNotice'
 import { withBase } from '../../utils/paths'
 import { confirmDialog } from '../../utils/dialog'
@@ -61,6 +65,16 @@ function ProfileSettingsPage() {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  // exact location (street and number or GPS): private, used for distance to jobs; saved with the form
+  const [exact, setExact] = useState(null)
+  const [exactTouched, setExactTouched] = useState(false)
+  useEffect(() => {
+    let live = true
+    placeService.myLocation(user.id).then((row) => {
+      if (live && row) setExact({ address: row.address, lat: row.lat, lng: row.lng, accuracy: row.accuracy_m, source: row.source })
+    }).catch(() => {})
+    return () => { live = false }
+  }, [user.id])
 
   const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim()
   const nameOk = fullName === '' || isValidFullName(fullName)
@@ -93,6 +107,17 @@ function ProfileSettingsPage() {
         account_type: form.accountType,
       })
       updateProfile({ user_metadata: { ...user.user_metadata, full_name: saved.full_name, city: saved.city, phone: saved.phone } })
+      if (exactTouched) {
+        try {
+          if (exact) await placeService.setMyLocation(exact)
+          else await placeService.clearMyLocation()
+          setExactTouched(false)
+          queryClient.invalidateQueries({ queryKey: ['me', user.id] })
+        } catch (locationError) {
+          setError(`Profil je sačuvan, ali tačna lokacija nije: ${locationError.message}`)
+          return
+        }
+      }
       setMessage('Profil je sačuvan.')
     } catch (requestError) {
       setError(requestError.message)
@@ -138,6 +163,16 @@ function ProfileSettingsPage() {
         <div className="account-field">
           <span>Lokacija</span>
           <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} label="Mjesto (naselje ili grad)" />
+          {(knowsPlace(form.city) || exact) && (
+            <ExactLocationPicker
+              town={form.city}
+              value={exact}
+              onChange={(next) => { setExact(next); setExactTouched(true) }}
+              openLabel="Dodaj svoju tačnu lokaciju (opciono)"
+              placeholder="Ulica i broj, npr. Ilirska 67"
+              hint="Tvoju tačnu lokaciju niko ne vidi. Koristimo je samo da izračunamo koliko si daleko od poslova (zaokruženo na oko 1 km) i da ti pokažemo poslove blizu tebe. Sačuvaj profil da se primijeni."
+            />
+          )}
         </div>
         <label className="account-field">
           <span>Email</span>

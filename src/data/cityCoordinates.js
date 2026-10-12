@@ -1,4 +1,4 @@
-// [lat, lng] for every city offered in the post-task location picker.
+// [lat, lng] for every municipality in BiH (the same points as public.city_coords).
 export const cityCoordinates = {
   'Sarajevo': [43.8563, 18.4131],
   'Banja Luka': [44.7722, 17.1910],
@@ -93,11 +93,75 @@ export const cityCoordinates = {
   'Neum': [42.9247, 17.6158],
   'Čitluk': [43.2286, 17.7000],
   'Posušje': [43.4728, 17.3283],
+  // ostale općine (sjedište općine iz public.bih_locations), da svaka općina u BiH ima svoju tačku
+  'Banovići': [44.4060, 18.5265],
+  'Berkovići': [43.0947, 18.1703],
+  'Breza': [44.0186, 18.2606],
+  'Brod': [45.1375, 17.9872],
+  'Bužim': [45.0536, 16.0325],
+  'Čelić': [44.7210, 18.8231],
+  'Doboj Istok': [44.7329, 18.1888],
+  'Doboj Jug': [44.6878, 18.0489],
+  'Dobretići': [44.3779, 17.4143],
+  'Domaljevac-Šamac': [45.0611, 18.5861],
+  'Foča-Ustikolina': [43.5834, 18.7911],
+  'Gornji Vakuf-Uskoplje': [43.9381, 17.5883],
+  'Grude': [43.3836, 17.3951],
+  'Istočna Ilidža': [43.7956, 18.3522],
+  'Istočni Drvar': [44.3926, 16.6200],
+  'Istočni Mostar': [43.3851, 17.9791],
+  'Istočni Stari Grad': [43.8780, 18.4970],
+  'Istočno Novo Sarajevo': [43.7943, 18.4349],
+  'Jablanica': [43.6603, 17.7617],
+  'Jezero': [44.3495, 17.1688],
+  'Kalinovik': [43.5046, 18.4465],
+  'Kneževo': [44.4907, 17.3816],
+  'Kostajnica': [45.2196, 16.5393],
+  'Kozarska Dubica': [45.1767, 16.8094],
+  'Krupa na Uni': [44.8902, 16.3251],
+  'Kupres (RS)': [44.0801, 17.1556],
+  'Ljubinje': [42.9512, 18.0870],
+  'Lopare': [44.6350, 18.8434],
+  'Milići': [44.1702, 19.0920],
+  'Novi Grad': [45.0464, 16.3778],
+  'Novo Goražde': [43.6783, 19.0285],
+  'Olovo': [44.1277, 18.5807],
+  'Orašje': [45.0337, 18.6933],
+  'Osmaci': [44.4016, 18.9164],
+  'Oštra Luka': [44.8603, 16.6607],
+  'Pale-Prača': [43.7637, 18.7651],
+  'Pelagićevo': [44.9011, 18.5919],
+  'Petrovac': [44.4698, 16.4974],
+  'Petrovo': [44.6280, 18.3532],
+  'Prozor-Rama': [43.8222, 17.6092],
+  'Ribnik': [44.4175, 16.8169],
+  'Šekovići': [44.2990, 18.8553],
+  'Sokolac': [43.9382, 18.8008],
+  'Srbac': [45.0973, 17.5233],
+  'Tomislavgrad': [43.7185, 17.2252],
+  'Trnovo (RS)': [43.6658, 18.4459],
+  'Ugljevik': [44.6636, 19.0203],
+  'Usora': [44.6723, 18.0111],
+  'Vukosavlje': [44.9432, 18.6467],
+  'Žepče': [44.4267, 18.0378],
 }
 
 export const isRemoteLocation = (location) => /online|daljin|remote/i.test(location || '')
 
 const normalise = (value) => (value || '').toLowerCase().trim()
+
+// Names people write differently from the official one (old names, joined, with a suffix).
+const ALIASES = {
+  banjaluka: 'Banja Luka', 'bosanski novi': 'Novi Grad', 'bosanski brod': 'Brod', 'bosanska dubica': 'Kozarska Dubica',
+  'bosanska kostajnica': 'Kostajnica', 'skender vakuf': 'Kneževo', 'gornji vakuf': 'Gornji Vakuf-Uskoplje', uskoplje: 'Gornji Vakuf-Uskoplje',
+  prozor: 'Prozor-Rama', rama: 'Prozor-Rama', 'brčko distrikt': 'Brčko', 'bosanska gradiška': 'Gradiška', duvno: 'Tomislavgrad',
+}
+
+// "Moja lokacija" in a filter is stored as "@43.8563,18.4131" (a point from the phone's GPS).
+const POINT_LABEL = /^@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/
+export const pointLabel = (lat, lng) => `@${Number(lat).toFixed(4)},${Number(lng).toFixed(4)}`
+export const isPointLabel = (label) => POINT_LABEL.test(String(label || '').trim())
+export const placeName = (label) => (isPointLabel(label) ? 'Moja lokacija' : label)
 
 // Settlements ("Otes, Ilidža") come from the database (public.bih_locations, ~19 500 places), so their
 // points are remembered here once seen (picked in the type-ahead, or looked up for a profile), and kept
@@ -120,14 +184,16 @@ export function rememberPlace(label, lat, lng) {
   } catch { /* full or blocked storage */ }
 }
 
-export const knowsPlace = (label) => Boolean(label && (cityCoordinates[label.trim()] || placePoints.has(label.trim())))
+export const knowsPlace = (label) => Boolean(label && (cityCoordinates[label.trim()] || placePoints.has(label.trim()) || isPointLabel(label) || ALIASES[normalise(label)]))
 
 // Exact town name first, then a remembered settlement, then the longest town name contained in the
 // text ("Novi Grad Sarajevo" beats "Sarajevo" for "Novi Grad Sarajevo, BiH"; an unknown "Otes, Ilidža"
 // falls back to Ilidža until its own point is known).
 export function coordsForLocation(location) {
   if (!location || isRemoteLocation(location)) return null
-  const exact = cityCoordinates[location.trim()]
+  const point = POINT_LABEL.exec(location.trim())
+  if (point) return { lat: Number(point[1]), lng: Number(point[2]) }
+  const exact = cityCoordinates[location.trim()] || cityCoordinates[ALIASES[normalise(location)]]
   if (exact) return { lat: exact[0], lng: exact[1] }
   const place = placePoints.get(location.trim())
   if (place) return { ...place }

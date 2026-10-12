@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { personaliseRanked, rankListings } from '../utils/ranking'
 import { readInterests, recordInterest } from '../utils/interests'
-import { keys, useSearchListings } from '../hooks/queries'
+import { keys, useMyPoint, useSearchListings } from '../hooks/queries'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { promotionService } from '../services/promotionService'
 import { PromoBadge } from '../components/Promotion'
@@ -12,14 +12,15 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUpDown, Banknote, Bookmark, CalendarDays, Car, Clock3, Radar, Check, ChevronDown, Laptop, List, MapPin,
-  Map as MapIcon, Search as SearchIcon, Users, X,
+  Map as MapIcon, Search as SearchIcon, Users, X, LocateFixed,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
 // maplibre is ~0.8 MB: only fetched when the map is actually on screen
 const TaskMap = lazy(() => import('../components/TaskMap'))
 import { serviceCategories } from '../data/categories'
 import { bosniaCities } from '../data/cities'
-import { distanceKm, isRemoteLocation, rememberPlace } from '../data/cityCoordinates'
+import { distanceKm, isPointLabel, isRemoteLocation, placeName, pointLabel, rememberPlace } from '../data/cityCoordinates'
+import { currentLocation, locationSupported } from '../utils/location'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import { usePlacePoint } from '../hooks/usePlacePoint'
 import { listingService } from '../services/listingService'
@@ -156,7 +157,26 @@ function SearchPage() {
 
   // a chosen town or settlement ("Otes, Ilidža") is where distance is measured from
   const origin = usePlacePoint(filters.city)
-  const homePoint = usePlacePoint(me?.city || '')
+  // home: the exact point from "Moja lokacija" in the profile, else the profile's town
+  const myPoint = useMyPoint(user?.id)
+  const cityHome = usePlacePoint(me?.city || '')
+  const homePoint = myPoint || cityHome
+  const [locating, setLocating] = useState(false)
+  const [locateError, setLocateError] = useState('')
+  // "Blizu mene": the phone's position becomes the place to measure from (?city=@lat,lng)
+  const nearMe = async () => {
+    setLocating(true)
+    setLocateError('')
+    try {
+      const here = await currentLocation({ goodEnoughMeters: 500, waitMs: 6000 })
+      update({ city: pointLabel(here.lat, here.lng), ...(filters.radius === 0 ? { radius: 25 } : {}) })
+      setCitySearch('')
+    } catch (message) {
+      setLocateError(typeof message === 'string' ? message : 'Lokacija trenutno nije dostupna.')
+    } finally {
+      setLocating(false)
+    }
+  }
 
   // Everything — text relevance, distance, competition, the searcher's trades — is ranked in
   // Postgres (search_listings) in one round trip, cached by TanStack Query: revisiting a search
@@ -232,9 +252,9 @@ function SearchPage() {
       photo: row.cover_url ?? ([...(row.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || null),
       photoCount: row.image_count ?? (row.listing_images || []).length,
       distance: origin && point ? distanceKm(origin, point) : (row.distance_km ?? null),
-      reach: me?.city ? reachFor(row, me.city, homePoint) : null,
+      reach: me?.city || myPoint ? reachFor(row, me?.city, homePoint) : null,
     }
-  }, [origin, me, homePoint])
+  }, [origin, me, homePoint, myPoint])
 
   const organic = useMemo(() => {
     let items = rows.map(decorate)
@@ -303,7 +323,7 @@ function SearchPage() {
   const toggleMenu = (id) => setOpenMenu((current) => (current === id ? '' : id))
   const { places: cityMatches, loading: citySearching } = useLocationSearch(citySearch, { limit: 12, popular: POPULAR_SEARCH_CITIES })
   const locationLabel = filters.city
-    ? `${filters.radius === 0 ? 'Cijela BiH' : `${filters.radius} km`} · ${filters.city}${filters.includeRemote ? ' i online' : ''}`
+    ? `${filters.radius === 0 ? 'Cijela BiH' : `${filters.radius} km`} · ${placeName(filters.city)}${filters.includeRemote ? ' i online' : ''}`
     : 'Cijela BiH i online'
   const priceLabel = filters.minPrice === '' && filters.maxPrice === ''
     ? 'Bilo koja cijena'
@@ -354,6 +374,17 @@ function SearchPage() {
           </label>
           <div className="popover-list">
             <button type="button" className={`popover-option ${!filters.city ? 'active' : ''}`} onClick={() => update({ city: '' })}>Cijela BiH</button>
+            {locationSupported() && (
+              <button type="button" className={`popover-option ${isPointLabel(filters.city) ? 'active' : ''}`} onClick={nearMe} disabled={locating}>
+                <span><LocateFixed size={14} /> {locating ? 'Tražim gdje si…' : 'Blizu mene'}</span>
+              </button>
+            )}
+            {myPoint && (
+              <button type="button" className="popover-option" onClick={() => { update({ city: pointLabel(myPoint.lat, myPoint.lng), ...(filters.radius === 0 ? { radius: 25 } : {}) }); setCitySearch('') }}>
+                <span><MapPin size={14} /> Moja lokacija iz profila</span>
+              </button>
+            )}
+            {locateError && <p className="muted-text">{locateError}</p>}
             {cityMatches.map((place) => (
               <button key={place.label} type="button" className={`popover-option ${filters.city === place.label ? 'active' : ''}`} onClick={() => { if (place.lat != null) rememberPlace(place.label, place.lat, place.lng); update({ city: place.label }); setCitySearch('') }}>
                 <span>{place.name}{place.municipality && place.municipality !== place.name && <span className="muted-text">, {place.municipality}</span>}</span>

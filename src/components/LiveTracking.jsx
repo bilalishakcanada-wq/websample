@@ -4,6 +4,7 @@ import { liveLocationService } from '../services/liveLocationService'
 import { distanceMeters, keepScreenOn, locationSupported, watchLocation } from '../utils/location'
 import { haptic, isNativeApp } from '../utils/native'
 import { toast } from './Toaster'
+import { useListingAddress } from '../hooks/queries'
 import './LiveTracking.css'
 
 const LiveTrackingMap = lazy(() => import('./LiveTrackingMap'))
@@ -46,7 +47,9 @@ function LiveTracking({ payment, listing, role }) {
   const active = payment.status === 'funded' && ['in_progress', 'revision'].includes(payment.work_state || 'in_progress')
   const onSite = !/online/i.test(listing?.location || '')
   const town = (listing?.location || '').split(',')[0].trim()
-  const destination = listing?.lat != null && listing?.lng != null ? { lat: listing.lat, lng: listing.lng } : null
+  // the exact address when the client gave one (both people here may read it), else the job's public point
+  const exact = useListingAddress(listing?.id, onSite)
+  const destination = exact ? { lat: exact.lat, lng: exact.lng } : listing?.lat != null && listing?.lng != null ? { lat: listing.lat, lng: listing.lng } : null
 
   const [available, setAvailable] = useState(false)
   const [row, setRow] = useState(null)          // last point the server has
@@ -256,7 +259,7 @@ function LiveTracking({ payment, listing, role }) {
       </div>
       {(point || destination) && (isProvider ? sharing : true) && (
         <Suspense fallback={<div className="live-map live-map-loading" aria-busy="true" />}>
-          <LiveTrackingMap destination={destination} provider={fresh ? point : null} />
+          <LiveTrackingMap key={destination ? `${destination.lat},${destination.lng}` : 'none'} destination={destination} provider={fresh ? point : null} />
         </Suspense>
       )}
     </section>

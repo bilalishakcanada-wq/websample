@@ -23,6 +23,9 @@ import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '..
 import { InviteBanner } from '../components/QuoteRequest'
 import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
 import IdentityGateNotice from '../components/IdentityGateNotice'
+import ExactLocationPicker from '../components/ExactLocationPicker'
+import { placeService } from '../services/placeService'
+import { knowsPlace } from '../data/cityCoordinates'
 import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const STEPS = [
@@ -130,6 +133,12 @@ function PostTaskPage() {
           price: listing.price ?? '',
         }))
         if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+        // the exact address is not on the listing row (only the owner and the accepted provider may read it)
+        if (!isRemote) {
+          placeService.listingAddress(sourceId).then((exact) => {
+            if (exact) setForm((current) => (current.exact === undefined ? { ...current, exact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
+          })
+        }
         // "Povećaj budžet ili dodaj put" on the job page lands on the budget step
         setStep(!stale && searchParams.get('step') === 'budget' ? STEPS.length - 1 : 0)
       })
@@ -159,7 +168,8 @@ function PostTaskPage() {
     if (postGate === 'pending') return
     setSaving(true)
     try {
-      const { listing, flaggedPhotos } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
+      const { listing, flaggedPhotos, addressError } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
+      if (addressError) toast(`Posao je objavljen, ali tačna adresa nije sačuvana: ${addressError}`, { kind: 'error', duration: 6000 })
       if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
@@ -253,14 +263,15 @@ function PostTaskPage() {
               <button type="button" className={`wizard-option ${form.mode === 'in-person' ? 'selected' : ''}`} onClick={() => update({ mode: 'in-person' })}>
                 <Building2 size={18} /> Na lokaciji
               </button>
-              <button type="button" className={`wizard-option ${form.mode === 'remote' ? 'selected' : ''}`} onClick={() => update({ mode: 'remote' })}>
+              <button type="button" className={`wizard-option ${form.mode === 'remote' ? 'selected' : ''}`} onClick={() => update({ mode: 'remote', exact: null })}>
                 <Laptop size={18} /> Online / na daljinu
               </button>
             </div>
             {form.mode === 'in-person' && (
               <div className="wizard-field">
                 <span>Mjesto (naselje, selo ili grad)</span>
-                <CityField id="task-city" value={form.location} onChange={(city) => update({ location: city })} />
+                <CityField id="task-city" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} />
+                {knowsPlace(form.location) && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
               </div>
             )}
           </section>
@@ -377,7 +388,7 @@ function PostTaskPage() {
               <h3>Pregled oglasa</h3>
               <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
-              <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : (form.location || '—')}</strong></div>
+              <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : form.exact?.address ? `${form.location} · ${form.exact.address}` : (form.location || '—')}</strong></div>
               <div className="wizard-summary-row"><span>Kada</span><strong>{formScheduleLabel(form)}</strong></div>
               {conditionsOn && hasConditions(form.conditions) && <div className="wizard-summary-row"><span>Značke i pogodnosti</span><strong>{conditionsSummary(form.conditions)}</strong></div>}
               {form.requirements.length > 0 && <div className="wizard-summary-row"><span>Uslovi</span><strong>{form.requirements.join(' · ')}</strong></div>}

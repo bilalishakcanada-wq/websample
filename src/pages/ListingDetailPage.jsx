@@ -21,10 +21,11 @@ import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
+import ExactAddress from '../components/ExactAddress'
 import { paymentService } from '../services/paymentService'
 import { setPageTitle } from '../utils/pageTitle'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { keys } from '../hooks/queries'
+import { keys, useMyPoint } from '../hooks/queries'
 import { questionService } from '../services/questionService'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { shareLink } from '../utils/native'
@@ -188,6 +189,7 @@ function ListingDetailPage() {
   const isOwner = Boolean(user && listing && user.id === listing.user_id)
   const saved = useSaved()
   const myCity = useMyCity()
+  const myPoint = useMyPoint(user?.id)
   // opening someone else's job teaches the feed what this person is into (kept on this device)
   useEffect(() => {
     if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
@@ -504,7 +506,7 @@ function ListingDetailPage() {
         )}
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
-          isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} canRebid={canRebid} freshBidIds={freshBidIds} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
+          isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} myPoint={myPoint} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} canRebid={canRebid} freshBidIds={freshBidIds} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
           onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={offerLabel} offerGate={offerGate} conditionCheck={conditionCheck}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
@@ -599,7 +601,7 @@ function ListingDetailPage() {
             {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
               <section className="job-card">
                 <h2>Doseg ponuda</h2>
-                <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} />
+                <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} />
               </section>
             )}
 
@@ -620,6 +622,7 @@ function ListingDetailPage() {
                 <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
                 {travelLabel(listing) && <div><span className="job-fact-icon"><Car size={17} /></span><div><small>Put</small><strong>{travelLabel(listing)}</strong></div></div>}
               </div>
+              <ExactAddress listing={listing} isOwner={isOwner} acceptedForMe={Boolean(user && acceptedBid?.bidder_id === user.id)} />
             </section>
 
             <section className="job-card">

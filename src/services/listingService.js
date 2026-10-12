@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { publicError, sanitizeText } from '../utils/validation'
 import { apiRequest } from './api'
 import { appConfig } from '../config/appConfig'
@@ -35,6 +35,26 @@ async function writeListing(run, fullRow) {
     return run(withoutExtras(row))
   }
   return first
+}
+
+// Vector of a search query from the embed-query Edge function (cached there per query). Turned off for the
+// rest of the visit once the function is missing or has no OpenAI key, so plain search never waits on it.
+let semanticSearch = true
+const queryVectors = new Map()
+async function queryEmbedding(text) {
+  if (!semanticSearch || !isSupabaseConfigured) return null
+  const key = text.trim().toLowerCase()
+  if (queryVectors.has(key)) return queryVectors.get(key)
+  try {
+    const { data, error } = await supabase.functions.invoke('embed-query', { body: { q: text } })
+    if (error || data?.configured === false) { semanticSearch = false; return null }
+    const vector = typeof data?.embedding === 'string' ? data.embedding : null
+    queryVectors.set(key, vector)
+    return vector
+  } catch {
+    semanticSearch = false
+    return null
+  }
 }
 
 export const listingService = {
@@ -163,8 +183,9 @@ export const listingService = {
     query = '', category = '', lat = null, lng = null, radiusKm = 0, includeRemote = true,
     minPrice = '', maxPrice = '', hasBudget = false, noOffers = false, sort = 'recommended', limit = 50, offset = 0,
   } = {}) {
-    const { data, error } = await supabase.rpc('search_listings', {
-      p_query: sanitizeText(query).slice(0, 80),
+    const text = sanitizeText(query).slice(0, 80)
+    const args = {
+      p_query: text,
       p_category: category || '',
       p_lat: lat, p_lng: lng,
       p_radius_km: radiusKm || 0,
@@ -176,12 +197,22 @@ export const listingService = {
       p_sort: sort,
       p_limit: limit,
       p_offset: offset,
-    })
+    }
+    const { data, error } = await supabase.rpc('search_listings', args)
     if (error) {
       console.error('Supabase search failed', { message: error.message, code: error.code })
       throw publicError()
     }
-    const rows = data || []
+    let rows = data || []
+    // few hits for a typed query: ask again with its meaning (pgvector), which also finds jobs written in
+    // other words ("treba mi neko da okreči" → "Krečenje stana"). Any failure keeps the plain result.
+    if (text.trim().length >= 3 && offset === 0 && rows.length < Math.min(5, limit)) {
+      const embedding = await queryEmbedding(text)
+      if (embedding) {
+        const more = await supabase.rpc('search_listings', { ...args, p_embedding: embedding })
+        if (!more.error && (more.data || []).length > rows.length) rows = more.data
+      }
+    }
     return { data: rows, count: rows[0]?.total_count ?? 0 }
   },
 

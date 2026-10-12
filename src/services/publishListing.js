@@ -6,6 +6,7 @@ import { queryClient } from '../lib/queryClient'
 import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
 import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
 import { cleanConditions } from '../utils/jobConditions'
+import { placeService } from './placeService'
 
 // the "Kada:" line stays in the description so older app versions still show the date.
 // "Prije: " with the colon: the database's contact-details filter reads "Prije 2026-10-01"
@@ -19,7 +20,7 @@ const kadaLine = (timing, date) => {
 /**
  * Validates and publishes (or updates) a job from the wizard form shared by the
  * desktop wizard and the phone flow. Throws a user-facing Error on problems.
- * Returns { listing, flaggedPhotos }.
+ * Returns { listing, flaggedPhotos, addressError }.
  */
 export async function publishListing({ user, form, photos = { files: [], removed: [] }, existingImages = [], tagList = [], editId = null, invitedProvider = null }) {
   const hit = findProhibitedTerm(form.title, form.description)
@@ -59,9 +60,18 @@ export async function publishListing({ user, form, photos = { files: [], removed
     const outcome = await profileService.checkMyMedia()
     flaggedPhotos = (outcome.results || []).filter((item) => item.kind === 'listing' && item.status === 'flagged').length
   }
+  // exact address (street and number or GPS): form.exact undefined = untouched, null = removed.
+  // The job is already saved, so a failure here is reported, not thrown.
+  let addressError = ''
+  try {
+    if (form.mode !== 'remote' && form.exact?.lat != null) await placeService.setListingAddress(listing.id, form.exact)
+    else if (editId && (form.mode === 'remote' || form.exact === null)) await placeService.clearListingAddress(listing.id)
+  } catch (error) {
+    addressError = error.message || 'Tačna adresa nije sačuvana.'
+  }
   // every cached list that could show this job is refreshed on next paint
   queryClient.invalidateQueries({ queryKey: ['search'] })
   queryClient.invalidateQueries({ queryKey: ['me'] })
   if (editId) queryClient.invalidateQueries({ queryKey: ['listing', editId] })
-  return { listing, flaggedPhotos }
+  return { listing, flaggedPhotos, addressError }
 }

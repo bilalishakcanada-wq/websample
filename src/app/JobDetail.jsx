@@ -8,6 +8,7 @@ import LiveTracking from '../components/LiveTracking'
 import { RequirementsList } from '../components/TaskExtras'
 import { ConditionsCard } from '../components/JobConditions'
 import ReachRadar from '../components/ReachRadar'
+import ExactAddress from '../components/ExactAddress'
 import { QuoteRequestCard } from '../components/QuoteRequest'
 import { reachFor, travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -26,7 +27,7 @@ const Avatar = ({ url, size = 48 }) => (url
 /** Phone job page, laid out like the reference app: status band → white sheet with the facts → Offers | Questions. */
 function JobDetail(props) {
   const {
-    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
+    listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, myPoint = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
@@ -37,7 +38,7 @@ function JobDetail(props) {
 
   const open = listing.status === 'published' && !acceptedBid
   // a provider outside this job's reach is told so up front, not invited to offer
-  const reach = !isOwner && user && myCity ? reachFor(listing, myCity) : null
+  const reach = !isOwner && user && (myCity || myPoint) ? reachFor(listing, myCity, myPoint) : null
   const tooFar = reach?.status === 'too_far'
   const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
@@ -136,6 +137,7 @@ function JobDetail(props) {
             </li>
           )}
         </ul>
+        <ExactAddress listing={listing} isOwner={isOwner} acceptedForMe={Boolean(user && acceptedBid?.bidder_id === user.id)} className="jd-exact" />
 
         <QuoteRequestCard listing={listing} userId={user?.id} isOwner={isOwner} myBid={myBid} onChanged={refreshJob} phone />
 
@@ -156,7 +158,7 @@ function JobDetail(props) {
         {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
           <div className="jd-reqs">
             <h3>Doseg ponuda</h3>
-            <ReachRadar listing={listing} myCity={myCity} isOwner={isOwner} signedIn={Boolean(user)} compact />
+            <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} compact />
           </div>
         )}
 

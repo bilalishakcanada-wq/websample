@@ -28,6 +28,8 @@ import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
 import IdentityGateNotice from '../components/IdentityGateNotice'
+import ExactLocationPicker from '../components/ExactLocationPicker'
+import { placeService } from '../services/placeService'
 import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const DRAFT_KEY = 'zadatak-post-draft'
@@ -131,6 +133,12 @@ function PostFlow() {
         travel: listing.travel_allowance ? String(Math.round(listing.travel_allowance)) : '',
       })
       if (editId) setExistingImages([...(listing.listing_images || [])].sort((a, b) => a.position - b.position))
+      // the exact address is not on the listing row (only the owner and the accepted provider may read it)
+      if (!remote) {
+        placeService.listingAddress(sourceId).then((exact) => {
+          if (exact) setForm((current) => (current.exact === undefined ? { ...current, exact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
+        })
+      }
       // land on the field the user tapped ("Uredi" next to the date / budget), otherwise on the review
       const wanted = STEPS.indexOf(searchParams.get('step'))
       setStep(stale ? STEPS.indexOf('time') : wanted >= 0 ? wanted : STEPS.length - 1)
@@ -192,7 +200,8 @@ function PostFlow() {
     setSaving(true)
     setError('')
     try {
-      const { listing, flaggedPhotos } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
+      const { listing, flaggedPhotos, addressError } = await publishListing({ user, form, photos: { files, removed }, existingImages, editId, invitedProvider: inviteId })
+      if (addressError) toast(`Posao je objavljen, ali tačna adresa nije sačuvana: ${addressError}`, { kind: 'error', duration: 6000 })
       if (!editId && !inviteId && promotionOptions) await promoteAfterPublish(listing.id, form.promotion)
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error', duration: 6000 })
       if (freshPost) clearDraft()
@@ -263,7 +272,7 @@ function PostFlow() {
             <button type="button" className={`ap-card ${form.mode === 'in-person' ? 'active' : ''}`} onClick={() => { update({ mode: 'in-person' }); haptic('light') }}>
               <Building2 size={22} /><strong>Uživo</strong><span>Izvođač dolazi na lokaciju</span>
             </button>
-            <button type="button" className={`ap-card ${form.mode === 'remote' ? 'active' : ''}`} onClick={() => { update({ mode: 'remote', location: '' }); haptic('light') }}>
+            <button type="button" className={`ap-card ${form.mode === 'remote' ? 'active' : ''}`} onClick={() => { update({ mode: 'remote', location: '', exact: null }); haptic('light') }}>
               <Laptop size={22} /><strong>Online</strong><span>Može se uraditi od kuće</span>
             </button>
           </div>
@@ -273,6 +282,7 @@ function PostFlow() {
               <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen(true)}>
                 <LocateFixed size={18} /> {form.location || 'Naselje, selo ili grad'}
               </button>
+              {form.location && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
             </>
           )}
         </section>
@@ -353,7 +363,7 @@ function PostFlow() {
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.location}</strong><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.exact?.address ? `${form.location} · ${form.exact.address}` : form.location}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setCatOpen(true)} className={form.category ? '' : 'is-missing'}><span>Kategorija</span><strong>{form.category || 'Odaberi'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(3)}><span>Opis</span><strong className="ap-clamp">{form.description}</strong><ChevronRight size={18} /></button>
             {conditionsOn && hasConditions(form.conditions) && <button type="button" onClick={() => setStep(3)}><span>Značke i pogodnosti</span><strong className="ap-clamp">{conditionsSummary(form.conditions)}</strong><ChevronRight size={18} /></button>}
@@ -377,7 +387,7 @@ function PostFlow() {
         )}
       </div>
 
-      {cityOpen && <CitySheet value={form.location} onPick={(city) => { update({ location: city }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
+      {cityOpen && <CitySheet value={form.location} onPick={(city) => { update({ location: city, ...(city !== form.location ? { exact: null } : {}) }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
       {catSheet.mounted && (
         <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>
           <div className="ap-sheet" onClick={(event) => event.stopPropagation()}>

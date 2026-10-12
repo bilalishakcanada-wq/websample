@@ -9,8 +9,8 @@ const R = 70 // radius of the reach ring in the drawing
  * "Doseg ponuda": a small radar with the job in the middle, the ring at the distance offers may
  * come from, and the viewer's own city as a dot. Explains why a cheap job far away can't be taken.
  */
-function ReachRadar({ listing, myCity, isOwner = false, signedIn = false, compact = false }) {
-  const state = reachFor(listing, isOwner ? null : myCity)
+function ReachRadar({ listing, myCity, myPoint = null, isOwner = false, signedIn = false, compact = false }) {
+  const state = reachFor(listing, isOwner ? null : myCity, isOwner ? null : myPoint)
   if (!state || state.status === 'remote' || state.status === 'invited') return null
   const travel = travelLabel(listing)
   const km = state.reachKm

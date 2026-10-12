@@ -94,3 +94,28 @@ export function distanceMeters(a, b) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2
   return 2 * 6371000 * Math.asin(Math.sqrt(h))
 }
+
+/**
+ * One position for "Koristi moju lokaciju": the first fix good to about 100 m, or the best one after
+ * a few seconds. Resolves { lat, lng, accuracy }; rejects with a ready-to-show Bosnian sentence.
+ */
+export function currentLocation({ goodEnoughMeters = 100, waitMs = 8000 } = {}) {
+  return new Promise((resolve, reject) => {
+    let best = null
+    let done = false
+    let stop = () => {}
+    const finish = (error) => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      stop()
+      if (best) resolve({ lat: best.lat, lng: best.lng, accuracy: best.accuracy })
+      else reject(error || 'Lokacija trenutno nije dostupna.')
+    }
+    const timer = setTimeout(() => finish(), waitMs)
+    stop = watchLocation((position) => {
+      if (!best || (position.accuracy ?? Infinity) < (best.accuracy ?? Infinity)) best = position
+      if ((position.accuracy ?? Infinity) <= goodEnoughMeters) finish()
+    }, (message) => { if (!best) finish(message) })
+  })
+}

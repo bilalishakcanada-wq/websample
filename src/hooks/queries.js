@@ -1,11 +1,12 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { listingService } from '../services/listingService'
 import { bidService } from '../services/bidService'
 import { messageService } from '../services/messageService'
 import { notificationService } from '../services/notificationService'
 import { profileService } from '../services/profileService'
 import { matchService } from '../services/matchService'
+import { placeService } from '../services/placeService'
 import { keys } from './queryKeys'
 
 /**
@@ -81,6 +82,27 @@ export const usePublicProfile = (userId) => useQuery({
   enabled: Boolean(userId),
   staleTime: 2 * 60 * 1000,
 })
+
+/** Exact address of a job (street and number or GPS point); null unless I own it or my offer was accepted. */
+export const useListingAddress = (listingId, enabled = true) => useQuery({
+  queryKey: keys.listingAddress(listingId),
+  queryFn: () => placeService.listingAddress(listingId),
+  enabled: Boolean(listingId && enabled),
+  staleTime: 60 * 1000,
+}).data || null
+
+/** My own exact point (profile settings "Moja lokacija"), or null; distance to jobs is measured from it. */
+export function useMyPoint(userId) {
+  const data = useQuery({
+    queryKey: keys.myLocation(userId),
+    queryFn: () => placeService.myLocation(userId),
+    enabled: Boolean(userId),
+    staleTime: 5 * 60 * 1000,
+  }).data
+  const lat = data?.lat
+  const lng = data?.lng
+  return useMemo(() => (lat != null && lng != null ? { lat, lng } : null), [lat, lng])
+}
 
 /** Whether "Zatraži ponudu" is on (its privacy rules are on the database). undefined while loading. */
 export const useQuoteRequestsEnabled = () => useQuery({

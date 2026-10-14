@@ -12995,6 +12995,5 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .mw-more { display: inline-block; margin-top: 14px; color: var(--accent); font-weight: 800; }
 
 /* the footer opens with a line drawing of Bosnian cities */
-.site-footer-skyline { display: block; width: 100%; height: clamp(90px, 12vw, 160px); margin-bottom: 8px; opacity: .9; }
-.site-footer-skyline svg { width: 100%; height: 100%; }
+.site-footer-cities { height: clamp(150px, 19vw, 320px); }
 .mw-hero > :not(.hero-stars, .mw-scene) { position: relative; z-index: 1; }

@@ -7,6 +7,8 @@ import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
 import { useMyBids, useMyListings } from '../hooks/queries'
 import { useJobFeed } from '../hooks/useFeed'
+import { useSimpleMode } from '../hooks/useSimpleMode'
+import '../components/SimpleOfferSheet.css'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { dropBootScreen } from '../utils/boot'
@@ -171,6 +173,8 @@ function TaskerHome({ user, firstName }) {
   const navigate = useNavigate()
   const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
+  // jednostavan način: svaka kartica posla dobija veliko dugme "Prijavi se" (2 dodira do poslane prijave)
+  const simple = useSimpleMode(user.id)
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
   // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
   const ready = !loading && bids !== null
@@ -195,22 +199,41 @@ function TaskerHome({ user, firstName }) {
 
       <div className="ap-home-body">
         <PushPrompt compact reason="Javit ćemo ti čim se pojavi posao za tebe." />
+        {simple.choice == null && !simple.enabled && !loading && (
+          <section className="ap-simple-offer" data-testid="simple-mode-nudge">
+            <strong>Želiš lakše?</strong>
+            <span>Uključi jednostavan način: veliko dugme „Prijavi se“ i ništa ne kucaš.</span>
+            <div>
+              <button type="button" className="simple-apply-btn" onClick={() => { haptic('light'); simple.setChoice(true) }}>Uključi</button>
+              <button type="button" className="ap-simple-no" onClick={() => simple.setChoice(false)}>Ne, hvala</button>
+            </div>
+          </section>
+        )}
         <section className="ap-section">
           <h2 className="ap-h2">{personalised ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
           <p className="ap-p">{personalised ? 'Prema tvojim vještinama, gradu i onome što pregledaš' : 'Svježe i s malo ponuda na vrhu'}</p>
           {loading && feed.length === 0 && <div className="ap-list">{[1, 2, 3].map((i) => <SkeletonApJob key={i} />)}</div>}
           {!loading && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
-            {feed.map((job) => (
-              <Link key={job.id} to={`/listings/${job.id}`} className="ap-job" onPointerDown={() => prefetchRoute('/listings')}>
-                <div className="ap-job-main">
-                  <strong>{job.title}</strong>
-                  <span><MapPin size={13} /> {job.location || 'Bez lokacije'}</span>
-                  <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.reasons?.[0] ? ` · ${job.reasons[0]}` : ''}</span>
+            {feed.map((job) => {
+              const card = (
+                <Link key={job.id} to={`/listings/${job.id}`} className={`ap-job ${simple.enabled ? 'ap-job-simple' : ''}`} onPointerDown={() => prefetchRoute('/listings')}>
+                  <div className="ap-job-main">
+                    <strong>{job.title}</strong>
+                    <span><MapPin size={simple.enabled ? 18 : 13} /> {job.location || 'Bez lokacije'}</span>
+                    <span className="ap-job-state">Otvoren{job.bid_count > 0 ? ` · ${job.bid_count} ponuda` : ''}{job.reasons?.[0] ? ` · ${job.reasons[0]}` : ''}</span>
+                  </div>
+                  <em className="ap-price">{typeof job.price === 'string' ? job.price : money(job.price)}</em>
+                </Link>
+              )
+              if (!simple.enabled) return card
+              return (
+                <div key={job.id} className="ap-job-simple-wrap">
+                  {card}
+                  <Link to={`/listings/${job.id}?prijava=1`} className="simple-apply-btn" data-testid="simple-apply" onClick={() => haptic('light')}>Prijavi se</Link>
                 </div>
-                <em className="ap-price">{typeof job.price === 'string' ? job.price : money(job.price)}</em>
-              </Link>
-            ))}
+              )
+            })}
           </div>
           {ready && <Link to="/search" className="ap-more">Svi poslovi <ChevronRight size={16} /></Link>}
         </section>

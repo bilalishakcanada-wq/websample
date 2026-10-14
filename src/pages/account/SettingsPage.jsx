@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import { useSimpleMode } from '../../hooks/useSimpleMode'
 import { currentSubscription, disablePush, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../../utils/push'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
@@ -17,6 +18,7 @@ function SettingsPage() {
   const [notifyPush, setNotifyPush] = useState(profile.notify_push !== false)
   const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported'
   const [password, setPassword] = useState('')
+  const simple = useSimpleMode(user.id)
 
   useEffect(() => {
     if (!pushSupported()) { setDevice(pushNeedsInstall() ? 'install' : 'unsupported'); return }
@@ -79,6 +81,20 @@ function SettingsPage() {
           )}
         </div>
         <button type="button" className="primary-button" onClick={savePrefs} disabled={busy === 'prefs'}>{busy === 'prefs' ? 'Čuvam…' : 'Sačuvaj'}</button>
+      </div>
+
+      <h3 className="account-sub" id="jednostavno">Jednostavan način</h3>
+      <div className="settings-rows">
+        <div className="settings-row">
+          <div>
+            <strong>{simple.enabled ? 'Uključen' : 'Isključen'}</strong>
+            <span>Veliko dugme „Prijavi se na posao“: cijena je već izabrana i ne moraš ništa kucati. Sam se uključuje za majstore od 40 godina naviše.</span>
+          </div>
+          <button type="button" data-testid="simple-mode-toggle" className={simple.enabled ? 'ghost-button' : 'primary-button'} disabled={busy === 'simple'}
+            onClick={async () => { setBusy('simple'); setError(''); setMessage(''); try { const next = await simple.setChoice(!simple.enabled); setMessage(next.enabled ? 'Jednostavan način je uključen.' : 'Jednostavan način je isključen.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') } }}>
+            {simple.enabled ? 'Isključi' : 'Uključi'}
+          </button>
+        </div>
       </div>
 
       <h3 className="account-sub">Prijava</h3>

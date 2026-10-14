@@ -28,7 +28,7 @@ const Avatar = ({ url, size = 48 }) => (url
 function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, myPoint = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
-    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
+    onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', simple = false, conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
@@ -86,7 +86,7 @@ function JobDetail(props) {
         {isOwner && <div className="jd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>}
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
-        {!isOwner && open && !myBid && <button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button>}
+        {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
         {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>Izmijeni ponudu</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
@@ -277,7 +277,7 @@ function JobDetail(props) {
       </section>
 
       {!isOwner && open && !myBid && (
-        <div className="jd-sticky"><button type="button" className="ap-btn ap-btn-primary" onClick={onOpenBid}>{offerLabel}</button></div>
+        <div className="jd-sticky"><button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button></div>
       )}
     </div>
   )

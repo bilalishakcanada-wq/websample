@@ -51,6 +51,9 @@ function JobDetail(props) {
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
             : isPrivate ? ['Čekaš ponudu', 'Zahtjev je poslan samo odabranom izvođaču.'] : ['Čekaš ponude', 'Izvođači u blizini su obaviješteni.']
     : canRebid ? ['Klijent je odbio ponudu.', `Pošalji novu cijenu (odbijeno: ${money(myBid.amount)}). Posao je još otvoren.`]
+    // jednostavan način: kratko i jasno šta se desilo i šta je sljedeće
+    : simple && myBid?.status === 'accepted' ? ['Posao je tvoj!', payment?.net_amount != null ? `Klijent te je izabrao. Novac je osiguran: dobijaš ${money(payment.net_amount)} kad završiš posao.` : 'Klijent te je izabrao. Dogovori se s klijentom u porukama.']
+    : simple && myBid?.status === 'pending' ? ['Prijava je poslana', 'Klijent sada bira majstora. Javit ćemo ti čim odgovori.']
     : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
         ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
@@ -89,8 +92,9 @@ function JobDetail(props) {
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
         {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}
-        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>Izmijeni ponudu</button>}
-        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>Povuci ponudu</button>}
+        {simple && !isOwner && myBid?.status === 'accepted' && <Link to={`/messages?listing=${listing.id}`} className="simple-apply-btn"><MessageCircle size={24} /> Piši klijentu</Link>}
+        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>{simple ? 'Promijeni cijenu' : 'Izmijeni ponudu'}</button>}
+        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>{simple ? 'Ipak ne želim ovaj posao' : 'Povuci ponudu'}</button>}
         {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
         {!isOwner && !myBid && open && onSave && (
           <button type="button" className="ap-btn ap-btn-light jd-save" onClick={onSave} aria-pressed={saved}><Bookmark size={18} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Sačuvano' : 'Sačuvaj za kasnije'}</button>
@@ -156,7 +160,7 @@ function JobDetail(props) {
           </div>
         )}
 
-        {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
+        {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && !(simple && myBid) && (
           <div className="jd-reqs">
             <h3>Doseg ponuda</h3>
             <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} compact />

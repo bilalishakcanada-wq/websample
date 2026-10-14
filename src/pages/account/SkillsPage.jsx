@@ -4,6 +4,7 @@ import { useAccount } from './AccountLayout'
 import { serviceCategories } from '../../data/categories'
 import { contactInfoMessage, scanContactInfo } from '../../utils/moderation'
 import RuleOneNotice from '../../components/RuleOneNotice'
+import './SkillsPage.css'
 
 const TRANSPORT = ['Bicikl', 'Auto', 'Online', 'Skuter', 'Kamion', 'Kombi', 'Pješke', 'Javni prevoz']
 const LANGUAGES = ['Bosanski', 'Hrvatski', 'Srpski', 'Engleski', 'Njemački', 'Turski', 'Arapski', 'Italijanski', 'Francuski', 'Španski']
@@ -17,7 +18,7 @@ function ListEditor({ title, items, placeholder, onChange, draft, setDraft, max 
     setDraft('')
   }
   return (
-    <div className="account-field account-field-wide">
+    <div className="account-field account-field-wide skills-group">
       <span>{title} <small>({items.length}/{max})</small></span>
       {items.length > 0 && (
         <ul className="list-editor-items">
@@ -76,13 +77,13 @@ function SkillsPage() {
   }
 
   return (
-    <div className="account-section">
+    <div className="account-section skills-page">
       <div className="account-section-head"><h1>Vještine</h1></div>
       <p className="muted-text">Ovo su tvoje vještine. Drži ih ažurnim — klijenti ih vide na tvom javnom profilu i po njima te platforma predlaže za poslove.</p>
 
       <form className="account-form" onSubmit={submit}>
-        <div className="account-field account-field-wide">
-          <span>U čemu si dobar/dobra?</span>
+        <div className="account-field account-field-wide skills-group">
+          <span>U čemu si dobar/dobra? {trades.length > 0 && <small>({trades.length})</small>}</span>
           <div className="trade-chips">
             {serviceCategories.map(({ id, name }) => (
               <button key={id} type="button" className={`trade-chip ${trades.includes(name) ? 'active' : ''}`} onClick={() => toggle(trades, setTrades, name)} aria-pressed={trades.includes(name)}>{name}</button>
@@ -90,7 +91,7 @@ function SkillsPage() {
           </div>
         </div>
 
-        <div className="account-field account-field-wide">
+        <div className="account-field account-field-wide skills-group">
           <span>Kako se krećeš?</span>
           <div className="check-row">
             {TRANSPORT.map((option) => (
@@ -101,7 +102,7 @@ function SkillsPage() {
           </div>
         </div>
 
-        <div className="account-field account-field-wide">
+        <div className="account-field account-field-wide skills-group">
           <span>Koje jezike govoriš / pišeš?</span>
           <div className="check-row">
             {LANGUAGES.map((option) => (
@@ -120,7 +121,7 @@ function SkillsPage() {
         <div className="account-field-wide"><RuleOneNotice compact /></div>
         {error && <div className="form-error account-field-wide">{error}</div>}
         {message && <div className="form-success account-field-wide">{message}</div>}
-        <div className="account-field-wide">
+        <div className="account-field-wide skills-save">
           <button type="submit" className="primary-button" disabled={saving || !scan.clean}>{saving ? 'Čuvam…' : 'Sačuvaj vještine'}</button>
         </div>
       </form>

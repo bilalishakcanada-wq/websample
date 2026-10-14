@@ -1,0 +1,62 @@
+/* Skills page on phones: each question is one plain white card, every choice is the same small chip */
+@media (max-width: 768px) {
+  .skills-page .account-form { gap: 12px; margin-top: 4px; }
+
+  .skills-page .skills-group {
+    gap: 12px;
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--stroke);
+  }
+  .skills-page .skills-group > span { font-size: 1rem; color: var(--primary-strong); }
+
+  /* all trades visible, no small scroll box */
+  .skills-page .trade-chips { max-height: none; overflow: visible; gap: 8px; padding: 0; }
+
+  .skills-page .check-row { gap: 8px; }
+
+  .skills-page .trade-chip,
+  .skills-page .check-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--stroke);
+    background: var(--surface);
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  .skills-page .trade-chip.active,
+  .skills-page .check-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .skills-page .trade-chip.active::before,
+  .skills-page .check-pill.active::before { content: '✓'; margin-right: 6px; font-weight: 800; }
+
+  /* the chip itself shows the choice; the checkbox stays for keyboards and screen readers */
+  .skills-page .check-pill input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .skills-page .check-pill:has(input:focus-visible) { box-shadow: 0 0 0 3px var(--primary-soft); }
+
+  /* qualifications, work, specialties */
+  .skills-page .list-editor-items li { padding: 8px 8px 8px 14px; border-radius: 12px; font-size: 0.92rem; }
+  .skills-page .list-editor-items li button { width: 30px; height: 30px; min-height: 0; padding: 0; }
+  .skills-page .list-editor-add input { min-width: 0; min-height: 46px; padding: 0 14px; font-size: 0.95rem; }
+  .skills-page .list-editor-add .ghost-button { min-height: 46px; padding: 0 16px; border-radius: 12px; }
+
+  .skills-page .skills-save .primary-button { width: 100%; justify-content: center; min-height: 52px; }
+}

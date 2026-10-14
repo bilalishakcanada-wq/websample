@@ -35,4 +35,5 @@ export const keys = {
   promoted: (params) => ['search', 'promoted', params],
   promotionOptions: (userId) => ['me', userId || 'guest', 'promotion-options'],
   providerPayments: (userId) => ['me', userId, 'provider-payments'],
+  simpleMode: (userId) => ['me', userId, 'simple-mode'],
 }

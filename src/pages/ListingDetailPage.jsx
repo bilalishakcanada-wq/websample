@@ -36,6 +36,8 @@ import { SkeletonJobPhone } from '../components/Skeleton'
 import ActionError from '../components/ActionError'
 import OfferReplies from '../components/OfferReplies'
 import { useOfferGate, useJobConditionCheck, offerCta } from '../hooks/useOfferGate'
+import { useSimpleMode } from '../hooks/useSimpleMode'
+import SimpleOfferSheet from '../components/SimpleOfferSheet'
 import { ConditionsCard } from '../components/JobConditions'
 import { badgeFixLink, requirementLabel } from '../utils/jobConditions'
 import { recordInterest } from '../utils/interests'
@@ -105,7 +107,9 @@ function ListingDetailPage() {
   const [listing, setListing] = useState(null)
   const conditionCheck = useJobConditionCheck(user?.id, listing?.conditions?.requires || [])
   const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
-  const offerLabel = offerCta(offerGate, conditionCheck.missing)
+  // jednostavan način (majstori 40+ ili po izboru): prijava jednim dodirom, bez kucanja
+  const simpleMode = useSimpleMode(user?.id).enabled
+  const offerLabel = simpleMode && offerGate === 'ok' ? 'Želim ovaj posao' : offerCta(offerGate, conditionCheck.missing)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -262,6 +266,14 @@ function ListingDetailPage() {
     setSheetOpen(true)
   }
 
+  // "Želim ovaj posao" s kartice posla (jednostavan način): sheet se otvori sam, čim je posao učitan
+  const quickApply = searchParams.get('prijava') === '1'
+  useEffect(() => {
+    if (!quickApply || !listing) return
+    setSearchParams((params) => { params.delete('prijava'); return params }, { replace: true })
+    if (!isOwner && listing.status === 'published' && (!myBid || canRebid)) openBidSheet()
+  }, [quickApply, listing]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // "Izmijeni ponudu": isti sheet, popunjen trenutnom ponudom, dok klijent nije odlučio.
   const openEditBid = () => {
     if (!myBid || myBid.status !== 'pending') return
@@ -271,14 +283,18 @@ function ListingDetailPage() {
     setSheetOpen(true)
   }
 
-  const submitBid = async (event) => {
+  const submitBid = (event) => {
     event.preventDefault()
+    sendBid(bidForm)
+  }
+
+  const sendBid = async (form) => {
     setBidError('')
-    if (findProhibitedTerm(bidForm.message)) {
+    if (findProhibitedTerm(form.message)) {
       setBidError('Poruka sadrži sadržaj koji krši Pravila korištenja.')
       return
     }
-    const contactScan = scanContactInfo(bidForm.message)
+    const contactScan = scanContactInfo(form.message)
     if (!contactScan.clean) {
       setBidError(contactInfoMessage(contactScan, 'ponuda'))
       return
@@ -286,7 +302,7 @@ function ListingDetailPage() {
     setSending(true)
     try {
       if (editingBid) {
-        const updated = await bidService.updateBid(myBid.id, bidForm)
+        const updated = await bidService.updateBid(myBid.id, form)
         setBids((current) => current.map((bid) => (bid.id === updated.id ? { ...bid, ...updated } : bid)))
         queryClient.invalidateQueries({ queryKey: keys.listing(id) })
         setBidForm({ amount: '', message: '' })
@@ -295,7 +311,7 @@ function ListingDetailPage() {
         toast('Ponuda je izmijenjena. Klijent vidi novu verziju.', { kind: 'success' })
         return
       }
-      const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: bidForm.amount, message: bidForm.message })
+      const created = await bidService.createBid({ listingId: id, bidderId: user.id, amount: form.amount, message: form.message })
       setBids((current) => [{ ...created, bidder: null }, ...current])
       recordInterest('bid', { category: listing?.category })
       bidService.listForListing(id).then((rows) => { setBids(rows); queryClient.setQueryData(keys.listing(id), (cur) => ({ listing: cur?.listing || listing, bids: rows })) }).catch(() => {})
@@ -468,6 +484,12 @@ function ListingDetailPage() {
         <div className={`sheet-backdrop ${offerSheet.closing ? 'is-closing' : ''}`} inert={offerSheet.closing || undefined} role="presentation" onClick={() => setSheetOpen(false)}>
           <section className="offer-sheet" role="dialog" aria-modal="true" aria-labelledby="offer-title" onClick={(event) => event.stopPropagation()}>
             <div className="sheet-handle" />
+            {simpleMode && !editingBid ? (
+              <SimpleOfferSheet
+                listing={listing} priceStats={priceStats} feePercent={feePercent} when={when} sending={sending} error={bidError}
+                rejectedAmount={canRebid ? myBid.amount : null} onSubmit={sendBid} onClose={() => setSheetOpen(false)}
+              />
+            ) : (<>
             <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : canRebid ? 'Pošalji novu cijenu' : 'Pošalji ponudu'}</h2>
             {canRebid && !editingBid && <p className="rebid-note" data-testid="rebid-sheet-note"><strong>Klijent je odbio {formatPrice(myBid.amount)}.</strong><span>Predloži drugu cijenu ili objasni šta je uključeno.</span></p>}
             <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
@@ -492,6 +514,7 @@ function ListingDetailPage() {
               <button data-testid="offer-submit" type="submit" className="primary-button" disabled={sending}>{sending ? 'Šaljem...' : editingBid ? 'Sačuvaj izmjene' : 'Pošalji ponudu'}</button>
               <button type="button" className="ghost-button" onClick={() => setSheetOpen(false)}>Odustani</button>
             </form>
+            </>)}
           </section>
         </div>
       )}
@@ -507,7 +530,7 @@ function ListingDetailPage() {
         <JobDetail
           listing={listing} images={images} bids={bids} metrics={metrics} questions={questions} poster={poster} payment={payment} user={user}
           isOwner={isOwner} expired={expired} isPrivate={isPrivate} requirements={requirements} myCity={myCity} myPoint={myPoint} saved={saved.isSaved(listing.id)} onSave={() => saved.toggle(listing.id)} myBid={myBid} canRebid={canRebid} freshBidIds={freshBidIds} onWithdraw={withdrawBid} acceptedBid={acceptedBid} myReview={myReview} when={when} isRemote={isRemote} descriptionBody={descriptionBody}
-          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={offerLabel} offerGate={offerGate} conditionCheck={conditionCheck}
+          onBack={goBack} onShare={share} onReport={reportListing} onOpenBid={openBidSheet} onEditBid={openEditBid} offerLabel={offerLabel} offerGate={offerGate} conditionCheck={conditionCheck} simple={simpleMode}
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
@@ -750,7 +773,7 @@ function ListingDetailPage() {
             <div className="job-offer-card">
               <span>Okvirni budžet</span>
               <strong>{formatPrice(listing.price, listing.currency)}</strong>
-              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className="primary-button full-width" onClick={openBidSheet}><Send size={18} /> {offerLabel}</button>}
+              {!isOwner && !myBid && listing.status === 'published' && <button type="button" className={simpleMode ? 'simple-apply-btn' : 'primary-button full-width'} onClick={openBidSheet}><Send size={simpleMode ? 24 : 18} /> {offerLabel}</button>}
               {canRebid && (
                 <div className="rebid-note" data-testid="rebid-note">
                   <strong>Klijent je odbio ponudu. Pošalji novu cijenu.</strong>

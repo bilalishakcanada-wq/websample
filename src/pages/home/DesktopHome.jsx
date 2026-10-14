@@ -560,10 +560,19 @@ function DesktopHome() {
         </section>
 
         <section className="country-strip reveal" aria-label="Regija">
-          <span className="country-flag" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22">
-              <path d="M12 22s7-6.6 7-12.2A7 7 0 0 0 5 9.8C5 15.4 12 22 12 22z" fill="#1f5fff" />
-              <circle cx="12" cy="9.8" r="2.8" fill="#fff" />
+          <span className="country-flag" title="Grb Bosne i Hercegovine" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="26" height="26">
+              <defs>
+                <clipPath id="bih-grb-shield">
+                  <path d="M3 2.5h18v8.5c0 5.6-3.8 9.3-9 11.5-5.2-2.2-9-5.9-9-11.5z" />
+                </clipPath>
+              </defs>
+              <g clipPath="url(#bih-grb-shield)">
+                <rect x="0" y="0" width="24" height="24" fill="#002395" />
+                <path d="M8 2.5H21V19z" fill="#fecb00" />
+                <path d="M6.40 1.97 L6.70 2.82 L7.59 2.84 L6.88 3.38 L7.14 4.23 L6.40 3.72 L5.67 4.23 L5.93 3.38 L5.22 2.84 L6.11 2.82Z M9.26 5.60 L9.56 6.45 L10.45 6.47 L9.74 7.01 L10.00 7.86 L9.26 7.35 L8.53 7.86 L8.79 7.01 L8.08 6.47 L8.97 6.45Z M12.12 9.23 L12.42 10.08 L13.31 10.10 L12.60 10.64 L12.86 11.49 L12.12 10.98 L11.39 11.49 L11.65 10.64 L10.94 10.10 L11.83 10.08Z M14.98 12.86 L15.28 13.71 L16.17 13.73 L15.46 14.27 L15.72 15.12 L14.98 14.61 L14.25 15.12 L14.51 14.27 L13.80 13.73 L14.69 13.71Z M17.84 16.49 L18.14 17.34 L19.03 17.36 L18.32 17.90 L18.58 18.75 L17.84 18.24 L17.11 18.75 L17.37 17.90 L16.66 17.36 L17.55 17.34Z" fill="#fff" />
+              </g>
+              <path d="M3 2.5h18v8.5c0 5.6-3.8 9.3-9 11.5-5.2-2.2-9-5.9-9-11.5z" fill="none" stroke="#fff" strokeWidth="1" />
             </svg>
           </span>
           <span>Bosna i Hercegovina</span>

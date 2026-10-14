@@ -1,0 +1,78 @@
+/* =========================================================================
+   Phones and tablets (touch screens only). Loaded after App.css and app.css.
+   Buttons here get no gray outline: a tapped button doesn't keep a focus ring,
+   doesn't stay stuck in its hover look, and outlined buttons become soft
+   filled ones, the way native apps draw them. Tablets with a keyboard or
+   trackpad still get the focus ring (:focus-visible).
+   ========================================================================= */
+@media (hover: none) and (pointer: coarse) {
+  html { -webkit-tap-highlight-color: transparent; }
+
+  /* 1) no ring after a tap; only keyboard focus draws one */
+  html :where(button, a, [role='button'], [tabindex], summary, label):focus:not(:focus-visible) { outline: none; box-shadow: none; }
+  html :where(button, a, [role='button'], summary)::-moz-focus-inner { border: 0; }
+}
+
+/* a phone with no mouse or trackpad at all: some phone browsers still draw the keyboard ring after a tap,
+   so buttons and links draw none (screen readers like VoiceOver and TalkBack draw their own focus box) */
+@media (hover: none) and (pointer: coarse) and (not (any-pointer: fine)) {
+  html :where(button, a, [role='button'], summary):focus-visible { outline: none; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+
+  /* 2) outlined (gray-bordered) buttons and pills turn into soft filled ones.
+        Their selected state (blue border) is left alone. */
+  html :is(
+    .ghost-button, .secondary-button, .save-button, .filter-pill, .radius-chip, .trade-chip,
+    .pd-btn, .oauth-button, .jc-chip, .hero-btn-light, .account-link-button, .info-card-button,
+    .tx-travel-toggle, .notif-pill, .site-user-chip, .simple-offer-prices button
+  ):not(.active, .is-active, .is-on, .is-primary, .is-suggested, .selected, [aria-pressed='true'], [aria-selected='true'], [aria-checked='true'], :disabled) {
+    border-color: transparent;
+    background-color: var(--m-btn-soft);
+    box-shadow: none;
+  }
+
+  /* 3) a tap leaves no hover look behind (no lift, no blue edge, no shadow) */
+  html :is(
+    .ghost-button, .secondary-button, .icon-button, .save-button, .primary-button, .boss-band-button,
+    .filter-pill, .radius-chip, .trade-chip, .pd-btn, .oauth-button, .hero-btn, .plan-button
+  ):hover {
+    transform: none;
+  }
+  html :is(.ghost-button, .secondary-button, .icon-button, .save-button, .filter-pill, .radius-chip, .trade-chip, .pd-btn, .oauth-button, .notif-pill, .site-user-chip):not(.active, .is-active, .is-on, .is-primary, .selected, [aria-pressed='true'], [aria-selected='true']):hover {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  /* 4) press feedback: a quick shrink and darker fill, instead of the faded (half transparent) look */
+  html :where(button, [role='button'], a[class*='button'], a[class*='btn']) { -webkit-user-select: none; user-select: none; }
+  html button:active, html a:active { opacity: 1; }
+  html :is(
+    .ghost-button, .secondary-button, .save-button, .filter-pill, .radius-chip, .trade-chip,
+    .pd-btn, .oauth-button, .jc-chip, .hero-btn-light, .icon-button, .ap-icon-btn, .ap-btn-light,
+    .tx-travel-toggle, .notif-pill, .site-user-chip
+  ):not(:disabled, .active, .is-active, .is-on, .is-primary, .selected):active {
+    background-color: var(--m-btn-soft-pressed);
+  }
+  html :where(button, [role='button'], a[class*='button'], a[class*='btn']):not(:disabled):active {
+    transform: scale(0.97);
+    transition-duration: 0.06s;
+  }
+
+  /* 5) text fields: 16px text so the iPhone doesn't zoom the page when a field is tapped */
+  html :is(.adm-quick input, .dossier-note-form textarea, .adm-modal textarea, .pay-dispute textarea, .alert-form select, .alert-form input, .qa-form input, .tx-travel-chips input, .verify-trade-select select) { font-size: 16px; }
+}
+
+:root {
+  --m-btn-soft: #eaf0fc;
+  --m-btn-soft-pressed: #d9e4fb;
+}
+
+/* =========================================================================
+   Small screens (phone width): roomier tap targets
+   ========================================================================= */
+@media (max-width: 560px) {
+  /* every button is at least 48px tall: easy to hit with a thumb */
+  html :is(.primary-button, .secondary-button, .ghost-button, .danger-button, .oauth-button) { min-height: 48px; }
+}

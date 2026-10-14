@@ -181,6 +181,27 @@ export const authService = {
     recordAttempt('resend', cleanedEmail)
   },
 
+  /** Google sign-ups confirm their email with our own link: { pending, sent }. */
+  async emailConfirmationStatus() {
+    const { data, error } = await supabase.rpc('email_confirmation_status')
+    if (error) return { pending: false, sent: false } // an older database without the check never locks anyone out
+    return data || { pending: false, sent: false }
+  },
+
+  /** Sends that link again: 'sent', 'wait' (one mail a minute) or 'not_needed'. */
+  async sendEmailConfirmation() {
+    const { data, error } = await supabase.rpc('send_email_confirmation')
+    if (error) throw publicError()
+    return data
+  },
+
+  /** The token from the link in the mail; false when it is wrong, used or older than a day. */
+  async confirmEmail(token) {
+    const { data, error } = await supabase.rpc('confirm_email', { p_token: token })
+    if (error) throw publicError()
+    return data === true
+  },
+
   async resetPassword(email) {
     const cleanedEmail = sanitizeText(email).toLowerCase()
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')

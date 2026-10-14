@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
+import { useAuth } from './context/AuthContext'
 import './App.css'
 import './app/app.css'
 // Every other page loads on demand — the phone downloads only what it opens.
@@ -110,6 +111,19 @@ function PostRoute() {
   return isPhone ? <PostFlow /> : <ProtectedRoute><PostTaskPage /></ProtectedRoute>
 }
 
+const ConfirmEmailPage = lazy(lazyImport(() => import('./pages/ConfirmEmailPage')))
+const ConfirmEmailScreen = lazy(() => import('./pages/ConfirmEmailPage').then((module) => ({ default: module.ConfirmEmailScreen })))
+// pages a Google sign-up can still open before clicking the confirmation link
+const OPEN_WHILE_UNCONFIRMED = ['/potvrdi-email', '/pravila', '/privatnost', '/kontakt', '/pomoc']
+
+/** A new Google account sees "confirm your email" everywhere until it clicks our link. */
+function EmailConfirmGate({ children }) {
+  const { user, emailCheck } = useAuth()
+  const { pathname } = useLocation()
+  if (!user || !emailCheck.pending || OPEN_WHILE_UNCONFIRMED.some((path) => pathname.startsWith(path))) return children
+  return <Suspense fallback={<RouteFallback />}><ConfirmEmailScreen /></Suspense>
+}
+
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
@@ -123,6 +137,7 @@ function App() {
       <SupportChatSlot />
       <InstallPrompt />
       <RouteGuard>
+      <EmailConfirmGate>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -134,6 +149,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/potvrdi-email" element={<ConfirmEmailPage />} />
         <Route path="/objavi" element={<PostRoute />} />
         <Route path="/start" element={<StartGoal />} />
         <Route path="/intro" element={<Intro />} />
@@ -180,6 +196,7 @@ function App() {
         <Route path="*" element={<Redirect to="/404" />} />
       </Routes>
       </Suspense>
+      </EmailConfirmGate>
       </RouteGuard>
       <SiteFooter />
       <NavigationBar />

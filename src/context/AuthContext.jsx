@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { disablePush, syncPush } from '../utils/push'
 import { authService } from '../services/authService'
 import { trustService } from '../services/trustService'
@@ -25,6 +25,10 @@ export function AuthProvider({ children }) {
   // the staff role arrives after the first paint; only /admin and /mod wait for it (see ProtectedRoute)
   const [staffReady, setStaffReady] = useState(() => !hasStoredSession())
   const lastUserId = useRef(undefined)
+  // Google sign-ups wait for our confirmation link: { pending, sent } for the signed-in account
+  const [checked, setChecked] = useState({ id: null, pending: false, sent: false })
+  const userId = user?.id ?? null
+  const emailCheck = useMemo(() => (checked.id === userId ? { pending: checked.pending, sent: checked.sent } : { pending: false, sent: false }), [checked, userId])
 
   const refreshAdminStatus = async (currentUser) => {
     if (!currentUser) {
@@ -94,6 +98,19 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    let active = true
+    if (userId) authService.emailConfirmationStatus().then((status) => { if (active) setChecked({ id: userId, ...status }) })
+    return () => { active = false }
+  }, [userId])
+
+  const refreshEmailCheck = useCallback(async () => {
+    if (!userId) return { pending: false, sent: false }
+    const status = await authService.emailConfirmationStatus()
+    setChecked({ id: userId, ...status })
+    return status
+  }, [userId])
+
   const login = async (payload) => {
     setError('')
     const result = await authService.signIn(payload)
@@ -142,8 +159,8 @@ export function AuthProvider({ children }) {
   const isAdmin = staffRole === 'admin'
   const isModerator = staffRole === 'moderator'
   const value = useMemo(
-    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
-    [user, isAdmin, isModerator, staffRole, staffReady, loading, error],
+    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
+    [user, isAdmin, isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,0 +1,15 @@
+/* =========================================================================
+   Phones (touch screen, no mouse or trackpad): a tapped button or link draws
+   no ring (focus outline) and no tap highlight. Nothing else changes.
+   Screen readers like VoiceOver and TalkBack draw their own focus box.
+   ========================================================================= */
+@media (hover: none) and (pointer: coarse) {
+  html { -webkit-tap-highlight-color: transparent; }
+  html :where(button, a, [role='button'], [tabindex], summary, label):focus:not(:focus-visible) { outline: none; }
+  html :where(button, a, [role='button'], summary)::-moz-focus-inner { border: 0; }
+}
+
+/* some phone browsers still draw the keyboard ring after a tap */
+@media (hover: none) and (pointer: coarse) and (not (any-pointer: fine)) {
+  html :where(button, a, [role='button'], summary):focus-visible { outline: none; }
+}

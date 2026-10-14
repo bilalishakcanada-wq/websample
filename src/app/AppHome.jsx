@@ -199,16 +199,6 @@ function TaskerHome({ user, firstName }) {
 
       <div className="ap-home-body">
         <PushPrompt compact reason="Javit ćemo ti čim se pojavi posao za tebe." />
-        {simple.choice == null && !simple.enabled && !loading && (
-          <section className="ap-simple-offer" data-testid="simple-mode-nudge">
-            <strong>Lakše do posla</strong>
-            <span>Velika dugmad i prijava na posao u dva dodira, bez pisanja. Želiš li to?</span>
-            <div>
-              <button type="button" className="simple-apply-btn" onClick={() => { haptic('light'); simple.setChoice(true) }}>Da, uključi</button>
-              <button type="button" className="ap-simple-no" onClick={() => simple.setChoice(false)}>Ne treba mi</button>
-            </div>
-          </section>
-        )}
         <section className="ap-section">
           <h2 className="ap-h2">{personalised ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
           <p className="ap-p">{personalised ? 'Prema tvojim vještinama, gradu i onome što pregledaš' : 'Svježe i s malo ponuda na vrhu'}</p>

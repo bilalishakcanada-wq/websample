@@ -1,5 +1,5 @@
 // Jednostavan način za majstore (supabase/providers/01_simple_mode.sql):
-//   worker turns it on in Postavke → the job page shows one big "Želim ovaj posao" button
+//   worker turns it on under Postavke → Jednostavan način → the job page shows one big "Želim ovaj posao" button
 //   → the sheet has the client's budget already chosen and no text to type → one tap sends the offer.
 //   The "Želim ovaj posao" link on the phone home cards opens the job with ?prijava=1, which opens the sheet at once.
 import { test, expect } from '@playwright/test'
@@ -13,13 +13,11 @@ test.describe.serial('Jednostavan način za majstore', () => {
   let listingUrl = ''
 
   const setSimple = async (on) => {
-    await provider.goto('/account/postavke')
-    const toggle = provider.getByTestId('simple-mode-toggle')
-    await expect(toggle).toBeVisible()
-    if ((await toggle.innerText()).trim() === (on ? 'Uključi' : 'Isključi')) {
-      await toggle.click()
-      await expect(toggle).toHaveText(on ? 'Isključi' : 'Uključi')
-    }
+    await provider.goto('/account/jednostavan-nacin')
+    const option = provider.getByTestId(on ? 'simple-mode-on' : 'simple-mode-off')
+    await expect(option).toBeVisible()
+    if ((await option.getAttribute('aria-checked')) !== 'true') await option.click()
+    await expect(option).toHaveAttribute('aria-checked', 'true')
   }
 
   test.beforeAll(async ({ browser }) => {

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, ShieldCheck, UserRound, Users, Wrench } from 'lucide-react'
+import { Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, MousePointerClick, ShieldCheck, UserRound, Users, Wrench } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
@@ -21,6 +21,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
       rows: [
         ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
         ['/account/informacije', 'Informacije o nalogu', null, IdCard],
+        ['/account/jednostavan-nacin', 'Jednostavan način', 'Velika dugmad i prijava na posao u 2 dodira', MousePointerClick],
       ],
     },
     {

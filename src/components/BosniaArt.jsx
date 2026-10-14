@@ -1,9 +1,9 @@
 import { useEffect, useId, useMemo, useState } from 'react'
-import { cevapi, diver, dzezva, navijac, sebilj, skyline, stariMost } from '../art/bosnia'
+import { cevapi, diver, dzezva, navijac, sebilj, stariMost } from '../art/bosnia'
 import '../art/bosnia.css'
 
 // Each drawing is built once; it is static markup we wrote ourselves (no user data in it).
-const DRAW = { stariMost, diver, sebilj, dzezva, cevapi, navijac, skyline }
+const DRAW = { stariMost, diver, sebilj, dzezva, cevapi, navijac }
 const cache = {}
 const markup = (name) => (cache[name] ??= DRAW[name]())
 

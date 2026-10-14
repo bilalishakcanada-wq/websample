@@ -338,24 +338,3 @@ export function navijac() {
   ${star(70, 220, 14)}${star(340, 430, 12)}${star(40, 420, 8)}${star(340, 600, 9)}${star(110, 120, 7)}
 </svg>`
 }
-
-// line-art skyline: mountains, Vijećnica, minaret, Stari most, Jajce falls, Banja Luka Kastel
-export function skyline(w = 1440, h = 170) {
-  const s = `fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`
-  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" class="skyline">
-  <path d="M0 120L80 70L140 100L220 40L300 96L360 64L430 110" ${s} opacity=".35"/>
-  <path d="M190 62l30-22 22 18" ${s} opacity=".35"/>
-  <!-- Vijećnica -->
-  <g transform="translate(450 50)" opacity=".55"><path d="M0 120V30H160V120M0 30L20 10H140L160 30M60 10V-10H100V10" ${s}/>${[20, 60, 100, 140].map((x) => `<path d="M${x - 10} 120V80a10 10 0 0 1 20 0V120" ${s}/><path d="M${x - 10} 70h20M${x - 10} 62h20" ${s}/>`).join('')}<path d="M10 50H150" ${s} stroke-dasharray="6 6"/></g>
-  <!-- minaret -->
-  <g transform="translate(660 0)" opacity=".55"><path d="M0 170V50H16V170M-4 50h24M8 50L8 6L0 30H16L8 6" ${s}/><path d="M-6 90h28" ${s}/></g>
-  <!-- Stari most -->
-  <g transform="translate(720 70)" opacity=".55"><path d="M0 100L20 40H40Q120-40 200 40H220L240 100M40 100Q120 6 200 100" ${s}/><path d="M14 40V0L28-16L42 0V40" ${s}/></g>
-  <!-- Jajce waterfall -->
-  <g transform="translate(1000 40)" opacity=".55"><path d="M0 40H90L110 130M0 40V10L20 -6L40 10V40M60 40V20h20v20" ${s}/>${[96, 106, 116, 126].map((x, i) => `<path class="fall" style="animation-delay:${i * .2}s" d="M${x} 50V130" ${s} stroke-dasharray="10 8"/>`).join('')}</g>
-  <!-- Kastel -->
-  <g transform="translate(1180 70)" opacity=".55"><path d="M0 100V20H140V100M0 20V8h14v12M28 20V8h14v12M56 20V8h14v12M84 20V8h14v12M112 20V8h14v12M126 20V8h14" ${s}/><path d="M60 100V70a10 10 0 0 1 20 0V100" ${s}/></g>
-  <path d="M1340 120L1400 80L1460 120" ${s} opacity=".35"/>
-  <path d="M0 168H${w}" ${s} opacity=".4"/>
-</svg>`
-}

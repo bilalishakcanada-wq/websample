@@ -27,7 +27,7 @@ export function createEmailRepository(admin: SupabaseClient) {
         const [userName, providerName] = await Promise.all([
           displayName(event.recipient_id),
           (async () => {
-            if (['JOB_PUBLISHED', 'NEW_MESSAGE', 'NOTIFICATION'].includes(event.event_type)) return undefined
+            if (['JOB_PUBLISHED', 'NEW_MESSAGE', 'NOTIFICATION', 'EMAIL_CONFIRM'].includes(event.event_type)) return undefined
             if (event.event_type === 'JOB_COMPLETED') {
               const { data } = await admin.from('job_payments').select('provider_id').eq('listing_id', event.payload_data.listing_id).eq('status', 'released').maybeSingle()
               return displayName(data?.provider_id)

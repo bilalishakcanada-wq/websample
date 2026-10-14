@@ -71,3 +71,9 @@ Pregled svih mailova: `node scripts/build-email-templates.mjs --preview email-pr
 
 Važno: ove funkcije su prije objavljivane iz lokalnog Codex foldera na računaru. Prije novog
 objavljivanja odatle, prvo povuci najnoviji `main`, inače se vraća stari izgled.
+
+## 4. Potvrda emaila za svaki novi račun
+
+- **Email i lozinka:** Supabase šalje mail za potvrdu kad je u *Authentication → Sign In / Providers → Email* uključeno **Confirm email**. Bez toga se račun odmah sam potvrdi.
+- **Google:** Google već potvrđuje adresu, pa Supabase ne šalje ništa. Zato `supabase/communication/03_email_confirmation.sql` svakom novom Google računu doda red u `zadatak_private.email_confirmations`. Aplikacija tada na svakoj stranici pokaže "Potvrdi svoj email" i sama pošalje mail (događaj `EMAIL_CONFIRM` kroz `send-transactional-email`, isti plavo-bijeli izgled). Link vodi na `/potvrdi-email?t=…`, a `public.confirm_email` račun otključa. Link vrijedi 24 sata, novi mail najviše jednom u minuti. Postojeći računi se ne diraju.
+- Pravila u bazi koja traže potvrđen email (`public.is_email_verified`) čekaju i ovaj link.

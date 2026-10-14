@@ -1,15 +1,20 @@
 import { renderBrandedEmail } from './brandedEmail.ts'
 import { configuredEmailSender } from './emailSender.ts'
 
-export const emailEvents = ['JOB_PUBLISHED', 'NEW_BID_RECEIVED', 'JOB_ACCEPTED', 'JOB_COMPLETED', 'NEW_MESSAGE', 'NOTIFICATION'] as const
+export const emailEvents = ['JOB_PUBLISHED', 'NEW_BID_RECEIVED', 'JOB_ACCEPTED', 'JOB_COMPLETED', 'NEW_MESSAGE', 'NOTIFICATION', 'EMAIL_CONFIRM'] as const
 export type EventType = typeof emailEvents[number]
-export type Data = { listing_id?: string; title: string; amount?: number | string; user_name?: string; provider_name?: string; link?: string; message?: string }
+export type Data = { listing_id?: string; title: string; amount?: number | string; user_name?: string; provider_name?: string; link?: string; message?: string; token?: string }
 export type Event = { id: string; event_type: EventType; recipient_email: string; payload_data: Data; claim_id: string; mail_request?: Record<string, unknown>; recipient_id?: string; source_id?: string }
 
 export function renderTransactionalEmail(type: EventType, data: Data, siteUrl: string) {
   const site = new URL(siteUrl)
   if (site.protocol !== 'https:' || site.username || site.password) throw new Error('SITE_URL_INVALID')
   site.search = ''; site.hash = ''
+  if (type === 'EMAIL_CONFIRM') {
+    // the link opens /potvrdi-email, which hands the token to public.confirm_email
+    if (!/^[a-f0-9]{64}$/.test(data.token || '')) throw new Error('TOKEN_INVALID')
+    return renderBrandedEmail('WELCOME_CONFIRM', { userName: data.user_name, actionUrl: site.href.replace(/\/$/, '') + '/potvrdi-email?t=' + data.token })
+  }
   if (type === 'NEW_MESSAGE' || type === 'NOTIFICATION') {
     const link = data.link || '/account/obavijesti'
     if (!link.startsWith('/') || link.startsWith('//') || link.includes('\\') || Array.from(link).some(char => char.charCodeAt(0) <= 32)) throw new Error('NOTIFICATION_LINK_INVALID')

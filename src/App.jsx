@@ -45,6 +45,7 @@ const WalletPage = lazy(lazyImport(() => import('./pages/account/WalletPage')))
 const NotificationsPage = lazy(lazyImport(() => import('./pages/account/NotificationsPage')))
 const VerificationPage = lazy(lazyImport(() => import('./pages/account/VerificationPage')))
 const SettingsPage = lazy(lazyImport(() => import('./pages/account/SettingsPage')))
+const SimpleModePage = lazy(lazyImport(() => import('./pages/account/SimpleModePage')))
 const PaymentOptionsPage = lazy(lazyImport(() => import('./pages/account/PaymentOptionsPage')))
 const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
 
@@ -171,6 +172,7 @@ function App() {
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="verifikacija" element={<VerificationPage />} />
           <Route path="postavke" element={<SettingsPage />} />
+          <Route path="jednostavan-nacin" element={<SimpleModePage />} />
           <Route path="alarmi" element={<TaskAlertsPage />} />
           <Route path="informacije" element={<AccountInfoPage />} />
           <Route path="placanje" element={<PaymentOptionsPage />} />

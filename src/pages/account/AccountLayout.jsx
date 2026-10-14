@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { keys, useMyBundle } from '../../hooks/queries'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Award, Bell, Camera, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
+  Award, Bell, Camera, MousePointerClick, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { profileService } from '../../services/profileService'
@@ -28,6 +28,7 @@ export const ACCOUNT_NAV = [
   { to: '/account/znacke', label: 'Značke', icon: Award },
   { to: '/account/portfolio', label: 'Portfolio', icon: Images, providerOnly: true },
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true },
+  { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick },
   { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true },
   { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
   { to: '/account/placanje', label: 'Opcije plaćanja', icon: CreditCard, hidden: true },

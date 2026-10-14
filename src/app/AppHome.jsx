@@ -173,7 +173,7 @@ function TaskerHome({ user, firstName }) {
   const navigate = useNavigate()
   const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
-  // jednostavan način: svaka kartica posla dobija veliko dugme "Prijavi se" (2 dodira do poslane prijave)
+  // jednostavan način: svaka kartica posla dobija veliko dugme "Želim ovaj posao" (2 dodira do poslane prijave)
   const simple = useSimpleMode(user.id)
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
   // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
@@ -201,11 +201,11 @@ function TaskerHome({ user, firstName }) {
         <PushPrompt compact reason="Javit ćemo ti čim se pojavi posao za tebe." />
         {simple.choice == null && !simple.enabled && !loading && (
           <section className="ap-simple-offer" data-testid="simple-mode-nudge">
-            <strong>Želiš lakše?</strong>
-            <span>Uključi jednostavan način: veliko dugme „Prijavi se“ i ništa ne kucaš.</span>
+            <strong>Lakše do posla</strong>
+            <span>Velika dugmad i prijava na posao u dva dodira, bez pisanja. Želiš li to?</span>
             <div>
-              <button type="button" className="simple-apply-btn" onClick={() => { haptic('light'); simple.setChoice(true) }}>Uključi</button>
-              <button type="button" className="ap-simple-no" onClick={() => simple.setChoice(false)}>Ne, hvala</button>
+              <button type="button" className="simple-apply-btn" onClick={() => { haptic('light'); simple.setChoice(true) }}>Da, uključi</button>
+              <button type="button" className="ap-simple-no" onClick={() => simple.setChoice(false)}>Ne treba mi</button>
             </div>
           </section>
         )}
@@ -230,7 +230,7 @@ function TaskerHome({ user, firstName }) {
               return (
                 <div key={job.id} className="ap-job-simple-wrap">
                   {card}
-                  <Link to={`/listings/${job.id}?prijava=1`} className="simple-apply-btn" data-testid="simple-apply" onClick={() => haptic('light')}>Prijavi se</Link>
+                  <Link to={`/listings/${job.id}?prijava=1`} className="simple-apply-btn" data-testid="simple-apply" onClick={() => haptic('light')}>Želim ovaj posao</Link>
                 </div>
               )
             })}

@@ -49,7 +49,7 @@
   min-height: 68px;
   border: 0;
   border-radius: 20px;
-  background: #0f7a52;
+  background: var(--primary);
   color: #ffffff;
   font-size: 1.35rem;
   font-weight: 800;
@@ -67,7 +67,7 @@
   cursor: pointer;
 }
 
-/* veliko dugme "Prijavi se na posao" na stranici posla i na karticama poslova */
+/* veliko dugme "Želim ovaj posao" na stranici posla i na karticama poslova */
 .simple-apply-btn {
   display: flex;
   align-items: center;
@@ -77,7 +77,7 @@
   min-height: 64px;
   border: 0;
   border-radius: 20px;
-  background: #0f7a52;
+  background: var(--primary);
   color: #ffffff;
   font-size: 1.35rem;
   font-weight: 800;

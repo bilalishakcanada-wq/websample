@@ -88,7 +88,7 @@ function SettingsPage() {
         <div className="settings-row">
           <div>
             <strong>{simple.enabled ? 'Uključen' : 'Isključen'}</strong>
-            <span>Veliko dugme „Prijavi se na posao“: cijena je već izabrana i ne moraš ništa kucati. Sam se uključuje za majstore od 40 godina naviše.</span>
+            <span>Velika dugmad i prijava na posao u dva dodira, bez pisanja. Za majstore od 40 godina i više uključuje se sam.</span>
           </div>
           <button type="button" data-testid="simple-mode-toggle" className={simple.enabled ? 'ghost-button' : 'primary-button'} disabled={busy === 'simple'}
             onClick={async () => { setBusy('simple'); setError(''); setMessage(''); try { const next = await simple.setChoice(!simple.enabled); setMessage(next.enabled ? 'Jednostavan način je uključen.' : 'Jednostavan način je isključen.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') } }}>

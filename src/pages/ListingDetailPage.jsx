@@ -109,7 +109,7 @@ function ListingDetailPage() {
   const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
   // jednostavan način (majstori 40+ ili po izboru): prijava jednim dodirom, bez kucanja
   const simpleMode = useSimpleMode(user?.id).enabled
-  const offerLabel = simpleMode && offerGate === 'ok' ? 'Prijavi se na posao' : offerCta(offerGate, conditionCheck.missing)
+  const offerLabel = simpleMode && offerGate === 'ok' ? 'Želim ovaj posao' : offerCta(offerGate, conditionCheck.missing)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -266,7 +266,7 @@ function ListingDetailPage() {
     setSheetOpen(true)
   }
 
-  // "Prijavi se" s kartice posla (jednostavan način): sheet se otvori sam, čim je posao učitan
+  // "Želim ovaj posao" s kartice posla (jednostavan način): sheet se otvori sam, čim je posao učitan
   const quickApply = searchParams.get('prijava') === '1'
   useEffect(() => {
     if (!quickApply || !listing) return

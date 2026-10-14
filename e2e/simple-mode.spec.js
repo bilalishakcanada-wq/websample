@@ -1,7 +1,7 @@
 // Jednostavan način za majstore (supabase/providers/01_simple_mode.sql):
-//   worker turns it on in Postavke → the job page shows one big "Prijavi se na posao" button
+//   worker turns it on in Postavke → the job page shows one big "Želim ovaj posao" button
 //   → the sheet has the client's budget already chosen and no text to type → one tap sends the offer.
-//   The "Prijavi se" link on the phone home cards opens the job with ?prijava=1, which opens the sheet at once.
+//   The "Želim ovaj posao" link on the phone home cards opens the job with ?prijava=1, which opens the sheet at once.
 import { test, expect } from '@playwright/test'
 import { accountsConfigured, acceptDialogs, login } from './helpers.js'
 
@@ -61,13 +61,13 @@ test.describe.serial('Jednostavan način za majstore', () => {
     await setSimple(true)
     await provider.goto(listingUrl)
     await expect(provider.getByRole('heading', { name: title })).toBeVisible()
-    await provider.getByRole('button', { name: 'Prijavi se na posao' }).first().click()
+    await provider.getByRole('button', { name: 'Želim ovaj posao' }).first().click()
     const sheet = provider.getByTestId('simple-offer')
     await expect(sheet).toBeVisible()
     // the client's budget is already chosen and there is nothing to type
     await expect(sheet.getByRole('radio', { name: /1 KM/ })).toHaveAttribute('aria-checked', 'true')
     await expect(sheet.getByRole('textbox')).toHaveCount(0)
-    await sheet.getByRole('button', { name: 'Odustani' }).click()
+    await sheet.getByRole('button', { name: 'Ne, vrati me nazad' }).click()
     await expect(sheet).toHaveCount(0)
   })
 

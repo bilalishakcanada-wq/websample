@@ -284,7 +284,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--success);
+  color: #0f7a56; /* same dark green as .form-success: the bright success green is too faint for text */
   font-weight: 800;
   font-size: 0.92rem;
 }

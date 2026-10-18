@@ -6345,6 +6345,16 @@ body:has(.profile-cta-bar) .support-chat {
   height: 100%;
 }
 
+/* where the search measures from (a town, "Blizu mene" or a typed address); can be dragged */
+.task-map-origin {
+  width: 30px;
+  height: 38px;
+  cursor: grab;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 34'%3E%3Cpath d='M13 33s11-11.2 11-19.5A11 11 0 0 0 2 13.5C2 21.8 13 33 13 33z' fill='%23e8590c' stroke='%23fff' stroke-width='2'/%3E%3Ccircle cx='13' cy='13.5' r='4' fill='%23fff'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 2px 4px rgba(10, 31, 99, .4));
+}
+.task-map-origin:active { cursor: grabbing; }
+
 .task-popup .maplibregl-popup-content {
   padding: 10px 12px;
   border-radius: 12px;

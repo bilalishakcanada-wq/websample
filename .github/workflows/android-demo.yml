@@ -1,0 +1,64 @@
+# Signed-in walk through the Android app on an emulator: screenshots of every main screen and a
+# screen recording, pushed to the android-demo branch. Uses the newest beta APK from Releases.
+# Needs the DEMO_PASSWORD secret (password of the demo account below).
+name: Android demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/android-app-google-play-s4av02]
+    paths: ['.github/workflows/android-demo.yml', 'scripts/android-demo.mjs']
+
+permissions:
+  contents: write
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DEMO_EMAIL: zadatak.demo@example.com
+      DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm i --no-save --no-package-lock playwright@1.56.1
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - name: Newest beta APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download android-beta -p zadatak-beta.apk -R "${{ github.repository }}"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            mkdir -p demo
+            adb install -r zadatak-beta.apk
+            adb shell settings put system screen_off_timeout 1800000
+            adb shell input keyevent KEYCODE_WAKEUP && adb shell wm dismiss-keyguard
+            (adb shell screenrecord --time-limit 180 --size 720x1600 /sdcard/demo.mp4 &) ; sleep 1
+            node scripts/android-demo.mjs || true
+            sleep 3; adb shell pkill -INT screenrecord || true; sleep 4
+            adb pull /sdcard/demo.mp4 demo/snimak.mp4 || true
+            ls -la demo
+      - name: Publish to the android-demo branch
+        run: |
+          cd demo
+          git init -q -b android-demo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Android demo, run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-demo

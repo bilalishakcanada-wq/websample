@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { BellRing, Check, MapPin, Settings } from 'lucide-react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { isNativeApp } from '../utils/native'
+import { backgroundLocationSupported } from '../utils/location'
 import { openAppSettings, permissionStatus, permissionsOk, requestLocation, requestNotifications } from '../utils/permissions'
 import { liveReachUndecided, setLiveReach } from '../utils/liveReach'
 import './RequiredPermissions.css'
@@ -16,7 +17,10 @@ const STEPS = {
       account: 'Zadatak po lokaciji zna koliko si daleko od posla, pokazuje poslove u blizini i majstoru olakšava da dođe.',
       post: 'Po lokaciji tvoj posao vide majstori u blizini, a oni koji su daleko te mogu samo zamoliti da platiš prevoz.',
     },
-    note: 'Koristi se samo dok je Zadatak otvoren, nikad u pozadini.',
+    // Google Play: the disclosure says plainly that the app keeps using it with Zadatak in the background
+    note: () => (backgroundLocationSupported()
+      ? 'Dok je Lokacija uživo uključena, radi i kad je Zadatak u pozadini, a na telefonu tada stoji obavijest. Isključuješ je u Postavke → Lokacija.'
+      : 'Koristi se dok je Zadatak otvoren. Lokaciju uživo isključuješ u Postavke → Lokacija.'),
     ask: requestLocation,
   },
   notifications: {
@@ -26,7 +30,7 @@ const STEPS = {
       account: 'Da ti ništa ne promakne: nove ponude, poruke, molbe za prevoz i plaćanja stižu odmah, i kad je aplikacija zatvorena.',
       post: 'Čim majstor pošalje ponudu ili poruku, javićemo ti odmah, i kad je aplikacija zatvorena.',
     },
-    note: 'Možeš ih uvijek isključiti u postavkama.',
+    note: () => 'Možeš ih uvijek isključiti u postavkama.',
     ask: requestNotifications,
   },
 }
@@ -113,7 +117,7 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
             <>
               <h1 id="rp-title">{info.title}</h1>
               <p>{info.text[reason] || info.text.account}</p>
-              {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{info.note}</p>}
+              {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{info.note()}</p>}
             </>
           )}
         </div>

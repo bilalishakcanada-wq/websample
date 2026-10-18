@@ -1,6 +1,9 @@
 // One way to follow the phone's position on every platform:
 //  - iOS / Android app → Capacitor's native Geolocation plugin (system permission dialog, GPS, no browser limits);
 //  - browser (laptop, mobile web, installed web app) or an older app build without the plugin → HTML5 Geolocation.
+//  - { background: true } in the app → @capacitor-community/background-geolocation: the position keeps coming
+//    while the person uses other apps or locks the phone, with a notification on the phone as long as it runs
+//    (Android foreground service "location"). A browser can't do this: there it stops when the page is hidden.
 // Callers get the same { lat, lng, accuracy, heading, speed, at } shape and the same Bosnian error texts.
 import { isNativeApp } from './native'
 
@@ -8,6 +11,14 @@ const nativeGeo = () => {
   const cap = window.Capacitor
   return isNativeApp() && cap?.isPluginAvailable?.('Geolocation') ? cap.Plugins.Geolocation : null
 }
+
+const backgroundGeo = () => {
+  const cap = window.Capacitor
+  return isNativeApp() && cap?.isPluginAvailable?.('BackgroundGeolocation') ? cap.Plugins.BackgroundGeolocation : null
+}
+
+/** True in an app build that can keep following the position with Zadatak in the background. */
+export const backgroundLocationSupported = () => Boolean(backgroundGeo())
 
 const OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
 
@@ -30,12 +41,42 @@ export function locationErrorText(error) {
 
 export const locationSupported = () => Boolean(nativeGeo() || (typeof navigator !== 'undefined' && navigator.geolocation))
 
+const fromBackground = (loc) => ({
+  lat: loc.latitude,
+  lng: loc.longitude,
+  accuracy: loc.accuracy,
+  heading: Number.isFinite(loc.bearing) ? loc.bearing : null,
+  speed: Number.isFinite(loc.speed) ? loc.speed : null,
+  at: loc.time || Date.now(),
+})
+
 /**
  * Starts following the position. Returns stop(). onError gets a ready-to-show Bosnian sentence.
- * Works while the app/page is open; nothing runs in the background after the phone locks.
+ * Without options it works while the app/page is open. background: { title, message } keeps it going
+ * in the app with Zadatak in the background, and shows that notification on the phone meanwhile.
  */
-export function watchLocation(onPosition, onError) {
+export function watchLocation(onPosition, onError, { background } = {}) {
   let stopped = false
+  const bg = background ? backgroundGeo() : null
+  if (bg) {
+    let watcherId = null
+    Promise.resolve(bg.addWatcher({
+      backgroundTitle: background.title,
+      backgroundMessage: background.message,
+      requestPermissions: true,
+      stale: false,
+      distanceFilter: background.distanceFilter ?? 20,
+    }, (loc, error) => {
+      if (stopped) return
+      if (error) onError?.(locationErrorText(error.code === 'NOT_AUTHORIZED' ? Object.assign(error, { code: 1 }) : error))
+      else if (loc) onPosition(fromBackground(loc))
+    })).then((id) => {
+      watcherId = id
+      if (stopped) Promise.resolve(bg.removeWatcher({ id })).catch(() => {})
+    }).catch((error) => { if (!stopped) onError?.(locationErrorText(error)) })
+    return () => { stopped = true; if (watcherId) Promise.resolve(bg.removeWatcher({ id: watcherId })).catch(() => {}) }
+  }
+
   const geo = nativeGeo()
   if (geo) {
     let watchId = null

@@ -4,4 +4,7 @@
     <string name="title_activity_main">Zadatak</string>
     <string name="package_name">ba.poso.app</string>
     <string name="custom_url_scheme">ba.poso.app</string>
+    <!-- the notification while Lokacija uživo / "Krećem" runs with Zadatak in the background -->
+    <string name="capacitor_background_geolocation_notification_channel_name">Lokacija uživo</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_notification</string>
 </resources>

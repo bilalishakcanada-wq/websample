@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase'
+import { rpcFromBackground, supabase } from '../lib/supabase'
 
 // „Izvođač je na putu“ (supabase/booking/05_live_location.sql + 06_location_request.sql):
 // izvođač šalje zadnju tačku, klijent je prati uživo i može zatražiti lokaciju.
@@ -33,7 +33,7 @@ export const liveLocationService = {
       p_accuracy_m: point.accuracy == null ? null : Math.round(point.accuracy),
       p_heading: point.heading, p_speed_mps: point.speed,
     }
-    let { error } = await supabase.rpc('share_live_location', minutes && durationSupported ? { ...args, p_minutes: minutes } : args)
+    let { error } = await rpcFromBackground('share_live_location', minutes && durationSupported ? { ...args, p_minutes: minutes } : args)
     if (error && minutes && durationSupported && (error.code === 'PGRST202' || /p_minutes/.test(error.message || ''))) {
       durationSupported = false
       ;({ error } = await supabase.rpc('share_live_location', args))

@@ -3,11 +3,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../context/AuthContext'
 import { keys } from '../hooks/queryKeys'
 import { isLiveReachOn, LIVE_REACH_EVENT, startLiveReach } from '../utils/liveReach'
+import { backgroundLocationSupported } from '../utils/location'
 import { locationPermission } from '../utils/permissions'
 
 /**
- * "Lokacija uživo": while the switch is on and Zadatak is open, the position follows the person and
- * every new point refreshes doseg ponuda on screen (the reach radar, the offer button, search).
+ * "Lokacija uživo": while the switch is on, the position follows the person and every new point refreshes
+ * doseg ponuda on screen (the reach radar, the offer button, search). In the app it keeps going with
+ * Zadatak in the background; in a browser it pauses while the page is hidden.
  * Renders nothing. Never asks for permission itself: that happens on a tap (Postavke, RequiredPermissions).
  */
 function LiveReachSync() {
@@ -25,8 +27,10 @@ function LiveReachSync() {
   }, [])
 
   const userId = user?.id
+  // in the app the position keeps coming with Zadatak in the background; a browser only follows a visible page
+  const running = visible || backgroundLocationSupported()
   useEffect(() => {
-    if (!userId || !on || !visible) return undefined
+    if (!userId || !on || !running) return undefined
     let stop = () => {}
     let alive = true
     locationPermission().then((state) => {
@@ -39,7 +43,7 @@ function LiveReachSync() {
       })
     })
     return () => { alive = false; stop() }
-  }, [userId, on, visible, queryClient])
+  }, [userId, on, running, queryClient])
 
   return null
 }

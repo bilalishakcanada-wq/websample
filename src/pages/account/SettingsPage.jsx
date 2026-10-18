@@ -10,6 +10,7 @@ import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
 import { isLiveReachOn, LIVE_REACH_REPORTED, setLiveReach } from '../../utils/liveReach'
 import { locationPermission, openAppSettings, requestLocation } from '../../utils/permissions'
 import { isNativeApp } from '../../utils/native'
+import { backgroundLocationSupported } from '../../utils/location'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
 
@@ -94,12 +95,12 @@ function SettingsPage() {
             <strong><MapPin size={15} /> Lokacija uživo {liveOn && <span className="live-dot" aria-hidden="true" />}</strong>
             <span>
               {liveOn
-                ? `Uključeno. Doseg ponuda se računa od mjesta gdje si sada, dok je Zadatak otvoren.${lastPoint ? ' Lokacija je upravo osvježena.' : ''}`
+                ? `Uključeno. Doseg ponuda se računa od mjesta gdje si sada${backgroundLocationSupported() ? ', i kad je Zadatak u pozadini (na telefonu stoji obavijest)' : ', dok je Zadatak otvoren'}.${lastPoint ? ' Lokacija je upravo osvježena.' : ''}`
                 : geo === 'denied'
                   ? (isNativeApp() ? 'Lokacija je odbijena. Otvori postavke telefona, dozvoli lokaciju za Zadatak i vrati se ovdje.' : 'Lokacija je blokirana u pregledniku. Dodirni ikonu lijevo od adrese stranice (katanac), dozvoli lokaciju i uključi ovdje.')
                   : geo === 'unsupported'
                     ? 'Ovaj uređaj ne zna lokaciju. Doseg se računa od adrese ili grada iz profila.'
-                    : 'Isključeno. Kad uključiš, doseg (koliko si daleko od posla) prati gdje si sada, a ne grad iz profila. Nikad u pozadini.'}
+                    : 'Isključeno. Kad uključiš, doseg (koliko si daleko od posla) prati gdje si sada, a ne grad iz profila.'}
             </span>
           </div>
           {geo === 'denied' && isNativeApp() && !liveOn && <button type="button" className="ghost-button" onClick={() => openAppSettings()}><Settings size={15} /> Postavke</button>}

@@ -47,7 +47,8 @@ import { RequirementsList } from '../components/TaskExtras'
 import ReachRadar from '../components/ReachRadar'
 import { QuoteRequestCard } from '../components/QuoteRequest'
 import { useMyCity } from '../hooks/useMyCity'
-import { travelLabel } from '../utils/reach'
+import { reachFor, travelLabel } from '../utils/reach'
+import { TravelRequestSheet, TravelRequestStatus, TravelRequestsOwner, travelCta, useTravelRequests } from '../components/TravelRequest'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
 import { activePromotion } from '../services/promotionService'
 
@@ -107,9 +108,15 @@ function ListingDetailPage() {
   const [listing, setListing] = useState(null)
   const conditionCheck = useJobConditionCheck(user?.id, listing?.conditions?.requires || [])
   const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
+  // too far for what this job pays: the only thing to send is a request that the client pays the trip
+  const travel = useTravelRequests(id, user?.id)
+  const travelRequests = useMemo(() => travel.data || [], [travel.data])
+  const myTravel = travelRequests.find((row) => row.provider_id === user?.id) || null
+  const [travelOpen, setTravelOpen] = useState(false)
   // jednostavan način (majstori 40+ ili po izboru): prijava jednim dodirom, bez kucanja
   const simpleMode = useSimpleMode(user?.id).enabled
-  const offerLabel = simpleMode && offerGate === 'ok' ? 'Želim ovaj posao' : offerCta(offerGate, conditionCheck.missing)
+  const offerLabel = offerGate === 'too_far' ? travelCta(myTravel)
+    : simpleMode && offerGate === 'ok' ? 'Želim ovaj posao' : offerCta(offerGate, conditionCheck.missing)
   const [related, setRelated] = useState([])
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -194,6 +201,10 @@ function ListingDetailPage() {
   const saved = useSaved()
   const myCity = useMyCity()
   const myPoint = useMyPoint(user?.id)
+  // the client said yes to the trip: the database now lets this provider offer, so ask it again
+  useEffect(() => {
+    if (myTravel?.status === 'accepted' && user?.id) queryClient.invalidateQueries({ queryKey: keys.offerReach(user.id, id) })
+  }, [myTravel?.status, user?.id, id]) // eslint-disable-line react-hooks/exhaustive-deps
   // opening someone else's job teaches the feed what this person is into (kept on this device)
   useEffect(() => {
     if (listing?.id && !isOwner) recordInterest('view', { category: listing.category, listingId: listing.id })
@@ -246,7 +257,10 @@ function ListingDetailPage() {
       return
     }
     if (offerGate === 'too_far') {
-      toast('Ovaj posao je predaleko od grada u tvom profilu za ovaj budžet. Pogledaj poslove bliže tebi.', { kind: 'info' })
+      if (!myTravel) setTravelOpen(true)
+      else if (myTravel.status === 'pending') toast('Molba za prevoz čeka odgovor klijenta. Javićemo ti čim odgovori.', { kind: 'info' })
+      else if (myTravel.status === 'declined') toast('Klijent ne plaća prevoz za ovaj posao. Pogledaj poslove bliže tebi.', { kind: 'info' })
+      else queryClient.invalidateQueries({ queryKey: keys.offerReach(user.id, id) })
       return
     }
     // klijent traži značku koju izvođač nema: vodi ga pravo na mjesto gdje je dobija
@@ -466,8 +480,17 @@ function ListingDetailPage() {
   // "Zatraži ponudu": only the client and the invited provider ever get this far
   const isPrivate = Boolean(listing.invited_provider)
 
+  const travelCard = isPrivate ? null
+    : isOwner ? <TravelRequestsOwner listingId={id} userId={user?.id} requests={travelRequests} />
+      : <TravelRequestStatus request={myTravel} />
   const overlays = (
     <>
+      {travelOpen && listing && (
+        <TravelRequestSheet
+          listing={listing} distanceKm={reachFor(listing, myCity, myPoint)?.distanceKm ?? null}
+          onClose={() => setTravelOpen(false)} onSent={() => { setTravelOpen(false); travel.refetch() }}
+        />
+      )}
       {acceptBid && (
         <AcceptOfferSheet bid={acceptBid} providerName={acceptBid.bidder?.display_name} onClose={() => setAcceptBid(null)} onDone={async () => { await refreshJob(); setMessage('Ponuda je prihvaćena i uplata je osigurana. Izvođač je obaviješten.') }} />
       )}
@@ -534,7 +557,7 @@ function ListingDetailPage() {
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
-          tab={tab} setTab={setTab}
+          tab={tab} setTab={setTab} travelCard={travelCard}
         />
         {overlays}
       </>
@@ -620,6 +643,8 @@ function ListingDetailPage() {
                 <RequirementsList items={requirements} />
               </section>
             )}
+
+            {travelCard}
 
             {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
               <section className="job-card">

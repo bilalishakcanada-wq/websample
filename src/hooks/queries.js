@@ -91,11 +91,11 @@ export const useListingAddress = (listingId, enabled = true) => useQuery({
   staleTime: 60 * 1000,
 }).data || null
 
-/** My own exact point (profile settings "Moja lokacija"), or null; distance to jobs is measured from it. */
+/** Where distance to jobs is measured from: the allowed device location, else the profile address ("Moja lokacija"), or null. */
 export function useMyPoint(userId) {
   const data = useQuery({
-    queryKey: keys.myLocation(userId),
-    queryFn: () => placeService.myLocation(userId),
+    queryKey: keys.reachPoint(userId),
+    queryFn: () => placeService.reachPoint(userId),
     enabled: Boolean(userId),
     staleTime: 5 * 60 * 1000,
   }).data

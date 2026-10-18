@@ -24,6 +24,10 @@ export default defineConfig({
     video: 'retain-on-failure',
     locale: 'bs-BA',
     ...devices['Desktop Chrome'],
+    // a new account and a new job need location and notifications allowed (components/RequiredPermissions.jsx);
+    // everyone in the test database is in Sarajevo, so the device point is too
+    permissions: ['geolocation', 'notifications'],
+    geolocation: { latitude: 43.8563, longitude: 18.4131 },
     // a preinstalled Chromium (sandboxes without `playwright install`): PW_CHROMIUM=/path/to/chrome
     ...(process.env.PW_CHROMIUM ? { launchOptions: { executablePath: process.env.PW_CHROMIUM } } : {}),
   },

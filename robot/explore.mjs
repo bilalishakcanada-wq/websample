@@ -367,12 +367,14 @@ async function crawl(browser, profileName, roleName, state) {
   const role = ROLES[roleName]
   const run = `${profileName}-${roleName}`
   PROFILES_BY_RUN.set(run, profile)
-  const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block' })
+  const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block', geolocation: { latitude: 43.8563, longitude: 18.4131 } })
   await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {})
+  // like a person who tapped "Dozvoli": a new account and a new job need location and notifications
+  await context.grantPermissions(['geolocation', 'notifications'], { origin: ORIGIN }).catch(() => {})
   const page = await context.newPage()
   page.on('dialog', (d) => d.dismiss().catch(() => {}))
   const current = { path: '/', discovered: new Set() }

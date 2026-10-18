@@ -13,6 +13,7 @@ import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queri
 import { ConditionsBuilder } from '../components/JobConditions'
 import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { publishListing } from '../services/publishListing'
+import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
@@ -62,6 +63,7 @@ function PostTaskPage() {
   // a new job needs an approved ID (editing one already published does not); the form stays
   // open to fill in and the draft is kept, only publishing waits for the check
   const postGate = usePostGate(user?.id, !editId)
+  const permissions = useRequiredPermissions('post')
   const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // a half-written job survives a refresh or an accidental click away; editing or copying a job
   // starts from that job and leaves the draft alone
@@ -166,6 +168,8 @@ function PostTaskPage() {
     setError('')
     if (postGate === 'needed' || postGate === 'rejected') { navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
+    // a new job goes out only from someone who allowed location and notifications
+    if (!editId && !(await permissions.ensure())) return
     setSaving(true)
     try {
       const { listing, flaggedPhotos, addressError } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
@@ -416,6 +420,7 @@ function PostTaskPage() {
           </button>
         )}
       </footer>
+      {permissions.sheet}
     </div>
   )
 }

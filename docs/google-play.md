@@ -111,7 +111,7 @@ obrađivači, to se ne broji kao dijeljenje).
 | Personal info → Other info (opis, struke, lična karta za provjeru) | da | opcionalno | App functionality, Fraud prevention, security, and compliance |
 | Financial info → Purchase history | da | obavezno za plaćanje | App functionality, Fraud prevention |
 | Financial info → Other financial info (IBAN za isplatu) | da | opcionalno | App functionality |
-| Location → Precise location | da | opcionalno | App functionality |
+| Location → Precise location | da | obavezno za novi račun i objavu posla (doseg ponuda) | App functionality |
 | Messages → Other in-app messages | da | opcionalno | App functionality, Fraud prevention (moderacija) |
 | Photos and videos → Photos | da | opcionalno | App functionality |
 | Files and docs | da | opcionalno | App functionality (licence, potvrde) |
@@ -128,11 +128,11 @@ reklamni ID.
 |---|---|---|
 | `INTERNET` | aplikacija učitava Zadatak | nikad (automatski) |
 | `CAMERA` | foto-dokaz urađenog posla, slike za oglas/profil/poruke | kad otvoriš kameru |
-| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | mjesto na foto-dokazu, „Krećem“ (mapa uživo), samo dok je aplikacija otvorena | kad uključiš tu funkciju |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | doseg ponuda (koliko je izvođač daleko od posla), mjesto na foto-dokazu, „Krećem“ (mapa uživo), samo dok je aplikacija otvorena | prije pravljenja računa i objave posla, poslije ekrana koji objašnjava zašto (dugme „Dozvoli“); odbijanje ne zaključava aplikaciju, samo tu radnju, s dugmetom „Otvori postavke“ |
 | `USE_BIOMETRIC`, `USE_FINGERPRINT` (iz `androidx.biometric`) | otisak/lice prije isplate | nikad (obična dozvola) |
 | `VIBRATE` (iz `@capacitor/haptics`) | kratka vibracija na dodir dugmeta | nikad (obična dozvola) |
 | `ACCESS_NETWORK_STATE`, `WAKE_LOCK` | ako ih biblioteka doda: provjera veze | nikad (obične dozvole) |
-| `POST_NOTIFICATIONS` | obavijesti na telefonu: nova poruka, ponuda, prihvaćen posao, plaćanje | Android 13+: kad korisnik dodirne „Uključi obavijesti“ |
+| `POST_NOTIFICATIONS` | obavijesti na telefonu: nova poruka, ponuda, molba za prevoz, prihvaćen posao, plaćanje | Android 13+: na istom ekranu prije računa i objave posla, kad korisnik dodirne „Dozvoli“ (ili „Uključi obavijesti“ u postavkama) |
 | `com.google.android.c2dm.permission.RECEIVE` (iz Firebase Messaging) | prijem obavijesti preko Googlea | nikad (obična dozvola) |
 
 Nova dozvola u buildu bez reda u ovoj tabeli ruši CI (korak „Google Play checks“): dodaj je ovdje i u

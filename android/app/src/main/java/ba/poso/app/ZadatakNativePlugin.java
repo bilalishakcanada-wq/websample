@@ -1,6 +1,9 @@
 package ba.poso.app;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
@@ -17,7 +20,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  - confirmIdentity: the system fingerprint / face / screen-lock dialog before money leaves escrow;
  *  - systemColors: the Android 12+ wallpaper accent (Material You), so the app can tint small details with it;
  *  - pushInfo: whether this build has Firebase (google-services.json), so the site only offers phone
- *    notifications when they can work (registering without Firebase would crash the app).
+ *    notifications when they can work (registering without Firebase would crash the app);
+ *  - openAppSettings: Zadatak's page in the phone settings, for a location or notification permission
+ *    that was refused (Android doesn't show the system dialog again after that).
  * The site calls it as window.Capacitor.Plugins.ZadatakNative (src/utils/biometric.js, src/utils/native.js).
  */
 @CapacitorPlugin(name = "ZadatakNative")
@@ -34,6 +39,18 @@ public class ZadatakNativePlugin extends Plugin {
         JSObject result = new JSObject();
         result.put("available", id != 0);
         call.resolve(result);
+    }
+
+    @PluginMethod
+    public void openAppSettings(PluginCall call) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getContext().getPackageName(), null));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            getContext().startActivity(intent);
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Postavke se ne mogu otvoriti", error);
+        }
     }
 
     @PluginMethod

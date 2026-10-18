@@ -1,21 +1,20 @@
 // Doseg ponuda: how far from a job a provider may be, from what the job pays (budget + travel
-// allowance). Mirrors public.listing_reach_km (supabase/airtasker/04) — the database is what
-// actually enforces it when an offer is sent; this is for showing it on screens.
+// allowance). Mirrors public.reach_tiers / public.listing_reach_km (supabase/reach/01): to change the
+// distances, change that table on the database and these numbers. The database is what actually
+// enforces it when an offer is sent; this is for showing it on screens.
 import { coordsForLocation, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
 
 export const REACH_TIERS = [
-  { below: 50, km: 15 },
-  { below: 100, km: 25 },
-  { below: 200, km: 40 },
-  { below: 400, km: 70 },
-  { below: 800, km: 120 },
+  { below: 50, km: 10 },
+  { below: 150, km: 25 },
+  { below: 300, km: 50 },
 ]
 export const NO_BUDGET_REACH_KM = 25
 export const TRAVEL_CHIPS = [10, 20, 30, 50]
 export const MAX_TRAVEL_ALLOWANCE = 500
 
 /**
- * km a provider may be from the job, or null for no limit (online, or pays 800 KM+).
+ * km a provider may be from the job, or null for no limit (online, or pays 300 KM+).
  * "Po dogovoru" never drops below the no-budget reach: travel money only widens it.
  */
 export const reachKm = (price, travel) => {

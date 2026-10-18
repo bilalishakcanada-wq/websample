@@ -61,13 +61,21 @@ const POZNATE_GRESKE = [
     test: /PREDALEKO/i,
     // "PREDALEKO: udaljen/a si 56 km, a za ovaj posao ponude mogu slati izvođači do 15 km"
     poruka: (tekst) => {
-      const detalj = (tekst.match(/PREDALEKO:\s*([^\n]+?)(?:\s{2,}|$)/) || [])[1]
-      return `Predaleko si za ovaj posao${detalj ? ` — ${detalj.trim()}` : ''}. Što je posao bolje plaćen (ili klijent plaća put), to izdaleka se mogu slati ponude.`
+      const detalj = (tekst.match(/PREDALEKO:\s*([^.\n]+)/) || [])[1]
+      return `Predaleko si za ovaj posao${detalj ? ` — ${detalj.trim()}` : ''}. Jedino što možeš je zamoliti klijenta da ti plati prevoz (gorivo ili taksi).`
+    },
+  },
+  {
+    test: /MOLBA_NIJE_MOGUCA/i,
+    // "MOLBA_NIJE_MOGUCA: već si poslao/la molbu za ovaj posao"
+    poruka: (tekst) => {
+      const detalj = ((tekst.match(/MOLBA_NIJE_MOGUCA:\s*([^\n]+?)(?:\s{2,}|$)/) || [])[1] || '').trim()
+      return detalj ? `${detalj.charAt(0).toUpperCase()}${detalj.slice(1)}.` : 'Molba za prevoz trenutno nije moguća.'
     },
   },
   {
     test: /GRAD_POTREBAN/i,
-    poruka: 'Dodaj svoj grad u profil — po njemu vidimo koliko si daleko od posla.',
+    poruka: 'Dozvoli lokaciju ili dodaj svoj grad u profil — po tome vidimo koliko si daleko od posla.',
     akcija: { tekst: 'Dodaj grad', href: '/account/profil' },
   },
 ]

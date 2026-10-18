@@ -29,7 +29,7 @@ function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, myPoint = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', simple = false, conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
-    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
+    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab, travelCard = null,
   } = props
   const [menu, setMenu] = useState(false)
   const [question, setQuestion] = useState('')
@@ -57,7 +57,7 @@ function JobDetail(props) {
     : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
         ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
-      : open && tooFar ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko.`]
+      : open && tooFar && offerGate === 'too_far' ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko. Možeš zamoliti klijenta da plati prevoz.`]
       : open && simple ? ['Ovaj posao je slobodan', 'Dodirni plavo dugme ispod da se prijaviš.']
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
@@ -103,6 +103,8 @@ function JobDetail(props) {
           <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
         )}
       </section>
+
+      {travelCard && <div className="jd-travel">{travelCard}</div>}
 
       <section className="jd-sheet">
         <h1 className="jd-title">{listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}{listing.title}</h1>

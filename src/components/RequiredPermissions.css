@@ -1,0 +1,13 @@
+/* "Dozvoli lokaciju i obavijesti" (RequiredPermissions.jsx), on top of the shared .dlg sheet */
+.rp-row { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 10px; border-radius: 16px; background: var(--surface-soft); }
+.rp-row.is-done { background: rgba(25, 179, 123, 0.1); }
+.rp-row.is-denied { background: rgba(239, 68, 68, 0.08); }
+.rp-icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--surface); color: var(--primary-strong); }
+.rp-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.rp-text strong { color: var(--text); }
+.rp-text span { font-size: 0.86rem; line-height: 1.35; color: var(--text-soft); }
+.rp-allow { flex: none; min-height: 40px; padding: 0 16px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 800; }
+.rp-row.is-denied .rp-allow { background: #dc2626; }
+.rp-ok { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--success); color: #fff; }
+.dlg p.rp-help { padding: 10px 12px; border-radius: 12px; background: rgba(239, 68, 68, 0.08); color: #991b1b; font-size: 0.9rem; }
+.rp .dlg-cancel { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }

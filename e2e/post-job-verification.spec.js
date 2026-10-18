@@ -90,6 +90,7 @@ test.describe.serial('Objava posla tek poslije potvrde identiteta', () => {
     await user.getByLabel('Ime i prezime').fill(ime)
     await user.getByLabel('Email adresa').fill(email)
     await user.getByLabel('Lozinka', { exact: true }).fill(PASSWORD)
+    await user.getByRole('checkbox', { name: /prihvatam/ }).check()
     await user.getByRole('button', { name: 'Nastavi' }).click()
     await expect(user).toHaveURL(/\/objavi/, { timeout: 30_000 })
   })

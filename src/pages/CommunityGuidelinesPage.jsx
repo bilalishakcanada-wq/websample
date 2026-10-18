@@ -8,7 +8,7 @@ const RULES = [
   { icon: MessageCircle, title: 'Dogovori se unutar platforme', text: 'Kontakt se razmjenjuje tek nakon prihvaćene ponude — to štiti obje strane od neželjenih poziva i nesporazuma.' },
   { icon: Star, title: 'Ocjenjuj pošteno', text: 'Recenzija opisuje stvarno iskustvo. Lažne, kupljene ili osvetničke recenzije se brišu, a nalog opominje.' },
   { icon: Ban, title: 'Bez zabranjenog sadržaja', text: 'Oružje, droga, falsifikati, piraterija, seksualne usluge i diskriminacija nemaju mjesto ovdje. Oglasi se automatski i ručno provjeravaju.' },
-  { icon: ShieldCheck, title: 'Prijavi, ne prepiri se', text: 'Vidiš problem? Klikni zastavicu na oglasu ili profilu. Tim pregleda svaku prijavu; ozbiljne u roku nekoliko sati.' },
+  { icon: ShieldCheck, title: 'Prijavi, ne prepiri se', text: 'Vidiš problem? Klikni zastavicu na oglasu, profilu ili u razgovoru. Tim pregleda svaku prijavu; ozbiljne u roku nekoliko sati. Ne želiš kontakt s nekim? Blokiraj ga na profilu ili u razgovoru: više ti ne može pisati ni slati ponude.' },
 ]
 
 function CommunityGuidelinesPage() {

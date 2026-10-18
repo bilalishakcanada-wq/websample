@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { BellRing, LogOut } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Ban, BellRing, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
+import { useBlocks } from '../../hooks/useBlocks'
 import { currentSubscription, disablePush, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../../utils/push'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
@@ -17,6 +18,7 @@ function SettingsPage() {
   const [notifyPush, setNotifyPush] = useState(profile.notify_push !== false)
   const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported'
   const [password, setPassword] = useState('')
+  const { blocked, toggle: toggleBlockUser } = useBlocks()
 
   useEffect(() => {
     if (!pushSupported()) { setDevice(pushNeedsInstall() ? 'install' : 'unsupported'); return }
@@ -93,6 +95,22 @@ function SettingsPage() {
           </form>
         )}
         <div className="settings-row"><div><strong>Odjava</strong><span>Odjavi se sa ovog uređaja.</span></div><button type="button" className="ghost-button" onClick={async () => { await logout(); navigate('/') }}><LogOut size={15} /> Odjavi se</button></div>
+      </div>
+
+      <h3 className="account-sub" id="blokirani">Blokirani korisnici</h3>
+      <div className="settings-rows">
+        {blocked.length === 0 && (
+          <div className="settings-row"><div><strong><Ban size={15} /> Nikoga nisi blokirao/la</strong><span>Korisnika blokiraš na njegovom profilu ili u razgovoru (meni ⋯). Blokirani ti ne može slati poruke, ponude ni pitanja.</span></div></div>
+        )}
+        {blocked.map((person) => (
+          <div className="settings-row" key={person.user_id}>
+            <div><strong><Link to={`/korisnik/${person.user_id}`}>{person.display_name}</Link></strong><span>Blokiran/a {formatBosnianDate(person.created_at)}</span></div>
+            <button type="button" className="ghost-button" disabled={busy === `unblock-${person.user_id}`} onClick={async () => {
+              setBusy(`unblock-${person.user_id}`); setError(''); setMessage('')
+              try { if (await toggleBlockUser(person.user_id, person.display_name)) setMessage('Korisnik je odblokiran.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
+            }}>Odblokiraj</button>
+          </div>
+        ))}
       </div>
 
       <h3 className="account-sub">Pravilo #1 — istorija</h3>

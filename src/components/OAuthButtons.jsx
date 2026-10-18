@@ -31,7 +31,7 @@ const PROVIDERS = [
   { id: 'facebook', name: 'Facebook', Icon: FacebookIcon },
 ]
 
-function OAuthButtons({ verb = 'Nastavi', onError }) {
+function OAuthButtons({ verb = 'Nastavi', onError, canStart }) {
   const { loginWithProvider } = useAuth()
   const [enabled, setEnabled] = useState([])
   const [pending, setPending] = useState('')
@@ -58,6 +58,7 @@ function OAuthButtons({ verb = 'Nastavi', onError }) {
   if (enabled.length === 0) return null
 
   const handleClick = async (providerId) => {
+    if (canStart && !canStart()) return
     setPending(providerId)
     try {
       await loginWithProvider(providerId)

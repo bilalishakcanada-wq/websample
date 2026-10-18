@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { publicError, sanitizeText } from '../utils/validation'
+import { prepoznajGresku, publicError, sanitizeText } from '../utils/validation'
 
 /** Public Q&A under a job: anyone signed in can ask, the owner answers in the same thread. */
 export const questionService = {
@@ -28,7 +28,7 @@ export const questionService = {
       .single()
     if (error) {
       console.error('question insert failed', error.message)
-      throw new Error(error.message?.includes('moderat') ? 'Pitanje sadrži sadržaj koji nije dozvoljen.' : 'Pitanje nije poslano. Pokušaj ponovo.')
+      throw prepoznajGresku(error) || new Error(error.message?.includes('moderat') ? 'Pitanje sadrži sadržaj koji nije dozvoljen.' : 'Pitanje nije poslano. Pokušaj ponovo.')
     }
     return data
   },

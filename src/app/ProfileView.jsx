@@ -18,7 +18,7 @@ const Stars = ({ value, size = 15 }) => {
 }
 
 /** Phone public profile: "UPOZNAJ" + big name, rating, review cards, then a sticky call to action. */
-function ProfileView({ bundle, user, onReport }) {
+function ProfileView({ bundle, user, onReport, onBlock, blocked = false }) {
   const goBack = useGoBack()
   useFullscreen()
   const quoteEnabled = useQuoteRequestsEnabled()
@@ -39,7 +39,7 @@ function ProfileView({ bundle, user, onReport }) {
         {!isOwn && user && (
           <>
             <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>
-            {menu && <div className="jd-menu" onClick={() => setMenu(false)}><button type="button" onClick={onReport}>Prijavi profil</button></div>}
+            {menu && <div className="jd-menu" onClick={() => setMenu(false)}><button type="button" onClick={onReport}>Prijavi profil</button>{onBlock && <button type="button" onClick={onBlock}>{blocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'}</button>}</div>}
           </>
         )}
         {isOwn && <Link to="/account/profil" className="jd-link">Uredi</Link>}

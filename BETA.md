@@ -51,13 +51,8 @@ Svaki push na `main` (ili ručno: GitHub → *Actions* → **Android app** → *
 Na telefonu: preuzmi → otvori → „Dozvoli instalaciju iz ovog izvora“ → Instaliraj. Nova verzija se instalira preko stare (kad su postavljeni GitHub secrets `ANDROID_BETA_KEYSTORE_BASE64` i `ANDROID_BETA_KEYSTORE_PASSWORD`, svaka beta je potpisana istim ključem). Ko je beta instalirao prije ove promjene, mora je jednom deinstalirati.
 
 ### Android — Google Play (interno testiranje)
-1. [Google Play Console](https://play.google.com/console) — nalog razvijača (jednokratno 25 USD) → *Create app* → Zadatak.
-2. Napravi ključ za potpis (jednom, čuvaj ga!):
-   ```bash
-   keytool -genkeypair -v -keystore zadatak-release.keystore -alias zadatak -keyalg RSA -keysize 2048 -validity 10000
-   ```
-3. GitHub → repo *Settings → Secrets and variables → Actions* → dodaj: `ANDROID_KEYSTORE_BASE64` (`base64 -i zadatak-release.keystore | pbcopy`), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (=`poso`), `ANDROID_KEY_PASSWORD`.
-4. Pokreni workflow → u *Releases* se pojavi i `zadatak-release.aab` → Play Console → *Testing → Internal testing → Create release* → upload `.aab` → dodaj emailove testera → podijeli link.
+Sve što Google Play traži, odgovori za Play Console i koraci za vlasnika su u [`docs/google-play.md`](docs/google-play.md).
+Upload ključ je već napravljen (projektni fajlovi, `android-play-key/`); tajne su `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_PASSWORD` i `ANDROID_KEY_ALIAS` (=`zadatak`).
 
 ### iOS — TestFlight
 1. [Apple Developer Program](https://developer.apple.com/programs/) (99 USD/god) + [App Store Connect](https://appstoreconnect.apple.com) → *My Apps → +* → Zadatak, Bundle ID `ba.poso.app`.

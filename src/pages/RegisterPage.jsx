@@ -31,6 +31,8 @@ function RegisterPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState('')
+  // Google Play (UGC policy): the terms are accepted explicitly before anyone posts or messages
+  const [accepted, setAccepted] = useState(false)
   const offersServices = accountType === 'provider' || accountType === 'both'
 
   const toggleTrade = (name) => {
@@ -132,6 +134,10 @@ function RegisterPage() {
             </div>
           )}
         </div>
+        <label className="auth-accept">
+          <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required />
+          <span>Imam 18 ili više godina i prihvatam <Link to="/pravila">Pravila i uslove</Link>, <Link to="/pravila-zajednice">Pravila zajednice</Link> i <Link to="/privatnost">Politiku privatnosti</Link>.</span>
+        </label>
         {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
         {error && <div className="form-error">{error}{error === EMAIL_DOWN && <> <Link to="/kontakt?tema=account">Otvori Kontakt</Link></>}</div>}
         <button data-testid="register-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
@@ -143,7 +149,7 @@ function RegisterPage() {
         Već imaš račun? <Link to={`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`}>Prijavi se</Link>
       </p>
 
-      <OAuthButtons verb="Registruj se" onError={setError} />
+      <OAuthButtons verb="Registruj se" onError={setError} canStart={() => accepted || (setError('Prvo označi da prihvataš pravila i da imaš 18 ili više godina.'), false)} />
     </AuthLayout>
   )
 }

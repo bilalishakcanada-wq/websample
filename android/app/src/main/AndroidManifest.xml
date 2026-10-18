@@ -7,7 +7,9 @@
         </intent>
     </queries>
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -47,6 +49,9 @@
 
     <!-- Permissions -->
 
+    <!-- Google Play: only what the app uses. Every permission is listed with its reason in
+         docs/google-play.md (Data safety answers). No background location, no media/storage access:
+         photos come through the system picker or the in-app camera. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- CAMERA + location: the on-site photo proof (ProofCamera) takes the picture inside the app, never from the
          gallery, and stamps it with GPS and UTC time. Capacitor asks for both only when that screen opens. -->
@@ -54,6 +59,5 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

@@ -7,8 +7,9 @@ android {
         applicationId "ba.poso.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        // CI stamps both from the run number (Google Play needs a higher versionCode on every upload)
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -21,6 +22,9 @@ android {
     // ANDROID_BETA_KEYSTORE_BASE64 secret; it is never committed. Not the Google Play key: that one
     // stays in the ANDROID_KEYSTORE_* secrets.
     def betaKeystore = file("beta.keystore")
+    // Google Play upload key (Play App Signing re-signs for users). CI writes the file from
+    // ANDROID_KEYSTORE_BASE64; without it the release build stays unsigned and Play refuses it.
+    def releaseKeystore = file("zadatak-release.keystore")
     signingConfigs {
         beta {
             storeFile betaKeystore
@@ -28,12 +32,19 @@ android {
             keyAlias "androiddebugkey"
             keyPassword System.getenv("ANDROID_BETA_KEYSTORE_PASSWORD") ?: "android"
         }
+        release {
+            storeFile releaseKeystore
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+        }
     }
     buildTypes {
         debug {
             if (betaKeystore.exists()) signingConfig signingConfigs.beta
         }
         release {
+            if (releaseKeystore.exists()) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

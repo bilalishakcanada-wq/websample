@@ -38,6 +38,12 @@
             </intent-filter>
         </activity>
 
+        <!-- how phone notifications look: the one-colour Zadatak icon in the status bar, tinted brand blue,
+             in the "Poruke, ponude i poslovi" category (MainActivity creates it) -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_notification" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/zadatakBlue" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="zadatak-updates" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -58,6 +64,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- phone notifications (new message, offer, payment); Android 13+ asks the user once, when they turn them on -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

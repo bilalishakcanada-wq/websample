@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BellRing } from 'lucide-react'
 import { useAccount } from './AccountLayout'
-import { currentSubscription, disablePush, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../../utils/push'
-import { isNativeApp } from '../../utils/native'
+import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
 
 const WHAT = [
   ['Ponude i poslovi', 'Nova ponuda, prihvaćena ponuda, pitanja uz tvoj posao'],
@@ -21,10 +20,9 @@ function NotificationPrefsPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (isNativeApp()) { setDevice('native'); return }
-    if (!pushSupported()) { setDevice(pushNeedsInstall() ? 'install' : 'unsupported'); return }
-    if (pushPermission() === 'denied') { setDevice('blocked'); return }
-    currentSubscription().then((sub) => setDevice(sub ? 'on' : 'off'))
+    let alive = true
+    pushDeviceState().then((state) => { if (alive) setDevice(state) })
+    return () => { alive = false }
   }, [])
 
   const save = async (patch) => {
@@ -55,10 +53,10 @@ function NotificationPrefsPage() {
             <span>
               {device === 'on' && 'Prima push obavijesti.'}
               {device === 'off' && 'Još ne prima obavijesti.'}
-              {device === 'blocked' && 'Blokirane u postavkama — dozvoli obavijesti za Zadatak pa pokušaj ponovo.'}
+              {device === 'blocked' && 'Blokirane u postavkama telefona ili preglednika. Dozvoli obavijesti za Zadatak pa pokušaj ponovo.'}
               {device === 'install' && 'Na iPhoneu prvo dodaj Zadatak na početni ekran, pa uključi ovdje.'}
               {device === 'unsupported' && 'Ovaj preglednik ne podržava push.'}
-              {device === 'native' && 'Obavijesti u aplikaciji stižu u sljedećoj verziji — do tada ih vidiš u zvonu.'}
+              {device === 'native' && 'Obavijesti na telefonu stižu u sljedećoj verziji aplikacije. Do tada ih vidiš u zvonu.'}
               {device === 'loading' && '…'}
             </span>
           </div>

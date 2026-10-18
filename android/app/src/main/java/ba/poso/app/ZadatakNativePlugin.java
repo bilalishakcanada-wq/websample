@@ -15,7 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Small bridge for what Capacitor's own plugins don't cover:
  *  - confirmIdentity: the system fingerprint / face / screen-lock dialog before money leaves escrow;
- *  - systemColors: the Android 12+ wallpaper accent (Material You), so the app can tint small details with it.
+ *  - systemColors: the Android 12+ wallpaper accent (Material You), so the app can tint small details with it;
+ *  - pushInfo: whether this build has Firebase (google-services.json), so the site only offers phone
+ *    notifications when they can work (registering without Firebase would crash the app).
  * The site calls it as window.Capacitor.Plugins.ZadatakNative (src/utils/biometric.js, src/utils/native.js).
  */
 @CapacitorPlugin(name = "ZadatakNative")
@@ -24,6 +26,15 @@ public class ZadatakNativePlugin extends Plugin {
     // fingerprint/face (any class) or, when none is set up, the phone's PIN/pattern/password
     private static final int AUTHENTICATORS =
         BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
+    @PluginMethod
+    public void pushInfo(PluginCall call) {
+        // the google-services Gradle plugin adds this string only when google-services.json was in the build
+        int id = getContext().getResources().getIdentifier("google_app_id", "string", getContext().getPackageName());
+        JSObject result = new JSObject();
+        result.put("available", id != 0);
+        call.resolve(result);
+    }
 
     @PluginMethod
     public void biometricInfo(PluginCall call) {

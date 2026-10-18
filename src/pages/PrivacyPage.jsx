@@ -104,6 +104,7 @@ function PrivacyPage() {
             <li><strong>Kamera:</strong> slikanje urađenog posla (foto-dokaz) i slika za profil, oglas ili poruku. Slike se šalju samo kad ih ti pošalješ.</li>
             <li><strong>Lokacija (precizna, samo dok je aplikacija otvorena):</strong> mjesto i vrijeme na foto-dokazu i „Krećem“ (klijent vidi izvođača na mapi dok ne stigne). Lokaciju u pozadini ne tražimo i ne pratimo.</li>
             <li><strong>Otisak prsta ili lice:</strong> potvrda prije isplate ili oslobađanja novca. Otisak i lice ostaju u telefonu; mi dobijemo samo „potvrđeno“ ili „nije“.</li>
+            <li><strong>Obavijesti:</strong> nova poruka, ponuda, prihvaćen posao ili plaćanje i kad aplikacija nije otvorena. Traže se tek kad ih uključiš. Za slanje telefon dobije anonimni token od Googlea (Firebase), koji čuvamo uz tvoj nalog i brišemo kad se odjaviš ili isključiš obavijesti.</li>
             <li><strong>Internet:</strong> da aplikacija radi.</li>
           </ul>
           <p>Galeriju otvara sistemski birač slika, pa aplikacija ne dobija pristup ostalim slikama u telefonu. Prijava se ne prenosi u rezervne kopije telefona.</p>

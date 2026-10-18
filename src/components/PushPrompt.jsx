@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BellRing, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { currentSubscription, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../utils/push'
+import { enablePush, pushDeviceState, pushPermission } from '../utils/push'
 import { toast } from './Toaster'
 
 const DISMISS_KEY = 'zadatak-push-prompt-dismissed'
@@ -17,10 +17,10 @@ function PushPrompt({ compact = false, reason = 'Saznaj odmah kad stigne ponuda 
 
   useEffect(() => {
     let alive = true
-    if (!user || !pushSupported() || pushNeedsInstall()) return undefined
-    if (pushPermission() !== 'default') return undefined
+    if (!user) return undefined
     try { if (localStorage.getItem(DISMISS_KEY)) return undefined } catch { /* ignore */ }
-    currentSubscription().then((sub) => { if (alive && !sub) setVisible(true) })
+    // only someone who has not decided yet: allowed-but-switched-off and blocked devices are left alone
+    pushDeviceState().then((state) => { if (alive && state === 'off' && pushPermission() === 'default') setVisible(true) })
     return () => { alive = false }
   }, [user])
 
@@ -36,7 +36,7 @@ function PushPrompt({ compact = false, reason = 'Saznaj odmah kad stigne ponuda 
     try {
       const result = await enablePush()
       if (result === 'granted') { toast('Obavijesti su uključene na ovom uređaju.', { kind: 'success' }); setVisible(false) }
-      else if (result === 'denied') { toast('Obavijesti su blokirane u pregledniku — uključi ih u postavkama sajta.', { kind: 'error' }); setVisible(false) }
+      else if (result === 'denied') { toast('Obavijesti su blokirane — dozvoli ih za Zadatak u postavkama telefona ili preglednika.', { kind: 'error' }); setVisible(false) }
     } catch (error) {
       toast(error.message || 'Nije uspjelo uključivanje obavijesti.', { kind: 'error' })
     } finally {

@@ -5,39 +5,65 @@ import { isNativeApp } from '../utils/native'
 import { openAppSettings, permissionStatus, permissionsOk, requestLocation, requestNotifications } from '../utils/permissions'
 import './RequiredPermissions.css'
 
-const WHY = {
-  account: 'Prije pravljenja računa dozvoli lokaciju i obavijesti. Bez toga Zadatak ne može raditi kako treba.',
-  post: 'Prije objave posla dozvoli lokaciju i obavijesti. Tako majstori u blizini dobiju tvoj posao, a ti odmah saznaš za ponude.',
+const passes = (state) => state === 'granted' || state === 'unsupported'
+
+const STEPS = {
+  location: {
+    icon: MapPin,
+    title: 'Poveži svoju lokaciju',
+    text: {
+      account: 'Zadatak po lokaciji zna koliko si daleko od posla, pokazuje poslove u blizini i majstoru olakšava da dođe.',
+      post: 'Po lokaciji tvoj posao vide majstori u blizini, a oni koji su daleko te mogu samo zamoliti da platiš prevoz.',
+    },
+    note: 'Koristi se samo dok je Zadatak otvoren, nikad u pozadini.',
+    ask: requestLocation,
+  },
+  notifications: {
+    icon: BellRing,
+    title: 'Uključi obavijesti',
+    text: {
+      account: 'Da ti ništa ne promakne: nove ponude, poruke, molbe za prevoz i plaćanja stižu odmah, i kad je aplikacija zatvorena.',
+      post: 'Čim majstor pošalje ponudu ili poruku, javićemo ti odmah, i kad je aplikacija zatvorena.',
+    },
+    note: 'Možeš ih uvijek isključiti u postavkama.',
+    ask: requestNotifications,
+  },
+}
+const ORDER = ['location', 'notifications']
+
+const blockedHelp = (kind) => {
+  const what = kind === 'location' ? 'Lokaciju' : 'Obavijesti'
+  return isNativeApp()
+    ? `Odbijeno je jednom, pa telefon više ne pita sam. Dodirni „Otvori postavke“, uključi ${what} za Zadatak i vrati se ovdje.`
+    : `Odbijeno je jednom, pa preglednik više ne pita sam. Dodirni ikonu lijevo od adrese stranice (katanac), uključi ${what} i dodirni „Provjeri ponovo“.`
 }
 
-const blockedHelp = () => (isNativeApp()
-  ? 'Android ne pita ponovo kad se jednom odbije. Otvori postavke aplikacije Zadatak, uključi dozvolu i vrati se ovdje.'
-  : 'Preglednik ne pita ponovo kad se jednom odbije. Klikni na ikonu lijevo od adrese stranice (katanac), dozvoli Lokaciju i Obavijesti, pa dodirni „Provjeri ponovo“.')
-
-function Row({ icon: Icon, title, text, state, busy, onAllow, testId }) {
-  const done = state === 'granted'
+/** The picture on each step: the icon in rings, plus what it brings (a pin on a map, a notification card). */
+function Art({ kind }) {
+  const Icon = STEPS[kind]?.icon || Check
   return (
-    <div className={`rp-row ${done ? 'is-done' : ''} ${state === 'denied' ? 'is-denied' : ''}`}>
-      <span className="rp-icon"><Icon size={20} /></span>
-      <div className="rp-text">
-        <strong>{title}</strong>
-        <span>{state === 'unsupported' ? 'Ovaj uređaj ne podržava, obavijesti stižu u aplikaciju i na email.' : text}</span>
-      </div>
-      {done || state === 'unsupported'
-        ? <span className="rp-ok" aria-label="Dozvoljeno"><Check size={18} /></span>
-        : <button type="button" className="rp-allow" data-testid={testId} onClick={onAllow} disabled={busy}>{busy ? '…' : state === 'denied' ? 'Blokirano' : 'Dozvoli'}</button>}
+    <div className={`rp-art is-${kind}`} aria-hidden="true">
+      <span className="rp-ring rp-ring-3" />
+      <span className="rp-ring rp-ring-2" />
+      <span className="rp-ring rp-ring-1" />
+      <span className="rp-badge"><Icon size={44} strokeWidth={2.2} /></span>
+      {kind === 'notifications' && (
+        <span className="rp-toast"><b>Nova ponuda · 40 KM</b><small>Majstor Emir može doći sutra</small></span>
+      )}
+      {kind === 'location' && <span className="rp-chip">U blizini · 3 km</span>}
     </div>
   )
 }
 
 /**
- * "Dozvoli lokaciju i obavijesti": the explanation comes first, then each system dialog only on a tap
- * (Google Play: prominent disclosure before the runtime prompt). Refusing never locks the app:
- * the sheet explains how to turn it on, and "Ne sada" only cancels this one action.
+ * "Poveži lokaciju" → "Uključi obavijesti", one screen at a time like WhatsApp: the explanation first,
+ * and "Nastavi" opens the system's own dialog right away (Google Play: prominent disclosure before the
+ * runtime prompt). When it is allowed the next step comes on its own. Refusing never locks the app:
+ * the step explains how to turn it on, and "Ne sada" only cancels this one action.
  */
 export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }) {
   const [status, setStatus] = useState(null)
-  const [busy, setBusy] = useState('')
+  const [busy, setBusy] = useState(false)
   const refresh = useCallback(() => permissionStatus().then(setStatus), [])
 
   useEffect(() => {
@@ -49,40 +75,54 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
     return () => { document.removeEventListener('visibilitychange', again); window.removeEventListener('focus', again) }
   }, [refresh])
 
-  const ask = async (kind) => {
-    setBusy(kind)
+  const step = status ? ORDER.find((kind) => !passes(status[kind])) || 'done' : null
+  const denied = step && step !== 'done' && status[step] === 'denied'
+  const index = step === 'done' ? ORDER.length : ORDER.indexOf(step)
+
+  const ask = async () => {
+    setBusy(true)
     try {
-      const state = kind === 'location' ? await requestLocation() : await requestNotifications()
-      setStatus((current) => ({ ...current, [kind]: state }))
+      const state = await STEPS[step].ask()
+      const next = { ...status, [step]: state }
+      setStatus(next)
+      // both allowed by the person's own taps: carry on with what they were doing, no extra tap
+      if (permissionsOk(next)) onDone()
     } finally {
-      setBusy('')
+      setBusy(false)
     }
   }
 
-  const ready = permissionsOk(status)
-  const denied = status && (status.location === 'denied' || status.notifications === 'denied')
-
+  const info = STEPS[step]
   return (
-    <div className="dlg-backdrop" onClick={onClose} role="presentation">
-      <div className="dlg rp" role="dialog" aria-modal="true" aria-labelledby="rp-title" data-testid="required-permissions" onClick={(event) => event.stopPropagation()}>
-        <span className="dlg-handle" aria-hidden="true" />
-        <h2 id="rp-title">Dozvoli lokaciju i obavijesti</h2>
-        <p>{WHY[reason] || WHY.account}</p>
-        <Row
-          icon={MapPin} title="Lokacija" testId="allow-location" state={status?.location} busy={busy === 'location'} onAllow={() => ask('location')}
-          text="Po njoj mjerimo koliko si daleko od posla (doseg ponuda) i pokazujemo poslove u blizini. Koristi se samo dok je Zadatak otvoren, nikad u pozadini."
-        />
-        <Row
-          icon={BellRing} title="Obavijesti" testId="allow-notifications" state={status?.notifications} busy={busy === 'notifications'} onAllow={() => ask('notifications')}
-          text="Da odmah saznaš za nove ponude, poruke, molbe za prevoz i plaćanja."
-        />
-        {denied && <p className="rp-help">{blockedHelp()}</p>}
-        <div className="dlg-actions">
-          <button type="button" className="dlg-confirm" data-testid="permissions-continue" disabled={!ready} onClick={onDone}>Nastavi</button>
-          {denied && isNativeApp() && <button type="button" className="dlg-cancel" onClick={() => openAppSettings()}><Settings size={16} /> Otvori postavke</button>}
-          {denied && <button type="button" className="dlg-cancel" onClick={refresh}>Provjeri ponovo</button>}
-          <button type="button" className="dlg-cancel" onClick={onClose}>Ne sada</button>
+    <div className="rp-screen" role="dialog" aria-modal="true" aria-labelledby="rp-title" data-testid="required-permissions">
+      <div className="rp-dots" aria-label={step ? `Korak ${Math.min(index + 1, ORDER.length)} od ${ORDER.length}` : undefined}>
+        {ORDER.map((kind, i) => <span key={kind} className={i < index ? 'is-done' : i === index ? 'is-on' : ''} />)}
+      </div>
+      {step && (
+        <div className="rp-body" key={step}>
+          <Art kind={step} />
+          {step === 'done' ? (
+            <>
+              <h1 id="rp-title">Sve je povezano</h1>
+              <p>Lokacija i obavijesti su uključene. Možeš nastaviti.</p>
+            </>
+          ) : (
+            <>
+              <h1 id="rp-title">{info.title}</h1>
+              <p>{info.text[reason] || info.text.account}</p>
+              {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{info.note}</p>}
+            </>
+          )}
         </div>
+      )}
+      <div className="rp-actions">
+        {step === 'done' && <button type="button" className="rp-primary" data-testid="permissions-continue" onClick={onDone}>Nastavi</button>}
+        {step && step !== 'done' && !denied && (
+          <button type="button" className="rp-primary" data-testid="permissions-allow" onClick={ask} disabled={busy}>{busy ? 'Čekam odgovor…' : 'Nastavi'}</button>
+        )}
+        {denied && isNativeApp() && <button type="button" className="rp-primary" onClick={() => openAppSettings()}><Settings size={18} /> Otvori postavke</button>}
+        {denied && <button type="button" className={isNativeApp() ? 'rp-secondary' : 'rp-primary'} onClick={refresh}>Provjeri ponovo</button>}
+        <button type="button" className="rp-link" onClick={onClose}>Ne sada</button>
       </div>
     </div>
   )
@@ -92,7 +132,7 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
  * const permissions = useRequiredPermissions('post')
  * if (!(await permissions.ensure())) return     // in the submit handler
  * {permissions.sheet}                            // in the page
- * ensure() resolves true right away when both are already allowed, otherwise after the sheet.
+ * ensure() resolves true right away when both are already allowed, otherwise after the screen.
  */
 export function useRequiredPermissions(reason = 'account') {
   const [open, setOpen] = useState(false)

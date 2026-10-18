@@ -77,10 +77,12 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
     await page.getByTestId('register-submit').click()
     const sheet = page.getByTestId('required-permissions')
     await expect(sheet).toBeVisible()
-    await expect(sheet.getByTestId('permissions-continue')).toBeDisabled()
-    // the person allows both (here: the browser setting), the sheet sees it when the page gets focus back
+    await expect(sheet.getByRole('heading', { name: 'Poveži svoju lokaciju' })).toBeVisible()
+    await expect(sheet.getByTestId('permissions-continue')).toHaveCount(0)
+    // the person allows both (here: the browser setting), the screen sees it when the page gets focus back
     await ctx.grantPermissions(['geolocation', 'notifications'])
     await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+    await expect(sheet.getByRole('heading', { name: 'Sve je povezano' })).toBeVisible()
     await expect(sheet.getByTestId('permissions-continue')).toBeEnabled()
     await sheet.getByRole('button', { name: 'Ne sada' }).click()
     await expect(sheet).toHaveCount(0)

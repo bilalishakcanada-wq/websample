@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
-import { cityCoordinates, knowsPlace, rememberPlace } from '../data/cityCoordinates'
+import { cityCoordinates, distanceKm, knowsPlace, rememberPlace } from '../data/cityCoordinates'
 
 // Settlements of BiH (public.bih_locations). Answers are cached per query for the visit, so typing back
 // and forth never asks twice, and every place seen is remembered with its point (see cityCoordinates.js).
@@ -46,5 +46,30 @@ export const locationService = {
         .finally(() => pending.delete(text)))
     }
     return pending.get(text)
+  },
+  /**
+   * The settlement a street address belongs to: { place: "Ilirska 1, Butmir, Ilidža", lat, lng } from the
+   * geocoder → "Butmir, Ilidža" (the nearest settlement with one of the names in the address, within 15 km),
+   * else the nearest town the app knows. That is what everyone sees; the street stays private.
+   */
+  async settlementFor(address) {
+    const names = [...new Set(String(address?.place || '').split(',').map((part) => part.trim()).filter(Boolean))]
+    for (const name of names) {
+      let found = []
+      try { found = await this.search(name, { limit: 8 }) } catch { /* try the next name */ }
+      let best = null
+      for (const place of found) {
+        if (place.lat == null) continue
+        const km = distanceKm(address, place)
+        if (km <= 15 && (!best || km < best.km)) best = { km, label: place.label }
+      }
+      if (best) return best.label
+    }
+    let nearest = null
+    for (const [label, [lat, lng]] of Object.entries(cityCoordinates)) {
+      const km = distanceKm(address, { lat, lng })
+      if (!nearest || km < nearest.km) nearest = { km, label }
+    }
+    return nearest?.label || ''
   },
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Map as MapLibreMap, NavigationControl, LngLatBounds, Popup, setWorkerUrl } from 'maplibre-gl'
+import { Map as MapLibreMap, Marker, NavigationControl, LngLatBounds, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { latinLabels, MAP_STYLE_URL } from '../utils/mapStyle'
 // MapLibre 6 finds its worker next to its own module URL — after bundling that file no
@@ -33,7 +33,11 @@ const toGeoJSON = (listings) => ({
 const splitPromoted = (listings) => [listings.filter((item) => !item.promo), listings.filter((item) => item.promo)]
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-function TaskMap({ listings, activeId, onSelect, focus }) {
+/**
+ * origin ({ lat, lng }) is where the search measures distance from (a town, "Blizu mene" or a typed
+ * address): it gets its own pin, which can be dragged, and onOriginMove gets the new { lat, lng }.
+ */
+function TaskMap({ listings, activeId, onSelect, focus, origin = null, originLabel = '', onOriginMove }) {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const readyRef = useRef(false)
@@ -41,6 +45,9 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
   const vipCountRef = useRef(0)
   const onSelectRef = useRef(onSelect)
   useEffect(() => { onSelectRef.current = onSelect }, [onSelect])
+  const originRef = useRef(null)
+  const onOriginMoveRef = useRef(onOriginMove)
+  useEffect(() => { onOriginMoveRef.current = onOriginMove }, [onOriginMove])
 
   useEffect(() => {
     if (mapRef.current || !containerRef.current) return undefined
@@ -286,6 +293,31 @@ function TaskMap({ listings, activeId, onSelect, focus }) {
     }
     return () => { popupRef.current?.remove() }
   }, [activeId, listings])
+
+  // the search origin pin: follows the picked place, and a drag moves the search there
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (!origin) { originRef.current?.remove(); originRef.current = null; return }
+    if (!originRef.current) {
+      const el = document.createElement('div')
+      el.className = 'task-map-origin'
+      el.setAttribute('role', 'img')
+      const marker = new Marker({ element: el, draggable: true, anchor: 'bottom' }).setLngLat([origin.lng, origin.lat]).addTo(map)
+      marker.on('dragend', () => {
+        const { lat, lng } = marker.getLngLat()
+        onOriginMoveRef.current?.({ lat, lng })
+      })
+      originRef.current = marker
+    } else {
+      originRef.current.setLngLat([origin.lng, origin.lat])
+    }
+    const el = originRef.current.getElement()
+    const title = originLabel ? `${originLabel} · povuci iglu da promijeniš mjesto` : 'Povuci iglu da promijeniš mjesto'
+    el.title = title
+    el.setAttribute('aria-label', title)
+  }, [origin, originLabel])
+  useEffect(() => () => { originRef.current?.remove(); originRef.current = null }, [])
 
   return <div ref={containerRef} className="task-map" aria-label="Mapa oglasa" />
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- brand navy: window and launch background, so the app never flashes white while the site loads -->
+    <!-- brand navy: window background, so the app never flashes white while the site loads -->
     <color name="zadatakNavy">#0D2A52</color>
+    <!-- brand blue (same as the icon and favicon): launch screen and the accent of every notification -->
+    <color name="zadatakBlue">#1F5FFF</color>
 </resources>

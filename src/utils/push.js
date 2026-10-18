@@ -1,12 +1,15 @@
 import { isNativeApp } from './native'
 import { supabase } from '../lib/supabase'
+import { disableNativePush, enableNativePush, isNativePushApp, nativePushChecked, nativePushPermission, nativePushReady, nativeSubscription, syncNativePush } from './nativePush'
 
 // Public VAPID key (safe to ship); the private half lives in Supabase Vault.
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BBHM1vtFJ3QAM8sIEsyHT2Zse7E5tFGMiLTsKMC_GgnskUgUY2V7RCqsK_mRhY2aBUOip20FOFNwNVQ-b9zYztk'
 
-/** Browser can do Web Push at all (on iOS only once the app is installed to the home screen). */
-export const pushSupported = () =>
+const webPushSupported = () =>
   typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+
+/** Browser can do Web Push at all (on iOS only once the app is installed to the home screen); in the Android app: phone notifications. */
+export const pushSupported = () => (isNativePushApp() ? nativePushReady() : webPushSupported())
 
 /** iOS Safari needs the PWA installed before push works. */
 export const pushNeedsInstall = () => {
@@ -17,7 +20,7 @@ export const pushNeedsInstall = () => {
   return ios && !standalone
 }
 
-export const pushPermission = () => (pushSupported() ? Notification.permission : 'unsupported')
+export const pushPermission = () => (isNativePushApp() ? (nativePushReady() ? nativePushPermission() : 'unsupported') : webPushSupported() ? Notification.permission : 'unsupported')
 
 const urlBase64ToUint8Array = (base64) => {
   const padding = '='.repeat((4 - (base64.length % 4)) % 4)
@@ -32,6 +35,7 @@ const registration = async () => {
 
 /** Current subscription of this device, if any. */
 export async function currentSubscription() {
+  if (isNativePushApp()) return nativeSubscription()
   if (!pushSupported()) return null
   try {
     const reg = await registration()
@@ -57,6 +61,7 @@ const save = async (subscription) => {
  * Returns 'granted' | 'denied' | 'unsupported'.
  */
 export async function enablePush() {
+  if (isNativePushApp()) return enableNativePush()
   if (!pushSupported()) return 'unsupported'
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') return permission
@@ -73,6 +78,7 @@ export async function enablePush() {
 
 /** Re-save the existing subscription (after login on a device that already allowed push). */
 export async function syncPush() {
+  if (isNativePushApp()) return syncNativePush()
   const subscription = await currentSubscription()
   if (subscription && Notification.permission === 'granted') {
     try { await save(subscription) } catch { /* offline or signed out — try next time */ }
@@ -81,9 +87,24 @@ export async function syncPush() {
 
 /** Remove this device (used by the settings toggle and on sign-out). */
 export async function disablePush({ keepDevice = false } = {}) {
+  if (isNativePushApp()) return disableNativePush({ keepDevice })
   const subscription = await currentSubscription()
   if (!subscription) return
   try { await supabase.rpc('delete_push_subscription', { p_endpoint: subscription.endpoint }) } catch { /* ignore */ }
   if (!keepDevice) { try { await subscription.unsubscribe() } catch { /* ignore */ } }
   try { localStorage.removeItem('zadatak-push') } catch { /* ignore */ }
+}
+
+/**
+ * What the "obavijesti na ovom uređaju" switch shows: 'on' | 'off' | 'blocked' | 'install' | 'unsupported'
+ * | 'native' (an app build that cannot deliver notifications yet).
+ */
+export async function pushDeviceState() {
+  if (isNativePushApp()) {
+    await nativePushChecked()
+    if (!nativePushReady()) return 'native'
+  } else if (isNativeApp()) return 'native'
+  if (!pushSupported()) return pushNeedsInstall() ? 'install' : 'unsupported'
+  if (pushPermission() === 'denied') return 'blocked'
+  return (await currentSubscription()) ? 'on' : 'off'
 }

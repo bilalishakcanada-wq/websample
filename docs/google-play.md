@@ -12,7 +12,7 @@ Odgovori za Play Console su ispod, da se samo prepišu.
 | Play App Signing | ⏳ vlasnik uključi pri prvom uploadu (zadano je uključeno) | Play Console |
 | `versionCode` raste sa svakim uploadom | ✅ broj GitHub builda (`versionName` = `1.0.<broj>`) | workflow |
 | 16 KB veličina stranice (Android 15+) | ✅ aplikacija nema svojih `.so` biblioteka; CI provjerava `zipalign -P 16` | workflow |
-| Samo potrebne dozvole, svaka objašnjena | ✅ uklonjena `POST_NOTIFICATIONS` (nema nativnih push obavijesti); CI pada na svaku novu dozvolu koja nije na listi ispod | `AndroidManifest.xml`, tačka 4 |
+| Samo potrebne dozvole, svaka objašnjena | ✅ samo dozvole iz tačke 4 (`POST_NOTIFICATIONS` traži se tek kad korisnik uključi obavijesti); CI pada na svaku novu dozvolu koja nije na listi ispod | `AndroidManifest.xml`, tačka 4 |
 | Politika privatnosti: javni link, bez prijave, nije PDF | ✅ `https://bilalishakcanada-wq.github.io/websample/privatnost` (od sada vraća 200, ne 404) | `src/pages/PrivacyPage.jsx`, `pages.yml` |
 | Brisanje naloga u aplikaciji | ✅ Moj nalog → Profil → „Obriši nalog“ (briše odmah, i fajlove) | `ProfileSettingsPage.jsx`, `supabase/functions/delete-account` |
 | Brisanje naloga preko weba, bez aplikacije | ✅ `…/privatnost#brisanje-naloga` + Kontakt forma | `PrivacyPage.jsx` |
@@ -117,7 +117,7 @@ obrađivači, to se ne broji kao dijeljenje).
 | Files and docs | da | opcionalno | App functionality (licence, potvrde) |
 | App activity → Other user-generated content (oglasi, ponude, recenzije) | da | opcionalno | App functionality |
 | App info and performance → Crash logs / Diagnostics | da | obavezno | Analytics (popravke grešaka) |
-| Device or other IDs | da (push pretplata, IP u zaštiti prijave) | obavezno | Fraud prevention, security |
+| Device or other IDs | da (token za obavijesti na telefonu (Firebase), push pretplata, IP u zaštiti prijave) | obavezno | App functionality (obavijesti), Fraud prevention, security |
 
 Ne prikupljamo: kontakte, kalendar, zdravlje, audio, SMS, web historiju, instalirane aplikacije,
 reklamni ID.
@@ -132,12 +132,22 @@ reklamni ID.
 | `USE_BIOMETRIC`, `USE_FINGERPRINT` (iz `androidx.biometric`) | otisak/lice prije isplate | nikad (obična dozvola) |
 | `VIBRATE` (iz `@capacitor/haptics`) | kratka vibracija na dodir dugmeta | nikad (obična dozvola) |
 | `ACCESS_NETWORK_STATE`, `WAKE_LOCK` | ako ih biblioteka doda: provjera veze | nikad (obične dozvole) |
+| `POST_NOTIFICATIONS` | obavijesti na telefonu: nova poruka, ponuda, prihvaćen posao, plaćanje | Android 13+: kad korisnik dodirne „Uključi obavijesti“ |
+| `com.google.android.c2dm.permission.RECEIVE` (iz Firebase Messaging) | prijem obavijesti preko Googlea | nikad (obična dozvola) |
 
 Nova dozvola u buildu bez reda u ovoj tabeli ruši CI (korak „Google Play checks“): dodaj je ovdje i u
 listu `ALLOWED` u workflowu tek kad je opravdana.
 
-## 5. Kasnije (nije uslov za objavu)
-- **Nativne push obavijesti** (`@capacitor/push-notifications` + Firebase): tada se vraća
-  `POST_NOTIFICATIONS` i u Data safety dodaje „Device or other IDs“ za FCM token.
+## 5. Obavijesti na telefonu (Firebase)
+Aplikacija je spremna: ikona u statusnoj traci (`ic_notification`), plava boja, kategorija
+„Poruke, ponude i poslovi“ (`zadatak-updates`), dodir otvara tačnu stranicu. Baza već šalje svaku obavijest
+na sve telefone korisnika (`push_tokens` → `send-push-notification`). Za uključivanje trebaju dva fajla iz
+besplatnog Firebase projekta (console.firebase.google.com → Add project → Android app `ba.poso.app`):
+1. `google-services.json` (Project settings → General) ide u `android/app/` (ili GitHub tajna `GOOGLE_SERVICES_JSON`);
+2. ključ servisnog naloga (Project settings → Service accounts → Generate new private key) ide u Supabase
+   tajnu Edge funkcija `FCM_SERVICE_ACCOUNT_JSON`.
+Dok njih nema, aplikacija radi isto i u Postavkama piše da obavijesti na telefonu stižu u sljedećoj verziji.
+
+## 6. Kasnije (nije uslov za objavu)
 - **Vlastita domena** (`zadatak.ba`): promijeniti `server.url`, link politike i URL za brisanje u Play Consoleu.
 - **Tableti**: Android 16 na tabletima ignoriše zaključavanje na portret; ekran se tada okreće.

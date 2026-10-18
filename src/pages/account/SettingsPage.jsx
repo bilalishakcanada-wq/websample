@@ -6,7 +6,7 @@ import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useBlocks } from '../../hooks/useBlocks'
-import { currentSubscription, disablePush, enablePush, pushNeedsInstall, pushPermission, pushSupported } from '../../utils/push'
+import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
 
@@ -21,9 +21,9 @@ function SettingsPage() {
   const { blocked, toggle: toggleBlockUser } = useBlocks()
 
   useEffect(() => {
-    if (!pushSupported()) { setDevice(pushNeedsInstall() ? 'install' : 'unsupported'); return }
-    if (pushPermission() === 'denied') { setDevice('blocked'); return }
-    currentSubscription().then((sub) => setDevice(sub ? 'on' : 'off'))
+    let alive = true
+    pushDeviceState().then((state) => { if (alive) setDevice(state) })
+    return () => { alive = false }
   }, [])
 
   const toggleDevice = async () => {
@@ -70,9 +70,10 @@ function SettingsPage() {
             <span>
               {device === 'on' && 'Prima obavijesti.'}
               {device === 'off' && 'Još ne prima obavijesti — uključi ih ovdje.'}
-              {device === 'blocked' && 'Obavijesti su blokirane u pregledniku. Dozvoli ih u postavkama sajta pa pokušaj ponovo.'}
+              {device === 'blocked' && 'Obavijesti su blokirane u postavkama telefona ili preglednika. Dozvoli ih za Zadatak pa pokušaj ponovo.'}
               {device === 'install' && 'Na iPhoneu prvo dodaj Zadatak na početni ekran (Dijeli → Dodaj na početni ekran), pa uključi obavijesti ovdje.'}
               {device === 'unsupported' && 'Ovaj preglednik ne podržava push obavijesti.'}
+              {device === 'native' && 'Obavijesti na telefonu stižu u sljedećoj verziji aplikacije. Do tada ih vidiš u zvonu.'}
               {device === 'loading' && '…'}
             </span>
           </div>

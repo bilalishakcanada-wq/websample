@@ -130,6 +130,7 @@ reklamni ID.
 | `CAMERA` | foto-dokaz urađenog posla, slike za oglas/profil/poruke | kad otvoriš kameru |
 | `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | mjesto na foto-dokazu, „Krećem“ (mapa uživo), samo dok je aplikacija otvorena | kad uključiš tu funkciju |
 | `USE_BIOMETRIC`, `USE_FINGERPRINT` (iz `androidx.biometric`) | otisak/lice prije isplate | nikad (obična dozvola) |
+| `VIBRATE` (iz `@capacitor/haptics`) | kratka vibracija na dodir dugmeta | nikad (obična dozvola) |
 | `ACCESS_NETWORK_STATE`, `WAKE_LOCK` | ako ih biblioteka doda: provjera veze | nikad (obične dozvole) |
 
 Nova dozvola u buildu bez reda u ovoj tabeli ruši CI (korak „Google Play checks“): dodaj je ovdje i u

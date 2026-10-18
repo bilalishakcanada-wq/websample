@@ -8,6 +8,7 @@ import { useLocationSearch } from '../hooks/useLocationSearch'
 import { looksLikeAddress, useAddressSearch } from '../hooks/useAddressSearch'
 import { locationService } from '../services/locationService'
 import { publishListing } from '../services/publishListing'
+import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
 import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
@@ -73,6 +74,7 @@ function PostFlow() {
   // a new job needs an approved ID (editing one already published does not); the flow stays
   // open to fill in and the draft is kept, only publishing waits for the check
   const postGate = usePostGate(user?.id, !editId)
+  const permissions = useRequiredPermissions('post')
   const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // editing and copying start from a job, not the draft, and leave the draft alone
   const freshPost = !editId && !copyId
@@ -199,6 +201,8 @@ function PostFlow() {
     }
     if (postGate === 'needed' || postGate === 'rejected') { saveDraft(form, step, zaParam); navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
+    // a new job goes out only from someone who allowed location and notifications
+    if (!editId && !(await permissions.ensure())) return
     setSaving(true)
     setError('')
     try {
@@ -389,6 +393,7 @@ function PostFlow() {
         )}
       </div>
 
+      {permissions.sheet}
       {cityOpen && <CitySheet value={form.location} onPick={(city, exact) => { update({ location: city, ...(exact ? { exact } : city !== form.location ? { exact: null } : {}) }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
       {catSheet.mounted && (
         <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>

@@ -75,6 +75,7 @@ import NavigationBar from './components/NavigationBar'
 import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
+import LiveReachSync from './components/LiveReachSync'
 import { RouteFallback, RouteGuard } from './components/RouteBoundary'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import DialogHost from './components/DialogHost'
@@ -134,6 +135,7 @@ function App() {
       <ViewTransitions />
       <NativeBack />
       <SwBridge />
+      <LiveReachSync />
       <RealtimeSync />
       <SiteHeader />
       <SupportChatSlot />

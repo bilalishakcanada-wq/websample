@@ -26,7 +26,7 @@ function ReachRadar({ listing, myCity, myPoint = null, isOwner = false, signedIn
   if (isOwner) {
     text = km == null
       ? 'Posao je dobro plaćen, pa ponude mogu slati izvođači iz cijele BiH.'
-      : `Ponude mogu slati izvođači ${reachLabel(km)}. Veći budžet ili plaćen put (gorivo, taksi) proširuje krug.`
+      : `Ponude mogu slati izvođači ${reachLabel(km)}. Veći budžet ili plaćen put (gorivo, taksi) proširuje krug, a izvođači izdaleka ti mogu poslati molbu da platiš prevoz.`
   } else if (!signedIn) {
     text = km == null ? 'Dobro plaćen posao — mogu se javiti izvođači iz cijele BiH.' : `Ponude mogu slati izvođači ${reachLabel(km)}. Što je posao bolje plaćen, to izdaleka se izvođači mogu javiti.`
   } else if (state.status === 'ok') {
@@ -36,7 +36,7 @@ function ReachRadar({ listing, myCity, myPoint = null, isOwner = false, signedIn
   } else if (state.status === 'too_far') {
     tone = 'far'
     title = 'Predaleko za ovaj posao'
-    text = `Udaljen/a si oko ${Math.round(state.distanceKm)} km (${myCity}), a posao prima ponude ${reachLabel(km)}. Za ovu cijenu se ne isplati putovati.`
+    text = `Udaljen/a si oko ${Math.round(state.distanceKm)} km (${myCity}), a posao prima ponude ${reachLabel(km)}. Ponudu ne možeš poslati, ali možeš zamoliti klijenta da ti plati prevoz (gorivo ili taksi).`
   } else if (state.status === 'no_limit') {
     tone = 'ok'
     text = state.distanceKm != null
@@ -45,7 +45,7 @@ function ReachRadar({ listing, myCity, myPoint = null, isOwner = false, signedIn
   } else if (state.status === 'no_city') {
     tone = 'far'
     title = 'Dodaj svoj grad'
-    text = `Posao prima ponude ${reachLabel(km)}. Dodaj grad u profil da vidimo jesi li u dosegu.`
+    text = `Posao prima ponude ${reachLabel(km)}. Dozvoli lokaciju ili dodaj grad u profil da vidimo jesi li u dosegu.`
   } else {
     text = `Ponude mogu slati izvođači ${reachLabel(km)}.`
   }

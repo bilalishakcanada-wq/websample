@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { disablePush, syncPush } from '../utils/push'
+import { syncDeviceLocation } from '../utils/permissions'
 import { authService } from '../services/authService'
 import { trustService } from '../services/trustService'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
@@ -57,7 +58,7 @@ export function AuthProvider({ children }) {
           lastUserId.current = sessionUser?.id ?? null
           setStaffReady(false)
           refreshAdminStatus(sessionUser).finally(() => setStaffReady(true))
-          if (sessionUser) syncPush() // the listener skips INITIAL_SESSION for an account handled here
+          if (sessionUser) { syncPush(); syncDeviceLocation() } // the listener skips INITIAL_SESSION for an account handled here
         }
         // the stored token is checked against the server once: a deleted account (or a revoked
         // session) must not keep browsing as a ghost until the token expires
@@ -91,7 +92,7 @@ export function AuthProvider({ children }) {
       setStaffReady(false)
       refreshAdminStatus(sessionUser).finally(() => setStaffReady(true))
       // a device that already allowed push gets (re)attached to this account
-      if (sessionUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) syncPush()
+      if (sessionUser && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) { syncPush(); syncDeviceLocation() }
       if (event === 'SIGNED_IN') queryClient.invalidateQueries({ queryKey: ['me'] })
     })
 

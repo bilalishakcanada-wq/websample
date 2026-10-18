@@ -26,6 +26,8 @@ export const keys = {
   postGate: (userId) => ['me', userId, 'post-gate'],
   credentials: (userId) => ['me', userId, 'credentials'],
   offerReach: (userId, listingId) => ['me', userId, 'offer-reach', listingId],
+  travelRequests: (listingId, userId) => ['me', userId, 'travel-requests', listingId],
+  reachPoint: (userId) => ['me', userId, 'reach-point'],
   quoteRequests: (userId) => ['me', userId, 'quote-requests'],
   quoteRequestsEnabled: ['feature', 'quote-requests'],
   badgeCatalog: ['badges', 'catalog'],

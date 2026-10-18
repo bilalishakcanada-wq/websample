@@ -63,6 +63,18 @@ export const placeService = {
     return data || null
   },
 
+  /**
+   * The point reach is measured from, like public.reach_point: the device's position (allowed
+   * location, fresh within 30 days), else the profile address. The profile city is the caller's fallback.
+   */
+  async reachPoint(userId) {
+    if (!isSupabaseConfigured || !userId) return null
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: device } = await supabase.from('device_locations').select('lat, lng, updated_at').eq('user_id', userId).gte('updated_at', since).maybeSingle()
+    if (device) return { lat: device.lat, lng: device.lng, source: 'device' }
+    return this.myLocation(userId)
+  },
+
   async setMyLocation(point) {
     const { error } = await supabase.rpc('set_my_location', cleanPoint(point))
     if (error) throw new Error(error.message)

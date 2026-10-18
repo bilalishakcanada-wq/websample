@@ -11,7 +11,7 @@ export const OFFER_CTA = {
   needed: 'Potvrdi identitet za ponudu',
   pending: 'Identitet se provjerava',
   rejected: 'Ponovi verifikaciju',
-  too_far: 'Predaleko za ovaj posao',
+  too_far: 'Zamoli da plati prevoz',
   no_city: 'Dodaj grad u profil',
   missing_badges: 'Osvoji značku za ponudu',
 }

@@ -1,0 +1,26 @@
+/* Molba za plaćen prevoz (TravelRequest.jsx) */
+.tr-kinds, .tr-amounts { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+.tr-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 0 14px; border-radius: 999px; background: var(--surface-soft); color: var(--primary-strong); font-weight: 700; }
+.tr-chip.active { background: var(--accent); color: #fff; }
+.tr-label { display: block; margin-top: 4px; font-weight: 700; color: var(--text); font-size: 0.92rem; }
+.tr-amount { width: 96px; min-height: 42px; margin: 0; padding: 8px 12px; }
+
+.tr-status { display: flex; align-items: flex-start; gap: 12px; padding: 14px; margin: 12px 0; border-radius: 16px; background: var(--surface-alt); color: var(--primary-strong); }
+.tr-status div { display: grid; gap: 2px; }
+.tr-status strong { color: var(--text); }
+.tr-status span { color: var(--text-soft); line-height: 1.4; }
+.tr-status.is-ok { background: rgba(25, 179, 123, 0.12); }
+.tr-status.is-no { background: rgba(239, 68, 68, 0.08); }
+
+.tr-owner { padding: 18px; margin: 12px 0; border-radius: 20px; background: var(--surface); border: 1px solid var(--stroke); }
+.tr-owner h2 { margin: 0 0 4px; font-size: 1.1rem; color: var(--primary-strong); }
+.tr-owner > p { margin: 0 0 12px; color: var(--text-soft); }
+.tr-item { display: grid; gap: 6px; padding: 12px 0; border-top: 1px solid var(--stroke); }
+.tr-item-head { display: flex; justify-content: space-between; gap: 8px; }
+.tr-item-head span { color: var(--text-soft); font-size: 0.9rem; }
+.tr-item-note { margin: 0; color: var(--text-soft); }
+.tr-item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.tr-item-actions button { display: inline-flex; flex: 1 1 140px; width: auto; justify-content: center; align-items: center; gap: 6px; margin: 0; }
+.tr-item-state { font-weight: 700; color: var(--text-soft); }
+.tr-item-state.is-accepted { color: var(--success); }
+.jd-travel { padding: 0 16px; }

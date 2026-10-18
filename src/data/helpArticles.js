@@ -16,7 +16,7 @@ export const HELP_ARTICLES = [
     a: 'Ništa. Objava posla, primanje ponuda i dopisivanje su potpuno besplatni za klijente. Zadatak zarađuje malu naknadu od izvođača tek kad je posao uspješno završen.' },
   { id: 'choose', audience: 'client', q: 'Kako biram izvođača?', keywords: ['bira', 'odaber', 'ponud', 'prihvat', 'koga da'],
     a: 'Svaka ponuda ima cijenu i obrazloženje. Klikni na ime izvođača i vidiš javni profil: ocjene, uspješnost, značke (telefon, lična karta, licence), struke i portfolio. Kad ti odgovara — „Prihvati“. Tek tada se otključavaju poruke sa kontaktom.' },
-  { id: 'pay-flow', audience: 'client', q: 'Kako radi plaćanje (Zadatak Pay)?', keywords: ['plaćanj', 'placanj', 'plati', 'escrow', 'osigur', 'oslobod', 'kad plaćam', 'pay'],
+  { id: 'pay-flow', audience: 'client', q: 'Kako radi plaćanje (Zadatak Pay)?', keywords: ['plaćanj', 'placanj', 'plati', 'escrow', 'osigur', 'oslobod', 'kad plaćam', 'pay', 'platim', 'platiti', 'kako da platim', 'platim majstor'],
     a: 'Kad prihvatiš ponudu, cijena posla se rezerviše sa tvog balansa i čuva na Zadatku — izvođač vidi da je novac osiguran, ali ga ne dobija. Kad je posao urađen, izvođač klikne „Zatraži isplatu“, ti provjeriš i klikneš „Oslobodi uplatu“ — novac odmah ide izvođaču (umanjen za naknadu koju plaća on). Otkazivanje prije početka vraća ti pun iznos; ako se ne slažete, „Prijavi problem“ zamrzava novac dok Zadatak tim ne odluči.' },
   { id: 'contact-unlock', audience: 'client', q: 'Kad dobijam kontakt izvođača?', keywords: ['kontakt', 'broj', 'telefon', 'nazvat', 'pozvat'],
     a: 'Tek nakon što prihvatiš ponudu. Do tada su brojevi telefona, emailovi i društvene mreže sakriveni u oba smjera — tako nema neželjenih poziva i svi radite pod istim uslovima.' },
@@ -28,7 +28,7 @@ export const HELP_ARTICLES = [
     a: 'Prvo mu piši u porukama — većina se riješi dogovorom. Ako ne, otkaži posao uz razlog „izvođač nije došao / odustao“ i prijavi ga zastavicom na profilu ili oglasu. Naš tim pregleda svaku prijavu i po potrebi suspenduje nalog.' },
 
   // ---- providers ----
-  { id: 'earn', audience: 'provider', q: 'Kako počinjem zarađivati?', keywords: ['zarad', 'počn', 'kako da radim', 'postan izvođ', 'majstor'],
+  { id: 'earn', audience: 'provider', q: 'Kako počinjem zarađivati?', keywords: ['zarad', 'počn', 'kako da radim', 'postan izvođ', 'postati majstor', 'radim kao majstor', 'raditi kao majstor'],
     a: 'Registruj se, u „Moj nalog → Profil“ izaberi „Zaraditi novac“, u „Vještine“ označi struke i grad. Zatim „Pretraži poslove“ — pošalji ponudu sa cijenom i kratkim obrazloženjem. Preporučujemo da odmah verifikuješ telefon i dodaš sliku profila.' },
   { id: 'fees', audience: 'provider', q: 'Kolika je naknada i kako rade nivoi?', keywords: ['naknad', 'provizij', 'procen', 'nivo', 'bronz', 'srebr', 'zlat', 'platin', 'tier'],
     a: 'Naknada se skida samo sa isplaćenih poslova i zavisi od tvog nivoa u zadnjih 30 dana: Bronza 15 %, Srebro (500 KM+) 13 %, Zlato (1.500 KM+) 11 %, Platina (3.000 KM+) 9 %. Prije prihvatanja klijent vidi tačno koliko ti ostaje; procenat se zaključa u trenutku prihvatanja. Nivo vidiš u „Moj nalog → Ploča izvođača“.' },
@@ -38,7 +38,7 @@ export const HELP_ARTICLES = [
     a: 'U „Moj nalog → Značke“. Telefon: potvrdi SMS kodom. Način plaćanja: dodaj IBAN u „Načini plaćanja“. Lična karta, uvjerenje o nekažnjavanju i licence (električar, vodoinstalater, plin, klima, građevina, vozačka): pošalji dokument, tim ga pregleda i značka se pojavi na profilu. Značke aktivnosti (Top ocjene, Bez greške, Lokalni heroj…) dolaze same iz tvog rada.' },
   { id: 'verification', audience: 'provider', q: 'Koliko traje verifikacija dokumenata?', keywords: ['verifik', 'dokument', 'koliko traje', 'na čekanju', 'odobr'],
     a: 'Obično isti ili sljedeći radni dan. Dok čekaš, u Značkama piše „Na čekanju“. Ako je dokument nečitak ili se ime ne poklapa sa profilom, zahtjev bude odbijen — pošalji ponovo jasniju sliku.' },
-  { id: 'payouts', audience: 'provider', q: 'Kako primam isplate?', keywords: ['isplat', 'iban', 'račun', 'bank', 'novac', 'kad dobijam pare', 'uplat'],
+  { id: 'payouts', audience: 'provider', q: 'Kako primam isplate?', keywords: ['isplat', 'iban', 'račun', 'bank', 'primam novac', 'novac', 'kad dobijam pare', 'uplat'],
     a: 'U „Moj nalog → Načini plaćanja → Primam uplate“ upiši ime vlasnika, banku i IBAN; račun mora glasiti na tvoje ime. Zaradu s Balansa tražiš u „Moj nalog → Balans → Zatraži isplatu“ (nakon provjere identiteta), a tim je uplati na taj račun. U „Historiji plaćanja“ vidiš sve završene poslove i obračun naknade.' },
   { id: 'balance', audience: 'provider', q: 'Šta je balans na mom nalogu?', keywords: ['balans', 'stanje', 'saldo', 'novčanik', 'novcanik', 'pare na nalogu'],
     a: 'Balans je tvoj novac na Zadatku — vidiš ga u „Moj nalog → Balans“ sa svakom uplatom, naknadom i isplatom. Iz balansa se naplaćuje naknada kad se posao završi; uplate, bonuse i povrate dodaje Zadatak tim. Ako nešto ne štima, piši podršci sa svojim privatnim ID-om.' },

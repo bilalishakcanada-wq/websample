@@ -56,7 +56,7 @@
     <!-- Permissions -->
 
     <!-- Google Play: only what the app uses. Every permission is listed with its reason in
-         docs/google-play.md (Data safety answers). No background location, no media/storage access:
+         docs/google-play.md (Data safety answers). No ACCESS_BACKGROUND_LOCATION and no media/storage access:
          photos come through the system picker or the in-app camera. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- CAMERA + location: the on-site photo proof (ProofCamera) takes the picture inside the app, never from the
@@ -64,6 +64,11 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Lokacija uživo and "Krećem" keep following the position while the person uses other apps: a foreground
+         service of type location (@capacitor-community/background-geolocation) with a notification on the phone
+         the whole time. It starts only from a tap in the app, so no ACCESS_BACKGROUND_LOCATION is needed. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- phone notifications (new message, offer, payment); Android 13+ asks the user once, when they turn them on -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />

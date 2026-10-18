@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BellRing, CheckCircle2, Clock3, MapPin, Navigation, Radio, Square } from 'lucide-react'
 import { liveLocationService } from '../services/liveLocationService'
-import { distanceMeters, keepScreenOn, locationSupported, watchLocation } from '../utils/location'
+import { backgroundLocationSupported, distanceMeters, keepScreenOn, locationSupported, watchLocation } from '../utils/location'
 import { haptic, isNativeApp } from '../utils/native'
 import { toast } from './Toaster'
 import { useListingAddress } from '../hooks/queries'
@@ -28,6 +28,8 @@ const prije = (ms) => (ms < 60000 ? `prije ${Math.max(1, Math.round(ms / 1000))}
  * provider is simply "in town"; further out: road ≈ 1.3 × straight line, speed from GPS when it reports one.
  */
 const IN_TOWN_M = 3000
+// on the phone while the provider drives with another app open (maps, calls): Android shows it as long as it runs
+const SHARING_NOTICE = { title: 'Dijeliš lokaciju s klijentom', message: 'Klijent vidi gdje si dok ne stigneš. Zaustavi u Zadatku.', distanceFilter: 10 }
 function eta(distance, speed) {
   const v = speed && speed > 2 ? speed : CITY_SPEED
   const min = Math.max(1, Math.round((distance * 1.3) / v / 60))
@@ -111,7 +113,7 @@ function LiveTracking({ payment, listing, role }) {
         if (e.expired) { stopSharing(); toast('Vrijeme dijeljenja lokacije je isteklo.'); return }
         setError(e.message)
       })
-    }, (message) => setError(message))
+    }, (message) => setError(message), { background: SHARING_NOTICE })
     return () => { stop(); releaseScreen() }
   }, [sharing, active, payment.listing_id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -237,7 +239,7 @@ function LiveTracking({ payment, listing, role }) {
               : 'Kad kreneš, uključi dijeljenje: klijent vidi gdje si i kad stižeš. Traje najviše 2 sata, a ugasiš ga kad hoćeš.'}
           </p>
         )}
-        {isProvider && sharing && <p className="muted-text">Drži Zadatak otvoren dok voziš; lokacija se ne šalje kad je ekran zaključan.</p>}
+        {isProvider && sharing && <p className="muted-text">{backgroundLocationSupported() ? 'Lokacija se šalje i kad otvoriš drugu aplikaciju ili zaključaš ekran; na telefonu stoji obavijest dok dijeliš.' : 'Drži Zadatak otvoren dok voziš; lokacija se ne šalje kad je ekran zaključan.'}</p>}
         {error && <p className="form-error">{error}</p>}
         {isProvider && (
           sharing

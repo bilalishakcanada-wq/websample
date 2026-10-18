@@ -3,7 +3,7 @@
 // njoj se mjeri doseg ponuda (supabase/reach/01). Obavijesti: Web Push u pregledniku, FCM u Android aplikaciji.
 // Gdje uređaj obavijesti ne može (iPhone preglednik bez instalacije, Android build bez Firebasea),
 // stanje je 'unsupported' i ne blokira: obavijesti tada stižu u aplikaciju i na email.
-import { supabase } from '../lib/supabase'
+import { rpcFromBackground, supabase } from '../lib/supabase'
 import { isNativeApp } from './native'
 import { currentLocation, locationSupported } from './location'
 import { enablePush, pushPermission, pushSupported } from './push'
@@ -58,7 +58,7 @@ export async function reportDeviceLocation(point) {
   if (!point) return
   const { data } = await supabase.auth.getSession()
   if (!data?.session) return
-  const { error } = await supabase.rpc('report_device_location', { p_lat: point.lat, p_lng: point.lng, p_accuracy_m: point.accuracy ?? null })
+  const { error } = await rpcFromBackground('report_device_location', { p_lat: point.lat, p_lng: point.lng, p_accuracy_m: point.accuracy ?? null })
   if (!error) write(LAST_REPORT, String(Date.now()))
 }
 

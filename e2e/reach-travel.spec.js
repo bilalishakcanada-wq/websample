@@ -33,6 +33,7 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
   /** @type {import('@playwright/test').Page} */ let provider
   const title = `[E2E] Mali posao daleko ${Date.now()}`
   let listingId = ''
+  let liveListingId = ''
 
   const rest = (page, token, method, path, data) => page.request.fetch(`${baza.url}${path}`, {
     method, data,
@@ -57,9 +58,9 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
   })
 
   test.afterAll(async () => {
-    if (listingId && client) {
+    if (client) {
       const token = await tokenOf(client)
-      await rest(client, token, 'DELETE', `/rest/v1/listings?id=eq.${listingId}`).catch(() => {})
+      for (const id of [listingId, liveListingId].filter(Boolean)) await rest(client, token, 'DELETE', `/rest/v1/listings?id=eq.${id}`).catch(() => {})
     }
     if (provider) await placeProvider(SARAJEVO).catch(() => {})
     await clientCtx?.close()
@@ -125,5 +126,24 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
     await provider.reload()
     await expect(provider.getByTestId('travel-status')).toContainText('Klijent plaća prevoz')
     await expect(provider.getByRole('button', { name: 'Pošalji ponudu' }).first()).toBeVisible()
+  })
+
+  test('lokacija uživo: doseg prati gdje je izvođač sada', async () => {
+    const token = await tokenOf(client)
+    const res = await rest(client, token, 'POST', '/rest/v1/listings', {
+      user_id: subOf(token), title: `${title} uživo`, description: 'Automatski test lokacije uživo. Ovaj oglas se briše na kraju testa.',
+      category: 'Vodoinstalater', location: 'Sarajevo', price: 40, status: 'published', lat: SARAJEVO.latitude, lng: SARAJEVO.longitude,
+    })
+    expect(res.ok(), await res.text()).toBeTruthy()
+    liveListingId = (await res.json())[0].id
+    // Postavke → Lokacija uživo, while the phone is in Mostar
+    await provider.goto('/account/postavke')
+    await provider.getByTestId('live-reach-toggle').click()
+    await expect(provider.getByTestId('live-reach')).toContainText('Uključeno')
+    await provider.goto(`/listings/${liveListingId}`)
+    await expect(provider.getByRole('button', { name: 'Zamoli da plati prevoz' }).first()).toBeVisible()
+    // the provider drives to Sarajevo: the page follows without a reload
+    await providerCtx.setGeolocation(SARAJEVO)
+    await expect(provider.getByRole('button', { name: 'Pošalji ponudu' }).first()).toBeVisible({ timeout: 30_000 })
   })
 })

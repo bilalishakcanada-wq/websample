@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Ban, BellRing, LogOut } from 'lucide-react'
+import { Ban, BellRing, LogOut, MapPin, Settings } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useBlocks } from '../../hooks/useBlocks'
 import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
+import { isLiveReachOn, LIVE_REACH_REPORTED, setLiveReach } from '../../utils/liveReach'
+import { locationPermission, openAppSettings, requestLocation } from '../../utils/permissions'
+import { isNativeApp } from '../../utils/native'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
 
@@ -19,6 +22,30 @@ function SettingsPage() {
   const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported'
   const [password, setPassword] = useState('')
   const { blocked, toggle: toggleBlockUser } = useBlocks()
+  // Lokacija uživo: doseg ponuda follows where the person is right now (utils/liveReach.js)
+  const [live, setLive] = useState(isLiveReachOn)
+  const [geo, setGeo] = useState('loading') // 'granted' | 'denied' | 'prompt' | 'unsupported'
+  const [lastPoint, setLastPoint] = useState(null)
+  useEffect(() => {
+    let alive = true
+    const check = () => locationPermission().then((state) => { if (alive) setGeo(state) })
+    check()
+    const reported = (event) => setLastPoint(event.detail)
+    window.addEventListener(LIVE_REACH_REPORTED, reported)
+    window.addEventListener('focus', check)
+    return () => { alive = false; window.removeEventListener(LIVE_REACH_REPORTED, reported); window.removeEventListener('focus', check) }
+  }, [])
+  const liveOn = live && geo === 'granted'
+  const toggleLive = async () => {
+    setError('')
+    if (liveOn) { setLiveReach(false); setLive(false); return }
+    setBusy('live')
+    try {
+      const state = await requestLocation()
+      setGeo(state)
+      if (state === 'granted') { setLiveReach(true); setLive(true) }
+    } finally { setBusy('') }
+  }
 
   useEffect(() => {
     let alive = true
@@ -59,6 +86,28 @@ function SettingsPage() {
   return (
     <div className="account-section">
       <div className="account-section-head"><h1>Postavke</h1></div>
+
+      <h3 className="account-sub" id="lokacija">Lokacija</h3>
+      <div className="settings-rows">
+        <div className="settings-row settings-row-device" data-testid="live-reach">
+          <div>
+            <strong><MapPin size={15} /> Lokacija uživo {liveOn && <span className="live-dot" aria-hidden="true" />}</strong>
+            <span>
+              {liveOn
+                ? `Uključeno. Doseg ponuda se računa od mjesta gdje si sada, dok je Zadatak otvoren.${lastPoint ? ' Lokacija je upravo osvježena.' : ''}`
+                : geo === 'denied'
+                  ? (isNativeApp() ? 'Lokacija je odbijena. Otvori postavke telefona, dozvoli lokaciju za Zadatak i vrati se ovdje.' : 'Lokacija je blokirana u pregledniku. Dodirni ikonu lijevo od adrese stranice (katanac), dozvoli lokaciju i uključi ovdje.')
+                  : geo === 'unsupported'
+                    ? 'Ovaj uređaj ne zna lokaciju. Doseg se računa od adrese ili grada iz profila.'
+                    : 'Isključeno. Kad uključiš, doseg (koliko si daleko od posla) prati gdje si sada, a ne grad iz profila. Nikad u pozadini.'}
+            </span>
+          </div>
+          {geo === 'denied' && isNativeApp() && !liveOn && <button type="button" className="ghost-button" onClick={() => openAppSettings()}><Settings size={15} /> Postavke</button>}
+          {(liveOn || !['unsupported', 'denied'].includes(geo)) && (
+            <button type="button" className={liveOn ? 'ghost-button' : 'primary-button'} data-testid="live-reach-toggle" onClick={toggleLive} disabled={busy === 'live' || geo === 'loading'}>{busy === 'live' ? '…' : liveOn ? 'Isključi' : 'Uključi'}</button>
+          )}
+        </div>
+      </div>
 
       <h3 className="account-sub">Obavijesti</h3>
       <div className="settings-rows">

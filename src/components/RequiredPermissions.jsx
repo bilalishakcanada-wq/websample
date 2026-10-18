@@ -3,6 +3,7 @@ import { BellRing, Check, MapPin, Settings } from 'lucide-react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { isNativeApp } from '../utils/native'
 import { openAppSettings, permissionStatus, permissionsOk, requestLocation, requestNotifications } from '../utils/permissions'
+import { liveReachUndecided, setLiveReach } from '../utils/liveReach'
 import './RequiredPermissions.css'
 
 const passes = (state) => state === 'granted' || state === 'unsupported'
@@ -84,6 +85,8 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
     try {
       const state = await STEPS[step].ask()
       const next = { ...status, [step]: state }
+      // a connected location follows the person (Postavke → Lokacija uživo), unless they switched it off there
+      if (step === 'location' && state === 'granted' && liveReachUndecided()) setLiveReach(true)
       setStatus(next)
       // both allowed by the person's own taps: carry on with what they were doing, no extra tap
       if (permissionsOk(next)) onDone()

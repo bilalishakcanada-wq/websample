@@ -12295,6 +12295,9 @@ button { touch-action: manipulation; }
   .push-prompt.is-compact .push-prompt-close { grid-area: 1 / 4; align-self: center; }
 }
 .settings-row-device strong { display: inline-flex; align-items: center; gap: 6px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(25, 179, 123, 0.6); animation: live-dot 1.6s ease-out infinite; }
+@keyframes live-dot { to { box-shadow: 0 0 0 8px rgba(25, 179, 123, 0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
 .notif-list-open { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; color: var(--text-soft); background: rgba(10, 31, 99, 0.05); margin-left: auto; align-self: center; }
 .notif-list li { align-items: center; }
 @media (prefers-reduced-motion: reduce) { .push-prompt-icon { animation: none; } }

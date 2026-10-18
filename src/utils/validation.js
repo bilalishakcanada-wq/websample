@@ -30,6 +30,7 @@ const POZNATE_GRESKE = [
   { test: /CHAT_JOS_NIJE_OTVOREN/i, poruka: 'Dopisivanje počinje kada klijent prihvati ponudu i osigura uplatu.' },
   { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },
   { test: /PREVISE_ODGOVORA/i, poruka: 'Previše poruka ispod ove ponude. Dogovorite ostalo kad klijent prihvati ponudu.' },
+  { test: /KORISNIK_BLOKIRAN|user_blocked/i, poruka: 'Ovo nije moguće: jedno od vas je blokiralo drugo.' },
   { test: /NISI_UCESNIK_RAZGOVORA/i, poruka: 'Nemaš pristup ovom razgovoru.' },
   { test: /PONUDA_NA_SVOJ_OGLAS/i, poruka: 'Ne možeš slati ponudu na vlastiti posao.' },
   { test: /PONUDA_ZAKLJUCANA/i, poruka: 'Iznos i opis ponude može mijenjati samo izvođač koji ju je poslao.' },

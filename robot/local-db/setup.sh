@@ -29,7 +29,8 @@ for f in identity/bids_require_verified security/05_marketplace_scam_guards paym
          branding/01_zadatak_rebrand security/08_safe_file_links identity/jobs_require_verified identity/beta_skip_identity \
          badges/01_badge_ranking rollout/2026-10-06_all_pending locations/01_bih_locations locations/02_seed_bih_locations \
          booking/06_location_request algorithms/01_places_and_exact_location algorithms/02_search \
-         algorithms/03_matching algorithms/04_embeddings providers/01_simple_mode communication/03_email_confirmation; do
+         algorithms/03_matching algorithms/04_embeddings providers/01_simple_mode communication/03_email_confirmation \
+         communication/04_user_blocks; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   # the live mail outbox isn't in this copy: a stand-in of the same shape lets the email-confirmation SQL apply
   [ "$f" = communication/03_email_confirmation ] && $P -f "$HERE/email_outbox_stub.sql" >/dev/null

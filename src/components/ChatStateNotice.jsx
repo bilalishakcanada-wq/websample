@@ -1,11 +1,23 @@
-import { Lock, MessageSquareOff } from 'lucide-react'
+import { Ban, Lock, MessageSquareOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 /**
  * Stoji umjesto polja za pisanje kad dopisivanje nije dozvoljeno.
  * Poruka objašnjava ZAŠTO i nudi sljedeći korak — inače korisnik misli da je kvar.
  */
-function ChatStateNotice({ state, listingId }) {
+function ChatStateNotice({ state, listingId, onUnblock }) {
+  if (state === 'blocked') {
+    return (
+      <div className="ch-state-notice" role="status">
+        <Ban size={18} />
+        <div>
+          <strong>Blokirao/la si ovog korisnika</strong>
+          <p>Ne možete jedno drugom slati poruke, ponude ni pitanja. Prepiska ostaje sačuvana.</p>
+          {onUnblock && <button type="button" className="ghost-button" onClick={onUnblock}>Odblokiraj</button>}
+        </div>
+      </div>
+    )
+  }
   if (state === 'locked') {
     return (
       <div className="ch-state-notice" role="status">

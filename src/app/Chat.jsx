@@ -1,7 +1,7 @@
 import { PrivateImage } from '../components/PrivateFile'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
@@ -23,7 +23,7 @@ function Chat(props) {
   const {
     user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, chatState,
     grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading, sending,
-    error, notice, togglePref, reportConversation, timeOf, shortDate, retry,
+    error, notice, togglePref, reportConversation, toggleBlock, otherBlocked, timeOf, shortDate, retry,
   } = props
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
@@ -96,6 +96,7 @@ function Chat(props) {
             <button type="button" onClick={() => togglePref(active, 'saved')}><Heart size={16} fill={active.saved ? 'currentColor' : 'none'} /> {active.saved ? 'Ukloni iz spašenih' : 'Spasi razgovor'}</button>
             <button type="button" onClick={() => togglePref(active, 'archived')}>{active.archived ? <ArchiveRestore size={16} /> : <Archive size={16} />} {active.archived ? 'Vrati iz arhive' : 'Arhiviraj'}</button>
             <button type="button" onClick={reportConversation}><Flag size={16} /> Prijavi razgovor</button>
+            <button type="button" onClick={toggleBlock}><Ban size={16} /> {otherBlocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'}</button>
           </div>
         )}
       </header>
@@ -139,7 +140,7 @@ function Chat(props) {
           <button data-testid="chat-send" type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
         </form>
       ) : (
-        <ChatStateNotice state={chatState} listingId={active.listing_id} />
+        <ChatStateNotice state={chatState} listingId={active.listing_id} onUnblock={toggleBlock} />
       )}
     </div>
   )

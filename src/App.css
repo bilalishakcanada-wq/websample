@@ -4760,6 +4760,34 @@ button:disabled {
   text-decoration: underline;
 }
 
+.auth-form .auth-accept {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 4px 0 2px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-soft);
+  text-align: left;
+  cursor: pointer;
+}
+
+.auth-form .auth-accept input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+  margin: 1px 0 0;
+  accent-color: var(--primary);
+}
+
+.auth-accept a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
 @media (max-width: 480px) {
   .auth-logo {
     margin-bottom: 5vh;

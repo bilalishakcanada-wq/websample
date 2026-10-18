@@ -36,4 +36,5 @@ export const keys = {
   promotionOptions: (userId) => ['me', userId || 'guest', 'promotion-options'],
   providerPayments: (userId) => ['me', userId, 'provider-payments'],
   simpleMode: (userId) => ['me', userId, 'simple-mode'],
+  blocks: (userId) => ['me', userId, 'blocks'],
 }

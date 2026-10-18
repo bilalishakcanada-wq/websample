@@ -1,6 +1,6 @@
 import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
-import { publicError, sanitizeText } from '../utils/validation'
+import { prepoznajGresku, publicError, sanitizeText } from '../utils/validation'
 
 export const messageService = {
   async listConversations(userId) {
@@ -90,7 +90,7 @@ export const messageService = {
 
     if (error) {
       console.error('Supabase message insert failed', { message: error.message, code: error.code })
-      throw publicError()
+      throw prepoznajGresku(error) || publicError()
     }
     return data
   },
@@ -113,7 +113,7 @@ export const messageService = {
       .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: '📷 Slika', attachment_url: fileRef, attachment_type: 'image' })
       .select('id, sender_id, receiver_id, content, created_at, attachment_url, attachment_type')
       .single()
-    if (error) { console.error('Supabase image message insert failed', { message: error.message, code: error.code }); throw publicError() }
+    if (error) { console.error('Supabase image message insert failed', { message: error.message, code: error.code }); throw prepoznajGresku(error) || publicError() }
     return data
   },
 

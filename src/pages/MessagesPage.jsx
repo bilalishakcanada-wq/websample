@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { useAuth } from '../context/AuthContext'
@@ -18,6 +18,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import Chat from '../app/Chat'
 import { SkeletonRows } from '../components/Skeleton'
 import { promptDialog } from '../utils/dialog'
+import { useBlocks } from '../hooks/useBlocks'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -96,7 +97,9 @@ function MessagesPage() {
   const [markTick, setMarkTick] = useState(0)
 
   const active = inbox.find((item) => item.id === activeId)
-  const chatState = active?.chat_state || 'open'
+  const { isBlocked, toggle: toggleBlockUser } = useBlocks()
+  const otherBlocked = Boolean(active && isBlocked(active.other_id))
+  const chatState = otherBlocked ? 'blocked' : (active?.chat_state || 'open')
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
   // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
@@ -256,6 +259,17 @@ function MessagesPage() {
     }
   }
 
+  const toggleBlock = async () => {
+    if (!active) return
+    setError(''); setNotice('')
+    try {
+      const wasBlocked = otherBlocked
+      if (await toggleBlockUser(active.other_id, active.other_name)) setNotice(wasBlocked ? 'Korisnik je odblokiran.' : 'Korisnik je blokiran. Više vam ne može pisati.')
+    } catch (requestError) {
+      setError(requestError.message)
+    }
+  }
+
   const hideTips = () => { setTipsOpen(false); try { localStorage.setItem('zadatak-chat-tips', 'hidden') } catch { /* ignore */ } }
 
   // group the thread by day for separators
@@ -277,7 +291,7 @@ function MessagesPage() {
         user={user} inbox={inbox} visible={visible} active={active} loading={loading} query={query} setQuery={setQuery} filter={filter} setFilter={setFilter}
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage} sending={sending}
-        uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} timeOf={timeOf} shortDate={shortDate}
+        uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} toggleBlock={toggleBlock} otherBlocked={otherBlocked} timeOf={timeOf} shortDate={shortDate}
         retry={() => loadInbox()} chatState={chatState}
       />
     )
@@ -373,7 +387,8 @@ function MessagesPage() {
                   <div className="chat-head-actions">
                     <button type="button" className={active.saved ? 'on' : ''} onClick={() => togglePref(active, 'saved')} title={active.saved ? 'Ukloni iz spašenih' : 'Spasi'}><Heart size={16} fill={active.saved ? 'currentColor' : 'none'} /></button>
                     <button type="button" onClick={() => togglePref(active, 'archived')} title={active.archived ? 'Vrati iz arhive' : 'Arhiviraj'}>{active.archived ? <ArchiveRestore size={16} /> : <Archive size={16} />}</button>
-                    <button type="button" onClick={reportConversation} title="Prijavi razgovor"><Flag size={16} /></button>
+                    <button type="button" onClick={reportConversation} title="Prijavi razgovor" aria-label="Prijavi razgovor"><Flag size={16} /></button>
+                    <button type="button" className={otherBlocked ? 'on' : ''} onClick={toggleBlock} title={otherBlocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'} aria-label={otherBlocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'}><Ban size={16} /></button>
                   </div>
                 </header>
 
@@ -429,7 +444,7 @@ function MessagesPage() {
                   <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
                   </>
                 ) : (
-                  <ChatStateNotice state={chatState} listingId={active.listing_id} />
+                  <ChatStateNotice state={chatState} listingId={active.listing_id} onUnblock={toggleBlock} />
                 )}
               </>
             )}

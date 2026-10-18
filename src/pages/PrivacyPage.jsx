@@ -10,7 +10,7 @@ function PrivacyPage() {
       cta={{ eyebrow: 'Tvoji podaci', text: 'Nalog i sve lične podatke brišeš sam, u postavkama profila.', to: '/account/profil', label: 'Postavke profila' }}
     >
         <section className="info-section reveal">
-          <p className="muted-text">Zadnja izmjena: 7. oktobar 2026.</p>
+          <p className="muted-text">Zadnja izmjena: 18. oktobar 2026.</p>
           <p>
             Platformu Zadatak vodi Zadatak tim (u nastavku: „mi“). Odgovorni smo za podatke koje nam daješ dok koristiš
             Zadatak na sajtu i u aplikaciji za Android i iPhone. Za sve u vezi s tvojim podacima piši nam preko
@@ -92,13 +92,25 @@ function PrivacyPage() {
           <ul className="rules-list">
             <li>Prijavi se na sajtu ili u aplikaciji, otvori <Link to="/account/profil">Moj nalog → Profil</Link> i na dnu klikni „Obriši nalog“.</li>
             <li>Ako imaš posao s osiguranom uplatom u toku, prvo ga završi ili otkaži, da niko ne ostane bez novca.</li>
-            <li>Ako se ne možeš prijaviti, piši nam preko stranice <Link to="/kontakt">Kontakt</Link> s emailom naloga i obrisat ćemo ga u roku od 30 dana.</li>
+            <li>Ako se ne možeš prijaviti ili si već obrisao/la aplikaciju, piši nam preko stranice <Link to="/kontakt">Kontakt</Link> (tema „Nalog“) s emailom naloga i obrisat ćemo ga u roku od 30 dana.</li>
           </ul>
           <p>Šta se briše i šta ostaje u rezervnim kopijama piše u tački 4.</p>
         </section>
 
+        <section className="info-section reveal" id="dozvole">
+          <h2>7. Dozvole u aplikaciji za Android i iPhone</h2>
+          <p>Aplikacija traži dozvolu tek kad otvoriš funkciju kojoj treba, i radi i ako je odbiješ (bez te funkcije).</p>
+          <ul className="rules-list">
+            <li><strong>Kamera:</strong> slikanje urađenog posla (foto-dokaz) i slika za profil, oglas ili poruku. Slike se šalju samo kad ih ti pošalješ.</li>
+            <li><strong>Lokacija (precizna, samo dok je aplikacija otvorena):</strong> mjesto i vrijeme na foto-dokazu i „Krećem“ (klijent vidi izvođača na mapi dok ne stigne). Lokaciju u pozadini ne tražimo i ne pratimo.</li>
+            <li><strong>Otisak prsta ili lice:</strong> potvrda prije isplate ili oslobađanja novca. Otisak i lice ostaju u telefonu; mi dobijemo samo „potvrđeno“ ili „nije“.</li>
+            <li><strong>Internet:</strong> da aplikacija radi.</li>
+          </ul>
+          <p>Galeriju otvara sistemski birač slika, pa aplikacija ne dobija pristup ostalim slikama u telefonu. Prijava se ne prenosi u rezervne kopije telefona.</p>
+        </section>
+
         <section className="info-section reveal">
-          <h2>7. Sigurnost</h2>
+          <h2>8. Sigurnost</h2>
           <p>
             Sve ide preko šifrovane veze (HTTPS). Pravila u bazi određuju ko smije vidjeti koji podatak, privatni fajlovi se
             otvaraju samo kratkotrajnim linkom, a isplata u aplikaciji traži potvrdu otiskom prsta ili licem.
@@ -106,12 +118,12 @@ function PrivacyPage() {
         </section>
 
         <section className="info-section reveal">
-          <h2>8. Uzrast</h2>
+          <h2>9. Uzrast</h2>
           <p>Zadatak je namijenjen osobama od 18 godina i starijim. Ne prikupljamo svjesno podatke mlađih osoba.</p>
         </section>
 
         <section className="info-section reveal">
-          <h2>9. Izmjene</h2>
+          <h2>10. Izmjene</h2>
           <p>O većim izmjenama ove politike javljamo emailom ili obaviještenjem u aplikaciji prije nego što počnu važiti.</p>
         </section>
     </InfoLayout>

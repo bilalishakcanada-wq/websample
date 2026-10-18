@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { usePublicProfile, useQuoteRequestsEnabled } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Star, UserRound } from 'lucide-react'
+import { Ban, Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Star, UserRound } from 'lucide-react'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
@@ -15,6 +15,8 @@ import { useFullscreen } from '../app/useFullscreen'
 import { SkeletonProfilePhone } from '../components/Skeleton'
 import { setPageTitle } from '../utils/pageTitle'
 import { promptDialog } from '../utils/dialog'
+import { useBlocks } from '../hooks/useBlocks'
+import { toast } from '../components/Toaster'
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
@@ -76,6 +78,7 @@ function PublicProfilePage() {
   const [showAllReviews, setShowAllReviews] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const { isBlocked, toggle: toggleBlockUser } = useBlocks()
   const isPhone = useMediaQuery('(max-width: 768px)')
 
   // the phone profile screen draws its own top bar (skeleton included); the not-found state keeps the tab bar
@@ -128,7 +131,19 @@ function PublicProfilePage() {
     }
   }
 
-  if (isPhone) return <ProfileView bundle={bundle} user={user} onReport={reportProfile} />
+  const blocked = isBlocked(userId)
+  const toggleBlock = async () => {
+    try {
+      if (await toggleBlockUser(userId, profile.display_name || 'ovog korisnika')) {
+        const text = blocked ? 'Korisnik je odblokiran.' : 'Korisnik je blokiran.'
+        setNotice(text); toast(text)
+      }
+    } catch (requestError) {
+      setNotice(requestError.message); toast(requestError.message, { kind: 'error' })
+    }
+  }
+
+  if (isPhone) return <ProfileView bundle={bundle} user={user} onReport={reportProfile} onBlock={toggleBlock} blocked={blocked} />
 
   return (
     <div className={`app-shell page-with-mobile-nav public-profile-page ${isProvider ? 'is-provider' : 'is-client'}`}>
@@ -191,7 +206,10 @@ function PublicProfilePage() {
           )}
 
           {!isOwnProfile && user && (
-            <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
+            <>
+              <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
+              <button type="button" className="meet-report" onClick={toggleBlock}><Ban size={13} /> {blocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'}</button>
+            </>
           )}
           {notice && <small className="meet-notice">{notice}</small>}
         </aside>

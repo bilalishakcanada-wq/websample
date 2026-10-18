@@ -5,6 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 VITE_BASE=/websample/ npx vite build
 cp dist/index.html dist/404.html          # SPA fallback: Pages serves 404.html for deep links
+for page in privatnost pravila pravila-zajednice kontakt; do mkdir -p "dist/$page" && cp dist/index.html "dist/$page/index.html"; done  # 200 for Google Play's links
 touch dist/.nojekyll                       # keep files that start with an underscore
 rm -rf .gh-pages && mkdir .gh-pages
 cp -R dist/. .gh-pages/

@@ -86,7 +86,8 @@ export class BookingController {
   async approve(@Param('listingId') listingId: string, @CurrentUser() user: AuthUser) {
     const { data, error } = await this.db.asUser(user).rpc('approve_work', { p_listing: listingId })
     this.raise(error)
-    return { status: data?.status, isplaceno: data?.net_amount }
+    // neto iznos izvođača se ne vraća klijentu
+    return { status: data?.status }
   }
 
   @Post('request-revision')

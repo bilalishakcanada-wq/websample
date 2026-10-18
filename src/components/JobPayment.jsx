@@ -18,24 +18,22 @@ const STEPS = [
 const stepIndex = (status) => ({ funded: 1, requested: 2, disputed: 2, released: 3, refunded: 1 }[status] ?? 0)
 
 /**
- * Accept-and-pay sheet: the client sees exactly what is reserved from the balance and
- * what the provider will receive, then confirms. Mirrors the Airtasker "accept & pay" step.
+ * Accept-and-pay sheet: the client sees exactly what is reserved from the balance, then
+ * confirms. Mirrors the Airtasker "accept & pay" step. The provider's payout after the
+ * platform fee is deliberately not shown here: that is between the provider and the platform.
  */
 export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
   const [wallet, setWallet] = useState(null)
-  const [fee, setFee] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     accountService.myWallet().then(setWallet).catch(() => setWallet({ balance: 0 }))
-    paymentService.feePercentFor(bid.bidder_id).then(setFee)
   }, [bid])
 
   const balance = Number(wallet?.balance || 0)
   const amount = Number(bid.amount || 0)
   const enough = balance >= amount
-  const net = fee == null ? null : amount - amount * fee / 100
 
   const confirm = async () => {
     setBusy(true)
@@ -70,9 +68,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
           <div className="pay-breakdown-total"><span>Ostaje na balansu</span><strong>{wallet ? money(Math.max(0, balance - amount)) : '…'}</strong></div>
         </div>
 
-        {fee != null && (
-          <p className="pay-note"><Check size={14} /> Izvođač nakon završetka dobija <strong>{money(net)}</strong> ({fee} % naknade platforme plaća izvođač, ti plaćaš tačno cijenu posla).</p>
-        )}
+        <p className="pay-note"><Check size={14} /> Plaćaš tačno cijenu posla, bez dodatnih troškova.</p>
 
         {wallet && !enough && (
           <div className="pay-short">
@@ -123,11 +119,18 @@ export function JobPaymentCard({ payment, role }) {
         })}
       </ol>
 
-      <div className="pay-breakdown">
-        <div><span>Cijena posla</span><strong>{money(payment.amount)}</strong></div>
-        <div><span>Naknada platforme ({payment.fee_percent} %)</span><strong>− {money(payment.fee_amount)}</strong></div>
-        <div className="pay-breakdown-total"><span>Izvođač dobija</span><strong>{money(payment.net_amount)}</strong></div>
-      </div>
+      {/* Klijent vidi samo cijenu koju plaća; naknadu i neto iznos vidi samo izvođač. */}
+      {role === 'provider' ? (
+        <div className="pay-breakdown">
+          <div><span>Cijena posla</span><strong>{money(payment.amount)}</strong></div>
+          <div><span>Naknada platforme ({payment.fee_percent} %)</span><strong>− {money(payment.fee_amount)}</strong></div>
+          <div className="pay-breakdown-total"><span>Ti dobijaš</span><strong>{money(payment.net_amount)}</strong></div>
+        </div>
+      ) : (
+        <div className="pay-breakdown">
+          <div className="pay-breakdown-total"><span>Cijena posla</span><strong>{money(payment.amount)}</strong></div>
+        </div>
+      )}
 
       <p className="pay-note muted-text">
         {payment.status === 'funded' && (role === 'client'

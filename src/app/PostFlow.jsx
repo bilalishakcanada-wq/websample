@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import { rememberPlace } from '../data/cityCoordinates'
 import { useLocationSearch } from '../hooks/useLocationSearch'
+import { looksLikeAddress, useAddressSearch } from '../hooks/useAddressSearch'
+import { locationService } from '../services/locationService'
 import { publishListing } from '../services/publishListing'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
@@ -284,7 +286,7 @@ function PostFlow() {
             <>
               <span className="ap-label">Mjesto</span>
               <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen(true)}>
-                <LocateFixed size={18} /> {form.location || 'Naselje, selo ili grad'}
+                <LocateFixed size={18} /> {form.location || 'Mjesto ili ulica i broj'}
               </button>
               {form.location && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
             </>
@@ -392,7 +394,7 @@ function PostFlow() {
       </div>
 
       {permissions.sheet}
-      {cityOpen && <CitySheet value={form.location} onPick={(city) => { update({ location: city, ...(city !== form.location ? { exact: null } : {}) }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
+      {cityOpen && <CitySheet value={form.location} onPick={(city, exact) => { update({ location: city, ...(exact ? { exact } : city !== form.location ? { exact: null } : {}) }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
       {catSheet.mounted && (
         <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>
           <div className="ap-sheet" onClick={(event) => event.stopPropagation()}>
@@ -415,15 +417,26 @@ function CitySheet({ value, onPick, onClose }) {
   const [query, setQuery] = useState('')
   const { places, loading } = useLocationSearch(query, { limit: 12 })
   const typed = query.trim()
+  const { addresses, loading: addressLoading } = useAddressSearch(query, {
+    enabled: looksLikeAddress(typed) || (!loading && !places.length && typed.length >= 4),
+  })
+  const [resolving, setResolving] = useState(false)
   const pick = (place) => {
     if (place.lat != null) rememberPlace(place.label, place.lat, place.lng)
     onPick(place.label)
+  }
+  // a street ("Butmir, Ilirska 1"): the job shows its settlement, the pin goes on the street
+  const pickAddress = async (address) => {
+    setResolving(true)
+    let town = ''
+    try { town = await locationService.settlementFor(address) } finally { setResolving(false) }
+    onPick(town || typed, { address: address.label, lat: address.lat, lng: address.lng, accuracy: null, source: 'typed' })
   }
 
   return (
     <div className="ap ap-screen ap-city">
       <header className="ap-city-top">
-        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Naselje, selo ili grad" className="ap-input" enterKeyHint="search" aria-label="Mjesto posla" />
+        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Mjesto ili ulica i broj" className="ap-input" enterKeyHint="search" aria-label="Mjesto posla" />
         <button type="button" className="ap-cancel" onClick={onClose}>Odustani</button>
       </header>
       <div className="ap-city-list" role="listbox">
@@ -434,7 +447,15 @@ function CitySheet({ value, onPick, onClose }) {
             {place.region && <small>{place.kind === 'dio grada' ? 'dio grada · ' : ''}{place.region}</small>}
           </button>
         ))}
-        {typed.length >= 2 && !places.length && <span className="ap-label">{loading ? 'Tražim…' : 'Nema takvog mjesta u BiH'}</span>}
+        {addresses.length > 0 && <span className="ap-label">Tačna adresa</span>}
+        {addresses.map((address) => (
+          <button key={`${address.lat},${address.lng}`} type="button" role="option" aria-selected="false" disabled={resolving} onClick={() => pickAddress(address)}>
+            <span>{address.street || address.label}</span>
+            {address.place && <small>{address.place}</small>}
+          </button>
+        ))}
+        {typed.length >= 2 && !places.length && !addresses.length && <span className="ap-label">{loading || addressLoading ? 'Tražim…' : 'Nema takvog mjesta ni adrese u BiH'}</span>}
+        {resolving && <span className="ap-label">Postavljam iglu na mapu…</span>}
         {typed && !loading && !places.some((place) => place.label === typed) && <button type="button" onClick={() => onPick(typed)}>Koristi „{typed}“</button>}
       </div>
     </div>

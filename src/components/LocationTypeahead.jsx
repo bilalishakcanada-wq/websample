@@ -1,21 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
-import { Loader2, MapPin, X } from 'lucide-react'
+import { Home, Loader2, MapPin, X } from 'lucide-react'
 import { useLocationSearch } from '../hooks/useLocationSearch'
+import { looksLikeAddress, useAddressSearch } from '../hooks/useAddressSearch'
 import { rememberPlace } from '../data/cityCoordinates'
+import { locationService } from '../services/locationService'
 
 /**
  * Where: any town, village or town quarter in BiH. Start typing ("Ote…") and pick "Otes, Ilidža";
  * the same name in another municipality ("Otes, Kakanj") is its own row, so nobody picks the wrong one.
  * Nothing is rendered up front: only the 8 best matches for what was typed (or the popular towns).
  * onChange(label, place) — label is what gets saved ("Otes, Ilidža"); place has lat/lng when known.
+ * With onAddress, a street can be typed too ("Butmir, Ilirska 1"): picking it saves its settlement through
+ * onChange and the exact point through onAddress({ address, lat, lng, accuracy, source: 'typed' }).
  */
-function LocationTypeahead({ value, onChange, id = 'city', label = 'Mjesto', required = false, placeholder = ' ', autoFocus = false }) {
+function LocationTypeahead({ value, onChange, onAddress, id = 'city', label = 'Mjesto', required = false, placeholder = ' ', autoFocus = false }) {
   const [query, setQuery] = useState(value || '')
   const [shownValue, setShownValue] = useState(value)
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(0)
   const wrapRef = useRef(null)
+  const [resolving, setResolving] = useState(false)
   const { places, loading } = useLocationSearch(query)
+  const typed = query.trim()
+  const { addresses, loading: addressLoading } = useAddressSearch(query, {
+    enabled: Boolean(onAddress) && (looksLikeAddress(typed) || (!loading && !places.length && typed.length >= 4)),
+  })
 
   // the form changed the value (a draft loaded, the field cleared): show it
   if (value !== shownValue) { setShownValue(value); setQuery(value || '') }
@@ -35,19 +44,29 @@ function LocationTypeahead({ value, onChange, id = 'city', label = 'Mjesto', req
     setOpen(false)
   }
 
+  const pickAddress = async (address) => {
+    setOpen(false)
+    setQuery(address.label)
+    setResolving(true)
+    let town = ''
+    try { town = await locationService.settlementFor(address) } finally { setResolving(false) }
+    if (town) { onChange(town, null); setQuery(town); setShownValue(town) }
+    onAddress({ address: address.label, lat: address.lat, lng: address.lng, accuracy: null, source: 'typed' })
+  }
+
   const onKeyDown = (event) => {
     if (!open && ['ArrowDown', 'ArrowUp'].includes(event.key)) { setOpen(true); return }
     if (event.key === 'ArrowDown') { event.preventDefault(); setHighlight((index) => Math.min(index + 1, places.length - 1)) }
     if (event.key === 'ArrowUp') { event.preventDefault(); setHighlight((index) => Math.max(index - 1, 0)) }
     if (event.key === 'Enter' && open && places[highlight]) { event.preventDefault(); pick(places[highlight]) }
+    else if (event.key === 'Enter' && open && addresses[0]) { event.preventDefault(); pickAddress(addresses[0]) }
     if (event.key === 'Escape') setOpen(false)
   }
 
-  const typed = query.trim()
   const listId = `${id}-list`
   return (
     <div className="field city-field" ref={wrapRef}>
-      <span className="city-field-icon">{loading && open ? <Loader2 size={16} className="spin" /> : <MapPin size={16} />}</span>
+      <span className="city-field-icon">{(loading && open) || resolving ? <Loader2 size={16} className="spin" /> : <MapPin size={16} />}</span>
       <input
         id={id}
         placeholder={placeholder}
@@ -69,7 +88,7 @@ function LocationTypeahead({ value, onChange, id = 'city', label = 'Mjesto', req
       {query && (
         <button type="button" className="city-field-clear" onClick={() => { setQuery(''); setShownValue(''); onChange('', null); setOpen(true); setHighlight(0) }} aria-label="Obriši mjesto"><X size={14} /></button>
       )}
-      {open && (places.length > 0 || typed.length >= 2) && (
+      {open && (places.length > 0 || addresses.length > 0 || typed.length >= 2) && (
         <ul className="city-field-list" id={listId} role="listbox">
           {!typed && <li className="city-field-hint">Popularni gradovi — ili upiši naselje</li>}
           {places.map((place, index) => (
@@ -83,8 +102,17 @@ function LocationTypeahead({ value, onChange, id = 'city', label = 'Mjesto', req
               </button>
             </li>
           ))}
-          {!places.length && typed.length >= 2 && (
-            <li className="city-field-hint">{loading ? 'Tražim…' : 'Nema takvog mjesta u BiH'}</li>
+          {addresses.length > 0 && <li className="city-field-hint">Tačna adresa</li>}
+          {addresses.map((address) => (
+            <li key={`${address.lat},${address.lng}`} role="option" aria-selected="false">
+              <button type="button" onClick={() => pickAddress(address)}>
+                <Home size={14} />
+                <span className="place-text"><strong>{address.street || address.label}</strong>{address.place && <small>{address.place}</small>}</span>
+              </button>
+            </li>
+          ))}
+          {!places.length && !addresses.length && typed.length >= 2 && (
+            <li className="city-field-hint">{loading || addressLoading ? 'Tražim…' : onAddress ? 'Nema takvog mjesta ni adrese u BiH' : 'Nema takvog mjesta u BiH'}</li>
           )}
         </ul>
       )}

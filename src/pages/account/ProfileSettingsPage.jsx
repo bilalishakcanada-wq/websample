@@ -162,7 +162,7 @@ function ProfileSettingsPage() {
         </label>
         <div className="account-field">
           <span>Lokacija</span>
-          <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} label="Mjesto (naselje ili grad)" />
+          <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} onAddress={(next) => { setExact(next); setExactTouched(true) }} label="Mjesto ili adresa" />
           {(knowsPlace(form.city) || exact) && (
             <ExactLocationPicker
               town={form.city}

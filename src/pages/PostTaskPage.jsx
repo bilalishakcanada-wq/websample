@@ -274,7 +274,7 @@ function PostTaskPage() {
             {form.mode === 'in-person' && (
               <div className="wizard-field">
                 <span>Mjesto (naselje, selo ili grad)</span>
-                <CityField id="task-city" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} />
+                <CityField id="task-city" label="Mjesto ili ulica i broj" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} onAddress={(exact) => update({ exact })} />
                 {knowsPlace(form.location) && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
               </div>
             )}

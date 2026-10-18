@@ -12,7 +12,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowUpDown, Banknote, Bookmark, CalendarDays, Car, Clock3, Radar, Check, ChevronDown, Laptop, List, MapPin,
-  Map as MapIcon, Search as SearchIcon, Users, X, LocateFixed,
+  Map as MapIcon, Search as SearchIcon, Users, X, LocateFixed, Home,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
 // maplibre is ~0.8 MB: only fetched when the map is actually on screen
@@ -22,6 +22,8 @@ import { bosniaCities } from '../data/cities'
 import { distanceKm, isPointLabel, isRemoteLocation, placeName, pointLabel, rememberPlace } from '../data/cityCoordinates'
 import { currentLocation, locationSupported } from '../utils/location'
 import { useLocationSearch } from '../hooks/useLocationSearch'
+import { looksLikeAddress, useAddressSearch } from '../hooks/useAddressSearch'
+import { placeService } from '../services/placeService'
 import { usePlacePoint } from '../hooks/usePlacePoint'
 import { listingService } from '../services/listingService'
 import { profileService } from '../services/profileService'
@@ -94,6 +96,8 @@ function SearchPage() {
     query: searchParams.get('q') || '',
     category: searchParams.get('category') || '',
     city: searchParams.get('city') || '',
+    // the name of a typed street address or a moved pin, when city is a point ("@43.82,18.33")
+    place: searchParams.get('adresa') || '',
     radius: Number(searchParams.get('radius') ?? 50),
     includeRemote: searchParams.get('remote') !== '0',
     minPrice: searchParams.get('min') || '',
@@ -132,6 +136,7 @@ function SearchPage() {
     if (filters.query) next.set('q', filters.query)
     if (filters.category) next.set('category', filters.category)
     if (filters.city) next.set('city', filters.city)
+    if (filters.place && isPointLabel(filters.city)) next.set('adresa', filters.place)
     if (filters.city && filters.radius !== 50) next.set('radius', String(filters.radius))
     if (!filters.includeRemote) next.set('remote', '0')
     if (filters.minPrice !== '') next.set('min', String(filters.minPrice))
@@ -169,7 +174,7 @@ function SearchPage() {
     setLocateError('')
     try {
       const here = await currentLocation({ goodEnoughMeters: 500, waitMs: 6000 })
-      update({ city: pointLabel(here.lat, here.lng), ...(filters.radius === 0 ? { radius: 25 } : {}) })
+      update({ city: pointLabel(here.lat, here.lng), place: '', ...(filters.radius === 0 ? { radius: 25 } : {}) })
       setCitySearch('')
     } catch (message) {
       setLocateError(typeof message === 'string' ? message : 'Lokacija trenutno nije dostupna.')
@@ -310,7 +315,7 @@ function SearchPage() {
   ].filter(Boolean).length
 
   const resetAll = () => {
-    setFilters({ query: '', category: '', city: '', radius: 50, includeRemote: true, minPrice: '', maxPrice: '', remoteOnly: false, hasBudget: false, noOffers: false, inReach: false, sort: 'newest' })
+    setFilters({ query: '', category: '', city: '', place: '', radius: 50, includeRemote: true, minPrice: '', maxPrice: '', remoteOnly: false, hasBudget: false, noOffers: false, inReach: false, sort: 'newest' })
     setOpenMenu('')
   }
 
@@ -322,8 +327,26 @@ function SearchPage() {
 
   const toggleMenu = (id) => setOpenMenu((current) => (current === id ? '' : id))
   const { places: cityMatches, loading: citySearching } = useLocationSearch(citySearch, { limit: 12, popular: POPULAR_SEARCH_CITIES })
+  // a street typed in the same box ("Butmir, Ilirska 1"): distance is then measured from that door
+  const typedPlace = citySearch.trim()
+  const { addresses, loading: addressSearching } = useAddressSearch(citySearch, {
+    enabled: looksLikeAddress(typedPlace) || (!citySearching && !cityMatches.length && typedPlace.length >= 4),
+  })
+  const originName = isPointLabel(filters.city) && filters.place ? filters.place.split(',').slice(0, 2).join(',') : placeName(filters.city)
+  const pickAddress = (address) => {
+    update({ city: pointLabel(address.lat, address.lng), place: address.label, ...(filters.radius === 0 ? { radius: 25 } : {}) })
+    setCitySearch('')
+  }
+  // the search pin moved on the map: measure from there, named by the street under it when known
+  const moveOrigin = async ({ lat, lng }) => {
+    update({ city: pointLabel(lat, lng), place: 'Tačka na mapi' })
+    try {
+      const found = await placeService.addressAt(lat, lng)
+      if (found?.label) setFilters((current) => (current.city === pointLabel(lat, lng) ? { ...current, place: found.label } : current))
+    } catch { /* the point alone is enough */ }
+  }
   const locationLabel = filters.city
-    ? `${filters.radius === 0 ? 'Cijela BiH' : `${filters.radius} km`} · ${placeName(filters.city)}${filters.includeRemote ? ' i online' : ''}`
+    ? `${filters.radius === 0 ? 'Cijela BiH' : `${filters.radius} km`} · ${originName}${filters.includeRemote ? ' i online' : ''}`
     : 'Cijela BiH i online'
   const priceLabel = filters.minPrice === '' && filters.maxPrice === ''
     ? 'Bilo koja cijena'
@@ -370,27 +393,33 @@ function SearchPage() {
         <FilterMenu id="location" label={locationLabel} active={Boolean(filters.city)} open={openMenu === 'location'} onToggle={toggleMenu} width={360}>
           <label className="popover-search">
             <MapPin size={15} />
-            <input placeholder="Upiši naselje ili grad..." value={citySearch} onChange={(event) => setCitySearch(event.target.value)} autoFocus />
+            <input placeholder="Naselje, grad ili ulica i broj..." value={citySearch} onChange={(event) => setCitySearch(event.target.value)} autoFocus />
           </label>
           <div className="popover-list">
-            <button type="button" className={`popover-option ${!filters.city ? 'active' : ''}`} onClick={() => update({ city: '' })}>Cijela BiH</button>
+            <button type="button" className={`popover-option ${!filters.city ? 'active' : ''}`} onClick={() => update({ city: '', place: '' })}>Cijela BiH</button>
             {locationSupported() && (
-              <button type="button" className={`popover-option ${isPointLabel(filters.city) ? 'active' : ''}`} onClick={nearMe} disabled={locating}>
+              <button type="button" className={`popover-option ${isPointLabel(filters.city) && !filters.place ? 'active' : ''}`} onClick={nearMe} disabled={locating}>
                 <span><LocateFixed size={14} /> {locating ? 'Tražim gdje si…' : 'Blizu mene'}</span>
               </button>
             )}
             {myPoint && (
-              <button type="button" className="popover-option" onClick={() => { update({ city: pointLabel(myPoint.lat, myPoint.lng), ...(filters.radius === 0 ? { radius: 25 } : {}) }); setCitySearch('') }}>
+              <button type="button" className="popover-option" onClick={() => { update({ city: pointLabel(myPoint.lat, myPoint.lng), place: '', ...(filters.radius === 0 ? { radius: 25 } : {}) }); setCitySearch('') }}>
                 <span><MapPin size={14} /> Moja lokacija iz profila</span>
               </button>
             )}
             {locateError && <p className="muted-text">{locateError}</p>}
             {cityMatches.map((place) => (
-              <button key={place.label} type="button" className={`popover-option ${filters.city === place.label ? 'active' : ''}`} onClick={() => { if (place.lat != null) rememberPlace(place.label, place.lat, place.lng); update({ city: place.label }); setCitySearch('') }}>
+              <button key={place.label} type="button" className={`popover-option ${filters.city === place.label ? 'active' : ''}`} onClick={() => { if (place.lat != null) rememberPlace(place.label, place.lat, place.lng); update({ city: place.label, place: '' }); setCitySearch('') }}>
                 <span>{place.name}{place.municipality && place.municipality !== place.name && <span className="muted-text">, {place.municipality}</span>}</span>
               </button>
             ))}
-            {citySearch.trim().length >= 2 && !cityMatches.length && <p className="muted-text">{citySearching ? 'Tražim…' : 'Nema takvog mjesta u BiH.'}</p>}
+            {addresses.length > 0 && <p className="muted-text">Tačna adresa</p>}
+            {addresses.map((address) => (
+              <button key={`${address.lat},${address.lng}`} type="button" className={`popover-option ${filters.place === address.label ? 'active' : ''}`} onClick={() => pickAddress(address)}>
+                <span><Home size={14} /> {address.street || address.label}{address.place && <span className="muted-text">, {address.place}</span>}</span>
+              </button>
+            ))}
+            {typedPlace.length >= 2 && !cityMatches.length && !addresses.length && <p className="muted-text">{citySearching || addressSearching ? 'Tražim…' : 'Nema takvog mjesta ni adrese u BiH.'}</p>}
           </div>
           {filters.city && (
             <>
@@ -512,7 +541,7 @@ function SearchPage() {
         <aside className="browse-map">
           {(mobileView === 'map' || !isPhone) && (
             <Suspense fallback={<div className="browse-map-loading"><span /></div>}>
-              <TaskMap listings={listings} activeId={activeId} onSelect={selectFromMap} focus={mapFocus} />
+              <TaskMap listings={listings} activeId={activeId} onSelect={selectFromMap} focus={mapFocus} origin={origin} originLabel={filters.city ? originName : ''} onOriginMove={moveOrigin} />
             </Suspense>
           )}
         </aside>

@@ -13025,3 +13025,22 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 /* the footer opens with a line drawing of Bosnian cities */
 .site-footer-cities { height: clamp(150px, 19vw, 320px); }
 .mw-hero > :not(.hero-stars, .mw-scene) { position: relative; z-index: 1; }
+
+/* support chat: conversations, human hand-off, suggestions */
+.support-chat-actions { display: inline-flex; gap: 6px; }
+.support-avatar.is-team { background: #16a34a; }
+.support-bubble-team { border-left: 3px solid #16a34a; }
+.support-bubble a.support-inline-link { display: inline; min-height: 0; padding: 0; margin: 0 2px; border: 0; background: none; color: var(--primary); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+.support-quick button.is-human { border-color: #16a34a; color: #15803d; }
+.support-quick button.is-human:hover { background: #16a34a; color: white; }
+.support-quick button:disabled { opacity: 0.6; }
+.support-notice { align-self: center; max-width: 92%; padding: 0.45rem 0.75rem; border-radius: 10px; background: var(--surface-soft); color: var(--text-soft); font-size: 0.76rem; text-align: center; }
+.support-divider { align-self: center; font-size: 0.7rem; font-weight: 700; color: var(--text-soft); }
+.support-past { display: flex; flex-direction: column; gap: 8px; opacity: 0.8; }
+.support-past-toggle { align-self: center; display: inline-flex; align-items: center; gap: 5px; padding: 0.3rem 0.7rem; border-radius: 999px; background: var(--surface-soft); color: var(--text-soft); font-size: 0.74rem; font-weight: 700; }
+.support-chat-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 0; }
+.support-human-button { display: inline-flex; align-items: center; gap: 6px; padding: 0.5rem 0.8rem; border-radius: 999px; background: #16a34a; color: white; font-size: 0.8rem; font-weight: 800; box-shadow: 0 6px 14px rgba(22, 163, 74, 0.25); }
+.support-human-button:hover { background: #15803d; }
+.support-human-button:disabled { opacity: 0.6; }
+.support-human-status { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 700; color: #15803d; }
+.support-chat-form textarea { flex: 1; resize: none; border: 1px solid var(--stroke); background: #f8fafc; border-radius: 12px; padding: 0.6rem 0.85rem; color: var(--text); min-height: 40px; max-height: 110px; font: inherit; font-size: 0.9rem; line-height: 1.35; field-sizing: content; }

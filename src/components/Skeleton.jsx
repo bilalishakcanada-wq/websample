@@ -176,8 +176,8 @@ export function SkeletonMyTasksPhone() {
 export function SkeletonChatPhone() {
   return (
     <div className="ap ap-page ch" aria-busy="true">
-      <div className="ap-sticky">
-        <header className="ap-page-head"><h1>Poruke</h1><IconBtnSkeleton /></header>
+      <header className="ap-page-head"><h1>Poruke</h1><IconBtnSkeleton /></header>
+      <div className="ch-tools">
         <div className="ch-search"><Skeleton h={18} w={18} r={5} /><Skeleton h={14} w={80} r={5} /></div>
         <div className="ch-filters">{['Sve', 'Nepročitane', 'Spašene', 'Arhiva'].map((label, i) => <button key={label} type="button" className={i === 0 ? 'active' : ''} tabIndex={-1}>{label}</button>)}</div>
       </div>

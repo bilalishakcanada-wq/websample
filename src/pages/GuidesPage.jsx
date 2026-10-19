@@ -60,7 +60,7 @@ function GuidesPage() {
           <section className="info-section">
             <h2>Još nema dovoljno podataka</h2>
             <p className="muted-text">Za ove kategorije još nije objavljen oglas sa cijenom. Budi prvi — tvoj oglas puni ovaj vodič.</p>
-            <div className="trade-chips">
+            <div className="trade-chips all">
               {withoutData.map(({ id, name }) => (
                 <Link key={id} to={`/objavi`} className="trade-chip">{name}</Link>
               ))}

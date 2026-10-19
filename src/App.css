@@ -4979,6 +4979,12 @@ button:disabled {
   padding: 2px;
 }
 
+/* a page section (not a picker inside a form): show every chip, no small scroll box inside the page */
+.trade-chips.all {
+  max-height: none;
+  overflow: visible;
+}
+
 .trade-chip {
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
@@ -9267,16 +9273,20 @@ body:has(.profile-cta-bar) .support-chat {
   display: grid;
 }
 
-.city-field:has(small) .city-field-icon {
+.city-field:has(small) .city-field-icon,
+.city-field:has(small) .city-field-clear {
   top: 1.75rem;
 }
 
 .city-field-clear {
   position: absolute;
   right: 0.7rem;
-  top: 1rem;
-  width: 26px;
-  height: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  min-height: 0;
+  padding: 0;
   border-radius: 50%;
   display: grid;
   place-items: center;

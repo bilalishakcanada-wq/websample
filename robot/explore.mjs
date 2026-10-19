@@ -1,32 +1,35 @@
 #!/usr/bin/env node
-// Zadatak test robot: opens the site like a person would, on a desktop, a phone, a small phone and
-// inside the Android app, as a guest, a new account, a client, a worker and an admin. On every
-// screen it follows the links, presses the buttons, and writes down whatever goes wrong:
-// JavaScript crashes, console errors, failed requests, error screens, pages that scroll sideways,
-// "undefined"/"NaN" shown to people, broken images, dead links and buttons that do nothing.
+// Zadatak test robot: opens the site like a customer would, on a computer, a phone and a small
+// Android phone, as a guest, a new account, a client and a worker. On every page it looks for what
+// a customer trips over: buttons and fields covered by something else, things drawn on top of each
+// other, buttons/fields/text cut off at the screen edge, fields without a label, fields that make an
+// iPhone zoom in, banners eating the phone screen, sideways scrolling, error screens, JavaScript
+// crashes, failed requests, "undefined"/"NaN" shown to people, broken images and dead links.
+// Each problem is saved with a screenshot where the element is outlined in red.
 //
 //   ROBOT_BASE_URL=http://localhost:4175 node robot/explore.mjs
 //
-// Options (env): ROBOT_PROFILES=desktop,phone,small,app  ROBOT_ROLES=guest,newbie,client,provider,admin
-//   ROBOT_MAX_PAGES=45 (per profile and role)  ROBOT_CLICKS=1 (0 = only look, don't press)  ROBOT_FORMS=1 (fill forms with odd input)
-//   ROBOT_PARALLEL=4  ROBOT_OUT=robot-report  ROBOT_CHROMIUM=/path/to/chrome  ROBOT_FAIL_ON=error|warn|never
+// Options (env): ROBOT_PROFILES=desktop,phone,small (also: app)  ROBOT_ROLES=guest,newbie,client,provider (also: admin)
+//   ROBOT_MAX_PAGES=30 (per profile and role)  ROBOT_CLICKS=0 (1 = also press every button)  ROBOT_FORMS=0 (1 = fill forms with odd input)
+//   ROBOT_VITALS=0 (1 = also time page loads)  ROBOT_PARALLEL=4  ROBOT_OUT=robot-report  ROBOT_CHROMIUM=/path/to/chrome  ROBOT_FAIL_ON=error|warn|never
 // Report: robot-report/report.md (+ report.json and screenshots).
 import { chromium, devices } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ACCOUNTS } from './accounts.mjs'
-import { pageChecks, clickables } from './checks.mjs'
+import { pageChecks, layoutChecks, clickables } from './checks.mjs'
 import { PROFILES, appShellStub } from './profiles.mjs'
 
 const BASE = (process.env.ROBOT_BASE_URL || 'http://localhost:4175').replace(/\/+$/, '')
 const BASE_PATH = new URL(BASE).pathname.replace(/\/+$/, '')
 const ORIGIN = new URL(BASE).origin
 const OUT = path.resolve(process.env.ROBOT_OUT || 'robot-report')
-const PROFILE_NAMES = (process.env.ROBOT_PROFILES || 'desktop,phone,small,app').split(',').map((s) => s.trim()).filter(Boolean)
-const ROLE_NAMES = (process.env.ROBOT_ROLES || 'guest,newbie,client,provider,admin').split(',').map((s) => s.trim()).filter(Boolean)
-const MAX_PAGES = Number(process.env.ROBOT_MAX_PAGES || 45)
-const CLICKS = process.env.ROBOT_CLICKS !== '0'
-const FORMS = process.env.ROBOT_FORMS !== '0'
+const PROFILE_NAMES = (process.env.ROBOT_PROFILES || 'desktop,phone,small').split(',').map((s) => s.trim()).filter(Boolean)
+const ROLE_NAMES = (process.env.ROBOT_ROLES || 'guest,newbie,client,provider').split(',').map((s) => s.trim()).filter(Boolean)
+const MAX_PAGES = Number(process.env.ROBOT_MAX_PAGES || 30)
+const CLICKS = process.env.ROBOT_CLICKS === '1'
+const FORMS = process.env.ROBOT_FORMS === '1'
+const VITALS = process.env.ROBOT_VITALS === '1'
 const FAIL_ON = process.env.ROBOT_FAIL_ON || 'error'
 const PARALLEL = Number(process.env.ROBOT_PARALLEL || 4)
 const SLOW_MS = Number(process.env.ROBOT_SLOW_MS || 6000)
@@ -130,11 +133,10 @@ function watch(page, run, current) {
   page.on('request', () => { net.requests += 1 })
   page.on('pageerror', (err) => push({ kind: 'js-exception', severity: 'error', message: `JavaScript crash: ${String(err.message).split('\n')[0].slice(0, 200)}`, detail: (err.stack || '').split('\n').slice(1, 3).join(' ').trim() }))
   page.on('console', (msg) => {
-    if (msg.type() !== 'error' && msg.type() !== 'warning') return
+    if (msg.type() !== 'error') return
     const text = msg.text()
     if (IGNORE_CONSOLE.some((re) => re.test(text))) return
-    if (msg.type() === 'warning' && !/React|key|deprecated|act\(|Each child/i.test(text)) return
-    push({ kind: msg.type() === 'error' ? 'console-error' : 'console-warning', severity: msg.type() === 'error' ? 'error' : 'warn', message: `Console ${msg.type()}: ${text.split('\n')[0].slice(0, 220)}` })
+    push({ kind: 'console-error', severity: 'error', message: `Console error: ${text.split('\n')[0].slice(0, 220)}` })
   })
   page.on('response', async (res) => {
     const u = res.url()
@@ -168,12 +170,45 @@ async function shot(page, run, p) {
   return file
 }
 
+/** Screenshot with the problem element outlined in red, scrolled into view. */
+async function markedShot(page, run, p, mark, n) {
+  const file = `shots/${run}-${pattern(p).replace(/[^a-z0-9]+/gi, '_').slice(0, 50) || 'home'}-${n}.png`
+  const ok = await page.evaluate((m) => {
+    const el = document.querySelector(`[data-robot-mark="${m}"]`)
+    if (!el) return false
+    el.scrollIntoView({ block: 'center', behavior: 'instant' })
+    el.style.setProperty('outline', '4px solid #ff0033', 'important')
+    el.style.setProperty('outline-offset', '2px', 'important')
+    return true
+  }, mark).catch(() => false)
+  if (!ok) return shot(page, run, p)
+  await page.screenshot({ path: path.join(OUT, file) }).catch(() => {})
+  await page.evaluate((m) => {
+    const el = document.querySelector(`[data-robot-mark="${m}"]`)
+    el?.style.removeProperty('outline')
+    el?.style.removeProperty('outline-offset')
+  }, mark).catch(() => {})
+  return file
+}
+
+let shotCount = 0
 async function inspect(page, run, current, profile) {
-  const list = await page.evaluate(pageChecks, { phone: profile.phone }).catch((e) => [{ kind: 'robot', severity: 'warn', message: `Checks failed: ${e.message.slice(0, 120)}` }])
+  const failed = (e) => [{ kind: 'robot', severity: 'warn', message: `Checks failed: ${e.message.slice(0, 120)}` }]
+  const list = [
+    ...(await page.evaluate(pageChecks, { phone: profile.phone }).catch(failed)),
+    ...(await page.evaluate(layoutChecks, { phone: profile.phone }).catch(failed)),
+  ]
   let file = null
   for (const f of list) {
-    if (f.severity === 'error' && !file) file = await shot(page, run, current.path)
-    record(run, pattern(current.path), { ...f, url: current.path, shot: f.severity === 'error' ? file : undefined })
+    const pat = pattern(current.path)
+    const known = findings.get(`${f.kind}|${pat}|${f.message}|${(f.detail || '').slice(0, 160)}`)
+    let shotFile
+    if (f.severity === 'error' && !known?.shot) {
+      if (f.mark !== undefined) shotFile = await markedShot(page, run, current.path, f.mark, (shotCount += 1))
+      else shotFile = file || (file = await shot(page, run, current.path))
+    }
+    const { mark: _mark, ...rest } = f
+    record(run, pat, { ...rest, url: current.path, shot: shotFile })
   }
 }
 
@@ -367,8 +402,9 @@ async function crawl(browser, profileName, roleName, state) {
   const role = ROLES[roleName]
   const run = `${profileName}-${roleName}`
   PROFILES_BY_RUN.set(run, profile)
-  const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', storageState: state || undefined, serviceWorkers: 'block', geolocation: { latitude: 43.8563, longitude: 18.4131 } })
-  await context.addInitScript(vitalsRecorder)
+  // reduced motion: no smooth scrolling or entrance animations, so the robot sees the page at rest
+  const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', reducedMotion: 'reduce', storageState: state || undefined, serviceWorkers: 'block', geolocation: { latitude: 43.8563, longitude: 18.4131 } })
+  if (VITALS) await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
@@ -405,13 +441,13 @@ async function crawl(browser, profileName, roleName, state) {
     }
     await settle(page)
     const took = Date.now() - started
-    if (took > SLOW_MS) record(run, pat, { kind: 'slow', severity: 'warn', message: `Page took ${(took / 1000).toFixed(1)} s to settle`, url: next })
+    if (VITALS && took > SLOW_MS) record(run, pat, { kind: 'slow', severity: 'warn', message: `Page took ${(took / 1000).toFixed(1)} s to settle`, url: next })
     const landed = appPath(page.url())
     if (/\/404$/.test(landed.split('?')[0]) && !next.includes('nepostojeca') && next !== '/404') {
       record(run, pat, { kind: 'dead-link', severity: 'error', message: 'Link leads to "page not found"', url: next, detail: current.from ? `linked from ${current.from}` : '' })
     }
     await inspect(page, run, current, profile)
-    await vitals(page, run, current)
+    if (VITALS) await vitals(page, run, current)
     // follow the links on the page
     const links = await page.$$eval('a[href]', (as) => as.map((a) => a.href)).catch(() => [])
     for (const href of links) {
@@ -451,7 +487,7 @@ function writeReport() {
     for (const f of list) {
       lines.push(`- **${f.message}** — \`${f.where}\` (${f.kind}; ${f.runs.length > 6 ? `${f.runs.length} profile/role runs` : f.runs.join(', ')})`)
       if (f.detail) lines.push(`  - ${String(f.detail).replace(/\s+/g, ' ').slice(0, 300)}`)
-      if (f.shot) lines.push(`  - screenshot: ${f.shot}`)
+      if (f.shot) lines.push(`  - screenshot: [${f.shot}](${f.shot})`)
     }
     lines.push('')
   }

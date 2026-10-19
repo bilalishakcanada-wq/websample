@@ -1,19 +1,17 @@
 # Robot za testiranje Zadatka
 
-Robot otvara sajt kao čovjek: na računaru, na telefonu, na malom Android telefonu (360 px) i unutar
-Android aplikacije, kao gost, novi korisnik, klijent, izvođač i administrator. Na svakoj stranici
-prati linkove, pritišće dugmad i zapisuje sve što ne valja:
+Robot otvara sajt kao kupac: na računaru, na telefonu i na malom Android telefonu (360 px), kao gost,
+novi korisnik, klijent i izvođač. Na svakoj glavnoj stranici traži ono na čemu se kupac spotakne:
 
-- JavaScript greške i greške u konzoli
-- zahtjeve prema serveru ili bazi koji padnu (4xx/5xx)
-- ekran „Došlo je do greške“
-- stranice koje se šire van ekrana (klizanje u stranu na telefonu)
-- „undefined“, „NaN“, „null“ ili „Invalid Date“ prikazano ljudima
-- slike koje se ne učitaju, linkove koji vode na „stranica ne postoji“
-- dugmad koja se ne mogu pritisnuti (nešto ih prekriva ili su van ekrana) i dugmad koja ne rade ništa
-- polja bez naziva i dugmad bez teksta (čitači ekrana), premala dugmad na telefonu, spore stranice
+- dugmad, linkove i polja koja nešto prekriva (pritisak bi pao na to drugo)
+- dugmad i polja jedno preko drugog, tekst preko teksta
+- dugmad, polja ili tekst odsječene na ivici ekrana, stranice koje se šire van ekrana
+- polja bez naziva (ne zna se šta upisati), polja sa sitnim slovima zbog kojih iPhone zumira stranicu
+- trake i baneri koji na telefonu zauzimaju veliki dio ekrana
+- ekran „Došlo je do greške“, JavaScript greške, zahtjeve koji padnu, „undefined“/„NaN“ prikazano ljudima,
+  slike koje se ne učitaju i linkove koji vode na „stranica ne postoji“
 
-Dugmad koja brišu, odjavljuju, suspenduju ili prebacuju novac robot namjerno ne pritišće.
+Svaki problem ima sliku ekrana na kojoj je taj element zaokružen crvenom bojom. Cijeli krug traje oko 5 minuta.
 
 ## Kada radi
 
@@ -34,9 +32,11 @@ node robot/explore.mjs                # izvještaj: robot-report/report.md
 Test nalozi (lozinka `Test12345!`): `klijent@test.zadatak`, `izvodjac@test.zadatak`, `admin@test.zadatak`,
 `novi@test.zadatak`. `bash robot/local-db/reset.sh` vraća ih u početno stanje.
 
-Podešavanja (env): `ROBOT_BASE_URL`, `ROBOT_PROFILES=desktop,phone,small,app`,
-`ROBOT_ROLES=guest,newbie,client,provider,admin`, `ROBOT_MAX_PAGES=45`, `ROBOT_CLICKS=0` (samo gleda),
-`ROBOT_PARALLEL=4`, `ROBOT_FAIL_ON=error|warn|never`, `ROBOT_CHROMIUM=/putanja/do/chrome`, `ROBOT_TRACE=1`.
+Podešavanja (env): `ROBOT_BASE_URL`, `ROBOT_PROFILES=desktop,phone,small` (ima i `app`),
+`ROBOT_ROLES=guest,newbie,client,provider` (ima i `admin`), `ROBOT_MAX_PAGES=30`, `ROBOT_CLICKS=1` (pritisne i
+svako dugme), `ROBOT_FORMS=1` (popuni forme čudnim unosom), `ROBOT_VITALS=1` (mjeri brzinu), `ROBOT_PARALLEL=4`,
+`ROBOT_FAIL_ON=error|warn|never`, `ROBOT_CHROMIUM=/putanja/do/chrome`, `ROBOT_TRACE=1`.
 
-Na pravom sajtu samo kao gost i bez pritiskanja dugmadi, da ništa ne promijeni:
-`ROBOT_BASE_URL=https://bilalishakcanada-wq.github.io/websample ROBOT_ROLES=guest ROBOT_CLICKS=0 node robot/explore.mjs`
+Na pravom sajtu samo kao gost, da ništa ne promijeni: na GitHubu Actions → Robot → Run workflow, polje „site“
+= adresa sajta. Ili lokalno:
+`ROBOT_BASE_URL=https://bilalishakcanada-wq.github.io/websample ROBOT_ROLES=guest node robot/explore.mjs`

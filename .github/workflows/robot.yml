@@ -1,13 +1,20 @@
 # The test robot (robot/README.md): on every pull request, and every night, it builds a private copy
-# of the database with test accounts, runs the end-to-end money path, then explores the whole site
-# on a desktop, a phone, a small phone and inside the Android app as a guest, a new account, a client,
-# a worker and an admin (about 40 minutes). The report (with screenshots) is attached to the run as "robot-report".
-# Nothing here touches the live site or the live database.
+# of the database with test accounts, runs the end-to-end money path, then checks every main page on a
+# computer, a phone and a small phone as a guest, a new account, a client and a worker for what customers
+# trip over: covered or overlapping buttons and fields, things cut off at the screen edge, fields without
+# a label, crashes and failed requests. The report (screenshots with the problem outlined in red) is
+# attached to the run as "robot-report". Nothing here touches the live site or the live database.
+# Run by hand with "site" set to a URL, it only looks at that site as a guest (no logins, no presses).
 name: Robot
 
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      site:
+        description: 'Check this site as a guest instead (e.g. https://bilalishakcanada-wq.github.io/websample)'
+        required: false
+        default: ''
   schedule:
     - cron: '17 2 * * *'
 
@@ -19,9 +26,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  robot:
+  live:
+    if: github.event_name == 'workflow_dispatch' && inputs.site != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Robot looks at the site as a guest
+        run: node robot/explore.mjs
+        env:
+          ROBOT_BASE_URL: ${{ inputs.site }}
+          ROBOT_ROLES: guest
+      - name: Report
+        if: always()
+        run: |
+          if [ -f robot-report/report.md ]; then head -c 60000 robot-report/report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robot-report
+          path: robot-report/
+          retention-days: 14
+
+  robot:
+    if: github.event_name != 'workflow_dispatch' || inputs.site == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       E2E_BASE_URL: http://localhost:4175
       E2E_CLIENT_EMAIL: klijent@test.zadatak
@@ -62,7 +99,7 @@ jobs:
           bash robot/local-db/reset.sh
           export $(cat robot/local-db/.anon)
           node robot/seed.mjs
-      - name: Robot explores the site
+      - name: Robot checks every page for covered, overlapping and cut-off buttons and fields
         if: always()
         run: node robot/explore.mjs
       - name: Report

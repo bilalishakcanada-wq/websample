@@ -204,3 +204,270 @@ export function clickables() {
   })
   return items
 }
+
+/**
+ * Runs in the page: the problems a customer actually trips over, checked over the whole page
+ * (it scrolls through it). Every finding carries `mark`: the element gets data-robot-mark so the
+ * robot can outline it in red on the screenshot.
+ *   covered       a button, link or field whose middle is under something else (a press lands on that)
+ *   overlap       two buttons/fields on top of each other, or two pieces of text drawn over each other
+ *   cut-off       a button, field or text sticking out past the left or right edge of the screen
+ *   field-label   a field with no label at all (nobody knows what to type)
+ *   field-zoom    phone: a field with text under 16px (iPhone zooms the whole page in when it is tapped)
+ *   field-size    phone: a field too small to tap
+ *   overlay       phone: fixed bars/banners that take a big part of the screen at once
+ */
+export function layoutChecks(opts) {
+  const out = []
+  // sections far down the page skip layout until scrolled near (content-visibility: auto), so their
+  // sizes are guesses; lay everything out for real while measuring
+  const force = document.createElement('style')
+  force.textContent = '*, *::before, *::after { content-visibility: visible !important; scroll-behavior: auto !important }'
+  document.head.appendChild(force)
+  let marks = 0
+  const mark = (el) => {
+    if (!el.hasAttribute('data-robot-mark')) el.setAttribute('data-robot-mark', String(marks++))
+    return el.getAttribute('data-robot-mark')
+  }
+  const push = (kind, severity, message, detail, el) => out.push({ kind, severity, message, detail, mark: el ? mark(el) : undefined })
+  const vw = document.documentElement.clientWidth
+  const vh = window.innerHeight
+  const shown = (el) => {
+    // closed <details>, content-visibility, display/visibility/opacity
+    if (el.checkVisibility && !el.checkVisibility({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })) return false
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      const s = getComputedStyle(n)
+      if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) < 0.05) return false
+      if (n.getAttribute('aria-hidden') === 'true' || n.inert) return false
+    }
+    const r = el.getBoundingClientRect()
+    return r.width > 2 && r.height > 2
+  }
+  const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.value || el.placeholder || el.title || el.getAttribute('alt') || '').trim().replace(/\s+/g, ' ').slice(0, 50)
+  const describe = (el) => {
+    const id = el.id ? `#${el.id}` : ''
+    const cls = typeof el.className === 'string' && el.className.trim() ? `.${el.className.trim().split(/\s+/).slice(0, 2).join('.')}` : ''
+    const text = name(el)
+    return `${el.tagName.toLowerCase()}${id}${cls}${text ? ` "${text}"` : ''}`
+  }
+  const what = (el) => {
+    const t = el.tagName
+    if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return 'Field'
+    if (t === 'A') return 'Link'
+    return 'Button'
+  }
+  // the area of the element a person can actually see, after every scroll box / clipping parent cuts it
+  const clipped = (el) => {
+    let r = el.getBoundingClientRect()
+    let box = { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+    for (let p = el.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
+      const s = getComputedStyle(p)
+      if (s.position === 'fixed') break
+      if (/(auto|scroll|hidden|clip)/.test(s.overflowX + s.overflowY)) {
+        const pr = p.getBoundingClientRect()
+        box = { left: Math.max(box.left, pr.left), top: Math.max(box.top, pr.top), right: Math.min(box.right, pr.right), bottom: Math.min(box.bottom, pr.bottom) }
+      }
+    }
+    return box.right - box.left > 2 && box.bottom - box.top > 2 ? box : null
+  }
+  const fixedAncestor = (el) => {
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      const p = getComputedStyle(n).position
+      if (p === 'fixed' || p === 'sticky') return n
+    }
+    return null
+  }
+  const inScroller = (el) => {
+    for (let p = el.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
+      if (/(auto|scroll)/.test(getComputedStyle(p).overflowX)) return true
+    }
+    return false
+  }
+  // the app scrolls inside its own boxes on phones, so let the browser scroll whatever box holds it
+  const scrollToEl = (el) => el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
+
+  // an open dialog: only what is inside it can be reached, and that is correct
+  const dialogs = [...document.querySelectorAll('[role="dialog"], [aria-modal="true"], dialog[open]')].filter(shown)
+  const scope = dialogs.length ? dialogs[dialogs.length - 1] : document.body
+  const CONTROL = 'button, a[href], [role="button"], [role="tab"], [role="checkbox"], [role="switch"], input:not([type=hidden]), select, textarea, summary'
+  const controls = [...scope.querySelectorAll(CONTROL)]
+    .filter((el) => !el.closest('.maplibregl-map, .leaflet-container, [data-robot-ignore]') && shown(el))
+    .slice(0, 400)
+
+  // 1. covered: scroll to each control and see what a press in its middle would hit
+  const covers = new Map()
+  for (const el of controls) {
+    if (el.disabled) continue
+    // checkboxes/radios/file inputs are often hidden visually and pressed through their label
+    if (el.tagName === 'INPUT' && /^(checkbox|radio|file|range|color)$/.test(el.type) && el.labels?.length) continue
+    if (!fixedAncestor(el)) scrollToEl(el)
+    const box = clipped(el)
+    if (!box) continue
+    const x = (Math.max(box.left, 0) + Math.min(box.right, vw)) / 2
+    const y = (Math.max(box.top, 0) + Math.min(box.bottom, vh)) / 2
+    if (x <= 0 || y <= 0 || x >= vw || y >= vh) continue
+    const hit = document.elementFromPoint(x, y)
+    if (!hit || el === hit || el.contains(hit) || hit.contains(el)) continue
+    if (el.labels && [...el.labels].some((l) => l.contains(hit))) continue
+    if (hit.closest('label')?.contains(el)) continue
+    // the thing on top is another control the same person asked for (e.g. a clear "x" inside a field)
+    const cover = hit.closest(CONTROL) && el.parentElement?.contains(hit) ? null : hit
+    if (!cover) continue
+    const top = fixedAncestor(cover) || cover
+    const key = describe(top)
+    if (!covers.has(key)) covers.set(key, { list: [] })
+    covers.get(key).list.push(el)
+  }
+  for (const [key, { list }] of covers) {
+    const names = list.slice(0, 4).map((el) => `${what(el).toLowerCase()} "${name(el) || '?'}"`).join(', ')
+    push('covered', 'error', `${list.length === 1 ? `${what(list[0])} "${name(list[0]) || '?'}" is` : `${list.length} buttons/fields are`} covered by ${key} (a press lands on that instead)`, names + (list.length > 4 ? ` and ${list.length - 4} more` : ''), list[0])
+  }
+
+  // 2. two controls drawn on top of each other
+  window.scrollTo({ top: 0, behavior: 'instant' })
+  const docBox = (el) => {
+    const r = el.getBoundingClientRect()
+    const toDoc = (q) => ({ left: q.left + window.scrollX, top: q.top + window.scrollY, right: q.right + window.scrollX, bottom: q.bottom + window.scrollY })
+    // a link wrapped over two lines is two boxes, not one big rectangle over its neighbours
+    return { ...toDoc(r), w: r.width, h: r.height, parts: [...el.getClientRects()].map(toDoc) }
+  }
+  const inter = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+  const interParts = (a, b) => {
+    let sum = 0
+    for (const p of a.parts.length ? a.parts : [a]) for (const q of b.parts.length ? b.parts : [b]) sum += inter(p, q)
+    return sum
+  }
+  const flow = controls.filter((el) => !fixedAncestor(el) && !(el.tagName === 'INPUT' && /^(checkbox|radio)$/.test(el.type)))
+  // only the part a person can see: chips scrolled out of a small scroll box are not "on top" of anything
+  const boxes = flow.filter((el) => clipped(el)).map((el) => {
+    const b = docBox(el)
+    const c = clipped(el)
+    const cut = { left: c.left + window.scrollX, top: c.top + window.scrollY, right: c.right + window.scrollX, bottom: c.bottom + window.scrollY }
+    b.parts = b.parts.map((q) => ({ left: Math.max(q.left, cut.left), top: Math.max(q.top, cut.top), right: Math.min(q.right, cut.right), bottom: Math.min(q.bottom, cut.bottom) })).filter((q) => q.right > q.left && q.bottom > q.top)
+    return { el, b: { ...b, ...cut, w: cut.right - cut.left, h: cut.bottom - cut.top } }
+  })
+  let overlaps = 0
+  for (let i = 0; i < boxes.length && overlaps < 6; i += 1) {
+    for (let j = i + 1; j < boxes.length && overlaps < 6; j += 1) {
+      const a = boxes[i]; const b = boxes[j]
+      if (a.el.contains(b.el) || b.el.contains(a.el)) continue
+      if (!inter(a.b, b.b)) continue
+      const area = interParts(a.b, b.b)
+      if (!area) continue
+      const small = Math.min(a.b.w * a.b.h, b.b.w * b.b.h)
+      if (area / small < 0.25) continue
+      // a label wrapped around its own field, or the same link twice (image + title) is fine
+      if (a.el.labels && [...a.el.labels].includes(b.el)) continue
+      if (a.el.tagName === 'A' && b.el.tagName === 'A' && a.el.href === b.el.href) continue
+      // a small button placed on a clickable card (save, share): fine when the button is the one on top
+      const [big, small_] = a.b.w * a.b.h >= b.b.w * b.b.h ? [a, b] : [b, a]
+      if (area / (small_.b.w * small_.b.h) > 0.95) {
+        small_.el.scrollIntoView({ block: 'center', behavior: 'instant' })
+        const r = small_.el.getBoundingClientRect()
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+        if (hit && (small_.el === hit || small_.el.contains(hit)) && big.el !== hit) continue
+      }
+      overlaps += 1
+      push('overlap', 'error', `${what(a.el)} "${name(a.el) || '?'}" and ${what(b.el).toLowerCase()} "${name(b.el) || '?'}" are on top of each other`, `${describe(a.el)} | ${describe(b.el)}`, a.el)
+    }
+  }
+
+  // 3. text drawn over other text (broken layout); per line, so wrapped paragraphs don't count
+  const lines = []
+  const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT)
+  const range = document.createRange()
+  for (let n = walker.nextNode(); n && lines.length < 3000; n = walker.nextNode()) {
+    const el = n.parentElement
+    if (!el || !n.textContent.trim() || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'OPTION', 'TEXTAREA'].includes(el.tagName)) continue
+    if (el.closest('svg, .maplibregl-map, .leaflet-container, [data-robot-ignore]') || fixedAncestor(el) || !shown(el)) continue
+    range.selectNodeContents(n)
+    // text cut with "…" or hidden by a parent's overflow only shows inside that parent
+    const clip = clipped(el)
+    if (!clip) continue
+    for (const q of range.getClientRects()) {
+      const r = { left: Math.max(q.left, clip.left), right: Math.min(q.right, clip.right), top: Math.max(q.top, clip.top), bottom: Math.min(q.bottom, clip.bottom) }
+      if (r.right - r.left < 4 || r.bottom - r.top < 4) continue
+      lines.push({ el, node: n, left: r.left + window.scrollX, right: r.right + window.scrollX, top: r.top + window.scrollY, bottom: r.bottom + window.scrollY })
+    }
+  }
+  lines.sort((a, b) => a.top - b.top)
+  const textHits = []
+  for (let i = 0; i < lines.length && textHits.length < 5; i += 1) {
+    const a = lines[i]
+    for (let j = i + 1; j < lines.length && lines[j].top < a.bottom; j += 1) {
+      const b = lines[j]
+      if (a.node === b.node) continue
+      const area = inter(a, b)
+      if (!area) continue
+      const small = Math.min((a.right - a.left) * (a.bottom - a.top), (b.right - b.left) * (b.bottom - b.top))
+      if (area / small < 0.3) continue
+      // both must really be seen there: one may sit under a solid card (that is covering, not overlap)
+      const cx = (Math.max(a.left, b.left) + Math.min(a.right, b.right)) / 2 - window.scrollX
+      const cyDoc = (Math.max(a.top, b.top) + Math.min(a.bottom, b.bottom)) / 2
+      window.scrollTo({ top: Math.max(0, cyDoc - vh / 2), behavior: 'instant' })
+      const hit = document.elementFromPoint(cx, cyDoc - window.scrollY)
+      if (!hit || !(a.el.contains(hit) || hit.contains(a.el) || b.el.contains(hit) || hit.contains(b.el))) continue
+      if (textHits.some((t) => (t.a === a.el && t.b === b.el) || (t.a === b.el && t.b === a.el))) continue
+      textHits.push({ a: a.el, b: b.el })
+      push('overlap', 'error', `Text drawn over other text: "${a.node.textContent.trim().slice(0, 40)}" and "${b.node.textContent.trim().slice(0, 40)}"`, `${describe(a.el)} | ${describe(b.el)}`, a.el)
+      break
+    }
+  }
+  window.scrollTo({ top: 0, behavior: 'instant' })
+
+  // 4. sticking out past the edge of the screen (also when the page hides sideways scrolling, which hides the bug)
+  const cut = []
+  for (const el of controls) {
+    if (inScroller(el) || fixedAncestor(el)?.getBoundingClientRect().width > vw) continue
+    // what a parent with overflow: hidden cuts away is not on screen at all (tickers, carousels)
+    const r = clipped(el)
+    if (r && (r.right > vw + 2 || r.left < -2)) cut.push(el)
+  }
+  for (const { el } of lines.filter((l) => (l.right - window.scrollX > vw + 2 || l.left - window.scrollX < -2) && !inScroller(l.el)).slice(0, 40)) {
+    const r = clipped(el)
+    if (r && (r.right > vw + 2 || r.left < -2) && !cut.includes(el)) cut.push(el)
+  }
+  const outer = cut.filter((el) => !cut.some((o) => o !== el && o.contains(el)))
+  for (const el of outer.slice(0, 5)) {
+    const r = el.getBoundingClientRect()
+    push('cut-off', 'error', `${['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(el.tagName) ? what(el) : 'Text'} "${name(el) || '?'}" is cut off at the ${r.left < -2 ? 'left' : 'right'} edge of the screen`, `${describe(el)} spans ${Math.round(r.left)}–${Math.round(r.right)}px on a ${vw}px screen`, el)
+  }
+
+  // 5. fields
+  for (const el of controls) {
+    if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || /^(submit|button|reset|image|file)$/.test(el.type)) continue
+    const labelled = (el.labels && [...el.labels].some((l) => l.innerText.trim())) || el.getAttribute('aria-label') || el.getAttribute('aria-labelledby') || el.title
+    if (!labelled && !el.placeholder && !(el.tagName === 'SELECT' && el.options[el.selectedIndex]?.text.trim())) {
+      push('field-label', 'error', 'Field with no label or hint: people can\'t tell what to type', describe(el), el)
+    }
+    if (opts.phone && !/^(checkbox|radio|range|color)$/.test(el.type)) {
+      const s = getComputedStyle(el)
+      if (parseFloat(s.fontSize) < 16 && !el.readOnly) push('field-zoom', 'warn', `Field text is ${s.fontSize}: iPhone zooms the page in when it is tapped`, describe(el), el)
+      const r = el.getBoundingClientRect()
+      if (r.height < 32 && el.tagName !== 'TEXTAREA') push('field-size', 'warn', `Field only ${Math.round(r.height)}px tall, hard to tap`, describe(el), el)
+    }
+  }
+
+  // 6. phone: how much of the screen fixed bars/banners take (dialogs the person opened don't count)
+  if (opts.phone && !dialogs.length) {
+    const bars = [...document.body.querySelectorAll('*')].filter((el) => {
+      const s = getComputedStyle(el)
+      return (s.position === 'fixed' || s.position === 'sticky') && shown(el)
+    }).filter((el, _i, all) => !all.some((o) => o !== el && o.contains(el)))
+    let area = 0
+    const names = []
+    for (const el of bars) {
+      const r = el.getBoundingClientRect()
+      const h = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0))
+      const w = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0))
+      if (h * w < 0.04 * vw * vh) continue
+      area += h * w
+      names.push(`${describe(el)} ${Math.round(h)}px`)
+    }
+    const share = area / (vw * vh)
+    if (share > 0.35) push('overlay', share > 0.5 ? 'error' : 'warn', `Fixed bars and banners cover ${Math.round(share * 100)}% of the phone screen`, names.join(' | '))
+  }
+
+  force.remove()
+  return out
+}

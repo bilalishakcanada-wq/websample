@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Ban, BellRing, LogOut, MapPin, Settings } from 'lucide-react'
+import { Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
@@ -8,11 +8,45 @@ import { formatBosnianDate } from '../../utils/dateFormat'
 import { useBlocks } from '../../hooks/useBlocks'
 import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
 import { isLiveReachOn, LIVE_REACH_REPORTED, setLiveReach } from '../../utils/liveReach'
+import { isJobShareAuto, setJobShareAuto } from '../../utils/jobShare'
 import { locationPermission, openAppSettings, requestLocation } from '../../utils/permissions'
 import { isNativeApp } from '../../utils/native'
 import { backgroundLocationSupported } from '../../utils/location'
+import { toast } from '../../components/Toaster'
+import './SettingsPage.css'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
+
+/** A row like WhatsApp's settings: coloured icon tile, title, one line under it, and a control on the right. */
+function Row({ icon: Icon, tone = 'blue', title, sub, children, testid, as: Tag = 'div', ...rest }) {
+  return (
+    <Tag className="st-row" data-testid={testid} {...rest}>
+      <span className={`st-tile st-tile-${tone}`} aria-hidden="true"><Icon size={18} strokeWidth={2.2} /></span>
+      <span className="st-text">
+        <strong>{title}</strong>
+        {sub && <span>{sub}</span>}
+      </span>
+      {children}
+    </Tag>
+  )
+}
+
+/** The switch itself: role="switch", so a screen reader says "uključeno / isključeno". */
+function Switch({ on, onChange, disabled, label, testid }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} className={`st-switch${on ? ' is-on' : ''}`} onClick={onChange} disabled={disabled} data-testid={testid}>
+      <span />
+    </button>
+  )
+}
+
+const GEO_TEXT = {
+  granted: ['Dozvoljeno', 'ok'],
+  prompt: ['Nije uključeno', 'warn'],
+  denied: ['Blokirano', 'bad'],
+  unsupported: ['Nije dostupno', 'muted'],
+  loading: ['…', 'muted'],
+}
 
 function SettingsPage() {
   const navigate = useNavigate()
@@ -20,55 +54,88 @@ function SettingsPage() {
   const { profile, bundle, saveProfile } = useAccount()
   const [notifyEmail, setNotifyEmail] = useState(profile.notify_email !== false)
   const [notifyPush, setNotifyPush] = useState(profile.notify_push !== false)
-  const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported'
+  const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported' | 'native'
   const [password, setPassword] = useState('')
   const { blocked, toggle: toggleBlockUser } = useBlocks()
   // Lokacija uživo: doseg ponuda follows where the person is right now (utils/liveReach.js)
   const [live, setLive] = useState(isLiveReachOn)
+  const [jobShare, setJobShare] = useState(isJobShareAuto)
   const [geo, setGeo] = useState('loading') // 'granted' | 'denied' | 'prompt' | 'unsupported'
   const [lastPoint, setLastPoint] = useState(null)
-  useEffect(() => {
-    let alive = true
-    const check = () => locationPermission().then((state) => { if (alive) setGeo(state) })
-    check()
-    const reported = (event) => setLastPoint(event.detail)
-    window.addEventListener(LIVE_REACH_REPORTED, reported)
-    window.addEventListener('focus', check)
-    return () => { alive = false; window.removeEventListener(LIVE_REACH_REPORTED, reported); window.removeEventListener('focus', check) }
+  const [busy, setBusy] = useState('')
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  // a long page: what went wrong (or right) shows as a toast where the person is looking
+  useEffect(() => { if (error) toast(error, { kind: 'error', duration: 5200 }) }, [error])
+  useEffect(() => { if (message) toast(message, { kind: 'success' }) }, [message])
+
+  // back from the phone's settings: the permission may have changed there
+  const recheck = useCallback(() => {
+    locationPermission().then(setGeo)
+    pushDeviceState().then(setDevice)
   }, [])
-  const liveOn = live && geo === 'granted'
+  useEffect(() => {
+    recheck()
+    const reported = (event) => setLastPoint(event.detail)
+    const onVisible = () => { if (document.visibilityState === 'visible') recheck() }
+    window.addEventListener(LIVE_REACH_REPORTED, reported)
+    window.addEventListener('focus', recheck)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => { window.removeEventListener(LIVE_REACH_REPORTED, reported); window.removeEventListener('focus', recheck); document.removeEventListener('visibilitychange', onVisible) }
+  }, [recheck])
+
+  const geoOk = geo === 'granted'
+  const liveOn = live && geoOk
+  const connectLocation = async () => {
+    setError('')
+    if (geo === 'denied') {
+      if (!(await openAppSettings())) setError('Dozvoli lokaciju za Zadatak u postavkama preglednika (katanac lijevo od adrese), pa se vrati ovdje.')
+      return
+    }
+    setBusy('geo')
+    try { setGeo(await requestLocation()) } finally { setBusy('') }
+  }
   const toggleLive = async () => {
     setError('')
     if (liveOn) { setLiveReach(false); setLive(false); return }
     setBusy('live')
     try {
-      const state = await requestLocation()
+      const state = geoOk ? 'granted' : await requestLocation()
       setGeo(state)
       if (state === 'granted') { setLiveReach(true); setLive(true) }
+      else if (state === 'denied') setError('Lokacija je blokirana za Zadatak. Dodirni „Otvori“ kod Pristupa lokaciji i dozvoli je.')
     } finally { setBusy('') }
   }
-
-  useEffect(() => {
-    let alive = true
-    pushDeviceState().then((state) => { if (alive) setDevice(state) })
-    return () => { alive = false }
-  }, [])
+  const toggleJobShare = async () => {
+    setError('')
+    if (jobShare) { setJobShareAuto(false); setJobShare(false); return }
+    if (!geoOk) {
+      setBusy('job')
+      try {
+        const state = await requestLocation()
+        setGeo(state)
+        if (state !== 'granted') { setError('Za ovo prvo dozvoli lokaciju.'); return }
+      } finally { setBusy('') }
+    }
+    setJobShareAuto(true); setJobShare(true)
+  }
 
   const toggleDevice = async () => {
     setBusy('device'); setError('')
     try {
       if (device === 'on') { await disablePush(); setDevice('off') }
+      else if (device === 'blocked') { if (!(await openAppSettings())) setError('Dozvoli obavijesti za Zadatak u postavkama telefona ili preglednika, pa se vrati ovdje.') }
       else { const result = await enablePush(); setDevice(result === 'granted' ? 'on' : result === 'denied' ? 'blocked' : device) }
     } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
   }
-  const [busy, setBusy] = useState('')
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
 
-  const savePrefs = async () => {
+  // like WhatsApp: a switch saves the moment it moves, there is no "Sačuvaj"
+  const savePref = async (patch, undo) => {
     setBusy('prefs'); setError(''); setMessage('')
-    try { await saveProfile({ notify_email: notifyEmail, notify_push: notifyPush }); setMessage('Postavke obavijesti su sačuvane.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
+    try { await saveProfile(patch) } catch (requestError) { undo(); setError(requestError.message) } finally { setBusy('') }
   }
+  const togglePush = () => { const next = !notifyPush; setNotifyPush(next); savePref({ notify_push: next }, () => setNotifyPush(!next)) }
+  const toggleEmail = () => { const next = !notifyEmail; setNotifyEmail(next); savePref({ notify_email: next }, () => setNotifyEmail(!next)) }
 
   const changePassword = async (event) => {
     event.preventDefault()
@@ -84,103 +151,115 @@ function SettingsPage() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  const [geoLabel, geoTone] = GEO_TEXT[geo] || GEO_TEXT.loading
+  const deviceOn = device === 'on'
+  const deviceSub = {
+    on: 'Ovaj telefon prima obavijesti, i kad je Zadatak zatvoren.',
+    off: 'Uključi da ti nova ponuda ili poruka stigne odmah.',
+    blocked: isNativeApp() ? 'Isključene u postavkama telefona. Dodirni da ih otvoriš.' : 'Blokirane u pregledniku. Dozvoli ih za Zadatak (katanac lijevo od adrese).',
+    install: 'Na iPhoneu prvo dodaj Zadatak na početni ekran (Dijeli → Dodaj na početni ekran).',
+    unsupported: 'Ovaj preglednik ne podržava obavijesti. Stižu u zvono i na email.',
+    native: 'Stižu u sljedećoj verziji aplikacije. Do tada ih vidiš u zvonu.',
+    loading: 'Provjeravam…',
+  }[device]
+
   return (
-    <div className="account-section">
+    <div className="account-section st">
       <div className="account-section-head"><h1>Postavke</h1></div>
 
-      <h3 className="account-sub" id="lokacija">Lokacija</h3>
-      <div className="settings-rows">
-        <div className="settings-row settings-row-device" data-testid="live-reach">
-          <div>
-            <strong><MapPin size={15} /> Lokacija uživo {liveOn && <span className="live-dot" aria-hidden="true" />}</strong>
-            <span>
-              {liveOn
-                ? `Uključeno. Doseg ponuda se računa od mjesta gdje si sada${backgroundLocationSupported() ? ', i kad je Zadatak u pozadini (na telefonu stoji obavijest)' : ', dok je Zadatak otvoren'}.${lastPoint ? ' Lokacija je upravo osvježena.' : ''}`
-                : geo === 'denied'
-                  ? (isNativeApp() ? 'Lokacija je odbijena. Otvori postavke telefona, dozvoli lokaciju za Zadatak i vrati se ovdje.' : 'Lokacija je blokirana u pregledniku. Dodirni ikonu lijevo od adrese stranice (katanac), dozvoli lokaciju i uključi ovdje.')
-                  : geo === 'unsupported'
-                    ? 'Ovaj uređaj ne zna lokaciju. Doseg se računa od adrese ili grada iz profila.'
-                    : 'Isključeno. Kad uključiš, doseg (koliko si daleko od posla) prati gdje si sada, a ne grad iz profila.'}
-            </span>
-          </div>
-          {geo === 'denied' && isNativeApp() && !liveOn && <button type="button" className="ghost-button" onClick={() => openAppSettings()}><Settings size={15} /> Postavke</button>}
-          {(liveOn || !['unsupported', 'denied'].includes(geo)) && (
-            <button type="button" className={liveOn ? 'ghost-button' : 'primary-button'} data-testid="live-reach-toggle" onClick={toggleLive} disabled={busy === 'live' || geo === 'loading'}>{busy === 'live' ? '…' : liveOn ? 'Isključi' : 'Uključi'}</button>
-          )}
-        </div>
+      <Link to="/account/profil" className="st-profile">
+        <span className="st-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={28} />}</span>
+        <span className="st-text">
+          <strong>{profile.full_name || 'Tvoj nalog'}</strong>
+          <span>{user.email}</span>
+        </span>
+        <ChevronRight size={20} className="st-chevron" />
+      </Link>
+
+      <h2 className="st-group-title" id="lokacija">Lokacija</h2>
+      <div className="st-group">
+        <Row icon={LocateFixed} tone="green" title="Pristup lokaciji" testid="geo-access"
+          sub={geo === 'denied'
+            ? (isNativeApp() ? 'Odbijeno na telefonu. Otvori postavke i dozvoli lokaciju za Zadatak.' : 'Blokirano u pregledniku.')
+            : geo === 'unsupported' ? 'Ovaj uređaj ne zna lokaciju. Udaljenost se računa od grada iz profila.' : 'Potrebno za objavu posla, ponude i traženje posla.'}>
+          {geo === 'granted' || geo === 'unsupported' || geo === 'loading'
+            ? <span className={`st-pill st-pill-${geoTone}`}>{geoLabel}</span>
+            : <button type="button" className="st-action" onClick={connectLocation} disabled={busy === 'geo'}>{busy === 'geo' ? '…' : geo === 'denied' ? 'Otvori' : 'Dozvoli'}</button>}
+        </Row>
+        <Row icon={Radio} tone="green" testid="live-reach" title={<>Lokacija uživo {liveOn && <span className="live-dot" aria-hidden="true" />}</>}
+          sub={liveOn
+            ? `Udaljenost od poslova se računa od mjesta gdje si sada${backgroundLocationSupported() ? ', i kad je Zadatak u pozadini (na telefonu stoji obavijest)' : ', dok je Zadatak otvoren'}.${lastPoint ? ' Upravo osvježeno.' : ''}`
+            : 'Kad je isključena, računamo od adrese ili grada iz profila.'}>
+          <Switch on={liveOn} onChange={toggleLive} disabled={busy === 'live' || geo === 'loading' || geo === 'unsupported'} label="Lokacija uživo" testid="live-reach-toggle" />
+        </Row>
+        <Row icon={Navigation} tone="teal" testid="job-share" title="Dijeli tokom posla"
+          sub={jobShare
+            ? 'Kad klijent na prihvaćenom poslu zatraži gdje si, lokacija se dijeli sama. Samo njemu, najviše 2 sata ili dok ne stigneš.'
+            : 'Kad klijent zatraži gdje si, pitamo te svaki put.'}>
+          <Switch on={jobShare && geo !== 'denied'} onChange={toggleJobShare} disabled={busy === 'job' || geo === 'loading' || geo === 'unsupported'} label="Dijeli lokaciju tokom posla" testid="job-share-toggle" />
+        </Row>
+      </div>
+      <p className="st-footnote">Lokaciju vidi samo klijent posla koji radiš, i samo dok ga dijeliš. Ostali vide samo grad.</p>
+
+      <h2 className="st-group-title" id="obavijesti">Obavijesti</h2>
+      <div className="st-group">
+        <Row icon={Smartphone} tone="orange" title="Na ovom telefonu" sub={deviceSub} testid="device-push">
+          {device === 'on' || device === 'off'
+            ? <Switch on={deviceOn} onChange={toggleDevice} disabled={busy === 'device'} label="Obavijesti na ovom telefonu" testid="device-push-toggle" />
+            : device === 'blocked' && isNativeApp() ? <button type="button" className="st-action" onClick={toggleDevice}><Settings size={14} /> Otvori</button> : null}
+        </Row>
+        <Row icon={BellRing} tone="red" title="Push obavijesti" sub="Ponude, poruke, plaćanja i molbe za prevoz.">
+          <Switch on={notifyPush} onChange={togglePush} disabled={busy === 'prefs'} label="Push obavijesti" testid="notify-push-toggle" />
+        </Row>
+        <Row icon={Mail} tone="blue" title="Email obavijesti" sub={`Na ${user.email}`}>
+          <Switch on={notifyEmail} onChange={toggleEmail} disabled={busy === 'prefs'} label="Email obavijesti" testid="notify-email-toggle" />
+        </Row>
+        <Row as={Link} to="/account/postavke-obavijesti" icon={ListChecks} tone="purple" title="Šta ti javljamo" sub="Ponude i poslovi, poruke, plaćanja, alarmi">
+          <ChevronRight size={18} className="st-chevron" />
+        </Row>
       </div>
 
-      <h3 className="account-sub">Obavijesti</h3>
-      <div className="settings-rows">
-        <label className="settings-row"><div><strong>Email obavijesti</strong><span>Nove ponude, poruke i značke na email.</span></div><input type="checkbox" checked={notifyEmail} onChange={(event) => setNotifyEmail(event.target.checked)} /></label>
-        <label className="settings-row"><div><strong>Push obavijesti</strong><span>Nove ponude, poruke i isplate — i kad aplikacija nije otvorena.</span></div><input type="checkbox" checked={notifyPush} onChange={(event) => setNotifyPush(event.target.checked)} /></label>
-        <div className="settings-row settings-row-device">
-          <div>
-            <strong><BellRing size={15} /> Ovaj uređaj</strong>
-            <span>
-              {device === 'on' && 'Prima obavijesti.'}
-              {device === 'off' && 'Još ne prima obavijesti — uključi ih ovdje.'}
-              {device === 'blocked' && 'Obavijesti su blokirane u postavkama telefona ili preglednika. Dozvoli ih za Zadatak pa pokušaj ponovo.'}
-              {device === 'install' && 'Na iPhoneu prvo dodaj Zadatak na početni ekran (Dijeli → Dodaj na početni ekran), pa uključi obavijesti ovdje.'}
-              {device === 'unsupported' && 'Ovaj preglednik ne podržava push obavijesti.'}
-              {device === 'native' && 'Obavijesti na telefonu stižu u sljedećoj verziji aplikacije. Do tada ih vidiš u zvonu.'}
-              {device === 'loading' && '…'}
-            </span>
-          </div>
-          {(device === 'on' || device === 'off') && (
-            <button type="button" className={device === 'on' ? 'ghost-button' : 'primary-button'} onClick={toggleDevice} disabled={busy === 'device'}>{busy === 'device' ? '…' : device === 'on' ? 'Isključi' : 'Uključi'}</button>
-          )}
-        </div>
-        <button type="button" className="primary-button" onClick={savePrefs} disabled={busy === 'prefs'}>{busy === 'prefs' ? 'Čuvam…' : 'Sačuvaj'}</button>
-      </div>
-
-      <h3 className="account-sub">Prijava</h3>
-      <div className="settings-rows">
-        <div className="settings-row"><div><strong>Email</strong><span>{user.email}</span></div></div>
+      <h2 className="st-group-title">Račun</h2>
+      <div className="st-group">
+        <Row icon={Mail} tone="blue" title="Email" sub={user.email} />
         {isOAuth ? (
-          <div className="settings-row"><div><strong>Lozinka</strong><span>Prijavljuješ se preko Google naloga — lozinka se mijenja kod Googlea.</span></div></div>
+          <Row icon={KeyRound} tone="gray" title="Lozinka" sub="Prijavljuješ se preko Google naloga, lozinka se mijenja kod Googlea." />
         ) : (
-          <form className="settings-row" id="lozinka" onSubmit={changePassword}>
-            <div><strong>Nova lozinka</strong><span>Najmanje 8 znakova.</span></div>
-            <div className="settings-inline"><input type="password" aria-label="Nova lozinka" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" /><button type="submit" className="ghost-button" disabled={busy === 'pw' || password.length < 8}>Promijeni</button></div>
+          <form className="st-row st-row-form" id="lozinka" onSubmit={changePassword}>
+            <span className="st-tile st-tile-gray" aria-hidden="true"><KeyRound size={18} strokeWidth={2.2} /></span>
+            <span className="st-text"><strong>Nova lozinka</strong><span>Najmanje 8 znakova.</span></span>
+            <span className="st-inline">
+              <input type="password" aria-label="Nova lozinka" value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} autoComplete="new-password" />
+              <button type="submit" className="st-action" disabled={busy === 'pw' || password.length < 8}>Promijeni</button>
+            </span>
           </form>
         )}
-        <div className="settings-row"><div><strong>Odjava</strong><span>Odjavi se sa ovog uređaja.</span></div><button type="button" className="ghost-button" onClick={async () => { await logout(); navigate('/') }}><LogOut size={15} /> Odjavi se</button></div>
+        <Row as="button" type="button" icon={LogOut} tone="red" title={<span className="st-danger">Odjavi se</span>} sub="Sa ovog uređaja." onClick={async () => { await logout(); navigate('/') }} />
       </div>
 
-      <h3 className="account-sub" id="blokirani">Blokirani korisnici</h3>
-      <div className="settings-rows">
+      <h2 className="st-group-title" id="blokirani">Privatnost</h2>
+      <div className="st-group">
         {blocked.length === 0 && (
-          <div className="settings-row"><div><strong><Ban size={15} /> Nikoga nisi blokirao/la</strong><span>Korisnika blokiraš na njegovom profilu ili u razgovoru (meni ⋯). Blokirani ti ne može slati poruke, ponude ni pitanja.</span></div></div>
+          <Row icon={Ban} tone="gray" title="Blokirani korisnici" sub="Nikoga nisi blokirao/la. Blokiraš na profilu ili u razgovoru (meni ⋯)." />
         )}
         {blocked.map((person) => (
-          <div className="settings-row" key={person.user_id}>
-            <div><strong><Link to={`/korisnik/${person.user_id}`}>{person.display_name}</Link></strong><span>Blokiran/a {formatBosnianDate(person.created_at)}</span></div>
-            <button type="button" className="ghost-button" disabled={busy === `unblock-${person.user_id}`} onClick={async () => {
+          <Row key={person.user_id} icon={Ban} tone="gray" title={<Link to={`/korisnik/${person.user_id}`}>{person.display_name}</Link>} sub={`Blokiran/a ${formatBosnianDate(person.created_at)}`}>
+            <button type="button" className="st-action" disabled={busy === `unblock-${person.user_id}`} onClick={async () => {
               setBusy(`unblock-${person.user_id}`); setError(''); setMessage('')
               try { if (await toggleBlockUser(person.user_id, person.display_name)) setMessage('Korisnik je odblokiran.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
             }}>Odblokiraj</button>
-          </div>
+          </Row>
         ))}
+        <Row icon={ShieldCheck} tone="teal" title="Pravilo #1"
+          sub={(bundle?.events || []).length === 0 ? 'Nema zabilježenih kršenja. Kod 3 kršenja nalog se suspenduje na 7 dana.' : `${bundle.strikes} aktivnih u zadnjih 30 dana. Kod 3 kršenja nalog se suspenduje na 7 dana.`} />
+        {(bundle?.events || []).length > 0 && (
+          <ul className="moderation-history st-history">
+            {bundle.events.map((event) => <li key={event.id}><span className={`tag tag-${event.action}`}>{EVENT_LABEL[event.action] || event.action}</span><span>{formatBosnianDate(event.created_at)}</span>{event.snippet && <em>{event.snippet}</em>}</li>)}
+          </ul>
+        )}
       </div>
 
-      <h3 className="account-sub">Pravilo #1 — istorija</h3>
-      <div className="settings-rows">
-        <div className="settings-row">
-          <div>
-            <strong>{(bundle?.events || []).length === 0 ? 'Nema zabilježenih kršenja' : `${bundle.strikes} aktivnih u zadnjih 30 dana`}</strong>
-            <span>Kod 3 kršenja nalog se suspenduje na 7 dana.</span>
-            {(bundle?.events || []).length > 0 && (
-              <ul className="moderation-history">
-                {bundle.events.map((event) => <li key={event.id}><span className={`tag tag-${event.action}`}>{EVENT_LABEL[event.action] || event.action}</span><span>{formatBosnianDate(event.created_at)}</span>{event.snippet && <em>{event.snippet}</em>}</li>)}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {error && <div className="form-error">{error}</div>}
-      {message && <div className="form-success">{message}</div>}
+      <p className="st-footnote st-version"><MapPin size={12} /> Zadatak · Bosna i Hercegovina</p>
     </div>
   )
 }

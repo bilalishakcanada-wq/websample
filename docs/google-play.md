@@ -13,6 +13,7 @@ Odgovori za Play Console su ispod, da se samo prepišu.
 | `versionCode` raste sa svakim uploadom | ✅ broj GitHub builda (`versionName` = `1.0.<broj>`) | workflow |
 | 16 KB veličina stranice (Android 15+) | ✅ aplikacija nema svojih `.so` biblioteka; CI provjerava `zipalign -P 16` | workflow |
 | Samo potrebne dozvole, svaka objašnjena | ✅ samo dozvole iz tačke 4 (`POST_NOTIFICATIONS` traži se tek kad korisnik uključi obavijesti); CI pada na svaku novu dozvolu koja nije na listi ispod | `AndroidManifest.xml`, tačka 4 |
+| Dozvole se traže u kontekstu, ne pri pokretanju | ✅ lokacija se traži kad zatreba (objava posla, ponuda, traženje posla) uz objašnjenje prije sistemskog prozora; pri registraciji se obje mogu preskočiti; preskočene obavijesti ne pitaju ponovo 7 dana; sve se mijenja u Postavke → Lokacija / Obavijesti | `RequiredPermissions.jsx`, `utils/permissions.js`, `SettingsPage.jsx` |
 | Politika privatnosti: javni link, bez prijave, nije PDF | ✅ `https://bilalishakcanada-wq.github.io/websample/privatnost` (od sada vraća 200, ne 404) | `src/pages/PrivacyPage.jsx`, `pages.yml` |
 | Brisanje naloga u aplikaciji | ✅ Moj nalog → Profil → „Obriši nalog“ (briše odmah, i fajlove) | `ProfileSettingsPage.jsx`, `supabase/functions/delete-account` |
 | Brisanje naloga preko weba, bez aplikacije | ✅ `…/privatnost#brisanje-naloga` + Kontakt forma | `PrivacyPage.jsx` |

@@ -3,7 +3,7 @@ import { BellRing, Check, MapPin, Settings } from 'lucide-react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { isNativeApp } from '../utils/native'
 import { backgroundLocationSupported } from '../utils/location'
-import { openAppSettings, permissionStatus, permissionsOk, requestLocation, requestNotifications } from '../utils/permissions'
+import { locationPermission, openAppSettings, PERMISSION_RULES, permissionStatus, permissionSteps, requestLocation, requestNotifications, requiredOk, snoozePermission } from '../utils/permissions'
 import { liveReachUndecided, setLiveReach } from '../utils/liveReach'
 import './RequiredPermissions.css'
 
@@ -16,7 +16,11 @@ const STEPS = {
     text: {
       account: 'Zadatak po lokaciji zna koliko si daleko od posla, pokazuje poslove u blizini i majstoru olakšava da dođe.',
       post: 'Po lokaciji tvoj posao vide majstori u blizini, a oni koji su daleko te mogu samo zamoliti da platiš prevoz.',
+      offer: 'Klijent vidi koliko si daleko i kad možeš doći. Bez lokacije ne znamo da li je posao u tvom dosegu.',
+      search: 'Pokazujemo poslove oko tebe i koliko je svaki daleko, da ne tražiš naslijepo po cijeloj državi.',
     },
+    // shown on the screen when this step can't be skipped here
+    needed: 'Bez lokacije ne možemo izračunati udaljenost do posla, pa je ovdje potrebna.',
     // Google Play: the disclosure says plainly that the app keeps using it with Zadatak in the background
     note: () => (backgroundLocationSupported()
       ? 'Dok je Lokacija uživo uključena, radi i kad je Zadatak u pozadini, a na telefonu tada stoji obavijest. Isključuješ je u Postavke → Lokacija.'
@@ -29,12 +33,12 @@ const STEPS = {
     text: {
       account: 'Da ti ništa ne promakne: nove ponude, poruke, molbe za prevoz i plaćanja stižu odmah, i kad je aplikacija zatvorena.',
       post: 'Čim majstor pošalje ponudu ili poruku, javićemo ti odmah, i kad je aplikacija zatvorena.',
+      offer: 'Čim klijent prihvati ponudu ili ti pošalje poruku, javićemo ti odmah.',
     },
     note: () => 'Možeš ih uvijek isključiti u postavkama.',
     ask: requestNotifications,
   },
 }
-const ORDER = ['location', 'notifications']
 
 const blockedHelp = (kind) => {
   const what = kind === 'location' ? 'Lokaciju' : 'Obavijesti'
@@ -63,12 +67,16 @@ function Art({ kind }) {
 /**
  * "Poveži lokaciju" → "Uključi obavijesti", one screen at a time like WhatsApp: the explanation first,
  * and "Nastavi" opens the system's own dialog right away (Google Play: prominent disclosure before the
- * runtime prompt). When it is allowed the next step comes on its own. Refusing never locks the app:
- * the step explains how to turn it on, and "Ne sada" only cancels this one action.
+ * runtime prompt). Only the screens this moment needs are shown (utils/permissions.js permissionSteps):
+ * a required one (location for a job post, an offer, the job search) ends the action on "Ne sada";
+ * an optional one is skipped for a week and the action carries on.
  */
-export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }) {
+export function RequiredPermissionsSheet({ reason = 'account', steps: initialSteps, onDone, onClose }) {
   const [status, setStatus] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [skipped, setSkipped] = useState([])
+  const [steps] = useState(initialSteps)
+  const required = (PERMISSION_RULES[reason] || PERMISSION_RULES.account).required
   const refresh = useCallback(() => permissionStatus().then(setStatus), [])
 
   useEffect(() => {
@@ -80,56 +88,62 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
     return () => { document.removeEventListener('visibilitychange', again); window.removeEventListener('focus', again) }
   }, [refresh])
 
-  const step = status ? ORDER.find((kind) => !passes(status[kind])) || 'done' : null
+  const step = status ? steps.find((kind) => !passes(status[kind]) && !skipped.includes(kind)) || 'done' : null
   const denied = step && step !== 'done' && status[step] === 'denied'
-  const index = step === 'done' ? ORDER.length : ORDER.indexOf(step)
+  const index = step === 'done' ? steps.length : steps.indexOf(step)
+  const isRequired = required.includes(step)
+
+  // every screen answered (allowed or skipped): carry on with what they were doing, no extra tap
+  const finished = useRef(false)
+  useEffect(() => {
+    if (step !== 'done' || finished.current) return
+    finished.current = true
+    if (requiredOk(status, reason)) onDone()
+    else onClose()
+  }, [step, status, reason, onDone, onClose])
 
   const ask = async () => {
     setBusy(true)
     try {
       const state = await STEPS[step].ask()
-      const next = { ...status, [step]: state }
       // a connected location follows the person (Postavke → Lokacija uživo), unless they switched it off there
       if (step === 'location' && state === 'granted' && liveReachUndecided()) setLiveReach(true)
-      setStatus(next)
-      // both allowed by the person's own taps: carry on with what they were doing, no extra tap
-      if (permissionsOk(next)) onDone()
+      setStatus((current) => ({ ...current, [step]: state }))
     } finally {
       setBusy(false)
     }
   }
 
+  const notNow = () => {
+    if (isRequired) { onClose(); return }
+    snoozePermission(step)
+    setSkipped((current) => [...current, step])
+  }
+
   const info = STEPS[step]
+  if (step === 'done') return null
   return (
     <div className="rp-screen" role="dialog" aria-modal="true" aria-labelledby="rp-title" data-testid="required-permissions">
-      <div className="rp-dots" aria-label={step ? `Korak ${Math.min(index + 1, ORDER.length)} od ${ORDER.length}` : undefined}>
-        {ORDER.map((kind, i) => <span key={kind} className={i < index ? 'is-done' : i === index ? 'is-on' : ''} />)}
-      </div>
+      {steps.length > 1 && (
+        <div className="rp-dots" aria-label={step ? `Korak ${Math.min(index + 1, steps.length)} od ${steps.length}` : undefined}>
+          {steps.map((kind, i) => <span key={kind} className={i < index ? 'is-done' : i === index ? 'is-on' : ''} />)}
+        </div>
+      )}
       {step && (
         <div className="rp-body" key={step}>
           <Art kind={step} />
-          {step === 'done' ? (
-            <>
-              <h1 id="rp-title">Sve je povezano</h1>
-              <p>Lokacija i obavijesti su uključene. Možeš nastaviti.</p>
-            </>
-          ) : (
-            <>
-              <h1 id="rp-title">{info.title}</h1>
-              <p>{info.text[reason] || info.text.account}</p>
-              {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{info.note()}</p>}
-            </>
-          )}
+          <h1 id="rp-title">{info.title}</h1>
+          <p>{info.text[reason] || info.text.account}</p>
+          {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{isRequired && info.needed ? info.needed : info.note()}</p>}
         </div>
       )}
       <div className="rp-actions">
-        {step === 'done' && <button type="button" className="rp-primary" data-testid="permissions-continue" onClick={onDone}>Nastavi</button>}
-        {step && step !== 'done' && !denied && (
+        {step && !denied && (
           <button type="button" className="rp-primary" data-testid="permissions-allow" onClick={ask} disabled={busy}>{busy ? 'Čekam odgovor…' : 'Nastavi'}</button>
         )}
         {denied && isNativeApp() && <button type="button" className="rp-primary" onClick={() => openAppSettings()}><Settings size={18} /> Otvori postavke</button>}
         {denied && <button type="button" className={isNativeApp() ? 'rp-secondary' : 'rp-primary'} onClick={refresh}>Provjeri ponovo</button>}
-        <button type="button" className="rp-link" onClick={onClose}>Ne sada</button>
+        <button type="button" className="rp-link" data-testid="permissions-skip" onClick={notNow}>{isRequired ? 'Ne sada' : 'Preskoči'}</button>
       </div>
     </div>
   )
@@ -139,24 +153,80 @@ export function RequiredPermissionsSheet({ reason = 'account', onDone, onClose }
  * const permissions = useRequiredPermissions('post')
  * if (!(await permissions.ensure())) return     // in the submit handler
  * {permissions.sheet}                            // in the page
- * ensure() resolves true right away when both are already allowed, otherwise after the screen.
+ * ensure() resolves at once when nothing needs asking; otherwise after the screens, true when what this
+ * moment requires is allowed (an optional notification step never blocks).
  */
 export function useRequiredPermissions(reason = 'account') {
-  const [open, setOpen] = useState(false)
+  const [steps, setSteps] = useState(null)
   const resolver = useRef(null)
+  const shown = useRef(false)
 
   const ensure = useCallback(async () => {
-    if (permissionsOk(await permissionStatus())) return true
-    return new Promise((resolve) => { resolver.current = resolve; setOpen(true) })
-  }, [])
+    const status = await permissionStatus()
+    const needed = permissionSteps(status, reason)
+    shown.current = needed.length > 0
+    if (needed.length === 0) return requiredOk(status, reason)
+    return new Promise((resolve) => { resolver.current = resolve; setSteps(needed) })
+  }, [reason])
 
   const finish = useCallback((ok) => {
-    setOpen(false)
+    setSteps(null)
     resolver.current?.(ok)
     resolver.current = null
   }, [])
-  useBackToClose(open, () => finish(false))
+  const done = useCallback(() => finish(true), [finish])
+  const close = useCallback(() => finish(false), [finish])
+  useBackToClose(Boolean(steps), close)
 
-  const sheet = open ? <RequiredPermissionsSheet reason={reason} onDone={() => finish(true)} onClose={() => finish(false)} /> : null
-  return { ensure, sheet }
+  const sheet = steps ? <RequiredPermissionsSheet reason={reason} steps={steps} onDone={done} onClose={close} /> : null
+  // asked(): the last ensure() showed the screens (something may have just been allowed)
+  const asked = useCallback(() => shown.current, [])
+  return { ensure, sheet, asked }
+}
+
+const SEARCH_ASKED = 'zadatak-search-location-asked'
+
+/**
+ * The job search without the device's location: a card that connects it (with `auto`, the location screen
+ * opens once per app session by itself, then only from the card). onGranted runs when it was just allowed.
+ */
+export function LocationNudge({ onGranted, auto = true }) {
+  const [state, setState] = useState(null)
+  const permissions = useRequiredPermissions('search')
+  const { ensure } = permissions
+
+  const connect = useCallback(async () => {
+    if (await ensure()) { setState('granted'); onGranted?.() }
+  }, [ensure, onGranted])
+
+  useEffect(() => {
+    let alive = true
+    const check = () => locationPermission().then((next) => { if (alive) setState(next) })
+    locationPermission().then((first) => {
+      if (!alive) return
+      setState(first)
+      let asked = true
+      try { asked = sessionStorage.getItem(SEARCH_ASKED) === '1'; sessionStorage.setItem(SEARCH_ASKED, '1') } catch { /* private mode */ }
+      if (auto && !passes(first) && !asked) connect()
+    })
+    window.addEventListener('focus', check)
+    return () => { alive = false; window.removeEventListener('focus', check) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!state || passes(state)) return permissions.sheet
+  return (
+    <>
+      <div className="rp-nudge" data-testid="location-nudge">
+        <span className="rp-nudge-icon" aria-hidden="true"><MapPin size={20} /></span>
+        <div>
+          <strong>Poveži lokaciju</strong>
+          <span>{state === 'denied' ? 'Lokacija je isključena za Zadatak. Bez nje ne vidiš koliko je koji posao daleko.' : 'Da vidiš poslove oko sebe i koliko je svaki daleko.'}</span>
+        </div>
+        <button type="button" className="rp-nudge-btn" onClick={state === 'denied' && isNativeApp() ? () => openAppSettings() : connect}>
+          {state === 'denied' && isNativeApp() ? 'Postavke' : 'Poveži'}
+        </button>
+      </div>
+      {permissions.sheet}
+    </>
+  )
 }

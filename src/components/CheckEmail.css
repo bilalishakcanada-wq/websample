@@ -1,0 +1,20 @@
+/* "Potvrdi svoj email" right after sign-up (CheckEmail.jsx) */
+.check-email { display: grid; justify-items: center; gap: 12px; text-align: center; }
+.check-email-art { position: relative; display: grid; place-items: center; width: 132px; height: 132px; margin: 4px 0 6px; }
+.check-email-ring { position: absolute; inset: 0; border-radius: 50%; background: var(--accent); opacity: 0.1; animation: check-email-pulse 2.4s ease-in-out infinite; }
+.check-email-badge { position: relative; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 26px; background: var(--accent); color: #fff; box-shadow: 0 16px 34px rgba(31, 95, 255, 0.32); }
+@keyframes check-email-pulse { 0%, 100% { transform: scale(0.92); } 50% { transform: scale(1.04); } }
+.check-email-lead { margin: 0; color: var(--text); font-size: 1.02rem; overflow-wrap: anywhere; }
+.check-email-steps { display: grid; gap: 8px; width: 100%; margin: 4px 0; padding: 14px 16px 14px 34px; border-radius: 16px; background: var(--surface-soft); color: var(--text-soft); text-align: left; font-size: 0.94rem; line-height: 1.4; }
+.check-email-wait { display: inline-flex; align-items: center; gap: 8px; margin: 2px 0; color: var(--text-soft); font-weight: 700; font-size: 0.92rem; }
+.check-email-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); animation: check-email-blink 1.4s ease-in-out infinite; }
+@keyframes check-email-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.check-email .auth-submit { width: 100%; }
+@media (prefers-reduced-motion: reduce) { .check-email-ring, .check-email-dot { animation: none; } }
+/* text buttons ("Pošalji ponovo", "Ispravi", "Odjavi se") on the confirmation screens */
+.check-email .link-button, .auth-form .link-button {
+  appearance: none; min-height: 44px; padding: 6px 4px; background: none; border: 0; font: inherit; font-weight: 800;
+  color: var(--primary); cursor: pointer;
+}
+.check-email .link-button:disabled, .auth-form .link-button:disabled { opacity: 0.6; cursor: default; }
+.check-email > .link-button + .link-button { margin-top: -8px; color: var(--text-soft); font-weight: 700; }

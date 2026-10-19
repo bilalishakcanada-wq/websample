@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/authService'
+import '../components/CheckEmail.css'
 
 /** "Confirm your email" for Google sign-ups: sends our link once, then offers to send it again. */
 export function ConfirmEmailScreen() {
@@ -27,13 +28,23 @@ export function ConfirmEmailScreen() {
     send()
   }, [emailCheck.sent])
 
+  // the link is usually tapped in the mail app or a browser: back in Zadatak, the screen notices by itself
+  useEffect(() => {
+    const check = () => { if (document.visibilityState === 'visible') refreshEmailCheck().catch(() => {}) }
+    const timer = window.setInterval(check, 10000)
+    document.addEventListener('visibilitychange', check)
+    window.addEventListener('focus', check)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', check); window.removeEventListener('focus', check) }
+  }, [refreshEmailCheck])
+
   return (
-    <AuthLayout title="Potvrdi svoj email" subtitle={<>Poslali smo link na <strong>{user?.email}</strong>. Klikni ga u mailu i račun je spreman (provjeri i spam).</>}>
+    <AuthLayout title="Potvrdi svoj email" subtitle={<>Poslali smo link na <strong>{user?.email}</strong>. Dodirni ga u mailu i račun je spreman (provjeri i spam). Ovaj ekran nastavlja sam čim potvrdiš.</>}>
       <div className="auth-form">
         <button type="button" className="primary-button auth-submit" onClick={async () => {
           const status = await refreshEmailCheck()
           if (status.pending) setState({ busy: false, error: '', note: 'Još nisi kliknuo link iz maila.' })
         }}>Potvrdio sam, nastavi</button>
+        <p className="check-email-wait" role="status"><span className="check-email-dot" aria-hidden="true" /> Čekamo potvrdu…</p>
         <button type="button" className="link-button" onClick={send} disabled={state.busy}>{state.busy ? 'Šaljem...' : 'Nije stigao mail? Pošalji ponovo'}</button>
         {state.note && <p className="auth-subtitle">{state.note}</p>}
         {state.error && <div className="form-error">{state.error}</div>}

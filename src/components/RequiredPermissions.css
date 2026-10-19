@@ -60,6 +60,18 @@
 .rp-secondary { background: var(--surface-soft); color: var(--primary-strong); }
 .rp-link { min-height: 44px; background: none; color: var(--text-soft); font-weight: 700; }
 
+/* the job search without location (LocationNudge) */
+.rp-nudge {
+  display: flex; align-items: center; gap: 12px; margin: 10px 0 14px; padding: 12px 14px; border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.rp-nudge > div { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.rp-nudge strong { color: var(--primary-strong); font-size: 0.98rem; }
+.rp-nudge span { color: var(--text-soft); font-size: 0.86rem; line-height: 1.35; }
+.rp-nudge-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 13px; background: var(--accent); color: #fff; }
+.rp-nudge .rp-nudge-icon { color: #fff; }
+.rp-nudge-btn { flex-shrink: 0; min-height: 40px; padding: 0 16px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 800; }
+
 @media (min-width: 769px) {
   /* a centred card on a computer; the huge shadow dims the page behind it */
   .rp-screen { inset: 50% auto auto 50%; width: 460px; height: min(680px, 94dvh); padding: 28px 32px 22px; border-radius: 28px; transform: translate(-50%, -50%); box-shadow: 0 0 0 100vmax rgba(6, 21, 48, 0.45), 0 30px 80px rgba(6, 21, 48, 0.35); animation: none; }
@@ -67,3 +79,4 @@
 @media (prefers-reduced-motion: reduce) {
   .rp-screen, .rp-body, .rp-ring, .rp-chip, .rp-toast { animation: none; }
 }
+@media (max-width: 768px) { .browse-page > .rp-nudge { margin: 10px 16px 6px; } }

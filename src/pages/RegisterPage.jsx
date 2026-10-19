@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Briefcase, Hammer, Repeat } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
+import CheckEmail from '../components/CheckEmail'
 import { serviceCategories } from '../data/categories'
 import { getMode } from '../app/mode'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
 import { EMAIL_DOWN } from '../services/authService'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
-import { permissionStatus, permissionsOk } from '../utils/permissions'
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove i biram ponude', icon: Briefcase },
@@ -23,7 +23,9 @@ function RegisterPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isPhone = useMediaQuery('(max-width: 768px)')
-  const { user, register } = useAuth()
+  const { user, register, login } = useAuth()
+  // after an email sign-up that waits for the confirmation link: { email, password } (memory only)
+  const [waiting, setWaiting] = useState(null)
   const [form, setForm] = useState({ fullName: '', email: '', password: '', city: '', phone: '' })
   // the goal chosen on the phone welcome flow pre-fills the account type
   const [accountType, setAccountType] = useState(() => (getMode() === 'tasker' ? 'provider' : 'client'))
@@ -36,10 +38,9 @@ function RegisterPage() {
   // Google Play (UGC policy): the terms are accepted explicitly before anyone posts or messages
   const [accepted, setAccepted] = useState(false)
   const offersServices = accountType === 'provider' || accountType === 'both'
-  // every new account allows location and notifications first (doseg ponuda, ponude i poruke)
+  // a new account is offered location and notifications once (both can be skipped here; posting a job,
+  // an offer and the job search ask for location again, because distance depends on it)
   const permissions = useRequiredPermissions('account')
-  const permsReady = useRef(false)
-  useEffect(() => { permissionStatus().then((status) => { permsReady.current = permissionsOk(status) }) }, [])
 
   const toggleTrade = (name) => {
     setTrades((current) => current.includes(name)
@@ -48,7 +49,20 @@ function RegisterPage() {
   }
 
   if (user) {
-    return <Navigate to={next || '/account'} replace />
+    // a brand-new account (just confirmed) goes to profile setup first
+    return <Navigate to={next || (waiting ? '/account/profil?setup=1' : '/account')} replace />
+  }
+
+  if (waiting) {
+    return (
+      <CheckEmail
+        email={waiting.email}
+        password={waiting.password}
+        signIn={login}
+        onSignedIn={() => navigate(next || '/account/profil?setup=1', { replace: true })}
+        onChangeEmail={() => { setWaiting(null); setForm((current) => ({ ...current, email: '' })) }}
+      />
+    )
   }
 
   const handleChange = (event) => {
@@ -59,11 +73,7 @@ function RegisterPage() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
-    if (!(await permissions.ensure())) {
-      setError('Za novi račun dozvoli lokaciju i obavijesti.')
-      return
-    }
-    permsReady.current = true
+    await permissions.ensure()
     setLoading(true)
 
     try {
@@ -74,7 +84,7 @@ function RegisterPage() {
         trades: offersServices ? trades : [],
       })
       if (result.session) navigate(next || '/account/profil?setup=1')
-      else navigate(`/login?verification=pending${next ? `&next=${encodeURIComponent(next)}` : ''}`, { state: { email: form.email.trim().toLowerCase() } })
+      else setWaiting({ email: form.email.trim().toLowerCase(), password: form.password })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -160,12 +170,11 @@ function RegisterPage() {
         Već imaš račun? <Link to={`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`}>Prijavi se</Link>
       </p>
 
-      <OAuthButtons verb="Registruj se" onError={setError} canStart={() => {
+      <OAuthButtons verb="Registruj se" onError={setError} canStart={async () => {
         if (!accepted) { setError('Prvo označi da prihvataš pravila i da imaš 18 ili više godina.'); return false }
-        if (permsReady.current) return true
-        // the sheet first; once both are allowed the person taps Google / Apple again
-        permissions.ensure().then((ok) => { permsReady.current = ok; if (ok) setError('Hvala! Sada ponovo izaberi način prijave.') })
-        return false
+        // the permission screens (if any are left), then straight on to Google / Apple: no second tap
+        await permissions.ensure()
+        return true
       }} />
       {permissions.sheet}
     </AuthLayout>

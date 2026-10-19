@@ -89,7 +89,9 @@ export async function setupNative() {
         error = new Error(hash.get('error_description') || parsed.searchParams.get('error_description') || 'no session in callback')
       }
       if (error) { console.error('native sign-in failed', error.message); window.location.assign(withBase('/login?oauth=failed')); return }
-      window.location.assign(withBase('/'))
+      // a confirmed sign-up comes back with next=…/account/profil?setup=1; only our own pages
+      const next = parsed.searchParams.get('next') || ''
+      window.location.assign(next.startsWith(withBase('/')) && !next.startsWith('//') && !next.includes('\\') ? next : withBase('/'))
     })
   } catch { /* ignore */ }
 }

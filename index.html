@@ -30,13 +30,23 @@
           var q = new URLSearchParams(location.search)
           if (hash.indexOf('access_token=') === -1 && !q.get('code')) return
           if (q.get('native') === '1') {
-            var target = 'ba.poso.app://auth/callback' + (q.get('code') ? '?code=' + q.get('code') : '') + hash
+            // the email confirmation link (sign-up started in the app) also says where the app opens: profile setup
+            var setup = q.get('setup') === '1'
+            var params = []
+            if (q.get('code')) params.push('code=' + encodeURIComponent(q.get('code')))
+            if (setup) params.push('next=' + encodeURIComponent(location.pathname + '?setup=1'))
+            var target = 'ba.poso.app://auth/callback' + (params.length ? '?' + params.join('&') : '') + hash
             history.replaceState(null, '', location.pathname)
             document.documentElement.setAttribute('data-native-return', '1')
             location.replace(target)
             setTimeout(function () {
               var note = document.getElementById('native-return')
-              if (note) { note.style.display = 'grid'; note.querySelector('a').href = target }
+              if (!note) return
+              note.style.display = 'grid'
+              note.querySelector('a').href = target
+              // opened on a computer or a phone without the app: the email is confirmed anyway, and the app
+              // that waits on "Potvrdi svoj email" signs in by itself
+              if (setup) note.querySelector('p').textContent = 'Email je potvrđen! Vrati se u Zadatak aplikaciju, prijavit ćemo te sami.'
             }, 1200)
             return
           }

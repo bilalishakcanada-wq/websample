@@ -434,7 +434,8 @@ async function crawl(browser, profileName, roleName, state) {
     try {
       // ERR_ABORTED: the previous page redirected at the same moment; one retry settles it
       const res = await page.goto(url(next), { timeout: 30_000 }).catch((e) => (/ERR_ABORTED/.test(e.message) ? page.goto(url(next), { timeout: 30_000 }) : Promise.reject(e)))
-      if (res && res.status() >= 400 && !next.includes('nepostojeca')) record(run, pat, { kind: 'http', severity: 'error', message: `Page answered ${res.status()}`, url: next })
+      // GitHub Pages answers 404 for every deep link and serves the app from 404.html; a real "not found" is caught below
+      if (res && res.status() >= 400 && res.status() !== 404 && !next.includes('nepostojeca')) record(run, pat, { kind: 'http', severity: 'error', message: `Page answered ${res.status()}`, url: next })
     } catch (e) {
       record(run, pat, { kind: 'navigation', severity: 'error', message: `Page did not open: ${e.message.split('\n')[0]}`, url: next })
       continue

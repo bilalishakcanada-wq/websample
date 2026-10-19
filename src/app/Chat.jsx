@@ -32,8 +32,9 @@ function Chat(props) {
   if (!active) {
     return (
       <div className="ap ap-page ch">
-        <div className="ap-sticky">
-          <header className="ap-page-head"><h1>Poruke</h1><NotifBellLink /></header>
+        {/* only the title stays pinned on a phone: search and filters scroll with the list, so pinned bars don't eat a third of the screen */}
+        <header className="ap-page-head"><h1>Poruke</h1><NotifBellLink /></header>
+        <div className="ch-tools">
           <label className="ch-search">
             <Search size={18} />
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pretraži" />

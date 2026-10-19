@@ -1,5 +1,6 @@
-// Lokacija i obavijesti: obje su obavezne prije pravljenja računa i prije objave posla
-// (components/RequiredPermissions.jsx). Lokacija uređaja ide u bazu (report_device_location), i po
+// Lokacija i obavijesti, pitane u trenutku kad zatrebaju (components/RequiredPermissions.jsx):
+// lokacija je obavezna za objavu posla, ponudu i traženje posla (po njoj se mjeri udaljenost), a obavijesti
+// se nude jednom i, kad ih osoba preskoči, ne pitaju ponovo 7 dana. Pri pravljenju računa ništa nije obavezno. Lokacija uređaja ide u bazu (report_device_location), i po
 // njoj se mjeri doseg ponuda (supabase/reach/01). Obavijesti: Web Push u pregledniku, FCM u Android aplikaciji.
 // Gdje uređaj obavijesti ne može (iPhone preglednik bez instalacije, Android build bez Firebasea),
 // stanje je 'unsupported' i ne blokira: obavijesti tada stižu u aplikaciju i na email.
@@ -52,6 +53,37 @@ export async function permissionStatus() {
 
 const passes = (state) => state === 'granted' || state === 'unsupported'
 export const permissionsOk = (status) => Boolean(status) && passes(status.location) && passes(status.notifications)
+export const locationOk = (status) => Boolean(status) && passes(status.location)
+
+// what each moment needs: `required` blocks the action until allowed, the rest is offered (and can be skipped)
+export const PERMISSION_RULES = {
+  account: { required: [], ask: ['location', 'notifications'] },
+  post: { required: ['location'], ask: ['location', 'notifications'] },
+  offer: { required: ['location'], ask: ['location', 'notifications'] },
+  search: { required: ['location'], ask: ['location'] },
+}
+const SNOOZE = 'zadatak-perm-snooze-'
+const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000
+
+/** "Ne sada" on an optional step: that question waits a week. */
+export const snoozePermission = (kind) => write(`${SNOOZE}${kind}`, String(Date.now()))
+const snoozed = (kind) => Date.now() - Number(read(`${SNOOZE}${kind}`) || 0) < SNOOZE_MS
+
+/**
+ * The screens to show for this moment, in order. A required one shows whenever it is missing; an optional one
+ * only while the phone can still ask (not after a refusal) and the person didn't skip it this week.
+ */
+export function permissionSteps(status, reason = 'account') {
+  const rule = PERMISSION_RULES[reason] || PERMISSION_RULES.account
+  return rule.ask.filter((kind) => {
+    if (passes(status?.[kind])) return false
+    if (rule.required.includes(kind)) return true
+    return status?.[kind] === 'prompt' && !snoozed(kind)
+  })
+}
+
+export const requiredOk = (status, reason = 'account') =>
+  (PERMISSION_RULES[reason] || PERMISSION_RULES.account).required.every((kind) => passes(status?.[kind]))
 
 /** Sends the device's position to the database (doseg ponuda). Signed out or offline: nothing happens. */
 export async function reportDeviceLocation(point) {
@@ -62,6 +94,8 @@ export async function reportDeviceLocation(point) {
   if (!error) write(LAST_REPORT, String(Date.now()))
 }
 
+const within = (promise, ms) => Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(null), ms))])
+
 /**
  * Ask for location (call from a tap). Returns the new state; when a position came through
  * it is also reported to the database.
@@ -70,15 +104,14 @@ export async function requestLocation() {
   try {
     const point = await currentLocation({ goodEnoughMeters: 500, waitMs: 10000 })
     write(GEO_OK, '1')
-    reportDeviceLocation(point).catch(() => {})
+    // awaited (briefly): the reach of an offer is measured from this point right after
+    await within(reportDeviceLocation(point).catch(() => {}), 4000)
     return 'granted'
   } catch {
     // no position (GPS off, timeout) is not a refusal: the permission itself decides
     return locationPermission()
   }
 }
-
-const within = (promise, ms) => Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(null), ms))])
 
 /** Ask for notifications (call from a tap). Returns the new state. */
 export async function requestNotifications() {

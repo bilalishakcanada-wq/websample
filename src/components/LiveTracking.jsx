@@ -6,6 +6,8 @@ import { haptic, isNativeApp } from '../utils/native'
 import { toast } from './Toaster'
 import { useListingAddress } from '../hooks/queries'
 import './LiveTracking.css'
+import { isJobShareAuto } from '../utils/jobShare'
+import { locationPermission } from '../utils/permissions'
 
 const LiveTrackingMap = lazy(() => import('./LiveTrackingMap'))
 
@@ -124,6 +126,23 @@ function LiveTracking({ payment, listing, role }) {
     const id = window.setTimeout(() => { stopSharing(); toast('Vrijeme dijeljenja lokacije je isteklo. Možeš ga ponovo uključiti.') }, Math.max(0, left))
     return () => window.clearTimeout(id)
   }, [sharing, until]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Postavke → Lokacija → "Dijeli tokom posla": the client's request is answered by itself, once per request
+  const autoAnswered = useRef(null)
+  useEffect(() => {
+    if (!isProvider || !active || !onSite || !available || sharing || request?.state !== 'pending' || !isJobShareAuto()) return
+    if (autoAnswered.current === request.requested_at) return
+    autoAnswered.current = request.requested_at
+    locationPermission().then((state) => {
+      if (state !== 'granted') return
+      lastSent.current = null
+      firstMinutes.current = SHARE_MINUTES
+      setUntil(Date.now() + SHARE_MINUTES * 60000)
+      setSharing(true)
+      setError('')
+      toast('Klijent je zatražio lokaciju i dijeliš je automatski. Isključuješ u Postavke → Lokacija.', { kind: 'info', duration: 5000 })
+    })
+  }, [isProvider, active, onSite, available, sharing, request?.state, request?.requested_at])
 
   if (!active || !onSite || !available) return null
   if (isProvider && !locationSupported()) return null

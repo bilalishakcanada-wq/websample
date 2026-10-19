@@ -28,6 +28,7 @@ import { usePlacePoint } from '../hooks/usePlacePoint'
 import { listingService } from '../services/listingService'
 import { profileService } from '../services/profileService'
 import { useAuth } from '../context/AuthContext'
+import { LocationNudge } from '../components/RequiredPermissions'
 import { FindMascot } from '../app/Mascots'
 import { timeAgo } from '../utils/dateFormat'
 import { SkeletonTaskCard } from '../components/Skeleton'
@@ -371,6 +372,8 @@ function SearchPage() {
         </div>
         <span className="muted-text">{loading ? 'Učitavam...' : `${listings.length} ${listings.length === 1 ? 'oglas' : 'oglasa'}`}</span>
       </header>
+
+      {user && <LocationNudge onGranted={() => { if (!filters.city) nearMe() }} />}
 
       <div className="filter-bar" ref={filterBarRef}>
         <label className="filter-search">

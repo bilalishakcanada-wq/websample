@@ -67,25 +67,32 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
     await providerCtx?.close()
   })
 
-  test('novi račun traži lokaciju i obavijesti', async ({ browser }) => {
+  test('novi račun nudi lokaciju i obavijesti, ali ih ne traži na silu', async ({ browser }) => {
     const ctx = await browser.newContext({ permissions: [] })
     const page = await ctx.newPage()
+    // a phone that was never asked: both permissions are still "prompt"
+    await page.addInitScript(() => {
+      const query = navigator.permissions.query.bind(navigator.permissions)
+      navigator.permissions.query = (d) => (['geolocation', 'notifications'].includes(d?.name) ? Promise.resolve({ state: 'prompt', addEventListener() {}, removeEventListener() {} }) : query(d))
+    })
     await page.goto('/register')
-    await page.locator('#fullName').fill('Test Dozvole Korisnik')
+    // one word: the sign-up stops at the name check, after the permission screens (no account is made)
+    await page.locator('#fullName').fill('Dozvole')
     await page.locator('#email').fill(`dozvole-${Date.now()}@test.zadatak`)
     await page.getByTestId('password-input').fill('Test12345!')
     await page.locator('.auth-accept input').check()
     await page.getByTestId('register-submit').click()
     const sheet = page.getByTestId('required-permissions')
-    await expect(sheet).toBeVisible()
     await expect(sheet.getByRole('heading', { name: 'Poveži svoju lokaciju' })).toBeVisible()
-    await expect(sheet.getByTestId('permissions-continue')).toHaveCount(0)
-    // the person allows both (here: the browser setting), the screen sees it when the page gets focus back
-    await ctx.grantPermissions(['geolocation', 'notifications'])
-    await page.evaluate(() => window.dispatchEvent(new Event('focus')))
-    await expect(sheet.getByRole('heading', { name: 'Sve je povezano' })).toBeVisible()
-    await expect(sheet.getByTestId('permissions-continue')).toBeEnabled()
-    await sheet.getByRole('button', { name: 'Ne sada' }).click()
+    await sheet.getByTestId('permissions-skip').click()
+    // skipped once: the sign-up carries on instead of being blocked
+    if (await sheet.getByRole('heading', { name: 'Uključi obavijesti' }).isVisible().catch(() => false)) await sheet.getByTestId('permissions-skip').click()
+    await expect(sheet).toHaveCount(0)
+    await expect(page.locator('.form-error')).toContainText('ime i prezime')
+    // the next attempt doesn't ask again this week
+    await page.locator('#fullName').fill('Jedno')
+    await page.getByTestId('register-submit').click()
+    await expect(page.locator('.form-error')).toContainText('ime i prezime')
     await expect(sheet).toHaveCount(0)
     await ctx.close()
   })
@@ -138,8 +145,9 @@ test.describe.serial('Doseg ponuda i molba za prevoz', () => {
     liveListingId = (await res.json())[0].id
     // Postavke → Lokacija uživo, while the phone is in Mostar
     await provider.goto('/account/postavke')
-    await provider.getByTestId('live-reach-toggle').click()
-    await expect(provider.getByTestId('live-reach')).toContainText('Uključeno')
+    const toggle = provider.getByTestId('live-reach-toggle')
+    if ((await toggle.getAttribute('aria-checked')) !== 'true') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-checked', 'true')
     await provider.goto(`/listings/${liveListingId}`)
     await expect(provider.getByRole('button', { name: 'Zamoli da plati prevoz' }).first()).toBeVisible()
     // the provider drives to Sarajevo: the page follows without a reload

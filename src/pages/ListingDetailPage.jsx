@@ -50,6 +50,7 @@ import { useMyCity } from '../hooks/useMyCity'
 import { reachFor, travelLabel } from '../utils/reach'
 import { TravelRequestSheet, TravelRequestStatus, TravelRequestsOwner, travelCta, useTravelRequests } from '../components/TravelRequest'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
+import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { activePromotion } from '../services/promotionService'
 
 const formatDate = formatBosnianDate
@@ -108,6 +109,7 @@ function ListingDetailPage() {
   const [listing, setListing] = useState(null)
   const conditionCheck = useJobConditionCheck(user?.id, listing?.conditions?.requires || [])
   const offerGate = useOfferGate(user?.id, id, conditionCheck.missing)
+  const offerPermissions = useRequiredPermissions('offer')
   // too far for what this job pays: the only thing to send is a request that the client pays the trip
   const travel = useTravelRequests(id, user?.id)
   const travelRequests = useMemo(() => travel.data || [], [travel.data])
@@ -241,7 +243,7 @@ function ListingDetailPage() {
   const freshBidIds = useMemo(() => new Set(bids.filter((bid) => firstBidIds && !firstBidIds.has(bid.id)).map((bid) => bid.id)), [bids, firstBidIds])
   const tags = useMemo(() => (listing?.listing_tags || []).map((item) => item.tags?.name).filter(Boolean), [listing])
 
-  const openBidSheet = () => {
+  const openBidSheet = async () => {
     if (!user) {
       navigate('/login', { state: { from: { pathname: `/listings/${id}` } } })
       return
@@ -252,11 +254,22 @@ function ListingDetailPage() {
       navigate(`/account/verifikacija?next=${encodeURIComponent(`/listings/${id}`)}`)
       return
     }
-    if (offerGate === 'no_city') {
+    // an offer needs the device's location: the client sees how far the provider is, and reach depends on it
+    let gate = offerGate
+    if (!(await offerPermissions.ensure())) {
+      toast('Za ponudu poveži lokaciju: po njoj klijent vidi koliko si daleko od posla.', { kind: 'info' })
+      return
+    }
+    if (offerPermissions.asked() && ['ok', 'no_city', 'too_far'].includes(gate)) {
+      // the location just came in: measure the reach again from where the person is now
+      await queryClient.refetchQueries({ queryKey: keys.offerReach(user.id, id) })
+      gate = queryClient.getQueryData(keys.offerReach(user.id, id)) || 'ok'
+    }
+    if (gate === 'no_city') {
       navigate(`/account/profil?next=${encodeURIComponent(`/listings/${id}`)}`)
       return
     }
-    if (offerGate === 'too_far') {
+    if (gate === 'too_far') {
       if (!myTravel) setTravelOpen(true)
       else if (myTravel.status === 'pending') toast('Molba za prevoz čeka odgovor klijenta. Javićemo ti čim odgovori.', { kind: 'info' })
       else if (myTravel.status === 'declined') toast('Klijent ne plaća prevoz za ovaj posao. Pogledaj poslove bliže tebi.', { kind: 'info' })
@@ -264,13 +277,13 @@ function ListingDetailPage() {
       return
     }
     // klijent traži značku koju izvođač nema: vodi ga pravo na mjesto gdje je dobija
-    if (offerGate === 'missing_badges') {
+    if (gate === 'missing_badges') {
       const first = conditionCheck.missing[0]
       toast(`Za ovaj posao treba značka: ${conditionCheck.missing.map(requirementLabel).join(', ')}.`, { kind: 'info' })
       navigate(badgeFixLink(first, `/listings/${id}`))
       return
     }
-    if (offerGate === 'pending') {
+    if (gate === 'pending') {
       toast('Identitet se još provjerava — obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
       return
     }
@@ -485,6 +498,7 @@ function ListingDetailPage() {
       : <TravelRequestStatus request={myTravel} />
   const overlays = (
     <>
+      {offerPermissions.sheet}
       {travelOpen && listing && (
         <TravelRequestSheet
           listing={listing} distanceKm={reachFor(listing, myCity, myPoint)?.distanceKm ?? null}

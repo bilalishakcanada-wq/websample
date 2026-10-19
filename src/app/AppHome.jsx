@@ -9,6 +9,7 @@ import { useMyBids, useMyListings } from '../hooks/queries'
 import { useJobFeed } from '../hooks/useFeed'
 import { useSimpleMode } from '../hooks/useSimpleMode'
 import '../components/SimpleOfferSheet.css'
+import { LocationNudge } from '../components/RequiredPermissions'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { dropBootScreen } from '../utils/boot'
@@ -198,6 +199,7 @@ function TaskerHome({ user, firstName }) {
       </section>
 
       <div className="ap-home-body">
+        <LocationNudge auto={false} />
         <PushPrompt compact reason="Javit ćemo ti čim se pojavi posao za tebe." />
         <section className="ap-section">
           <h2 className="ap-h2">{personalised ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>

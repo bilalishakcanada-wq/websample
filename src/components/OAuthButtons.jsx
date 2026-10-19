@@ -58,7 +58,8 @@ function OAuthButtons({ verb = 'Nastavi', onError, canStart }) {
   if (enabled.length === 0) return null
 
   const handleClick = async (providerId) => {
-    if (canStart && !canStart()) return
+    // canStart may show a screen first (RegisterPage: terms + permissions) and resolve later
+    if (canStart && !(await canStart())) return
     setPending(providerId)
     try {
       await loginWithProvider(providerId)

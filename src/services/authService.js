@@ -23,7 +23,9 @@ export const passwordUpdateError = (error) => {
   return 'Promjena lozinke nije uspjela. Pokušaj ponovo.'
 }
 
-const confirmRedirect = () => `${window.location.origin}${withBase('/account/profil')}?setup=1`
+// the link in the confirmation mail signs the person in and opens profile setup; when the sign-up started in
+// the app, ?native=1 makes the page the link opens (index.html) hand the session straight back to the app
+const confirmRedirect = () => `${window.location.origin}${withBase('/account/profil')}?setup=1${isNativeApp() ? '&native=1' : ''}`
 
 export const authService = {
   async signUp({ fullName, email, password, city, phone, captchaToken, accountType = 'client', trades = [] }) {
@@ -66,6 +68,11 @@ export const authService = {
       if (error.code === 'captcha_failed') throw new Error('Sigurnosna provjera nije prošla. Osvježite stranicu i pokušajte ponovo.')
       if (error.code === 'email_address_invalid') throw new Error('Ova email adresa nije prihvaćena. Provjerite da li je ispravno unesena.')
       throw publicError()
+    }
+    // with "Confirm email" on, Supabase answers an address that already has an account with a stand-in user
+    // without identities (and sends nothing): say so, instead of waiting for a mail that never comes
+    if (data?.user && !data.session && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      throw new Error('Nalog sa ovim emailom već postoji. Prijavi se ili, ako si zaboravio/la lozinku, zatraži novu.')
     }
     recordAttempt('register', 'device')
     return data

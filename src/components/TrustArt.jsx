@@ -10,7 +10,8 @@ const SKIN = '#f3c9a6'
 const SKIN_2 = '#d9a67c'
 const WHITE = '#ffffff'
 
-const STAR = 'M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z'
+// a plain five-point rating star
+const STAR = 'M0 -10L2.7 -2.7L10.5 -2.4L4.4 2.4L6.5 9.9L0 5.6L-6.5 9.9L-4.4 2.4L-10.5 -2.4L-2.7 -2.7Z'
 
 /**
  * Flat illustration for the "Sigurnost i povjerenje" section: a client and a
@@ -89,11 +90,6 @@ function TrustArt() {
         <rect x="-8" y="-16" width="30" height="24" rx="10" fill={SKIN_2} />
       </g>
 
-      {/* sparkles */}
-      {[[150, 60, 1], [400, 250, 0.8], [110, 460, 0.7], [380, 470, 0.7]].map(([x, y, s], index) => (
-        // position on the wrapper, animation on the path: animating a transformed element with transform-box forced layout every frame
-        <g key={index} transform={`translate(${x} ${y}) scale(${s})`}><path d={STAR} fill={WHITE} opacity="0.85" className="earn-art-spark" style={{ animationDelay: `${index * 0.5}s` }} /></g>
-      ))}
     </svg>
   )
 }

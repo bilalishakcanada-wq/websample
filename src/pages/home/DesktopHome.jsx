@@ -5,7 +5,6 @@ import {
   BadgeCheck,
   Check,
   MapPin,
-  MessageCircle,
   Search,
   ShieldCheck,
   Star,
@@ -13,6 +12,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react'
+import { ChatCircleIcon, ShieldCheckIcon, StarIcon } from '@phosphor-icons/react'
 import { mockProfessionals, mockServiceCategories } from '../../data/mockData'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import TrustArt from '../../components/TrustArt'
@@ -327,25 +327,24 @@ function DesktopHome() {
             <TrustArt />
           </div>
           <div>
-            <span className="eyebrow small-eyebrow">Sigurnost i povjerenje</span>
             <h2>Zaštita koja vam donosi mir</h2>
             <div className="trust-list">
               <div className="trust-item">
-                <div className="trust-item-icon"><MessageCircle size={20} /></div>
+                <div className="trust-item-icon"><ChatCircleIcon size={30} weight="duotone" /></div>
                 <div>
                   <strong>Zaštićena komunikacija</strong>
-                  <p>Kontakt podaci ostaju sakriveni dok zvanično ne prihvatite ponudu — bez neželjenih poziva.</p>
+                  <p>Kontakt podaci ostaju sakriveni dok zvanično ne prihvatite ponudu, bez neželjenih poziva.</p>
                 </div>
               </div>
               <div className="trust-item">
-                <div className="trust-item-icon"><Star size={20} /></div>
+                <div className="trust-item-icon"><StarIcon size={30} weight="duotone" /></div>
                 <div>
                   <strong>Provjerene ocjene i recenzije</strong>
                   <p>Svaka ocjena dolazi od stvarno završenog posla, tako da birate na osnovu pravog iskustva.</p>
                 </div>
               </div>
               <div className="trust-item">
-                <div className="trust-item-icon"><ShieldCheck size={20} /></div>
+                <div className="trust-item-icon"><ShieldCheckIcon size={30} weight="duotone" /></div>
                 <div>
                   <strong>Moderacija i podrška 7 dana sedmično</strong>
                   <p>Naš tim i AI podrška prate platformu i tu su za svako pitanje ili prijavu problema.</p>

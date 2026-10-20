@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
-import { CircleCheck, ClipboardList, MessageCircle, Search, UserRound } from 'lucide-react'
+import {
+  ChatCircleIcon as MessageCircle,
+  CheckCircleIcon as CircleCheck,
+  ClipboardTextIcon as ClipboardList,
+  MagnifyingGlassIcon as Search,
+  UserIcon as UserRound,
+} from '@phosphor-icons/react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { navigateWithTransition } from '../utils/viewTransition'
 import { haptic } from '../utils/native'
@@ -69,7 +75,7 @@ function MobileNav() {
       {tabs.map(([to, label, Icon], index) => (
         <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" data-testid={`nav-${to === '/' ? 'home' : to.slice(1).replace(/\//g, '-')}`} onClick={(event) => onTab(event, to, index)} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">
-            <Icon size={24} strokeWidth={index === active ? 2.5 : 1.75} />
+            <Icon size={24} weight={index === active ? "fill" : "regular"} />
             {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}
           </span>
           <span className="mobile-nav-label" data-label={label}>{label}</span>

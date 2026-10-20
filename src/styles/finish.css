@@ -39,3 +39,48 @@
 @keyframes cat-flicker { 20% { opacity: 0.35; } 40% { opacity: 1; } 55% { opacity: 0.5; } 70% { opacity: 1; } }
 @keyframes cat-sway { 30% { transform: rotate(-9deg); } 65% { transform: rotate(6deg); } }
 @keyframes cat-turn { 50% { transform: rotate(-35deg); } }
+
+/* ---------- Home: "Zaštita" list, open rows between hairlines instead of boxed icons ---------- */
+.trust-section h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+
+.trust-list {
+  gap: 0;
+  margin-top: 28px;
+  border-top: 1px solid var(--stroke);
+}
+
+.trust-item {
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.trust-item-icon {
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 0;
+  background: none;
+  color: var(--accent);
+}
+
+.trust-item-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.trust-item strong {
+  margin-bottom: 6px;
+  font-size: 1.12rem;
+}
+
+.trust-item p {
+  max-width: 52ch;
+  font-size: 1rem;
+  line-height: 1.55;
+}

@@ -27,7 +27,6 @@ export function useDesktopHomeMotion(scope) {
 
     // numbered steps pop in, the illustrations swing into place and float with the scroll
     if (has('.post-task-steps')) gsap.from('.post-task-steps li span', { scale: 0, rotate: -120, duration: 0.6, ease: 'back.out(2.2)', stagger: 0.12, scrollTrigger: onView('.post-task-steps') })
-    if (has('.steps-grid')) gsap.from('.step-number', { scale: 0, rotate: -120, duration: 0.7, ease: 'back.out(2.2)', stagger: 0.14, scrollTrigger: onView('.steps-grid') })
     for (const art of ['.trust-visual', '.boss-band-art']) {
       if (!has(art)) continue
       gsap.from(art, { opacity: 0, scale: 0.86, rotate: -4, duration: 1, ease: 'power3.out', scrollTrigger: onView(art, 'top 85%') })

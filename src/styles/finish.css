@@ -84,3 +84,379 @@
   font-size: 1rem;
   line-height: 1.55;
 }
+
+/* ---------- Home: how it works, the steps beside a phone showing the matching app screen ---------- */
+.how-it-works {
+  margin-top: 56px;
+  padding: 56px;
+  border: 1px solid var(--stroke);
+  border-radius: 28px;
+  background: #fff;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.how-steps-copy h2 {
+  margin: 0 0 28px;
+  max-width: 17ch;
+  font-size: clamp(2rem, 3.2vw, 2.9rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+}
+
+.how-steps-list {
+  margin: 0 0 32px;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.how-steps-list li {
+  position: relative;
+  border-top: 1px solid var(--stroke);
+}
+
+.how-steps-list button {
+  display: flex;
+  gap: 18px;
+  width: 100%;
+  padding: 20px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.how-steps-num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #c9d5ee;
+  border-radius: 50%;
+  color: var(--text-soft);
+  font-family: var(--font-display);
+  font-weight: 800;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.how-steps-text { display: grid; gap: 0; padding-top: 5px; }
+
+.how-steps-text strong {
+  color: var(--text-soft);
+  font-size: 1.25rem;
+  transition: color 0.25s ease;
+}
+
+/* only the open step shows its sentence; the others fold down to their title */
+.how-steps-text span {
+  display: grid;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  color: var(--text-soft);
+  line-height: 1.55;
+  transition: max-height 0.35s ease, opacity 0.35s ease, margin 0.35s ease;
+}
+
+.how-steps-list li.active .how-steps-num {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.how-steps-list li.active strong { color: var(--primary-strong); }
+
+.how-steps-list li.active .how-steps-text span {
+  max-height: 5em;
+  margin-top: 6px;
+  opacity: 1;
+}
+
+.how-steps-list button:hover strong { color: var(--primary-strong); }
+
+/* a thin line over the open step fills up until the next one takes over */
+.how-steps-bar {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left center;
+}
+
+.how-steps.is-running .how-steps-bar { animation: hs-bar var(--step-ms) linear both; }
+@keyframes hs-bar { from { transform: scaleX(0); } }
+
+.steps-head-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.steps-head-cta svg { transition: transform 0.2s ease; }
+.steps-head-cta:hover svg { transform: translateX(4px); }
+
+/* the phone stands on a navy block, cut off at the bottom like it is held in a hand */
+.how-steps-phone {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #0a1f63;
+}
+
+.how-steps-phone::before {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  right: -140px;
+  border-radius: 50%;
+  background: #1b4a8a;
+  opacity: 0.6;
+}
+
+.how-steps-device {
+  position: relative;
+  width: 290px;
+  height: 456px;
+  padding: 10px 10px 0;
+  border-radius: 42px 42px 0 0;
+  background: #071647;
+  box-shadow: 0 0 0 2px #1b4a8a;
+}
+
+.how-steps-device::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  left: 50%;
+  width: 84px;
+  height: 22px;
+  border-radius: 999px;
+  background: #071647;
+  transform: translateX(-50%);
+}
+
+.hs-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 58px 20px 22px;
+  overflow: hidden;
+  border-radius: 33px 33px 0 0;
+  background: #fff;
+  color: var(--primary-strong);
+}
+
+/* step 1: the post flow */
+.hs-post-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--primary-strong);
+}
+
+.hs-post-progress {
+  flex: 0 1 90px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6eaf1;
+}
+
+.hs-post-progress span {
+  display: block;
+  width: 16%;
+  height: 100%;
+  border-radius: inherit;
+  background: #19b37b;
+}
+
+.hs-post-cancel { margin-left: auto; color: var(--text-soft); font-size: 0.82rem; font-weight: 600; }
+
+.hs-post-title {
+  margin: 22px 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.hs-post-sub { margin-bottom: 14px; color: var(--text-soft); font-size: 0.82rem; }
+
+.hs-post-input {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--primary-strong);
+  border-radius: 12px;
+  font-size: 0.92rem;
+}
+
+.hs-char {
+  display: inline-block;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.hs-caret {
+  width: 2px;
+  height: 1.2em;
+  margin-left: 1px;
+  background: var(--accent);
+}
+
+.hs-post-hint { margin-top: 6px; text-align: right; color: var(--text-soft); font-size: 0.68rem; }
+
+.hs-post-next {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  margin-top: auto;
+  border-radius: 999px;
+  background: var(--primary-strong);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* step 2: offers arrive as notifications over the job */
+.hs-offers { background: #f3f6fc; }
+.hs-offers-head { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
+
+.hs-offers-job {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 0 #e3e9f4;
+}
+
+.hs-offers-job strong { font-size: 0.98rem; }
+.hs-offers-job span { color: var(--text-soft); font-size: 0.74rem; }
+
+.hs-note {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 192px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 30px rgba(7, 22, 71, 0.18);
+}
+
+.hs-note .brand-mark-svg { flex-shrink: 0; }
+.hs-note div { display: grid; gap: 2px; }
+.hs-note strong { font-size: 0.8rem; }
+.hs-note span { color: var(--text-soft); font-size: 0.72rem; line-height: 1.35; }
+.hs-note-2 { top: 268px; }
+
+/* step 3: where the money is */
+.hs-pay-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-top: 8px;
+  border-radius: 16px;
+  background: #e8efff;
+  color: var(--accent);
+}
+
+.hs-pay-title {
+  margin: 16px 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+
+.hs-pay p { margin: 0 0 18px; color: var(--text-soft); font-size: 0.8rem; line-height: 1.5; }
+
+.hs-pay-track {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.hs-pay-track li { display: flex; align-items: center; gap: 10px; }
+
+.hs-pay-track li > span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #c9d5ee;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.hs-pay-track li.done { color: var(--primary-strong); }
+.hs-pay-track li.done > span { border-color: #19b37b; background: #19b37b; }
+.hs-pay-track li.now { color: var(--primary-strong); }
+.hs-pay-track li.now > span { border-color: var(--accent); box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 10px var(--accent); }
+
+/* every screen plays its little moment when it comes up; without motion it simply shows the end of it */
+@media (prefers-reduced-motion: no-preference) {
+  .hs-screen { animation: hs-in 0.4s ease-out both; }
+  .hs-char { animation: hs-type 0.01s linear both; animation-delay: calc(0.5s + var(--i) * 0.1s); }
+  .hs-caret { animation: hs-caret 0.9s steps(1, end) infinite; }
+  .hs-post .hs-post-next { animation: hs-ready 0.3s ease-out 1.9s both; }
+  .hs-post-progress span { animation: hs-grow 0.5s ease-out 1.9s both; }
+  .hs-note { animation: hs-drop 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) 0.8s both; }
+  .hs-note-2 { animation-delay: 2.6s; }
+  .hs-pay-track li { animation: hs-rise 0.35s ease-out both; }
+  .hs-pay-track li:nth-child(1) { animation-delay: 0.3s; }
+  .hs-pay-track li:nth-child(2) { animation-delay: 0.7s; }
+  .hs-pay-track li:nth-child(3) { animation-delay: 1.1s; }
+  .hs-pay-track li.now > span { animation: hs-pulse 1.6s ease-in-out 1.2s infinite; }
+}
+
+@keyframes hs-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes hs-type { from { max-width: 0; } to { max-width: 1em; } }
+@keyframes hs-caret { 50% { opacity: 0; } }
+@keyframes hs-ready { from { background: #e6eaf1; color: #9aa6bd; } }
+@keyframes hs-grow { from { width: 4%; } }
+@keyframes hs-drop { from { opacity: 0; transform: translateY(-40px) scale(0.96); } }
+@keyframes hs-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes hs-pulse { 50% { box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 10px var(--accent), 0 0 0 6px rgba(31, 95, 255, 0.18); } }
+
+@media (max-width: 900px) {
+  .how-it-works { padding: 28px 20px; border-radius: 22px; }
+  .how-steps { grid-template-columns: 1fr; gap: 32px; }
+  .how-steps-phone { height: 440px; }
+}

@@ -63,7 +63,7 @@ const toGeoJSON = (listings, activeId = null, points = spreadPoints(listings)) =
 })
 
 // The pins are pictures drawn here on a canvas, in the site's own font: a rounded price label with a small
-// tail pointing at the place ("45 KM", "VIP · 120 KM"), and a round badge with the count for a group. The
+// tail pointing at the place ("45 KM", a crown for VIP, a flame for Hitno), and a round badge with the count for a group. The
 // map asks for each one the first time it needs it (setMissingStyleImageResolver), so they show even when the map's
 // own font server is slow or unreachable.
 const PIN_STYLES = {

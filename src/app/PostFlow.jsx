@@ -31,6 +31,7 @@ import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
 import IdentityGateNotice from '../components/IdentityGateNotice'
+import QuarterChips from '../components/QuarterChips'
 import ExactLocationPicker from '../components/ExactLocationPicker'
 import { formWhereLabel } from '../utils/dropoff'
 import { placeService } from '../services/placeService'
@@ -302,6 +303,7 @@ function PostFlow() {
               <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen('location')}>
                 <LocateFixed size={18} /> {form.location || 'Mjesto ili ulica i broj'}
               </button>
+              {!form.exact && <QuarterChips location={form.location} onPick={(location) => { update({ location }); haptic('light') }} />}
               {form.location && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
               {form.moving && (
                 <>
@@ -309,6 +311,7 @@ function PostFlow() {
                   <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen('dropoff')} data-testid="post-dropoff">
                     <MapPin size={18} /> {form.dropoffExact?.address ? `${form.dropoff} · ${form.dropoffExact.address}` : form.dropoff || 'Mjesto ili ulica i broj'}
                   </button>
+                  {!form.dropoffExact && <QuarterChips location={form.dropoff} onPick={(dropoff) => { update({ dropoff }); haptic('light') }} />}
                   <span className="ap-hint">Svi vide samo nazive mjesta. Tačne adrese vidi samo izvođač kojeg izabereš.</span>
                 </>
               )}

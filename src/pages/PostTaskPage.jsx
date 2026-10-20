@@ -17,6 +17,7 @@ import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
+import QuarterChips from '../components/QuarterChips'
 import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
 import ImagePicker from '../components/ImagePicker'
@@ -289,12 +290,14 @@ function PostTaskPage() {
                 <div className="wizard-field">
                   <span>{form.moving ? 'Odakle (naselje, selo ili grad)' : 'Mjesto (naselje, selo ili grad)'}</span>
                   <CityField id="task-city" label="Mjesto ili ulica i broj" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} onAddress={(exact) => update({ exact })} />
+                  {!form.exact && <QuarterChips location={form.location} onPick={(location) => update({ location })} />}
                   {knowsPlace(form.location) && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
                 </div>
                 {form.moving && (
                   <div className="wizard-field">
                     <span>Dokle (naselje, selo ili grad)</span>
                     <CityField id="task-dropoff" label="Dokle: mjesto ili ulica i broj" value={form.dropoff || ''} onChange={(city) => update({ dropoff: city, ...(city !== form.dropoff ? { dropoffExact: null } : {}) })} onAddress={(dropoffExact) => update({ dropoffExact })} />
+                    {!form.dropoffExact && <QuarterChips location={form.dropoff} onPick={(dropoff) => update({ dropoff })} />}
                     {form.dropoffExact?.address && <small className="wizard-hint">Tačna adresa: {form.dropoffExact.address}</small>}
                     <small className="wizard-hint">Svi vide samo nazive mjesta. Tačne adrese vidi samo izvođač kojeg izabereš.</small>
                   </div>

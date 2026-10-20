@@ -54,7 +54,7 @@ const toGeoJSON = (listings, activeId = null, points = spreadPoints(listings)) =
         id: item.id,
         title: item.title,
         price: priceText(item),
-        label: item.promo === 'vip' ? `VIP · ${priceText(item)}` : item.promo ? `Hitno · ${priceText(item)}` : priceText(item),
+        label: priceText(item),
         location: item.location || '',
         promo: item.promo || '',
         active: item.id === activeId,
@@ -72,7 +72,13 @@ const PIN_STYLES = {
   vip: { fill: GOLD, stroke: '#ffffff', text: '#ffffff' },
   urgent: { fill: '#fff4d6', stroke: '#c27c00', text: '#6b4500' },
 }
-const SCALE = 2
+// drawn at the screen's own pixel density (3 on most phones), so the text and edges stay sharp
+const SCALE = Math.min(4, Math.max(2, Math.ceil(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1)))
+// lucide's crown and flame, the same icons the site uses for VIP and Hitno
+const PIN_ICONS = {
+  vip: ['M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z', 'M5 21h14'],
+  urgent: ['M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4'],
+}
 const siteFont = () => {
   const family = typeof document !== 'undefined' ? getComputedStyle(document.body).fontFamily : ''
   return family || 'system-ui, sans-serif'
@@ -96,37 +102,54 @@ const roundedPath = (ctx, x, y, w, h, r, tail = 0) => {
 }
 const drawPin = (state, label) => {
   const style = PIN_STYLES[state] || PIN_STYLES.regular
-  const font = `700 ${12.5 * SCALE}px ${siteFont()}`
+  const icon = PIN_ICONS[state]
+  const font = `700 ${13 * SCALE}px ${siteFont()}`
   const probe = document.createElement('canvas').getContext('2d')
   probe.font = font
-  const pad = 10 * SCALE
-  const bodyH = 26 * SCALE
+  const pad = 11 * SCALE
+  const iconSize = icon ? 14 * SCALE : 0
+  const gap = icon ? 5 * SCALE : 0
+  const bodyH = 28 * SCALE
   const tail = 6 * SCALE
-  const blur = 4 * SCALE
-  const w = Math.ceil(probe.measureText(label).width) + pad * 2
+  const blur = 5 * SCALE
+  const textW = Math.ceil(probe.measureText(label).width)
+  const w = textW + iconSize + gap + pad * 2
   const canvas = document.createElement('canvas')
   canvas.width = w + blur * 2
   canvas.height = bodyH + tail * 1.2 + blur * 2
   const ctx = canvas.getContext('2d')
   ctx.save()
-  ctx.shadowColor = 'rgba(10, 31, 99, 0.3)'
+  ctx.shadowColor = 'rgba(10, 31, 99, 0.22)'
   ctx.shadowBlur = blur
-  ctx.shadowOffsetY = SCALE
+  ctx.shadowOffsetY = 1.5 * SCALE
   roundedPath(ctx, blur, blur, w, bodyH, bodyH / 2, tail)
   ctx.fillStyle = style.fill
   ctx.fill()
   ctx.restore()
-  ctx.lineWidth = 2 * SCALE
+  ctx.lineWidth = 1.5 * SCALE
   ctx.strokeStyle = style.stroke
   roundedPath(ctx, blur, blur, w, bodyH, bodyH / 2, tail)
   ctx.stroke()
   ctx.fillStyle = style.fill
   ctx.fill()
+  const left = blur + pad
+  const mid = blur + bodyH / 2
+  if (icon) {
+    ctx.save()
+    ctx.translate(left, mid - iconSize / 2)
+    ctx.scale(iconSize / 24, iconSize / 24)
+    ctx.strokeStyle = style.text
+    ctx.lineWidth = 2.2
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    for (const d of icon) ctx.stroke(new Path2D(d))
+    ctx.restore()
+  }
   ctx.font = font
   ctx.fillStyle = style.text
-  ctx.textAlign = 'center'
+  ctx.textAlign = 'left'
   ctx.textBaseline = 'middle'
-  ctx.fillText(label, blur + w / 2, blur + bodyH / 2 + SCALE)
+  ctx.fillText(label, left + iconSize + gap, mid + 0.5 * SCALE)
   return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 const drawCluster = (count) => {
@@ -137,11 +160,11 @@ const drawCluster = (count) => {
   canvas.height = size + ring * 2
   const ctx = canvas.getContext('2d')
   const c = canvas.width / 2
-  ctx.fillStyle = 'rgba(10, 31, 99, 0.16)'
+  ctx.fillStyle = 'rgba(10, 31, 99, 0.12)'
   ctx.beginPath(); ctx.arc(c, c, size / 2 + ring, 0, Math.PI * 2); ctx.fill()
   ctx.fillStyle = NAVY
   ctx.beginPath(); ctx.arc(c, c, size / 2, 0, Math.PI * 2); ctx.fill()
-  ctx.lineWidth = 3 * SCALE
+  ctx.lineWidth = 2.5 * SCALE
   ctx.strokeStyle = '#ffffff'
   ctx.stroke()
   ctx.font = `700 ${14 * SCALE}px ${siteFont()}`

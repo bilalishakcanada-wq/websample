@@ -112,6 +112,8 @@ export const findStreetAddress = (...texts) => {
 }
 
 export const streetAddressMessage = (found, context = 'opis') =>
-  `Tačnu adresu („${found}“) ne piši u ${context}: to vide svi. Upiši je u polje „Mjesto“ kod objave posla (vidi je samo izvođač kojeg izabereš) ili je pošalji u porukama nakon što prihvatiš ponudu.`
+  `Tačnu adresu („${found}“) ne piši u ${context}, jer to vide svi. ${/pitanj/.test(context)
+    ? 'Pošalji je u porukama nakon prihvaćene ponude.'
+    : 'Dodaj je kod „Mjesto“ i vidjet će je samo izvođač kojeg izabereš.'}`
 
 export const RULE_ONE_TEXT = 'Pravilo #1: bez brojeva telefona, emaila, linkova i društvenih mreža — u tekstu i na slikama. Kontakt se razmjenjuje tek nakon prihvaćene ponude, kroz poruke.'

@@ -59,6 +59,24 @@ test.describe.serial('Lokacija: bez obavezne dozvole, Odakle i Dokle', () => {
     await expect(client.getByText('Doseg ponuda')).toHaveCount(0)
   })
 
+  test('veliki grad nudi dio grada, posao ide na taj dio', async () => {
+    await client.goto('/objavi')
+    await client.getByPlaceholder('npr. Selidba kauča').fill(`${title} naselje`)
+    await client.getByRole('button', { name: 'Nastavi' }).click()
+    await client.getByRole('button', { name: 'Fleksibilan sam' }).click()
+    await client.getByRole('button', { name: 'Nastavi' }).click()
+    await client.getByRole('button', { name: /Uživo/ }).click()
+    const field = client.getByRole('button', { name: /Mjesto ili ulica i broj/ }).first()
+    await pickPlace(field, 'Sarajevo', /^Sarajevo/)
+    await expect(client.getByText('Koji dio grada?')).toBeVisible()
+    await client.getByRole('button', { name: 'Grbavica', exact: true }).click()
+    await expect(client.getByRole('button', { name: 'Grbavica, Novo Sarajevo' })).toBeVisible()
+    // tapping the chosen part again goes back to the whole town
+    await client.getByRole('button', { name: 'Grbavica', exact: true }).click()
+    await expect(client.getByRole('button', { name: 'Sarajevo', exact: true })).toBeVisible()
+    await client.getByRole('button', { name: 'Odustani' }).click()
+  })
+
   test('ulica i broj ne smiju u opis', async () => {
     await client.goto('/objavi')
     await client.getByPlaceholder('npr. Selidba kauča').fill(`${title} adresa`)
@@ -77,4 +95,5 @@ test.describe.serial('Lokacija: bez obavezne dozvole, Odakle i Dokle', () => {
     await expect(client.getByText(/Tačnu adresu \(„Ilirska 67“\) ne piši/)).toBeVisible()
     await expect(client).toHaveURL(/\/objavi/)
   })
+
 })

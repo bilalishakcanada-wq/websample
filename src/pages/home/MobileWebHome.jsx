@@ -56,8 +56,8 @@ function MobileWebHome() {
           if (!category) return null
           const Icon = category.icon
           return (
-            <Link key={id} to={`/search?category=${encodeURIComponent(category.name)}`} className="mw-cat">
-              <span className="mw-cat-icon"><Icon size={20} /></span>
+            <Link key={id} to={`/search?category=${encodeURIComponent(category.name)}`} className="mw-cat" data-cat={id}>
+              <span className="mw-cat-icon"><Icon size={28} weight="duotone" /></span>
               <strong>{category.name}</strong>
               <small>{hint}</small>
             </Link>

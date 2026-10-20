@@ -1,7 +1,8 @@
-// Lokacija i obavijesti, pitane u trenutku kad zatrebaju (components/RequiredPermissions.jsx):
-// lokacija je obavezna za objavu posla, ponudu i traženje posla (po njoj se mjeri udaljenost), a obavijesti
-// se nude jednom i, kad ih osoba preskoči, ne pitaju ponovo 7 dana. Pri pravljenju računa ništa nije obavezno. Lokacija uređaja ide u bazu (report_device_location), i po
-// njoj se mjeri doseg ponuda (supabase/reach/01). Obavijesti: Web Push u pregledniku, FCM u Android aplikaciji.
+// Lokacija i obavijesti, pitane u trenutku kad zatrebaju (components/RequiredPermissions.jsx). Kao na
+// Airtaskeru ništa nije obavezno: lokaciju telefon traži tek kad osoba dodirne „Koristi moju lokaciju“
+// (pretraga, igla na mapi, Postavke), a ko je odbije upiše mjesto ručno. Obavijesti se nude jednom i, kad ih
+// osoba preskoči, ne pitaju ponovo 7 dana. Lokacija uređaja ide u bazu (report_device_location) i po njoj se
+// pokazuje koliko je posao daleko. Obavijesti: Web Push u pregledniku, FCM u Android aplikaciji.
 // Gdje uređaj obavijesti ne može (iPhone preglednik bez instalacije, Android build bez Firebasea),
 // stanje je 'unsupported' i ne blokira: obavijesti tada stižu u aplikaciju i na email.
 import { rpcFromBackground, supabase } from '../lib/supabase'
@@ -57,10 +58,11 @@ export const locationOk = (status) => Boolean(status) && passes(status.location)
 
 // what each moment needs: `required` blocks the action until allowed, the rest is offered (and can be skipped)
 export const PERMISSION_RULES = {
-  account: { required: [], ask: ['location', 'notifications'] },
-  post: { required: ['location'], ask: ['location', 'notifications'] },
-  offer: { required: ['location'], ask: ['location', 'notifications'] },
-  search: { required: ['location'], ask: ['location'] },
+  account: { required: [], ask: ['notifications'] },
+  post: { required: [], ask: ['notifications'] },
+  offer: { required: [], ask: ['notifications'] },
+  // only from a tap on "Poveži" / "Blizu mene": the search works without it (type a place instead)
+  search: { required: [], ask: ['location'] },
 }
 const SNOOZE = 'zadatak-perm-snooze-'
 const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000
@@ -85,7 +87,7 @@ export function permissionSteps(status, reason = 'account') {
 export const requiredOk = (status, reason = 'account') =>
   (PERMISSION_RULES[reason] || PERMISSION_RULES.account).required.every((kind) => passes(status?.[kind]))
 
-/** Sends the device's position to the database (doseg ponuda). Signed out or offline: nothing happens. */
+/** Sends the device's position to the database (distance to jobs). Signed out or offline: nothing happens. */
 export async function reportDeviceLocation(point) {
   if (!point) return
   const { data } = await supabase.auth.getSession()
@@ -104,7 +106,7 @@ export async function requestLocation() {
   try {
     const point = await currentLocation({ goodEnoughMeters: 500, waitMs: 10000 })
     write(GEO_OK, '1')
-    // awaited (briefly): the reach of an offer is measured from this point right after
+    // awaited (briefly): the distance to each job is measured from this point right after
     await within(reportDeviceLocation(point).catch(() => {}), 4000)
     return 'granted'
   } catch {

@@ -3091,6 +3091,8 @@ button.back-home-link {
   letter-spacing: -0.04em;
 }
 
+.wizard-check { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0 4px; cursor: pointer; line-height: 1.45; }
+.wizard-check input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--primary); }
 .wizard-field {
   display: grid;
   gap: 8px;

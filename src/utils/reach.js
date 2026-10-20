@@ -1,60 +1,24 @@
-// Doseg ponuda: how far from a job a provider may be, from what the job pays (budget + travel
-// allowance). Mirrors public.reach_tiers / public.listing_reach_km (supabase/reach/01): to change the
-// distances, change that table on the database and these numbers. The database is what actually
-// enforces it when an offer is sent; this is for showing it on screens.
+// Udaljenost do posla. Kao na Airtaskeru to je samo informacija: ne ograničava ko smije poslati ponudu
+// (doseg ponuda i molba za prevoz su uklonjeni, supabase/airtasker-lokacija/01).
 import { coordsForLocation, distanceKm, isRemoteLocation } from '../data/cityCoordinates'
 
-export const REACH_TIERS = [
-  { below: 50, km: 10 },
-  { below: 150, km: 25 },
-  { below: 300, km: 50 },
-]
-export const NO_BUDGET_REACH_KM = 25
-export const TRAVEL_CHIPS = [10, 20, 30, 50]
+// older jobs may still carry money for the trip ("Platiću put"); new ones no longer ask for it
 export const MAX_TRAVEL_ALLOWANCE = 500
-
-/**
- * km a provider may be from the job, or null for no limit (online, or pays 300 KM+).
- * "Po dogovoru" never drops below the no-budget reach: travel money only widens it.
- */
-export const reachKm = (price, travel) => {
-  const p = price === '' || price == null ? null : Number(price)
-  const t = Number(travel) > 0 ? Number(travel) : 0
-  const pay = (p || 0) + t
-  const tier = REACH_TIERS.find((item) => pay < item.below)
-  if (!tier) return null
-  return p == null ? Math.max(NO_BUDGET_REACH_KM, tier.km) : tier.km
-}
-
-export const listingReachKm = (listing) => (isRemoteLocation(listing?.location) ? null : reachKm(listing?.price, listing?.travel_allowance))
-
-export const reachLabel = (km) => (km == null ? 'iz cijele BiH' : `do ${km} km od posla`)
 
 /** "Klijent plaća put do 20 KM" or null. */
 export const travelLabel = (listing) => (Number(listing?.travel_allowance) > 0 ? `Klijent plaća put do ${Number(listing.travel_allowance).toLocaleString('bs-BA')} KM` : null)
 
-const cityPoint = (city) => coordsForLocation(city)
-
 /**
- * Where a provider (by their profile city) stands for a job, computed on the device.
- * status: remote | no_limit | ok | too_far | no_city | unknown_city | no_job_location | invited
- * unknown_city: a profile city we can't place on the map; the database doesn't block those either.
- * myPoint: the profile place's { lat, lng } when the caller already has it (a settlement looked up).
+ * km from the viewer to the job (rounded to 0.1), or null when either place is unknown or the job is online.
+ * myPoint: the viewer's { lat, lng } when known (device or profile address), else their profile city.
  */
-export const reachFor = (listing, myCity, myPoint = null) => {
-  if (!listing) return null
-  // "Zatraži ponudu": the client picked this provider, so distance does not limit the offer
-  if (listing.invited_provider) return { status: 'invited', reachKm: null, distanceKm: null }
-  if (isRemoteLocation(listing.location)) return { status: 'remote', reachKm: null, distanceKm: null }
-  const km = reachKm(listing.price, listing.travel_allowance)
-  const job = listing.lat != null && listing.lng != null ? { lat: listing.lat, lng: listing.lng } : cityPoint(listing.location)
-  if (!job) return { status: 'no_job_location', reachKm: km, distanceKm: null }
-  const me = myPoint || cityPoint(myCity)
-  if (!me) {
-    const status = km == null ? 'no_limit' : String(myCity || '').trim() ? 'unknown_city' : 'no_city'
-    return { status, reachKm: km, distanceKm: null }
-  }
-  const distance = Math.round(distanceKm(me, job) * 10) / 10
-  if (km == null) return { status: 'no_limit', reachKm: null, distanceKm: distance }
-  return { status: distance <= km ? 'ok' : 'too_far', reachKm: km, distanceKm: distance }
+export const distanceToJob = (listing, myCity, myPoint = null) => {
+  if (!listing || isRemoteLocation(listing.location)) return null
+  const job = listing.lat != null && listing.lng != null ? { lat: listing.lat, lng: listing.lng } : coordsForLocation(listing.location)
+  const me = myPoint || coordsForLocation(myCity)
+  if (!job || !me) return null
+  return Math.round(distanceKm(me, job) * 10) / 10
 }
+
+/** "Oko 12 km od tebe" / "Manje od 1 km od tebe". */
+export const distanceLabel = (km) => (km == null ? null : km < 1 ? 'Manje od 1 km od tebe' : `Oko ${Math.round(km)} km od tebe`)

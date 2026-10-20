@@ -1,7 +1,7 @@
 import { listingService } from './listingService'
 import { tagService } from './tagService'
 import { profileService } from './profileService'
-import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
+import { contactInfoMessage, findProhibitedTerm, findStreetAddress, scanContactInfo, streetAddressMessage } from '../utils/moderation'
 import { queryClient } from '../lib/queryClient'
 import { cleanRequirements, scheduleFromForm, todayBa } from '../utils/schedule'
 import { MAX_TRAVEL_ALLOWANCE } from '../utils/reach'
@@ -29,6 +29,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
   if (findProhibitedTerm(requirements.join(' '))) throw new Error('Oglas sadrži sadržaj koji krši Pravila korištenja (npr. oružje ili droga) i ne može biti objavljen.')
   const contactScan = scanContactInfo(form.title, form.description, ...requirements)
   if (!contactScan.clean) throw new Error(contactInfoMessage(contactScan, 'oglas'))
+  const street = findStreetAddress(form.title, form.description)
+  if (street) throw new Error(streetAddressMessage(street, 'naslov ni opis'))
   const schedule = scheduleFromForm(form)
   if (schedule.due_date && schedule.due_date < todayBa()) throw new Error('Datum je već prošao — odaberi današnji ili neki kasniji dan.')
 
@@ -38,6 +40,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
     description: `${form.description.trim()}\n\nKada: ${kadaLine(form.timing, form.date)}`,
     category: form.category,
     location: form.mode === 'remote' ? 'Online / na daljinu' : form.location,
+    // selidba / prevoz / dostava: the second place ("Dokle"); null clears it on an edit
+    dropoff_location: form.mode !== 'remote' && form.moving && form.dropoff ? form.dropoff : null,
     price: Number(form.price) > 0 ? Number(form.price) : null,
     status: 'published',
     ...schedule,
@@ -66,6 +70,8 @@ export async function publishListing({ user, form, photos = { files: [], removed
   try {
     if (form.mode !== 'remote' && form.exact?.lat != null) await placeService.setListingAddress(listing.id, form.exact)
     else if (editId && (form.mode === 'remote' || form.exact === null)) await placeService.clearListingAddress(listing.id)
+    if (form.mode !== 'remote' && form.moving && form.dropoff && form.dropoffExact?.lat != null) await placeService.setListingDropoffAddress(listing.id, form.dropoffExact)
+    else if (editId && form.dropoffExact === null) await placeService.clearListingDropoffAddress(listing.id)
   } catch (error) {
     addressError = error.message || 'Tačna adresa nije sačuvana.'
   }

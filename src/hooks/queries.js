@@ -91,6 +91,14 @@ export const useListingAddress = (listingId, enabled = true) => useQuery({
   staleTime: 60 * 1000,
 }).data || null
 
+/** "Dokle" of a moving / delivery job, for the same two people as the address above. */
+export const useListingDropoffAddress = (listingId, enabled = true) => useQuery({
+  queryKey: keys.listingDropoffAddress(listingId),
+  queryFn: () => placeService.listingDropoffAddress(listingId),
+  enabled: Boolean(listingId && enabled),
+  staleTime: 60 * 1000,
+}).data || null
+
 /** Where distance to jobs is measured from: the allowed device location, else the profile address ("Moja lokacija"), or null. */
 export function useMyPoint(userId) {
   const data = useQuery({

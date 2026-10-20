@@ -49,6 +49,24 @@ export const placeService = {
     if (error) throw new Error(error.message)
   },
 
+  /** "Dokle" of a moving / delivery job (supabase/airtasker-lokacija/02): the street, seen like the one above. */
+  async setListingDropoffAddress(listingId, point) {
+    const { error } = await supabase.rpc('set_listing_dropoff_address', { p_listing: listingId, ...cleanPoint(point) })
+    if (error) throw new Error(error.message)
+  },
+
+  async clearListingDropoffAddress(listingId) {
+    const { error } = await supabase.rpc('clear_listing_dropoff_address', { p_listing: listingId })
+    if (error) throw new Error(error.message)
+  },
+
+  async listingDropoffAddress(listingId) {
+    if (!isSupabaseConfigured || !listingId) return null
+    const { data, error } = await supabase.rpc('listing_dropoff_address', { p_listing: listingId })
+    if (error) return null
+    return data?.[0] || null
+  },
+
   /** The exact address of a job, for its owner and the accepted provider; null for everyone else. */
   async listingAddress(listingId) {
     if (!isSupabaseConfigured || !listingId) return null

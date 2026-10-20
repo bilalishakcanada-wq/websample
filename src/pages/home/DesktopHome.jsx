@@ -15,6 +15,7 @@ import {
 import { ChatCircleIcon, ShieldCheckIcon, StarIcon } from '@phosphor-icons/react'
 import { mockProfessionals, mockServiceCategories } from '../../data/mockData'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import HowSteps from './HowSteps'
 import TrustArt from '../../components/TrustArt'
 import EarnArt from '../../components/EarnArt'
 import { useRevealOnScroll } from '../../hooks/useRevealOnScroll'
@@ -456,30 +457,7 @@ function DesktopHome() {
         </section>
 
         <section className="how-it-works reveal" id="kako-radi">
-          <div className="section-heading centered">
-            <div>
-              <span className="eyebrow small-eyebrow">Kako radi</span>
-              <h2>Jednostavno 3 koraka do željene usluge</h2>
-            </div>
-          </div>
-
-          <div className="steps-grid reveal-stagger reveal">
-            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
-              <div className="step-number">1</div>
-              <h3>Objavite posao</h3>
-              <p>Recite šta vam treba i postavite budget ili željeni termin.</p>
-            </SpotlightCard>
-            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
-              <div className="step-number">2</div>
-              <h3>Primite ponude</h3>
-              <p>Primite ponude od provjerenih stručnjaka i usporedite rješenja.</p>
-            </SpotlightCard>
-            <SpotlightCard className="step-card" theme="light" spotlightColor="#1f5fff" intensity={0.55} spotlightSize={220}>
-              <div className="step-number">3</div>
-              <h3>Platite sigurno</h3>
-              <p>Odaberite najbolju uslugu i plaćajte bez stresnog administriranja.</p>
-            </SpotlightCard>
-          </div>
+          <HowSteps />
         </section>
 
         <section className="boss-band reveal">

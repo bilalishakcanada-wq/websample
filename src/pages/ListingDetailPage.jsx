@@ -57,17 +57,26 @@ const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
 /** Cover photo + thumbnail strip; a soft category placeholder when the job has no photos. */
-function Gallery({ images, title, category, onOpen }) {
-  const [active, setActive] = useState(0)
-  if (images.length === 0) {
-    return (
-      <div className="job-gallery job-gallery-empty">
-        <Images size={30} />
-        <span>{category || 'Oglas'}</span>
-        <small>Vlasnik nije dodao slike</small>
-      </div>
-    )
+/** Otvoren → Dodijeljen → Završen across the top of the job, like Airtasker's OPEN / ASSIGNED / COMPLETED. */
+function StatusTrack({ status, expired, hasWorker }) {
+  if (status === 'cancelled' || expired) {
+    return <ol className="job-status-track"><li className="is-current is-stopped">{expired ? 'Rok prošao' : 'Otkazan'}</li></ol>
   }
+  const step = status === 'completed' ? 2 : (status === 'assigned' || hasWorker) ? 1 : 0
+  const steps = ['Otvoren', 'Dodijeljen', 'Završen']
+  return (
+    <ol className="job-status-track" aria-label="Stanje posla">
+      {steps.map((label, index) => (
+        <li key={label} className={`${index < step ? 'is-done' : ''} ${index === step ? `is-current ${index === 1 ? 'is-assigned' : ''}` : ''}`} aria-current={index === step ? 'step' : undefined}>{label}</li>
+      ))}
+    </ol>
+  )
+}
+
+function Gallery({ images, title, onOpen }) {
+  const [active, setActive] = useState(0)
+  // no photos: the title leads the page (a grey "no photos" box only pushed the job below the fold)
+  if (images.length === 0) return null
   const current = images[Math.min(active, images.length - 1)]
   return (
     <div className="job-gallery">
@@ -602,18 +611,15 @@ function ListingDetailPage() {
 
         <div className="job-layout">
           <div className="job-main">
-            <Gallery images={images} title={listing.title} category={listing.category} onOpen={(index) => setLightbox(index)} />
+            <Gallery images={images} title={listing.title} onOpen={(index) => setLightbox(index)} />
 
             <header className="job-head">
+              <StatusTrack status={listing.status} expired={expired} hasWorker={Boolean(acceptedBid)} />
               <div className="job-chips">
                 {listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}
                 <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
-                {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
                 {listing.status === 'assigned' && <span className="pill pill-gold"><Lock size={12} /> Izvođač odabran · uplata osigurana</span>}
-                {listing.status === 'cancelled' && <span className="pill pill-danger">Otkazan</span>}
-                {expired && <span className="pill pill-danger"><History size={12} /> Rok je prošao</span>}
                 {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
-                {listing.status === 'published' && !acceptedBid && !isPrivate && <span className="pill pill-ok">Otvoren za ponude</span>}
                 {listing.status === 'published' && !acceptedBid && isPrivate && <span className="pill pill-soft"><Lock size={12} /> Privatni zahtjev</span>}
               </div>
               <h1>{listing.title}</h1>
@@ -825,8 +831,12 @@ function ListingDetailPage() {
                   {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
                     ? <>Dogovorena cijena: <strong>{formatPrice(payment.amount)}</strong> (ponuda {formatPrice(myBid.amount)} + odobreno povećanje)</>
                     : <>Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong></>} — {BID_STATUS_LABEL[myBid.status]}
-                  {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={openEditBid}>Izmijeni</button>}
-                  {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={withdrawBid}>Povuci ponudu</button>}
+                </div>
+              )}
+              {!isOwner && myBid?.status === 'pending' && (
+                <div className="my-bid-actions">
+                  <button type="button" className="primary-button full-width" onClick={openEditBid}><Pencil size={16} /> Izmijeni ponudu</button>
+                  <button type="button" className="ghost-button full-width" onClick={withdrawBid}>Povuci ponudu</button>
                 </div>
               )}
               {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (

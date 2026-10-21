@@ -17,14 +17,16 @@ import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { serviceCategories } from '../data/categories'
 import RuleOneNotice from '../components/RuleOneNotice'
+import QuarterChips from '../components/QuarterChips'
 import CityField from '../components/CityField'
 import { guessCategory } from '../utils/categoryGuess'
 import ImagePicker from '../components/ImagePicker'
-import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
+import { RequirementsEditor, TimeOfDayPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { formScheduleFromListing, formScheduleLabel, todayBa } from '../utils/schedule'
 import IdentityGateNotice from '../components/IdentityGateNotice'
 import ExactLocationPicker from '../components/ExactLocationPicker'
+import { formWhereLabel } from '../utils/dropoff'
 import { placeService } from '../services/placeService'
 import { knowsPlace } from '../data/cityCoordinates'
 import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
@@ -131,6 +133,8 @@ function PostTaskPage() {
           category: listing.category || '',
           description: (listing.description || '').split('\n\nKada:')[0],
           location: isRemote ? '' : (listing.location || ''),
+          moving: !isRemote && Boolean(listing.dropoff_location),
+          dropoff: listing.dropoff_location || '',
           mode: isRemote ? 'remote' : 'in-person',
           price: listing.price ?? '',
         }))
@@ -140,6 +144,11 @@ function PostTaskPage() {
           placeService.listingAddress(sourceId).then((exact) => {
             if (exact) setForm((current) => (current.exact === undefined ? { ...current, exact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
           })
+          if (listing.dropoff_location) {
+            placeService.listingDropoffAddress(sourceId).then((exact) => {
+              if (exact) setForm((current) => (current.dropoffExact === undefined ? { ...current, dropoffExact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
+            })
+          }
         }
         // "Povećaj budžet ili dodaj put" on the job page lands on the budget step
         setStep(!stale && searchParams.get('step') === 'budget' ? STEPS.length - 1 : 0)
@@ -152,7 +161,7 @@ function PostTaskPage() {
 
   const canContinue = () => {
     if (step === 0) return form.title.trim().length >= 3 && (form.timing === 'flexible' || (form.date && form.date >= todayBa()))
-    if (step === 1) return form.mode === 'remote' || Boolean(form.location)
+    if (step === 1) return form.mode === 'remote' || (Boolean(form.location) && (!form.moving || Boolean(form.dropoff)))
     if (step === 2) return Boolean(form.category) && form.description.trim().length >= 10
     return true
   }
@@ -166,10 +175,16 @@ function PostTaskPage() {
 
   const submit = async () => {
     setError('')
+    // a visitor writes the whole job first (the draft is kept on the device) and signs up only to publish it
+    if (!user) {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList, za: zaParam || null })) } catch { /* ignore */ }
+      navigate(`/register?next=${encodeURIComponent(zaParam ? `/objavi?za=${zaParam}` : '/objavi')}`)
+      return
+    }
     if (postGate === 'needed' || postGate === 'rejected') { navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
-    // a new job goes out only from someone who allowed location and notifications
-    if (!editId && !(await permissions.ensure())) return
+    // notifications are offered once (never required): the client hears about offers right away
+    if (!editId) await permissions.ensure()
     setSaving(true)
     try {
       const { listing, flaggedPhotos, addressError } = await publishListing({ user, form, photos, existingImages, tagList, editId, invitedProvider: inviteId })
@@ -272,11 +287,28 @@ function PostTaskPage() {
               </button>
             </div>
             {form.mode === 'in-person' && (
-              <div className="wizard-field">
-                <span>Mjesto (naselje, selo ili grad)</span>
-                <CityField id="task-city" label="Mjesto ili ulica i broj" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} onAddress={(exact) => update({ exact })} />
-                {knowsPlace(form.location) && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
-              </div>
+              <>
+                {/* like Airtasker's "Is this a removalist task?": a job that moves something has two places */}
+                <label className="wizard-check">
+                  <input type="checkbox" checked={Boolean(form.moving)} onChange={(event) => update(event.target.checked ? { moving: true } : { moving: false, dropoff: '', dropoffExact: form.dropoffExact === undefined ? undefined : null })} />
+                  <span><strong>Treba nešto prevesti</strong> · selidba, prevoz ili dostava s jednog mjesta na drugo</span>
+                </label>
+                <div className="wizard-field">
+                  <span>{form.moving ? 'Odakle (naselje, selo ili grad)' : 'Mjesto (naselje, selo ili grad)'}</span>
+                  <CityField id="task-city" label="Mjesto ili ulica i broj" value={form.location} onChange={(city) => update({ location: city, ...(city !== form.location ? { exact: null } : {}) })} onAddress={(exact) => update({ exact })} />
+                  {!form.exact && <QuarterChips location={form.location} onPick={(location) => update({ location })} />}
+                  {knowsPlace(form.location) && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
+                </div>
+                {form.moving && (
+                  <div className="wizard-field">
+                    <span>Dokle (naselje, selo ili grad)</span>
+                    <CityField id="task-dropoff" label="Dokle: mjesto ili ulica i broj" value={form.dropoff || ''} onChange={(city) => update({ dropoff: city, ...(city !== form.dropoff ? { dropoffExact: null } : {}) })} onAddress={(dropoffExact) => update({ dropoffExact })} />
+                    {!form.dropoffExact && <QuarterChips location={form.dropoff} onPick={(dropoff) => update({ dropoff })} />}
+                    {form.dropoffExact?.address && <small className="wizard-hint">Tačna adresa: {form.dropoffExact.address}</small>}
+                    <small className="wizard-hint">Svi vide samo nazive mjesta. Tačne adrese vidi samo izvođač kojeg izabereš.</small>
+                  </div>
+                )}
+              </>
             )}
           </section>
         )}
@@ -378,27 +410,16 @@ function PostTaskPage() {
               </div>
             )}
 
-            {form.mode !== 'remote' && (
-              <div className="wizard-field">
-                <span>Troškovi puta (opciono)</span>
-                <TravelPicker value={form.travel} onChange={(travel) => update({ travel })} />
-                {inviteId
-                  ? <p className="tx-reach-hint">Doseg ne važi: izvođača biraš ti.</p>
-                  : <ReachHint price={form.price} travel={form.travel} />}
-              </div>
-            )}
-
             <div className="wizard-summary">
               <h3>Pregled oglasa</h3>
               <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '—'}</strong></div>
               <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
-              <div className="wizard-summary-row"><span>Lokacija</span><strong>{form.mode === 'remote' ? 'Online / na daljinu' : form.exact?.address ? `${form.location} · ${form.exact.address}` : (form.location || '—')}</strong></div>
+              <div className="wizard-summary-row"><span>Lokacija</span><strong>{formWhereLabel(form)}</strong></div>
               <div className="wizard-summary-row"><span>Kada</span><strong>{formScheduleLabel(form)}</strong></div>
               {conditionsOn && hasConditions(form.conditions) && <div className="wizard-summary-row"><span>Značke i pogodnosti</span><strong>{conditionsSummary(form.conditions)}</strong></div>}
               {form.requirements.length > 0 && <div className="wizard-summary-row"><span>Uslovi</span><strong>{form.requirements.join(' · ')}</strong></div>}
               <div className="wizard-summary-row"><span>Slike</span><strong>{existingImages.filter((item) => !photos.removed.includes(item.id)).length + photos.files.length || 'Bez slika'}</strong></div>
               <div className="wizard-summary-row"><span>Budžet</span><strong>{form.price ? `${form.price} KM` : 'Po dogovoru'}</strong></div>
-              {form.mode !== 'remote' && Number(form.travel) > 0 && <div className="wizard-summary-row"><span>Put</span><strong>Plaćam do {form.travel} KM</strong></div>}
             </div>
             {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => update({ promotion })} options={promotionOptions} />}
           </section>
@@ -416,7 +437,7 @@ function PostTaskPage() {
         )}
         {step === STEPS.length - 1 && (
           <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending'} onClick={submit}>
-            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : !user ? (zaParam ? 'Prijavi se i pošalji' : 'Prijavi se i objavi') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
           </button>
         )}
       </footer>

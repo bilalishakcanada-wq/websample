@@ -15,12 +15,10 @@ const STEPS = {
     title: 'Poveži svoju lokaciju',
     text: {
       account: 'Zadatak po lokaciji zna koliko si daleko od posla, pokazuje poslove u blizini i majstoru olakšava da dođe.',
-      post: 'Po lokaciji tvoj posao vide majstori u blizini, a oni koji su daleko te mogu samo zamoliti da platiš prevoz.',
-      offer: 'Klijent vidi koliko si daleko i kad možeš doći. Bez lokacije ne znamo da li je posao u tvom dosegu.',
+      post: 'Po lokaciji tvoj posao prvo vide majstori u blizini.',
+      offer: 'Klijent vidi koliko si daleko i kad možeš doći.',
       search: 'Pokazujemo poslove oko tebe i koliko je svaki daleko, da ne tražiš naslijepo po cijeloj državi.',
     },
-    // shown on the screen when this step can't be skipped here
-    needed: 'Bez lokacije ne možemo izračunati udaljenost do posla, pa je ovdje potrebna.',
     // Google Play: the disclosure says plainly that the app keeps using it with Zadatak in the background
     note: () => (backgroundLocationSupported()
       ? 'Dok je Lokacija uživo uključena, radi i kad je Zadatak u pozadini, a na telefonu tada stoji obavijest. Isključuješ je u Postavke → Lokacija.'
@@ -31,7 +29,7 @@ const STEPS = {
     icon: BellRing,
     title: 'Uključi obavijesti',
     text: {
-      account: 'Da ti ništa ne promakne: nove ponude, poruke, molbe za prevoz i plaćanja stižu odmah, i kad je aplikacija zatvorena.',
+      account: 'Da ti ništa ne promakne: nove ponude, poruke i plaćanja stižu odmah, i kad je aplikacija zatvorena.',
       post: 'Čim majstor pošalje ponudu ili poruku, javićemo ti odmah, i kad je aplikacija zatvorena.',
       offer: 'Čim klijent prihvati ponudu ili ti pošalje poruku, javićemo ti odmah.',
     },
@@ -67,9 +65,8 @@ function Art({ kind }) {
 /**
  * "Poveži lokaciju" → "Uključi obavijesti", one screen at a time like WhatsApp: the explanation first,
  * and "Nastavi" opens the system's own dialog right away (Google Play: prominent disclosure before the
- * runtime prompt). Only the screens this moment needs are shown (utils/permissions.js permissionSteps):
- * a required one (location for a job post, an offer, the job search) ends the action on "Ne sada";
- * an optional one is skipped for a week and the action carries on.
+ * runtime prompt). Only the screens this moment needs are shown (utils/permissions.js permissionSteps).
+ * Nothing is required (like Airtasker): "Preskoči" skips a screen for a week and the action carries on.
  */
 export function RequiredPermissionsSheet({ reason = 'account', steps: initialSteps, onDone, onClose }) {
   const [status, setStatus] = useState(null)
@@ -134,7 +131,7 @@ export function RequiredPermissionsSheet({ reason = 'account', steps: initialSte
           <Art kind={step} />
           <h1 id="rp-title">{info.title}</h1>
           <p>{info.text[reason] || info.text.account}</p>
-          {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{isRequired && info.needed ? info.needed : info.note()}</p>}
+          {denied ? <p className="rp-help">{blockedHelp(step)}</p> : <p className="rp-note">{info.note()}</p>}
         </div>
       )}
       <div className="rp-actions">
@@ -187,10 +184,11 @@ export function useRequiredPermissions(reason = 'account') {
 const SEARCH_ASKED = 'zadatak-search-location-asked'
 
 /**
- * The job search without the device's location: a card that connects it (with `auto`, the location screen
- * opens once per app session by itself, then only from the card). onGranted runs when it was just allowed.
+ * The job search without the device's location: a small card that connects it on a tap (with `auto`, the
+ * location screen opens once per app session by itself). The search works without it: a typed place does
+ * the same. onGranted runs when it was just allowed.
  */
-export function LocationNudge({ onGranted, auto = true }) {
+export function LocationNudge({ onGranted, auto = false }) {
   const [state, setState] = useState(null)
   const permissions = useRequiredPermissions('search')
   const { ensure } = permissions

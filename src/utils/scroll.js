@@ -15,6 +15,21 @@ export function scrollToTop() {
   if (root) root.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 }
 
+/** Jump (no animation) to a vertical position on whichever element scrolls. */
+export function scrollToY(top) {
+  smooth?.scrollTo(top, { immediate: true, force: true })
+  const root = scrollRoot()
+  if (root && root.scrollHeight > root.clientHeight) root.scrollTo({ top, left: 0, behavior: 'instant' })
+  else window.scrollTo({ top, left: 0, behavior: 'instant' })
+}
+
+/** How far the active scroller can go down right now. */
+export const scrollMax = () => {
+  const root = scrollRoot()
+  const rootMax = root ? root.scrollHeight - root.clientHeight : 0
+  return Math.max(rootMax, document.documentElement.scrollHeight - window.innerHeight)
+}
+
 export const scrollOffset = () => Math.max(window.scrollY || 0, scrollRoot()?.scrollTop || 0)
 
 /** Subscribe to scrolling of both the window and #root; returns the unsubscribe. */

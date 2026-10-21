@@ -19,12 +19,20 @@ const withoutExtras = (row) => Object.fromEntries(Object.entries(row).filter(([k
 // this column is dropped (the form hides the builder anyway while useJobConditionsEnabled() is false)
 const pickConditions = (payload) => (payload.conditions !== undefined ? { conditions: payload.conditions } : {})
 const withoutConditions = ({ conditions, ...row }) => row // eslint-disable-line no-unused-vars
+// "Dokle" of a moving / delivery job; the database works out its point (supabase/airtasker-lokacija/02)
+const pickDropoff = (payload) => (payload.dropoff_location !== undefined ? { dropoff_location: payload.dropoff_location || null } : {})
 
 const QUOTE_OFF = '„Zatraži ponudu“ još nije uključeno. Objavi posao svima ili pokušaj kasnije.'
 
 async function writeListing(run, fullRow) {
   let row = fullRow
   let first = await run(row)
+  // "Dokle" (supabase/airtasker-lokacija/02) is newer still: without it a job keeps only its first place
+  if (first.error && isMissingColumn(first.error) && row.dropoff_location !== undefined) {
+    const { dropoff_location, ...rest } = row // eslint-disable-line no-unused-vars
+    row = rest
+    first = await run(row)
+  }
   if (first.error && isMissingColumn(first.error) && row.conditions !== undefined) {
     row = withoutConditions(row)
     first = await run(row)
@@ -289,6 +297,7 @@ export const listingService = {
       ...(coordsForLocation(cleanPayload.location) || { lat: null, lng: null }),
       ...pickExtras(payload),
       ...pickConditions(payload),
+      ...pickDropoff(payload),
       // "Zatraži ponudu": only this provider sees the job (set once, on create)
       ...(payload.invited_provider ? { invited_provider: payload.invited_provider } : {}),
     })
@@ -328,6 +337,7 @@ export const listingService = {
       ...(coordsForLocation(input.location) || { lat: null, lng: null }),
       ...pickExtras(payload),
       ...pickConditions(payload),
+      ...pickDropoff(payload),
     }
     if (appConfig.apiBaseUrl) return apiRequest(`/api/listings/${id}`, { method: 'PATCH', body: cleanPayload })
 

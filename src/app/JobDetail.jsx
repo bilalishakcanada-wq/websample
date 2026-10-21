@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import JobStatusTrack from '../components/JobStatusTrack'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
 import { RequirementsList } from '../components/TaskExtras'
 import { ConditionsCard } from '../components/JobConditions'
-import ReachRadar from '../components/ReachRadar'
 import ExactAddress from '../components/ExactAddress'
 import { QuoteRequestCard } from '../components/QuoteRequest'
-import { reachFor, travelLabel } from '../utils/reach'
+import { distanceLabel, distanceToJob, travelLabel } from '../utils/reach'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
@@ -30,7 +29,7 @@ function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, myPoint = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', simple = false, conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
-    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab, travelCard = null,
+    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
   const [question, setQuestion] = useState('')
@@ -38,9 +37,8 @@ function JobDetail(props) {
   const [askError, setAskError] = useState('')
 
   const open = listing.status === 'published' && !acceptedBid
-  // a provider outside this job's reach is told so up front, not invited to offer
-  const reach = !isOwner && user && (myCity || myPoint) ? reachFor(listing, myCity, myPoint) : null
-  const tooFar = reach?.status === 'too_far'
+  // how far the job is from the viewer: information only, anyone may offer (like Airtasker)
+  const away = isOwner ? null : distanceLabel(distanceToJob(listing, myCity, myPoint))
 
   const band = expired
     ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
@@ -57,7 +55,6 @@ function JobDetail(props) {
     : myBid ? [payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
         ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
-      : open && tooFar && offerGate === 'too_far' ? ['Predaleko za ovaj posao', `Za ovu platu ponude šalju izvođači do ${reach.reachKm} km, a ti si ${Math.round(reach.distanceKm)} km daleko. Možeš zamoliti klijenta da plati prevoz.`]
       : open && simple ? ['Ovaj posao je slobodan', 'Dodirni plavo dugme ispod da se prijaviš.']
       : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
@@ -103,8 +100,6 @@ function JobDetail(props) {
         )}
       </section>
 
-      {travelCard && <div className="jd-travel">{travelCard}</div>}
-
       <section className="jd-sheet">
         <JobStatusTrack status={listing.status} expired={expired} hasWorker={Boolean(acceptedBid)} />
         <h1 className="jd-title">{listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}{listing.title}</h1>
@@ -124,9 +119,15 @@ function JobDetail(props) {
         <ul className="jd-facts">
           <li>
             <MapPin size={20} />
-            <span>{isRemote ? 'Online / na daljinu' : listing.location || 'Lokacija nije navedena'}</span>
+            <span>{isRemote ? 'Online / na daljinu' : listing.dropoff_location ? `Odakle: ${listing.location}` : listing.location || 'Lokacija nije navedena'}{away && <small>{away}</small>}</span>
             {!isRemote && listing.location && <Link to={`/search?q=${encodeURIComponent(listing.location)}&view=map`} className="jd-link">Na mapi</Link>}
           </li>
+          {listing.dropoff_location && (
+            <li>
+              <Navigation size={20} />
+              <span>Dokle: {listing.dropoff_location}</span>
+            </li>
+          )}
           <li>
             <CalendarDays size={20} />
             <span>{when}</span>
@@ -159,13 +160,6 @@ function JobDetail(props) {
           <div className="jd-reqs">
             <h3>Obavezni uslovi</h3>
             <RequirementsList items={requirements} />
-          </div>
-        )}
-
-        {!isRemote && !isPrivate && !['assigned', 'completed', 'cancelled'].includes(listing.status) && !(simple && myBid) && (
-          <div className="jd-reqs">
-            <h3>Doseg ponuda</h3>
-            <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} compact />
           </div>
         )}
 

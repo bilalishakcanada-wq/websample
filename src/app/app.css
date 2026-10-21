@@ -15,6 +15,11 @@
 .ap-title { margin: 14px 0 6px; font-family: var(--font-display); font-stretch: 92%; font-size: 1.85rem; line-height: 1.05; letter-spacing: -0.02em; color: var(--primary-strong); }
 .ap-sub { margin: 0 0 18px; color: var(--text-soft); font-size: 0.95rem; }
 .ap-label { display: block; margin: 16px 0 8px; font-size: 0.82rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.ap-check { display: flex; align-items: flex-start; gap: 12px; margin-top: 16px; padding: 14px 16px; border: 1.5px solid var(--stroke); border-radius: 14px; background: var(--surface); cursor: pointer; }
+.ap-check input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--primary); }
+.ap-check span { display: grid; gap: 2px; }
+.ap-check strong { font-size: 0.98rem; }
+.ap-check small { color: var(--text-soft); font-size: 0.84rem; }
 .ap-hint { display: block; margin-top: 8px; text-align: right; font-size: 0.74rem; color: var(--text-soft); }
 .ap-body { flex: 1; animation: ap-in 0.28s var(--ease-out) backwards; }
 @keyframes ap-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }

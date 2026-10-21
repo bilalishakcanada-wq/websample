@@ -62,8 +62,6 @@ html.lenis { scroll-behavior: auto !important; }
 .lenis [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
 
-/* GSAP SplitText: a word that rises out of its own line */
-.split-word { display: inline-block; will-change: transform; }
 
 body {
   margin: 0;

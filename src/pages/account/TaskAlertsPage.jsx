@@ -7,11 +7,21 @@ import { POPULAR_CITIES } from '../../data/siteMap'
 import { toast } from '../../components/Toaster'
 import { SkeletonList } from '../../components/Skeleton'
 
-/** "Alarmi za poslove": be the first to know when a matching job is posted. */
+const RADIUS = [10, 25, 50, 100]
+const EMPTY = { category: '', city: '', keyword: '', radiusKm: '25', mode: 'all' }
+const MODE_LABEL = { in_person: 'samo na licu mjesta', remote: 'samo online' }
+
+/** "Sarajevo, do 25 km" / "Cijela BiH · samo online" */
+const alertPlace = (alert) => {
+  const place = alert.mode === 'remote' ? 'Online' : alert.city ? `${alert.city}${alert.radius_km ? `, do ${alert.radius_km} km` : ''}` : 'Cijela BiH'
+  return alert.mode && alert.mode !== 'all' && alert.mode !== 'remote' ? `${place} · ${MODE_LABEL[alert.mode]}` : place
+}
+
+/** "Alarmi za poslove": be the first to know when a matching job is posted (place + distance, like Airtasker). */
 function TaskAlertsPage() {
   const { user } = useAuth()
   const [alerts, setAlerts] = useState(null)
-  const [form, setForm] = useState({ category: '', city: '', keyword: '' })
+  const [form, setForm] = useState(EMPTY)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,7 +36,7 @@ function TaskAlertsPage() {
     try {
       const created = await alertService.create({ userId: user.id, ...form })
       setAlerts((current) => [created, ...(current || [])])
-      setForm({ category: '', city: '', keyword: '' })
+      setForm(EMPTY)
       toast('Alarm je uključen — javit ćemo ti čim se pojavi takav posao.', { kind: 'success' })
     } catch (requestError) { setError(requestError.message) } finally { setBusy(false) }
   }
@@ -53,6 +63,21 @@ function TaskAlertsPage() {
             {POPULAR_CITIES.map((city) => <option key={city} value={city}>{city}</option>)}
           </select>
         </label>
+        {form.city && (
+          <label><span>Udaljenost</span>
+            <select value={form.radiusKm} onChange={(event) => setForm({ ...form, radiusKm: event.target.value })}>
+              <option value="">Samo {form.city}</option>
+              {RADIUS.map((km) => <option key={km} value={String(km)}>Do {km} km od mjesta {form.city}</option>)}
+            </select>
+          </label>
+        )}
+        <label><span>Gdje se radi</span>
+          <select value={form.mode} onChange={(event) => setForm({ ...form, mode: event.target.value })}>
+            <option value="all">Na licu mjesta i online</option>
+            <option value="in_person">Samo na licu mjesta</option>
+            <option value="remote">Samo online</option>
+          </select>
+        </label>
         <label><span>Ključna riječ (opciono)</span>
           <input value={form.keyword} maxLength={60} placeholder="npr. klima, laminat, selidba" onChange={(event) => setForm({ ...form, keyword: event.target.value })} />
         </label>
@@ -68,7 +93,7 @@ function TaskAlertsPage() {
           <div key={alert.id} className="alert-row">
             <div>
               <strong>{alert.category || 'Sve kategorije'}</strong>
-              <span>{alert.city || 'Cijela BiH'}{alert.keyword ? ` · „${alert.keyword}“` : ''}</span>
+              <span>{alertPlace(alert)}{alert.keyword ? ` · „${alert.keyword}“` : ''}</span>
             </div>
             <button type="button" className="icon-button" onClick={() => remove(alert.id)} aria-label="Obriši alarm"><Trash2 size={16} /></button>
           </div>

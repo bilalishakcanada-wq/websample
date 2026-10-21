@@ -27,11 +27,7 @@ import { ArcHeadline, HeroStars } from '../../components/HeroArt'
 import { BosniaArt, SCENES, useShuffle } from '../../components/BosniaArt'
 import { POPULAR_CITIES } from '../../data/siteMap'
 import { withBase } from '../../utils/paths'
-import SplitText from '../../components/reactbits/SplitText'
-import ShinyText from '../../components/reactbits/ShinyText'
 import SpotlightCard from '../../components/reactbits/SpotlightCard'
-import Magnet from '../../components/reactbits/Magnet'
-import '../../components/reactbits/ShinyText.css'
 import '../../components/reactbits/SpotlightCard.css'
 import { useDesktopHomeMotion } from './homeMotion'
 
@@ -119,23 +115,10 @@ function DesktopHome() {
 
           <div className="hero-stage-inner">
             <ArcHeadline />
-            <SplitText
-              tag="p"
-              className="hero-stage-tagline"
-              text="Objavi posao. Izaberi najboljeg. Riješeno."
-              splitType="words"
-              delay={90}
-              duration={0.7}
-              startDelay={0.45}
-              from={{ opacity: 0, y: 22 }}
-              to={{ opacity: 1, y: 0 }}
-              immediate
-            />
+            <p className="hero-stage-tagline">Objavi posao. Izaberi najboljeg. Riješeno.</p>
 
             <div className="hero-stage-actions">
-              <Magnet padding={60} magnetStrength={5}>
-                <Link to="/objavi" className="hero-btn hero-btn-primary">Objavi posao besplatno <ArrowRight size={18} /></Link>
-              </Magnet>
+              <Link to="/objavi" className="hero-btn hero-btn-primary">Objavi posao besplatno <ArrowRight size={18} /></Link>
               <Link to="/zaradi" className="hero-btn hero-btn-light">Zaradi kao izvođač</Link>
             </div>
 
@@ -196,7 +179,7 @@ function DesktopHome() {
           <section className="ticker-section reveal">
             <div className="section-heading">
               <div>
-                <span className="eyebrow small-eyebrow"><ShinyText text="Uživo" color="var(--primary)" shineColor="#9cc0ff" speed={2.4} delay={1.2} /></span>
+                <span className="eyebrow small-eyebrow">Uživo</span>
                 <h2>Pogledajte šta se radi upravo sada</h2>
               </div>
             </div>
@@ -463,7 +446,7 @@ function DesktopHome() {
         <section className="boss-band reveal">
           <div className="boss-band-copy">
             <span className="eyebrow small-eyebrow">Zarada</span>
-            <h2><ShinyText text="Budi svoj šef." color="#ffffff" shineColor="#8fb6ff" speed={2.6} delay={1.5} /></h2>
+            <h2>Budi svoj šef.</h2>
             <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Zadatku.</p>
             <ul className="boss-checklist">
               <li><Check size={16} /> Besplatan pristup hiljadama poslova</li>

@@ -94,4 +94,26 @@ export const scanChatMessage = (text, contactsAllowed) => {
   return scanContactInfo(text)
 }
 
+// A street and number ("Ilirska 67", "ul. Maršala Tita 10"): like Airtasker, the full address stays out of
+// the public text (title, description, questions) and goes in the job's own address field, which only the
+// chosen provider sees. Words that end like street names but aren't ones ("Nova 3 vrata") are let through.
+const STREET_KEYWORD = /(?:^|[^\p{L}])(?:ulica|ulici|ul\.|bulevar|bulevaru|trg|trgu|obala|obali)\s+[\p{Lu}0-9][\p{L}.-]*(?:\s+[\p{L}.-]+){0,3}\s+(?:br\.?\s*)?\d{1,4}[a-z]?(?![\p{L}\d])/iu
+const STREET_NAME = /(?:^|[^\p{L}])(\p{Lu}\p{Ll}{2,}(?:ska|ška|čka|ova|eva|ina|ića))\s+(?:br\.?\s*)?\d{1,3}[a-z]?(?![\p{L}\d])(?!\s*(?:km|kg|cm|m2|m²|m|h|%|x|puta|sata|dana|kom|komada|god)(?![\p{L}]))/u
+const NOT_STREETS = new Set(['Nova', 'Stara', 'Cijena', 'Ukupna', 'Godina', 'Druga', 'Sljedeća'])
+
+/** The street address found in the text ("Ilirska 67"), or null. */
+export const findStreetAddress = (...texts) => {
+  const text = texts.filter(Boolean).join('\n')
+  const keyword = text.match(STREET_KEYWORD)
+  if (keyword) return keyword[0].replace(/^[^\p{L}]/u, '').trim()
+  const named = text.match(STREET_NAME)
+  if (named && !NOT_STREETS.has(named[1])) return named[0].replace(/^[^\p{L}]/u, '').trim()
+  return null
+}
+
+export const streetAddressMessage = (found, context = 'opis') =>
+  `Tačnu adresu („${found}“) ne piši u ${context}, jer to vide svi. ${/pitanj/.test(context)
+    ? 'Pošalji je u porukama nakon prihvaćene ponude.'
+    : 'Dodaj je kod „Mjesto“ i vidjet će je samo izvođač kojeg izabereš.'}`
+
 export const RULE_ONE_TEXT = 'Pravilo #1: bez brojeva telefona, emaila, linkova i društvenih mreža — u tekstu i na slikama. Kontakt se razmjenjuje tek nakon prihvaćene ponude, kroz poruke.'

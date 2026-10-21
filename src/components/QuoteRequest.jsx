@@ -104,7 +104,7 @@ export function QuoteRequestCard({ listing, userId, isOwner, myBid, onChanged, p
       <p>
         {declined
           ? 'Klijent je obaviješten. Ako se predomisliš, još uvijek možeš poslati ponudu dok je posao otvoren.'
-          : 'Posao ne vidi niko drugi. Doseg ponuda ne važi jer je klijent izabrao baš tebe.'}
+          : 'Posao ne vidi niko drugi: klijent je izabrao baš tebe.'}
       </p>
       {!declined && open && !myBid && <button type="button" className={quiet} onClick={decline} disabled={busy}>Ne mogu ovaj posao</button>}
     </section>

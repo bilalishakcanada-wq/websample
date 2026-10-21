@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AlertTriangle, BadgeCheck, Eye, FlaskConical, Gauge, IdCard, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, Eye, Gauge, IdCard, ShieldCheck, X } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { identityService } from '../../services/identityService'
 import { formatBosnianDate } from '../../utils/dateFormat'
@@ -34,42 +34,44 @@ function Dokument({ path, naslov }) {
 }
 
 /**
- * Beta prekidač (samo admin): dok je uključen, objava posla i ponude ne traže
- * ličnu kartu. Važi za SVE korisnike sajta; isplate i dalje traže identitet.
+ * Prekidač „Obavezna verifikacija za sve" (samo admin). Uključen: objava posla, slanje
+ * ponude i dodjela posla traže potvrđenu ličnu kartu (odobrenu od tima), za SVE korisnike.
+ * Isključen: sve radi bez lične karte; isplate i dalje traže identitet.
  * Prekidač je u bazi (verification_policy), pa ga sajt ne može zaobići.
  */
-function BetaSwitch() {
+function RequiredSwitch() {
   const queryClient = useQueryClient()
   const [policy, setPolicy] = useState(null)
   const [busy, setBusy] = useState(false)
   useEffect(() => { identityService.policy().then(setPolicy).catch(() => {}) }, [])
   if (!policy) return null
-  const ukljucen = !policy.require_for_jobs && !policy.require_for_bids
+  const obavezna = policy.require_for_jobs && policy.require_for_bids
 
   const promijeni = async () => {
-    const ok = await confirmDialog(ukljucen
-      ? { title: 'Uključiti provjeru identiteta?', text: 'Objava posla i ponude ponovo traže potvrđenu ličnu kartu.', confirmLabel: 'Uključi provjeru' }
-      : { title: 'Beta bez lične karte?', text: 'Svi korisnici sajta mogu objavljivati poslove i slati ponude bez potvrđene lične karte. Isplate i dalje traže identitet.', confirmLabel: 'Isključi provjeru', danger: true })
+    const ok = await confirmDialog(obavezna
+      ? { title: 'Isključiti obaveznu verifikaciju?', text: 'Svi korisnici mogu objavljivati poslove, slati ponude i dodjeljivati poslove bez potvrđene lične karte. Isplate i dalje traže identitet.', confirmLabel: 'Isključi', danger: true }
+      : { title: 'Uključiti obaveznu verifikaciju za sve?', text: 'Od sada svaki korisnik mora imati ličnu kartu potvrđenu od tima da bi objavio posao, poslao ponudu ili dobio/dao posao. Pregled poslova ostaje otvoren. Korisnici bez potvrde dobiju poruku i link na verifikaciju.', confirmLabel: 'Uključi' })
     if (!ok) return
     setBusy(true)
     try {
-      setPolicy(await identityService.setBeta(!ukljucen))
+      // set_identity_beta(true) = bez lične karte, (false) = lična karta obavezna
+      setPolicy(await identityService.setBeta(obavezna))
       queryClient.invalidateQueries({ queryKey: ['me'] })
-      toast(ukljucen ? 'Provjera identiteta je ponovo uključena.' : 'Beta: objava i ponude bez lične karte.', { kind: 'success' })
+      toast(obavezna ? 'Verifikacija više nije obavezna.' : 'Verifikacija je sada obavezna za sve.', { kind: 'success' })
     } catch (e) { toast(e.message, { kind: 'error' }) } finally { setBusy(false) }
   }
 
   return (
-    <div data-testid="identity-beta" className={`admin-row idv-beta ${ukljucen ? 'on' : ''}`}>
-      <span className="idv-ikona"><FlaskConical size={18} /></span>
+    <div data-testid="identity-required" className={`admin-row idv-beta ${obavezna ? 'on' : ''}`}>
+      <span className="idv-ikona"><ShieldCheck size={18} /></span>
       <div>
-        <strong>{ukljucen ? 'Beta: lična karta se ne traži' : 'Lična karta se traži za objavu i ponude'}</strong>
-        <p className="muted-text">{ukljucen
-          ? 'Svi korisnici mogu objaviti posao i slati ponude bez verifikacije. Isplate i dalje traže identitet.'
-          : 'Za testiranje u beta fazi provjeru možeš privremeno isključiti. Kod verifikacije ostaje isti.'}</p>
+        <strong>Obavezna verifikacija za sve: {obavezna ? 'UKLJUČENO' : 'ISKLJUČENO'}</strong>
+        <p className="muted-text">{obavezna
+          ? 'Objava posla, slanje ponuda i dodjela posla traže ličnu kartu potvrđenu od tima — za klijente i za izvođače.'
+          : 'Korisnici mogu objavljivati poslove, slati ponude i dodjeljivati poslove bez lične karte. Isplate i dalje traže identitet.'}</p>
       </div>
-      <button type="button" className={ukljucen ? 'primary-button' : 'secondary-button'} disabled={busy} onClick={promijeni}>
-        {ukljucen ? 'Uključi provjeru ponovo' : 'Isključi za beta test'}
+      <button type="button" className={obavezna ? 'secondary-button' : 'primary-button'} disabled={busy} onClick={promijeni}>
+        {obavezna ? 'Isključi' : 'Uključi za sve'}
       </button>
     </div>
   )
@@ -131,7 +133,7 @@ function IdentityTab() {
         <span className="muted-text">{red.length === 0 ? 'Nema predmeta na čekanju' : `${red.length} na čekanju`}</span>
       </div>
 
-      {isAdmin && <BetaSwitch />}
+      {isAdmin && <RequiredSwitch />}
 
       {red.length === 0 && (
         <p className="muted-text">Red je prazan. Novi predmeti stižu čim neko pošalje podatke na provjeru.</p>

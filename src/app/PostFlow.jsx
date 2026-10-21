@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Building2, Camera, ChevronRight, Delete, Laptop, LocateFixed, Plus, X } from 'lucide-react'
+import { ArrowLeft, Building2, Camera, ChevronRight, Delete, Laptop, LocateFixed, MapPin, Plus, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import { rememberPlace } from '../data/cityCoordinates'
@@ -11,7 +11,7 @@ import { publishListing } from '../services/publishListing'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { PromotionPicker, promoteAfterPublish, usePromotionOptions } from '../components/Promotion'
 import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '../utils/schedule'
-import { ReachHint, RequirementsEditor, TimeOfDayPicker, TravelPicker } from '../components/TaskExtras'
+import { RequirementsEditor, TimeOfDayPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
 import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
@@ -31,14 +31,16 @@ import './app.css'
 import { scrollToTop } from '../utils/scroll'
 import { recordInterest } from '../utils/interests'
 import IdentityGateNotice from '../components/IdentityGateNotice'
+import QuarterChips from '../components/QuarterChips'
 import ExactLocationPicker from '../components/ExactLocationPicker'
+import { formWhereLabel } from '../utils/dropoff'
 import { placeService } from '../services/placeService'
 import { POST_CTA, postVerifyHref, usePostGate } from '../hooks/usePostGate'
 
 const DRAFT_KEY = 'zadatak-post-draft'
 const STEPS = ['title', 'time', 'where', 'describe', 'photos', 'budget', 'review']
 
-const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', description: '', requirements: [], conditions: {}, category: '', price: '', travel: '' }
+const emptyForm = { title: '', timing: '', date: '', timeOfDay: [], mode: '', location: '', moving: false, dropoff: '', description: '', requirements: [], conditions: {}, category: '', price: '', travel: '' }
 
 const loadDraft = () => {
   try { const raw = localStorage.getItem(DRAFT_KEY); return raw ? JSON.parse(raw) : null } catch { return null }
@@ -101,7 +103,8 @@ function PostFlow() {
   const [removed, setRemoved] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [cityOpen, setCityOpen] = useState(false)
+  // which place the search sheet fills: '' (closed) | 'location' (Odakle / Mjesto) | 'dropoff' (Dokle)
+  const [cityOpen, setCityOpen] = useState('')
   const [catOpen, setCatOpen] = useState(false)
   const fileRef = useRef(null)
   const priceStats = useCategoryPrice(form.category)
@@ -110,7 +113,7 @@ function PostFlow() {
   const goBackOut = useGoBack('/')
   // the phone's back button walks the steps like the arrow does, then leaves the flow
   const leaveFlow = useBackSteps(step, 0, () => setStep((s) => Math.max(0, s - 1)))
-  useBackToClose(cityOpen, () => setCityOpen(false))
+  useBackToClose(Boolean(cityOpen), () => setCityOpen(''))
   useBackToClose(catOpen, () => setCatOpen(false))
   const catSheet = usePresence(catOpen, 220)
 
@@ -129,6 +132,8 @@ function PostFlow() {
         ...(stale ? { timing: '', date: '', timeOfDay: schedule.timeOfDay } : schedule),
         mode: remote ? 'remote' : 'in-person',
         location: remote ? '' : (listing.location || ''),
+        moving: !remote && Boolean(listing.dropoff_location),
+        dropoff: listing.dropoff_location || '',
         description: (listing.description || '').split('\n\nKada:')[0],
         requirements: listing.requirements || [],
         conditions: listing.conditions || {},
@@ -142,6 +147,11 @@ function PostFlow() {
         placeService.listingAddress(sourceId).then((exact) => {
           if (exact) setForm((current) => (current.exact === undefined ? { ...current, exact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
         })
+        if (listing.dropoff_location) {
+          placeService.listingDropoffAddress(sourceId).then((exact) => {
+            if (exact) setForm((current) => (current.dropoffExact === undefined ? { ...current, dropoffExact: { address: exact.address, lat: exact.lat, lng: exact.lng, accuracy: exact.accuracy_m, source: exact.source } } : current))
+          })
+        }
       }
       // land on the field the user tapped ("Uredi" next to the date / budget), otherwise on the review
       const wanted = STEPS.indexOf(searchParams.get('step'))
@@ -166,7 +176,7 @@ function PostFlow() {
   const valid = {
     title: form.title.trim().length >= 3,
     time: form.timing === 'flexible' || ((form.timing === 'date' || form.timing === 'before') && Boolean(form.date) && form.date >= todayBa()),
-    where: form.mode === 'remote' || (form.mode === 'in-person' && Boolean(form.location)),
+    where: form.mode === 'remote' || (form.mode === 'in-person' && Boolean(form.location) && (!form.moving || Boolean(form.dropoff))),
     describe: form.description.trim().length >= 10,
     photos: true,
     budget: true,
@@ -201,8 +211,8 @@ function PostFlow() {
     }
     if (postGate === 'needed' || postGate === 'rejected') { saveDraft(form, step, zaParam); navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
-    // a new job goes out only from someone who allowed location and notifications
-    if (!editId && !(await permissions.ensure())) return
+    // notifications are offered once (never required): the client hears about offers right away
+    if (!editId) await permissions.ensure()
     setSaving(true)
     setError('')
     try {
@@ -284,11 +294,27 @@ function PostFlow() {
           </div>
           {form.mode === 'in-person' && (
             <>
-              <span className="ap-label">Mjesto</span>
-              <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen(true)}>
+              {/* like Airtasker's "Is this a removalist task?": a job that moves something has two places */}
+              <label className="ap-check">
+                <input type="checkbox" checked={Boolean(form.moving)} onChange={(event) => { update(event.target.checked ? { moving: true } : { moving: false, dropoff: '', dropoffExact: form.dropoffExact === undefined ? undefined : null }); haptic('light') }} />
+                <span><strong>Treba nešto prevesti</strong><small>Selidba, prevoz ili dostava s jednog mjesta na drugo</small></span>
+              </label>
+              <span className="ap-label">{form.moving ? 'Odakle' : 'Mjesto'}</span>
+              <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen('location')}>
                 <LocateFixed size={18} /> {form.location || 'Mjesto ili ulica i broj'}
               </button>
+              {!form.exact && <QuarterChips location={form.location} onPick={(location) => { update({ location }); haptic('light') }} />}
               {form.location && <ExactLocationPicker town={form.location} value={form.exact || null} onChange={(exact) => update({ exact })} />}
+              {form.moving && (
+                <>
+                  <span className="ap-label">Dokle</span>
+                  <button type="button" className="ap-input ap-input-btn" onClick={() => setCityOpen('dropoff')} data-testid="post-dropoff">
+                    <MapPin size={18} /> {form.dropoffExact?.address ? `${form.dropoff} · ${form.dropoffExact.address}` : form.dropoff || 'Mjesto ili ulica i broj'}
+                  </button>
+                  {!form.dropoffExact && <QuarterChips location={form.dropoff} onPick={(dropoff) => { update({ dropoff }); haptic('light') }} />}
+                  <span className="ap-hint">Svi vide samo nazive mjesta. Tačne adrese vidi samo izvođač kojeg izabereš.</span>
+                </>
+              )}
             </>
           )}
         </section>
@@ -340,14 +366,6 @@ function PostFlow() {
           {priceStats
             ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
             : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
-          {form.mode !== 'remote' && (
-            <>
-              {inviteId
-                ? <p className="tx-reach-hint">Doseg ne važi: izvođača biraš ti.</p>
-                : <ReachHint price={form.price} travel={form.travel} />}
-              <TravelPicker value={form.travel} onChange={(travel) => { update({ travel }); haptic('light') }} />
-            </>
-          )}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
               k === '' ? <span key={`sp-${i}`} />
@@ -369,14 +387,13 @@ function PostFlow() {
           <div className="ap-review">
             <button type="button" onClick={() => setStep(0)}><span>Naslov</span><strong>{form.title}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(1)}><span>Kada</span><strong>{formScheduleLabel(form)}</strong><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : form.exact?.address ? `${form.location} · ${form.exact.address}` : form.location}</strong><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setStep(2)}><span>Gdje</span><strong>{form.mode === 'remote' ? 'Online' : formWhereLabel(form)}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setCatOpen(true)} className={form.category ? '' : 'is-missing'}><span>Kategorija</span><strong>{form.category || 'Odaberi'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(3)}><span>Opis</span><strong className="ap-clamp">{form.description}</strong><ChevronRight size={18} /></button>
             {conditionsOn && hasConditions(form.conditions) && <button type="button" onClick={() => setStep(3)}><span>Značke i pogodnosti</span><strong className="ap-clamp">{conditionsSummary(form.conditions)}</strong><ChevronRight size={18} /></button>}
             {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
-            {form.mode !== 'remote' && <button type="button" onClick={() => setStep(5)}><span>Put</span><strong>{Number(form.travel) > 0 ? `Plaćam do ${form.travel} KM` : 'Ne plaćam put'}</strong><ChevronRight size={18} /></button>}
           </div>
           {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
           {error && <div className="form-error">{error}</div>}
@@ -394,7 +411,8 @@ function PostFlow() {
       </div>
 
       {permissions.sheet}
-      {cityOpen && <CitySheet value={form.location} onPick={(city, exact) => { update({ location: city, ...(exact ? { exact } : city !== form.location ? { exact: null } : {}) }); setCityOpen(false) }} onClose={() => setCityOpen(false)} />}
+      {cityOpen === 'location' && <CitySheet value={form.location} onPick={(city, exact) => { update({ location: city, ...(exact ? { exact } : city !== form.location ? { exact: null } : {}) }); setCityOpen('') }} onClose={() => setCityOpen('')} />}
+      {cityOpen === 'dropoff' && <CitySheet value={form.dropoff} label="Dokle: mjesto ili ulica i broj" onPick={(city, exact) => { update({ dropoff: city, dropoffExact: exact || null }); setCityOpen('') }} onClose={() => setCityOpen('')} />}
       {catSheet.mounted && (
         <div className={`ap-sheet-backdrop ${catSheet.closing ? 'is-closing' : ''}`} inert={catSheet.closing || undefined} onClick={() => setCatOpen(false)}>
           <div className="ap-sheet" onClick={(event) => event.stopPropagation()}>
@@ -413,7 +431,7 @@ function PostFlow() {
 }
 
 /** Full-screen place search (like a postcode picker): type a settlement ("Otes"), or tap a popular town. */
-function CitySheet({ value, onPick, onClose }) {
+function CitySheet({ value, label = 'Mjesto ili ulica i broj', onPick, onClose }) {
   const [query, setQuery] = useState('')
   const { places, loading } = useLocationSearch(query, { limit: 12 })
   const typed = query.trim()
@@ -436,7 +454,7 @@ function CitySheet({ value, onPick, onClose }) {
   return (
     <div className="ap ap-screen ap-city">
       <header className="ap-city-top">
-        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Mjesto ili ulica i broj" className="ap-input" enterKeyHint="search" aria-label="Mjesto posla" />
+        <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={label} className="ap-input" enterKeyHint="search" aria-label={label} />
         <button type="button" className="ap-cancel" onClick={onClose}>Odustani</button>
       </header>
       <div className="ap-city-list" role="listbox">

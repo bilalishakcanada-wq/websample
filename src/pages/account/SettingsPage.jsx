@@ -57,7 +57,7 @@ function SettingsPage() {
   const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported' | 'native'
   const [password, setPassword] = useState('')
   const { blocked, toggle: toggleBlockUser } = useBlocks()
-  // Lokacija uživo: doseg ponuda follows where the person is right now (utils/liveReach.js)
+  // Lokacija uživo: the distance to jobs follows where the person is right now (utils/liveReach.js)
   const [live, setLive] = useState(isLiveReachOn)
   const [jobShare, setJobShare] = useState(isJobShareAuto)
   const [geo, setGeo] = useState('loading') // 'granted' | 'denied' | 'prompt' | 'unsupported'
@@ -181,7 +181,7 @@ function SettingsPage() {
         <Row icon={LocateFixed} tone="green" title="Pristup lokaciji" testid="geo-access"
           sub={geo === 'denied'
             ? (isNativeApp() ? 'Odbijeno na telefonu. Otvori postavke i dozvoli lokaciju za Zadatak.' : 'Blokirano u pregledniku.')
-            : geo === 'unsupported' ? 'Ovaj uređaj ne zna lokaciju. Udaljenost se računa od grada iz profila.' : 'Potrebno za objavu posla, ponude i traženje posla.'}>
+            : geo === 'unsupported' ? 'Ovaj uređaj ne zna lokaciju. Udaljenost se računa od grada iz profila.' : 'Po njoj vidiš koliko je koji posao daleko. Nije obavezna: mjesto možeš i upisati.'}>
           {geo === 'granted' || geo === 'unsupported' || geo === 'loading'
             ? <span className={`st-pill st-pill-${geoTone}`}>{geoLabel}</span>
             : <button type="button" className="st-action" onClick={connectLocation} disabled={busy === 'geo'}>{busy === 'geo' ? '…' : geo === 'denied' ? 'Otvori' : 'Dozvoli'}</button>}
@@ -208,7 +208,7 @@ function SettingsPage() {
             ? <Switch on={deviceOn} onChange={toggleDevice} disabled={busy === 'device'} label="Obavijesti na ovom telefonu" testid="device-push-toggle" />
             : device === 'blocked' && isNativeApp() ? <button type="button" className="st-action" onClick={toggleDevice}><Settings size={14} /> Otvori</button> : null}
         </Row>
-        <Row icon={BellRing} tone="red" title="Push obavijesti" sub="Ponude, poruke, plaćanja i molbe za prevoz.">
+        <Row icon={BellRing} tone="red" title="Push obavijesti" sub="Ponude, poruke i plaćanja.">
           <Switch on={notifyPush} onChange={togglePush} disabled={busy === 'prefs'} label="Push obavijesti" testid="notify-push-toggle" />
         </Row>
         <Row icon={Mail} tone="blue" title="Email obavijesti" sub={`Na ${user.email}`}>

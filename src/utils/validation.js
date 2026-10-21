@@ -20,6 +20,7 @@ const POZNATE_GRESKE = [
     poruka: 'Prije ovoga treba potvrditi identitet — provjera traje obično do 24 sata.',
     akcija: { tekst: 'Potvrdi identitet', href: '/account/verifikacija' },
   },
+  { test: /IZVODJAC_NIJE_VERIFIKOVAN/i, poruka: 'Ovaj izvođač još nije potvrdio identitet, pa mu posao ne možeš dodijeliti. Izaberi drugu ponudu ili sačekaj da se verifikuje.' },
   {
     test: /USLOV_POSLA|conditions_required|bids_insert_conditions/i,
     poruka: 'Klijent za ovaj posao traži značku koju još nemaš. Osvoji je pa pošalji ponudu.',

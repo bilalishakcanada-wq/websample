@@ -12848,6 +12848,8 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 
 /* greška koja nudi izlaz */
 .action-error { display: flex; gap: 10px; align-items: flex-start; }
+/* .form-error already draws the alert icon (::before) */
+.action-error > svg { display: none; }
 .action-error svg { flex-shrink: 0; margin-top: 2px; }
 .action-error-link { display: inline-block; margin-top: 8px; font-weight: 700;
   color: inherit; text-decoration: underline; text-underline-offset: 3px; }

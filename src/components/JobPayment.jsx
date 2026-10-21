@@ -6,6 +6,7 @@ import { accountService } from '../services/accountService'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { toast } from './Toaster'
+import ActionError from './ActionError'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
@@ -45,7 +46,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
       onDone?.()
       onClose()
     } catch (requestError) {
-      setError(requestError.message)
+      setError(requestError)
     } finally {
       setBusy(false)
     }
@@ -80,7 +81,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
           </div>
         )}
 
-        {error && <div className="form-error">{error}</div>}
+        <ActionError error={error} />
         <div className="pay-sheet-actions">
           <button type="button" className="ghost-button" onClick={onClose}>Odustani</button>
           <button data-testid="payment-confirm" type="button" className="primary-button" onClick={confirm} disabled={busy || !wallet || !enough}><Lock size={16} /> {busy ? 'Osiguravam…' : `Prihvati i osiguraj ${money(amount)}`}</button>

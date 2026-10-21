@@ -1,5 +1,5 @@
 // "Lokacija uživo" (Postavke → Lokacija): while Zadatak is open, the device's position follows the person
-// and goes to the database (report_device_location), so doseg ponuda is always measured from where they are
+// and goes to the database (report_device_location), so the distance to jobs is always measured from where they are
 // right now, not from the profile city. In the app it keeps going with Zadatak in the background (other apps
 // open, phone locked) and the phone shows a notification meanwhile; in a browser only while the page is open.
 // The switch is per device (the permission is too), kept in localStorage.
@@ -8,7 +8,7 @@ import { watchLocation, distanceMeters } from './location'
 // the notification the phone shows while the position is followed in the background (Android)
 export const LIVE_REACH_NOTICE = {
   title: 'Lokacija uživo je uključena',
-  message: 'Zadatak prati gdje si da vidiš poslove u svom dosegu. Isključi u Postavke → Lokacija.',
+  message: 'Zadatak prati gdje si da vidiš koliko su poslovi daleko. Isključi u Postavke → Lokacija.',
 }
 import { reportDeviceLocation } from './permissions'
 

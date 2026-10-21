@@ -1272,16 +1272,34 @@ button {
 }
 
 .form-error {
-  padding: 0.8rem 1rem;
-  background: rgba(239, 68, 68, 0.08);
-  color: #b91c1c;
-  border: 1px solid rgba(239, 68, 68, 0.18);
-  border-radius: 12px;
-  font-weight: 700;
+  position: relative;
+  padding: 0.75rem 1rem 0.75rem 2.6rem;
+  background: #fdf5f4;
+  color: #8a1f17;
+  border: 1px solid #f3d6d2;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* lucide's circle-alert, so the message reads at a glance without shouting in bold red */
+.form-error::before {
+  content: '';
+  position: absolute;
+  left: 0.95rem;
+  top: 0.82rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  background: #d13a2e;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .form-error a {
   color: inherit;
+  font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -3091,6 +3109,8 @@ button.back-home-link {
   letter-spacing: -0.04em;
 }
 
+.wizard-check { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0 4px; cursor: pointer; line-height: 1.45; }
+.wizard-check input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--primary); }
 .wizard-field {
   display: grid;
   gap: 8px;

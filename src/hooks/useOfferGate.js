@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../lib/supabase'
 import { identityService } from '../services/identityService'
 import { badgeService } from '../services/badgeService'
 import { requirementLabel } from '../utils/jobConditions'
@@ -11,8 +10,6 @@ export const OFFER_CTA = {
   needed: 'Potvrdi identitet za ponudu',
   pending: 'Identitet se provjerava',
   rejected: 'Ponovi verifikaciju',
-  too_far: 'Zamoli da plati prevoz',
-  no_city: 'Dodaj grad u profil',
   missing_badges: 'Osvoji značku za ponudu',
 }
 
@@ -40,25 +37,13 @@ export function useJobConditionCheck(userId, requires = []) {
 }
 
 /**
- * Doseg ponude za ovaj posao (listing_reach iz baze): 'too_far' | 'no_city' | null.
- * Dok funkcija ne postoji u bazi (ili upit ne uspije) vraća null — baza svakako
- * odbije ponudu koja ne prolazi, a korisnik ne ostane zaključan greškom.
- */
-async function reachBlock(listingId) {
-  const { data, error } = await supabase.rpc('listing_reach', { p_listing: listingId })
-  if (error) return null
-  const row = Array.isArray(data) ? data[0] : data
-  if (!row || row.can_offer) return null
-  return row.reason === 'too_far' || row.reason === 'no_city' ? row.reason : null
-}
-
-/**
  * Smije li prijavljeni korisnik poslati ponudu na ovaj posao:
- * 'ok' | 'needed' | 'pending' | 'rejected' (identitet) | 'too_far' | 'no_city' (doseg)
+ * 'ok' | 'needed' | 'pending' | 'rejected' (identitet)
  * | 'missing_badges' (klijent traži značku koju nema; `missing` iz useJobConditionCheck).
  * Identitet ima prednost. Gost i učitavanje vraćaju 'ok' — gost ide na prijavu.
  */
-export function useOfferGate(userId, listingId, missing = []) {
+// udaljenost ne ograničava ponudu (kao Airtasker): svako može poslati ponudu na posao koji vidi
+export function useOfferGate(userId, _listingId, missing = []) {
   const { data: identity } = useQuery({
     queryKey: keys.offerGate(userId),
     queryFn: () => identityService.offerGate(),
@@ -66,15 +51,8 @@ export function useOfferGate(userId, listingId, missing = []) {
     staleTime: 60 * 1000,
     meta: { persist: false },
   })
-  const { data: reach } = useQuery({
-    queryKey: keys.offerReach(userId, listingId),
-    queryFn: () => reachBlock(listingId),
-    enabled: Boolean(userId && listingId),
-    staleTime: 60 * 1000,
-    meta: { persist: false },
-  })
   if (!userId) return 'ok'
   if (identity && identity !== 'ok') return identity
   if (missing.length > 0) return 'missing_badges'
-  return reach || 'ok'
+  return 'ok'
 }

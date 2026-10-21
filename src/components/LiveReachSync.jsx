@@ -8,7 +8,7 @@ import { locationPermission } from '../utils/permissions'
 
 /**
  * "Lokacija uživo": while the switch is on, the position follows the person and every new point refreshes
- * doseg ponuda on screen (the reach radar, the offer button, search). In the app it keeps going with
+ * the distance to jobs on screen (job pages, search). In the app it keeps going with
  * Zadatak in the background; in a browser it pauses while the page is hidden.
  * Renders nothing. Never asks for permission itself: that happens on a tap (Postavke, RequiredPermissions).
  */

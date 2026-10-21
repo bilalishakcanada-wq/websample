@@ -487,3 +487,4 @@
 .featured-tasker-card { box-shadow: none; border: 1px solid var(--cr-line); }
 .provider-card .badge-pill, .featured-tasker-badges .badge-pill { font-size: 12.5px; padding: 3px 8px; }
 .job-card-image.no-image .live-badge { position: static; display: inline-block; margin-bottom: 4px; }
+.pe .account-secret button { background: none; border: 0; box-shadow: none; }

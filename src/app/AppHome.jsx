@@ -18,29 +18,14 @@ import PushPrompt from '../components/PushPrompt'
 import NotifBellLink from '../components/NotifBellLink'
 import './app.css'
 import { SkeletonApJob } from '../components/Skeleton'
-import { gsap, onView, reducedMotion, revealWords, useGSAP } from '../lib/motion'
+import { gsap, onView, reducedMotion, useGSAP } from '../lib/motion'
 
-// the hero builds itself the first time Home opens in a session; tab switches after that stay instant
-let heroPlayed = false
-function useHeroMotion(scope) {
-  useGSAP(() => {
-    if (heroPlayed || reducedMotion()) return
-    heroPlayed = true
-    gsap.set('.ap-hero-chips > *', { transition: 'none' }) // their CSS press transition would fight the tween
-    revealWords(scope.current.querySelector('.ap-hero h1'), { scroll: false, stagger: 0.08 })
-    gsap.timeline({ defaults: { ease: 'power3.out' } })
-      .from('.ap-hero-greet', { opacity: 0, y: -8, duration: 0.4 })
-      .from('.ap-hero-form, .ap-hero-btn', { opacity: 0, y: 14, duration: 0.5 }, 0.2)
-      .from('.ap-hero-chips > *', { opacity: 0, x: 28, duration: 0.45, stagger: 0.04, clearProps: 'transform,transition' }, 0.3)
-  }, { scope })
-}
-
-/** Category tiles pop in, one after another, the first time they scroll into view. */
+/** Category tiles settle in once, the first time they scroll into view; the hero is there from the first frame. */
 function useTilesMotion(scope, ready) {
   useGSAP(() => {
     if (!ready || reducedMotion() || !scope.current?.querySelector('.ap-tiles')) return
     gsap.set('.ap-tile', { transition: 'none' })
-    gsap.from('.ap-tile', { opacity: 0, scale: 0.85, y: 12, duration: 0.4, ease: 'back.out(1.8)', stagger: 0.04, clearProps: 'transform,transition', scrollTrigger: onView('.ap-tiles', 'top 95%') })
+    gsap.from('.ap-tile', { opacity: 0, y: 10, duration: 0.35, ease: 'power2.out', stagger: 0.03, clearProps: 'transform,transition', scrollTrigger: onView('.ap-tiles', 'top 95%') })
   }, { scope, dependencies: [ready] })
 }
 
@@ -110,7 +95,6 @@ function PosterHome({ firstName }) {
   const ownJobs = useMyListings(user.id)
   const ownJobsKnown = !ownJobs.isPending || ownJobs.fetchStatus === 'paused'
   const homeRef = useRef(null)
-  useHeroMotion(homeRef)
   useTilesMotion(homeRef, ownJobsKnown)
 
   const start = (text) => {
@@ -180,7 +164,6 @@ function TaskerHome({ user, firstName }) {
   // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
   const ready = !loading && bids !== null
   const homeRef = useRef(null)
-  useHeroMotion(homeRef)
 
   return (
     <div className="ap ap-home" ref={homeRef}>

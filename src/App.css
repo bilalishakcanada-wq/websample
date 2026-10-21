@@ -5134,6 +5134,10 @@ button:disabled {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.82);
 }
+.profile-setup-banner .profile-setup-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin-top: 10px; }
+.profile-setup-actions a, .profile-setup-actions button { font: inherit; font-size: 0.92rem; font-weight: 700; color: #fff; background: none; border: 0; padding: 6px 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.profile-setup-actions button { color: rgba(255, 255, 255, 0.82); text-decoration: none; }
+.ap-setup-reminder { margin: 16px 0 14px; }
 
 .profile-hero {
   display: grid;

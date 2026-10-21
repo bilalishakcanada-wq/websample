@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useMyBundle } from '../../hooks/queries'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Award, Bell, Camera, MousePointerClick, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
 } from 'lucide-react'
@@ -35,10 +35,36 @@ export const ACCOUNT_NAV = [
   { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
 ]
 
+const SETUP_LATER = 'zadatak-setup-later'
+
+/**
+ * A new account's profile is not filled in yet: a reminder on the account pages, never a wall.
+ * "Kasnije" hides it for this visit; on the profile page itself it is just the welcome line.
+ */
+function SetupReminder({ onProfilePage }) {
+  const [later, setLater] = useState(() => { try { return sessionStorage.getItem(SETUP_LATER) === '1' } catch { return false } })
+  if (later && !onProfilePage) return null
+  const hide = () => { try { sessionStorage.setItem(SETUP_LATER, '1') } catch { /* private mode */ } setLater(true) }
+  return (
+    <div className="profile-setup-banner">
+      <Sparkles size={18} />
+      <div>
+        <strong>Dobrodošao/la na Zadatak!</strong>
+        <span>Dopuni osnovne podatke — traje minutu.</span>
+        {!onProfilePage && (
+          <span className="profile-setup-actions">
+            <Link to="/account/profil?setup=1">Dopuni profil</Link>
+            <button type="button" onClick={hide}>Kasnije</button>
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function AccountLayout() {
   const isPhone = useMediaQuery('(max-width: 768px)')
   const { user } = useAuth()
-  const navigate = useNavigate()
   const goBack = useGoBack('/account')
   const { pathname } = useLocation()
   // the profile bundle is cached: coming back to any account page paints instantly, then refreshes
@@ -61,7 +87,6 @@ function AccountLayout() {
     return data
   }, [setBundle])
 
-  // first visit after registration: profile must be filled in
   // On phones the nav is a horizontal strip: keep the active item in view.
   const navRef = useRef(null)
   useEffect(() => {
@@ -71,11 +96,6 @@ function AccountLayout() {
     }
   }, [pathname, bundle])
 
-  useEffect(() => {
-    if (bundle?.profile && !bundle.profile.onboarding_completed && pathname !== '/account/profil') {
-      navigate('/account/profil?setup=1', { replace: true })
-    }
-  }, [bundle, pathname, navigate])
 
   const profile = bundle?.profile || null
   const isProvider = profile?.account_type && profile.account_type !== 'client'
@@ -153,7 +173,11 @@ function AccountLayout() {
       <AccountContext.Provider value={value}>
         <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleAvatarChange} />
         {pathname === '/account' ? (
-          <AccountMenu onPickAvatar={() => avatarInputRef.current?.click()} uploadingAvatar={uploadingAvatar} />
+          <AccountMenu
+            onPickAvatar={() => avatarInputRef.current?.click()}
+            uploadingAvatar={uploadingAvatar}
+            notice={!profile.onboarding_completed && <div className="ap-setup-reminder"><SetupReminder /></div>}
+          />
         ) : (
           <div className="ap ap-page ap-sub">
             <div className="ap-subbar">
@@ -166,6 +190,7 @@ function AccountLayout() {
                 <div><strong>Nalog je suspendovan</strong><span>{profile.suspension_reason || 'Prekršeno je Pravilo #1.'}</span></div>
               </div>
             )}
+            {!profile.onboarding_completed && <SetupReminder onProfilePage={pathname === '/account/profil'} />}
             {avatarNotice && <small className="account-avatar-notice">{avatarNotice}</small>}
             <Outlet />
           </div>
@@ -206,12 +231,7 @@ function AccountLayout() {
                 </div>
               </div>
             )}
-            {!profile.onboarding_completed && pathname === '/account/profil' && (
-              <div className="profile-setup-banner">
-                <Sparkles size={18} />
-                <div><strong>Dobrodošao/la na Zadatak!</strong><span>Dopuni osnovne podatke — traje minutu.</span></div>
-              </div>
-            )}
+            {!profile.onboarding_completed && <SetupReminder onProfilePage={pathname === '/account/profil'} />}
             <Outlet />
           </main>
         </div>

@@ -164,7 +164,7 @@ export function SkeletonMyTasksPhone() {
     <div className="ap ap-page mt" aria-busy="true">
       <div className="ap-sticky">
         <header className="ap-page-head"><h1>Moji poslovi</h1><IconBtnSkeleton /></header>
-        <div className="ap-tabs"><button type="button" className="active" tabIndex={-1}>Objavio/la sam</button><button type="button" tabIndex={-1}>Moje ponude</button></div>
+        <div className="ap-tabs"><button type="button" className="active" tabIndex={-1}>Objavljeni</button><button type="button" tabIndex={-1}>Moje ponude</button></div>
       </div>
       <span className="mt-filter"><Skeleton h={16} w={92} r={6} /></span>
       <section className="ap-section"><div className="mt-list"><SkeletonMtCard /><SkeletonMtCard /></div></section>

@@ -1,14 +1,8 @@
 import { useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useJobFeed } from './useFeed'
-import { mockServiceCategories, mockTasks } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
-import { withBase } from '../utils/paths'
-
-const categoryImage = (category) => {
-  const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.webp')
-}
+import { categoryPhoto } from '../utils/categoryPhoto'
 
 const shortTag = (category) => {
   if (!category) return 'Ostalo'
@@ -21,21 +15,19 @@ export const toCardListing = (listing) => ({
   title: listing.title,
   category: listing.category || 'Ostalo',
   tag: shortTag(listing.category),
-  price: listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('bs-BA')} KM`,
+  price: listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('hr-HR')} KM`,
   location: listing.location || 'Lokacija nije navedena',
   time: formatBosnianDate(listing.created_at),
   offers: listing.bid_count ?? listing.bids?.[0]?.count ?? 0,
-  image: [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || categoryImage(listing.category),
+  image: [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url || categoryPhoto(listing.category),
   isLive: true,
 })
 
-/** The job feed as cards: ranked for whoever is looking (see useFeed), newest-first no longer. */
-export function useLiveListings({ limit = 8, fallbackToDemo = true } = {}) {
+/** The job feed as cards: ranked for whoever is looking (see useFeed), newest-first no longer. Only real jobs. */
+export function useLiveListings({ limit = 8 } = {}) {
   const { user } = useAuth()
   const { feed, loading } = useJobFeed({ userId: user?.id ?? null, limit })
   const listings = useMemo(() => feed.map(toCardListing), [feed])
 
-  const demoFill = fallbackToDemo ? mockTasks.slice(0, Math.max(0, limit - listings.length)) : []
-
-  return { listings, demoListings: demoFill, combined: [...listings, ...demoFill], loading, hasLive: listings.length > 0 }
+  return { listings, loading, hasLive: listings.length > 0 }
 }

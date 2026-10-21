@@ -49,7 +49,7 @@ function PricingPage() {
               <TierMedal code={tier.code} size={44} />
               <div>
                 <strong>{tier.label}</strong>
-                <span>{Number(tier.min_30d_km) === 0 ? 'Početni nivo' : `Od ${Number(tier.min_30d_km).toLocaleString('bs-BA')} KM prometa u zadnjih 30 dana`}</span>
+                <span>{Number(tier.min_30d_km) === 0 ? 'Početni nivo' : `Od ${Number(tier.min_30d_km).toLocaleString('hr-HR')} KM prometa u zadnjih 30 dana`}</span>
               </div>
               <b className={index === tiers.length - 1 ? 'best' : ''}>{tier.fee_percent}% naknada</b>
             </div>
@@ -63,7 +63,7 @@ function PricingPage() {
         <ol className="steps-list">
           <li><strong>Klijent prihvati ponudu</strong> — iznos se rezerviše sa njegovog Balansa i čuva na Zadatku.</li>
           <li><strong>Posao se uradi</strong> — izvođač zatraži isplatu, klijent potvrdi.</li>
-          <li><strong>Novac se oslobađa</strong> — zarada bez naknade sjeda izvođaču na Balans; historija je vidljiva obojici.</li>
+          <li><strong>Novac se oslobađa</strong> — zarada umanjena za naknadu sjeda izvođaču na Balans; historija je vidljiva obojici.</li>
         </ol>
         <div className="info-note"><Info size={16} /> Uplata karticom na Balans i isplata na bankovni račun stižu s procesorom plaćanja; do tada se uplata i isplata dogovaraju s timom.</div>
       </section>

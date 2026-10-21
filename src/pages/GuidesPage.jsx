@@ -5,7 +5,7 @@ import InfoLayout from '../components/InfoLayout'
 import { serviceCategories } from '../data/categories'
 import { contactService } from '../services/contactService'
 
-const km = (value) => `${Number(value).toLocaleString('bs-BA')} KM`
+const km = (value) => `${Number(value).toLocaleString('hr-HR')} KM`
 
 function GuidesPage() {
   const [stats, setStats] = useState([])

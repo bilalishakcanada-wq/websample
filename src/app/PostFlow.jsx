@@ -362,9 +362,9 @@ function PostFlow() {
         <section className="ap-body ap-body-budget" key="budget">
           <h1 className="ap-title">Unesi budžet</h1>
           <p className="ap-sub">Ne brini — konačnu cijenu uvijek možeš dogovoriti kasnije.</p>
-          <div className="ap-amount"><span>{form.price ? Number(form.price).toLocaleString('bs-BA') : '0'}</span> KM</div>
+          <div className="ap-amount"><span>{form.price ? Number(form.price).toLocaleString('hr-HR') : '0'}</span> KM</div>
           {priceStats
-            ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
+            ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('hr-HR')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
             : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
@@ -393,7 +393,7 @@ function PostFlow() {
             {conditionsOn && hasConditions(form.conditions) && <button type="button" onClick={() => setStep(3)}><span>Značke i pogodnosti</span><strong className="ap-clamp">{conditionsSummary(form.conditions)}</strong><ChevronRight size={18} /></button>}
             {form.requirements?.length > 0 && <button type="button" onClick={() => setStep(3)}><span>Uslovi</span><strong className="ap-clamp">{form.requirements.join(' · ')}</strong><ChevronRight size={18} /></button>}
             <button type="button" onClick={() => setStep(4)}><span>Slike</span><strong>{files.length + existingImages.length - removed.length || 'Bez slika'}</strong><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('hr-HR')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
           </div>
           {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
           {error && <div className="form-error">{error}</div>}

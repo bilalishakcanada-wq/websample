@@ -201,7 +201,7 @@ function SupportChat({ openRequested = false }) {
   const firstName = context?.firstName || (user?.user_metadata?.full_name ? String(user.user_metadata.full_name).split(' ')[0] : '')
 
   return (
-    <div className="support-chat">
+    <div className={`support-chat ${open ? 'is-open' : ''}`}>
       {open && (
         <div className="support-chat-panel" role="dialog" aria-label="Podrška">
           <div className="support-chat-header">

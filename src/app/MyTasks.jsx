@@ -21,7 +21,7 @@ import ProviderDashboard from '../components/ProviderDashboard'
 const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'], expired: ['Rok prošao', 'off'] }
 const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani'], ['expired', 'Rok prošao']]
 const EMPTY = []
-const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
+const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR')} KM`)
 
 /** "Moji poslovi": jobs I posted and offers I sent — cards like the browse list, with a status filter. */
 function MyTasks() {
@@ -68,7 +68,7 @@ function MyTasks() {
       <div className="ap-sticky">
         <header className="ap-page-head"><h1>Moji poslovi</h1><NotifBellLink /></header>
         <div className="ap-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavio/la sam {jobs ? `(${jobs.length})` : ''}</button>
+          <button type="button" role="tab" aria-selected={tab === 'objavljeni'} className={tab === 'objavljeni' ? 'active' : ''} onClick={() => switchTab('objavljeni')}>Objavljeni {jobs ? `(${jobs.length})` : ''}</button>
           <button type="button" role="tab" aria-selected={tab === 'ponude'} className={tab === 'ponude' ? 'active' : ''} onClick={() => switchTab('ponude')}>Moje ponude {bids ? `(${bids.length})` : ''}</button>
           <button type="button" role="tab" aria-selected={tab === 'sacuvano'} className={tab === 'sacuvano' ? 'active' : ''} onClick={() => switchTab('sacuvano')}>Sačuvano</button>
         </div>

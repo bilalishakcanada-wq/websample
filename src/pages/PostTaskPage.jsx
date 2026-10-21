@@ -395,7 +395,7 @@ function PostTaskPage() {
             </label>
             {priceStats && (
               <div className="price-hint">
-                <span>Slični poslovi u „{form.category}“ obično koštaju <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.count} objavljenih, raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM).</span>
+                <span>Slični poslovi u „{form.category}“ obično koštaju <strong>{priceStats.median.toLocaleString('hr-HR')} KM</strong> ({priceStats.count} objavljenih, raspon {priceStats.min.toLocaleString('hr-HR')}–{priceStats.max.toLocaleString('hr-HR')} KM).</span>
                 <div className="price-hint-chips">
                   {[Math.round(priceStats.median * 0.8), Math.round(priceStats.median), Math.round(priceStats.median * 1.25)].map((value) => (
                     <button key={value} type="button" className={Number(form.price) === value ? 'active' : ''} onClick={() => update({ price: String(value) })}>{value} KM</button>

@@ -8,7 +8,7 @@ import { timeAgo } from '../utils/dateFormat'
 import { SkeletonMtCard } from './Skeleton'
 import './ProviderDashboard.css'
 
-const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA', { maximumFractionDigits: 2 })} KM`)
+const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR', { maximumFractionDigits: 2 })} KM`)
 const TABS = [
   ['active', 'Aktivne ponude', Hourglass],
   ['ongoing', 'U toku', Lock],

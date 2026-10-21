@@ -12,7 +12,7 @@ import { useAccount } from './account/AccountLayout'
 import { confirmDialog } from '../utils/dialog'
 import ProviderDashboard from '../components/ProviderDashboard'
 
-const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
+const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR')} KM`)
 
 const STATUS_LABELS = {
   published: 'Objavljen',
@@ -121,7 +121,7 @@ function DashboardPage() {
                   <h3>{item.title}</h3>
                   <div className="rec-card-meta">
                     <span><MapPin size={14} /> {item.location || 'Bez lokacije'}</span>
-                    <strong>{item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('bs-BA')} KM`}</strong>
+                    <strong>{item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('hr-HR')} KM`}</strong>
                   </div>
                   {item.reasons?.length > 0 && (
                     <ul className="rec-reasons">
@@ -160,7 +160,7 @@ function DashboardPage() {
                 </div>
               </div>
               <div className="dashboard-listing-actions">
-                <strong>{listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('bs-BA')} KM`}</strong>
+                <strong>{listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('hr-HR')} KM`}</strong>
                 <div className="dashboard-listing-buttons">
                   <Link className="ghost-button" to={`/listings/${listing.id}`}><Eye size={15} /> Pogledaj</Link>
                   <Link className="ghost-button" to={`/objavi?edit=${listing.id}`}><Pencil size={15} /> Uredi</Link>

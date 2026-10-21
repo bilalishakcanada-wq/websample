@@ -31,7 +31,7 @@ function Countdown({ until }) {
 }
 
 const utcTime = (value) => `${new Date(value).toISOString().slice(0, 16).replace('T', ' ')} UTC`
-const daleko = (meters) => (meters == null ? null : meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toLocaleString('bs-BA', { maximumFractionDigits: 1 })} km`)
+const daleko = (meters) => (meters == null ? null : meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toLocaleString('hr-HR', { maximumFractionDigits: 1 })} km`)
 
 /** Jedna slika prije/poslije: privatna (potpisan link) ili stari javni link. */
 function ProofItem({ row }) {
@@ -59,7 +59,7 @@ function ProofGallery({ rows }) {
   )
 }
 
-const km = (value) => `${Number(value || 0).toLocaleString('bs-BA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
+const km = (value) => `${Number(value || 0).toLocaleString('hr-HR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
 
 /** Naknada za otkazivanje (ista formula kao cancellation_fee_for u bazi). */
 function naknadaZaOtkaz(payment) {

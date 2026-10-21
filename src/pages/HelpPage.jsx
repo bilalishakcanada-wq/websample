@@ -54,6 +54,8 @@ function HelpPage() {
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Postavi pitanje — npr. kako dobijam značke, koliko je naknada…" autoFocus />
             {query && <button type="button" onClick={() => setQuery('')} aria-label="Obriši">×</button>}
           </label>
+          {/* phones: the round chat button would sit on top of the answers, so the chat opens from here */}
+          <button type="button" className="help-hero-chat" onClick={openSupport}><MessageCircle size={16} /> Razgovaraj s podrškom</button>
         </div>
       </section>
 

@@ -6,7 +6,7 @@ import { coordsForLocation, distanceKm, isRemoteLocation } from '../data/cityCoo
 export const MAX_TRAVEL_ALLOWANCE = 500
 
 /** "Klijent plaća put do 20 KM" or null. */
-export const travelLabel = (listing) => (Number(listing?.travel_allowance) > 0 ? `Klijent plaća put do ${Number(listing.travel_allowance).toLocaleString('bs-BA')} KM` : null)
+export const travelLabel = (listing) => (Number(listing?.travel_allowance) > 0 ? `Klijent plaća put do ${Number(listing.travel_allowance).toLocaleString('hr-HR')} KM` : null)
 
 /**
  * km from the viewer to the job (rounded to 0.1), or null when either place is unknown or the job is online.

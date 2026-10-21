@@ -99,7 +99,7 @@ export function ConditionsCard({ conditions, travelAllowance, held, identityOk, 
         <>
           <Title className={requires.length ? 'jc-sub' : ''}>Klijent obezbjeđuje</Title>
           <ul className="jc-perks">
-            {travel > 0 && <li><Car size={15} aria-hidden="true" /> Plaća put do {travel.toLocaleString('bs-BA')} KM</li>}
+            {travel > 0 && <li><Car size={15} aria-hidden="true" /> Plaća put do {travel.toLocaleString('hr-HR')} KM</li>}
             {perks.map((code) => <li key={code}><Sparkles size={15} aria-hidden="true" /> {perkShown(code)}</li>)}
           </ul>
         </>

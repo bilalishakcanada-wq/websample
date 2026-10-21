@@ -1,6 +1,6 @@
 import { uploadUserFile } from '../lib/privateFiles'
 import { supabase } from '../lib/supabase'
-import { publicError } from '../utils/validation'
+import { prepoznajGresku, publicError } from '../utils/validation'
 
 // SQL raises short codes; say what the person can do about it.
 const friendly = (error) => {
@@ -31,6 +31,8 @@ const call = async (fn, args) => {
   const { data, error } = await supabase.rpc(fn, args)
   if (error) {
     console.error(`${fn} failed`, { message: error.message, code: error.code })
+    // dodjela posla kad admin traži verifikaciju (identity/assign_require_verified.sql): poruka s linkom
+    if (/VERIFIKACIJA_POTREBNA|IZVODJAC_NIJE_VERIFIKOVAN/.test(error.message || '')) throw prepoznajGresku(error)
     throw new Error(friendly(error))
   }
   return data

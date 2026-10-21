@@ -47,6 +47,9 @@ test.describe.serial('Lokacija: bez obavezne dozvole, Odakle i Dokle', () => {
     await client.getByPlaceholder(/Napiši šta tačno treba uraditi/).fill('Automatski test: prevesti kauč, oglas je samo za provjeru lokacije.')
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('button', { name: /Nastavi|Preskoči/ }).first().click()
+    // a budget is required: it is held from the balance when the job is published
+    await expect(client.getByRole('button', { name: 'Nastavi' })).toBeDisabled()
+    await client.getByRole('group', { name: 'Iznos' }).getByRole('button', { name: '5', exact: true }).click()
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await expect(client.getByText(/Odakle: Sarajevo.*Dokle: Mostar/)).toBeVisible()
     await client.getByRole('button', { name: 'Objavi posao' }).click()
@@ -88,6 +91,7 @@ test.describe.serial('Lokacija: bez obavezne dozvole, Odakle i Dokle', () => {
     await client.getByPlaceholder(/Napiši šta tačno treba uraditi/).fill('Dođite na Ilirska 67, treći sprat, treba montirati ormar.')
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('button', { name: /Nastavi|Preskoči/ }).first().click()
+    await client.getByRole('group', { name: 'Iznos' }).getByRole('button', { name: '5', exact: true }).click()
     await client.getByRole('button', { name: 'Nastavi' }).click()
     await client.getByRole('button', { name: 'Objavi posao' }).click()
     const skip = client.getByTestId('permissions-skip')

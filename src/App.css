@@ -13087,3 +13087,11 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .support-human-button:disabled { opacity: 0.6; }
 .support-human-status { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 700; color: #15803d; }
 .support-chat-form textarea { flex: 1; resize: none; border: 1px solid var(--stroke); background: #f8fafc; border-radius: 12px; padding: 0.6rem 0.85rem; color: var(--text); min-height: 40px; max-height: 110px; font: inherit; font-size: 0.9rem; line-height: 1.35; field-sizing: content; }
+
+/* budget held when a job is published (BudgetHold.jsx) */
+.budget-hold-note { margin-top: 14px; font-size: 0.84rem; color: var(--text-soft); text-align: left; }
+.budget-hold-note p { margin: 0 0 6px; }
+.budget-hold-note p:first-child { display: flex; gap: 6px; align-items: flex-start; }
+.budget-hold-note p:first-child svg { flex-shrink: 0; margin-top: 2px; }
+.budget-hold-short { color: var(--danger); font-weight: 600; }
+.budget-hold-short a { color: inherit; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }

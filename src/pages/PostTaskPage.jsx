@@ -9,7 +9,8 @@ import { useGoBack } from '../hooks/useGoBack'
 import { ArrowLeft, Building2, CalendarDays, Check, Laptop, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
-import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { useBudgetHold, useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { BudgetHoldNote } from '../components/BudgetHold'
 import { ConditionsBuilder } from '../components/JobConditions'
 import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { publishListing } from '../services/publishListing'
@@ -65,6 +66,8 @@ function PostTaskPage() {
   // a new job needs an approved ID (editing one already published does not); the form stays
   // open to fill in and the draft is kept, only publishing waits for the check
   const postGate = usePostGate(user?.id, !editId)
+  // publishing takes the budget from the balance (supabase/payments/03): a budget is required then
+  const budgetHold = useBudgetHold(user?.id)
   const permissions = useRequiredPermissions('post')
   const postBack = inviteId ? `/objavi?za=${inviteId}` : copyId ? `/objavi?copy=${copyId}` : '/objavi'
   // a half-written job survives a refresh or an accidental click away; editing or copying a job
@@ -195,6 +198,7 @@ function PostTaskPage() {
   }
 
   const priceStats = useCategoryPrice(form.category)
+  const needsBudget = budgetHold.enabled && !(Number(form.price) > 0)
   const [guessed, setGuessed] = useState(false)
   // entering "Detalji" with no category: pre-select what the title suggests (the person can still change it)
   const goNext = () => {
@@ -377,7 +381,7 @@ function PostTaskPage() {
         {step === 4 && (
           <section className="wizard-panel">
             <h1>Koliki je vaš budžet?</h1>
-            <p className="muted-text">Ne brinite — iznos možete dogovoriti i naknadno sa izvođačem.</p>
+            <p className="muted-text">{budgetHold.enabled ? 'Unesite iznos koji ste spremni platiti. Konačnu cijenu dogovarate sa izvođačem kroz ponude.' : 'Ne brinite — iznos možete dogovoriti i naknadno sa izvođačem.'}</p>
             <label className="wizard-field wizard-budget">
               <span>Budžet u KM</span>
               <div className="wizard-budget-input">
@@ -389,10 +393,11 @@ function PostTaskPage() {
                   step="1"
                   value={form.price}
                   onChange={(event) => update({ price: event.target.value })}
-                  placeholder="Ostavite prazno za 'Po dogovoru'"
+                  placeholder={budgetHold.enabled ? 'npr. 50' : "Ostavite prazno za 'Po dogovoru'"}
                 />
               </div>
             </label>
+            {budgetHold.enabled && <BudgetHoldNote price={form.price} balance={budgetHold.balance} editing={Boolean(editId)} />}
             {priceStats && (
               <div className="price-hint">
                 <span>Slični poslovi u „{form.category}“ obično koštaju <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.count} objavljenih, raspon {priceStats.min.toLocaleString('bs-BA')}–{priceStats.max.toLocaleString('bs-BA')} KM).</span>
@@ -430,7 +435,7 @@ function PostTaskPage() {
           </button>
         )}
         {step === STEPS.length - 1 && (
-          <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending'} onClick={submit}>
+          <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending' || needsBudget} onClick={submit}>
             {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
           </button>
         )}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Building2, Camera, ChevronRight, Delete, Laptop, LocateFixed, MapPin, Plus, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
@@ -14,7 +14,8 @@ import { formScheduleFromListing, formScheduleLabel, shortDate, todayBa } from '
 import { RequirementsEditor, TimeOfDayPicker } from '../components/TaskExtras'
 import { InviteBanner } from '../components/QuoteRequest'
 import { listingService } from '../services/listingService'
-import { useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { useBudgetHold, useJobConditionsEnabled, useQuoteRequestsEnabled } from '../hooks/queries'
+import { BudgetHoldNote } from '../components/BudgetHold'
 import { ConditionsBuilder } from '../components/JobConditions'
 import { conditionsSummary, hasConditions } from '../utils/jobConditions'
 import { guessCategory } from '../utils/categoryGuess'
@@ -108,6 +109,8 @@ function PostFlow() {
   const [catOpen, setCatOpen] = useState(false)
   const fileRef = useRef(null)
   const priceStats = useCategoryPrice(form.category)
+  // publishing takes the budget from the balance (supabase/payments/03): a budget is required then
+  const budgetHold = useBudgetHold(user?.id)
   const footRef = useKeyboardAvoid()
 
   const goBackOut = useGoBack('/')
@@ -179,8 +182,8 @@ function PostFlow() {
     where: form.mode === 'remote' || (form.mode === 'in-person' && Boolean(form.location) && (!form.moving || Boolean(form.dropoff))),
     describe: form.description.trim().length >= 10,
     photos: true,
-    budget: true,
-    review: Boolean(form.category),
+    budget: !budgetHold.enabled || Number(form.price) > 0,
+    review: Boolean(form.category) && (!budgetHold.enabled || Number(form.price) > 0),
   }[key]
 
   const goNext = () => {
@@ -226,7 +229,7 @@ function PostFlow() {
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true })
     } catch (requestError) {
-      setError(requestError.message)
+      setError(requestError)
       setSaving(false)
     }
   }
@@ -361,11 +364,12 @@ function PostFlow() {
       {key === 'budget' && (
         <section className="ap-body ap-body-budget" key="budget">
           <h1 className="ap-title">Unesi budžet</h1>
-          <p className="ap-sub">Ne brini — konačnu cijenu uvijek možeš dogovoriti kasnije.</p>
+          <p className="ap-sub">{budgetHold.enabled ? 'Koliko si spreman/na platiti? Konačnu cijenu dogovaraš sa izvođačem kroz ponude.' : 'Ne brini — konačnu cijenu uvijek možeš dogovoriti kasnije.'}</p>
           <div className="ap-amount"><span>{form.price ? Number(form.price).toLocaleString('bs-BA') : '0'}</span> KM</div>
           {priceStats
             ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
-            : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
+            : !budgetHold.enabled && <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
+          {budgetHold.enabled && <BudgetHoldNote price={form.price} balance={budgetHold.balance} editing={Boolean(editId)} />}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
               k === '' ? <span key={`sp-${i}`} />
@@ -396,7 +400,7 @@ function PostFlow() {
             <button type="button" onClick={() => setStep(5)}><span>Budžet</span><strong>{form.price ? `${Number(form.price).toLocaleString('bs-BA')} KM` : 'Po dogovoru'}</strong><ChevronRight size={18} /></button>
           </div>
           {!editId && !inviteId && <PromotionPicker value={form.promotion || 'standard'} onChange={(promotion) => { update({ promotion }); haptic('light') }} options={promotionOptions} />}
-          {error && <div className="form-error">{error}</div>}
+          {error && <div className="form-error">{error.message || error}{error.akcija && <> <Link to={error.akcija.href} className="action-error-link">{error.akcija.tekst} →</Link></>}</div>}
         </section>
       )}
 

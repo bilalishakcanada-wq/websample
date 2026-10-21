@@ -73,6 +73,17 @@ const POZNATE_GRESKE = [
       return detalj ? `${detalj.charAt(0).toUpperCase()}${detalj.slice(1)}.` : 'Molba za prevoz trenutno nije moguća.'
     },
   },
+  // budžet se rezerviše pri objavi posla (payments/03)
+  { test: /BUDZET_OBAVEZAN/i, poruka: 'Unesi budžet. Iznos se rezerviše sa tvog balansa dok posao ne bude završen.' },
+  {
+    test: /BUDZET_NEDOVOLJNO/i,
+    // "BUDZET_NEDOVOLJNO: potrebno 120.00 KM, na balansu je 40.00 KM"
+    poruka: (tekst) => {
+      const detalj = (tekst.match(/BUDZET_NEDOVOLJNO:\s*(potrebno[^,]*KM, na balansu je -?[\d.,]+ KM)/) || [])[1]
+      return `Nemaš dovoljno na balansu${detalj ? ` (${detalj.trim()})` : ''}. Dopuni balans da bi objavio/la posao.`
+    },
+    akcija: { tekst: 'Dopuni balans', href: '/account/novcanik' },
+  },
   {
     test: /GRAD_POTREBAN/i,
     poruka: 'Dozvoli lokaciju ili dodaj svoj grad u profil — po tome vidimo koliko si daleko od posla.',

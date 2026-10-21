@@ -32,6 +32,7 @@ export const keys = {
   badgeCatalog: ['badges', 'catalog'],
   badgeVault: (userId) => ['me', userId, 'badge-vault'],
   jobConditionsEnabled: ['feature', 'job-conditions'],
+  budgetHold: (userId) => ['me', userId || 'guest', 'budget-hold'],
   // izdvojeni oglasi (Hitno / VIP) i ploča izvođača
   promoted: (params) => ['search', 'promoted', params],
   promotionOptions: (userId) => ['me', userId || 'guest', 'promotion-options'],

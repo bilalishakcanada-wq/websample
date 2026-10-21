@@ -126,6 +126,13 @@ export const useJobConditionsEnabled = () => useQuery({
   staleTime: 10 * 60 * 1000,
 }).data === true
 
+/** { enabled, balance }: posting a job holds its budget (payments/03 is on the database), and the client's balance. */
+export const useBudgetHold = (userId) => useQuery({
+  queryKey: keys.budgetHold(userId),
+  queryFn: () => listingService.budgetHold(userId),
+  staleTime: 30 * 1000,
+}).data || { enabled: false, balance: null }
+
 /** Invalidates a set of keys whenever the window regains focus or a custom app event fires. */
 export function useInvalidateOn(eventNames, queryKeys) {
   const queryClient = useQueryClient()

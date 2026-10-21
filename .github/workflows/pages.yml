@@ -135,10 +135,8 @@ jobs:
         run: npm run build
       - name: SPA fallback + no Jekyll
         run: cp dist/index.html dist/404.html && touch dist/.nojekyll
-      # Google Play checks the privacy policy and account-deletion links: they must answer 200, not
-      # the 404 status the SPA fallback carries, so these pages get their own copy of the app shell.
-      - name: Legal pages answer 200
-        run: for page in privatnost pravila pravila-zajednice kontakt; do mkdir -p "dist/$page" && cp dist/index.html "dist/$page/index.html"; done
+      # every public page (the legal ones Google Play checks too) already has its own <page>.html from
+      # `npm run build` (scripts/static-pages.mjs), so it answers 200 instead of the fallback's 404
       # GitHub's CDN keeps index.html for ~10 minutes: someone who loads a stale copy right after a
       # deploy must still find the chunks it names — so the previous build's files ride along once.
       - name: Keep the previous build's chunks

@@ -48,6 +48,14 @@ export function titleFor(pathname) {
   return BRAND
 }
 
+const HOME_DESCRIPTION = 'Objavi posao besplatno i primi ponude provjerenih majstora i izvođača u svom gradu, širom Bosne i Hercegovine.'
+
+/** The page's meta description (the same text scripts/static-pages.mjs puts in each page's HTML). */
+export function descriptionFor(pathname) {
+  const clean = pathname.replace(/\/+$/, '') || '/'
+  return SITE_PAGES.find((item) => item.path === clean)?.short || HOME_DESCRIPTION
+}
+
 /** Pages with data (a job, a profile) call this once they know the name. */
 export function setPageTitle(text) {
   document.title = text ? `${text} · ${BRAND}` : BRAND

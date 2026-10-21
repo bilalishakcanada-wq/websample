@@ -4,6 +4,7 @@ import AuthLayout from '../components/AuthLayout'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/authService'
 import '../components/CheckEmail.css'
+import { takeReturn } from '../utils/afterAuth'
 
 /** "Confirm your email" for Google sign-ups: sends our link once, then offers to send it again. */
 export function ConfirmEmailScreen() {
@@ -70,7 +71,8 @@ function ConfirmEmailPage() {
         setResult(ok ? 'ok' : 'invalid')
         if (ok && user) {
           await refreshEmailCheck()
-          navigate('/account/profil?setup=1', { replace: true })
+          // back to what they were doing before signing up (a job, the post form), else profile setup
+          navigate(takeReturn() || '/account/profil?setup=1', { replace: true })
         }
       })
       .catch(() => active && setResult('invalid'))

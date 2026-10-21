@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Briefcase, Hammer, Repeat } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -12,6 +12,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
 import { EMAIL_DOWN } from '../services/authService'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
+import { forgetReturn, rememberReturn, safeNext } from '../utils/afterAuth'
 
 const ACCOUNT_TYPES = [
   { value: 'client', label: 'Tražim majstora', hint: 'Objavljujem poslove i biram ponude', icon: Briefcase },
@@ -29,8 +30,9 @@ function RegisterPage() {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', city: '', phone: '' })
   // the goal chosen on the phone welcome flow pre-fills the account type
   const [accountType, setAccountType] = useState(() => (getMode() === 'tasker' ? 'provider' : 'client'))
-  const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
   const next = safeNext(searchParams.get('next'))
+  // the confirmation mail and Google sign-up come back to a start page: from there, on to `next`
+  useEffect(() => { if (next) rememberReturn(next) }, [next])
   const [trades, setTrades] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -59,7 +61,7 @@ function RegisterPage() {
         email={waiting.email}
         password={waiting.password}
         signIn={login}
-        onSignedIn={() => navigate(next || '/account/profil?setup=1', { replace: true })}
+        onSignedIn={() => { forgetReturn(); navigate(next || '/account/profil?setup=1', { replace: true }) }}
         onChangeEmail={() => { setWaiting(null); setForm((current) => ({ ...current, email: '' })) }}
       />
     )
@@ -83,7 +85,7 @@ function RegisterPage() {
         accountType,
         trades: offersServices ? trades : [],
       })
-      if (result.session) navigate(next || '/account/profil?setup=1')
+      if (result.session) { forgetReturn(); navigate(next || '/account/profil?setup=1') }
       else setWaiting({ email: form.email.trim().toLowerCase(), password: form.password })
     } catch (err) {
       setError(err.message)

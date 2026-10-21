@@ -175,6 +175,12 @@ function PostTaskPage() {
 
   const submit = async () => {
     setError('')
+    // a visitor writes the whole job first (the draft is kept on the device) and signs up only to publish it
+    if (!user) {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList, za: zaParam || null })) } catch { /* ignore */ }
+      navigate(`/register?next=${encodeURIComponent(zaParam ? `/objavi?za=${zaParam}` : '/objavi')}`)
+      return
+    }
     if (postGate === 'needed' || postGate === 'rejected') { navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
     // notifications are offered once (never required): the client hears about offers right away
@@ -431,7 +437,7 @@ function PostTaskPage() {
         )}
         {step === STEPS.length - 1 && (
           <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending'} onClick={submit}>
-            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : !user ? (zaParam ? 'Prijavi se i pošalji' : 'Prijavi se i objavi') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
           </button>
         )}
       </footer>

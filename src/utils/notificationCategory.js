@@ -69,3 +69,6 @@ export const groupByDay = (items, now = new Date()) => {
   }
   return groups.filter((group) => group.items.length)
 }
+
+/** Notification titles from the server can start with an emoji ("🏆 Nova značka: …"); the app shows plain text. */
+export const plainTitle = (title) => String(title || '').replace(/^(?:\p{Extended_Pictographic}|️|‍|\s)+/u, '')

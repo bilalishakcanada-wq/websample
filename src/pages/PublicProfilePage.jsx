@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { usePublicProfile, useQuoteRequestsEnabled } from '../hooks/queries'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Ban, Briefcase, CheckCircle2, Flag, GraduationCap, Info, MapPin, MessageSquareQuote, Play, Star, UserRound } from 'lucide-react'
+import { Ban, CheckCircle2, Flag, MapPin, Play, Star, UserRound } from 'lucide-react'
 import { reportService } from '../services/reportService'
 import { useAuth } from '../context/AuthContext'
 import TrustBadge, { LastSeen } from '../components/TrustBadge'
 import AvatarWithBadges from '../components/AvatarWithBadges'
 import BadgeShowcase from '../components/BadgeShowcase'
 import BackHome from '../components/BackHome'
-import { formatBosnianDate, formatBosnianMonthYear } from '../utils/dateFormat'
+import { formatBosnianDate, formatBosnianMonthYear, reviewsLabel } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import ProfileView from '../app/ProfileView'
 import { useFullscreen } from '../app/useFullscreen'
@@ -39,31 +39,29 @@ function Stars({ value, size = 14 }) {
   )
 }
 
-function SectionList({ icon: Icon, title, items, emptyHint, editHref }) {
+/** A titled list (education, work) on the profile; the owner sees a link to fill an empty one. */
+function SectionList({ title, items, emptyHint, editHref }) {
   if ((!items || items.length === 0) && !editHref) return null
   return (
-    <section className="pp-section">
+    <div className="pf-sub">
       <h3>{title}</h3>
-      {items?.length > 0 ? (
-        <ul className="pp-list">
-          {items.map((item) => <li key={item}><span className="pp-list-icon"><Icon size={16} /></span><span>{item}</span></li>)}
-        </ul>
-      ) : (
-        <Link to={editHref} className="pp-empty-link">{emptyHint}</Link>
-      )}
-    </section>
+      {items?.length > 0
+        ? <ul className="pf-list">{items.map((item) => <li key={item}>{item}</li>)}</ul>
+        : <Link to={editHref} className="pf-empty-link">{emptyHint}</Link>}
+    </div>
   )
 }
 
+/** A titled row of chips (specialties, transport). */
 function SectionChips({ title, items, emptyHint, editHref }) {
   if ((!items || items.length === 0) && !editHref) return null
   return (
-    <section className="pp-section">
+    <div className="pf-sub">
       <h3>{title}</h3>
       {items?.length > 0
-        ? <div className="pp-chips">{items.map((item) => <span key={item} className="pp-chip">{item}</span>)}</div>
-        : <Link to={editHref} className="pp-empty-link">{emptyHint}</Link>}
-    </section>
+        ? <div className="chip-row">{items.map((item) => <span key={item} className="chip">{item}</span>)}</div>
+        : <Link to={editHref} className="pf-empty-link">{emptyHint}</Link>}
+    </div>
   )
 }
 
@@ -145,198 +143,173 @@ function PublicProfilePage() {
 
   if (isPhone) return <ProfileView bundle={bundle} user={user} onReport={reportProfile} onBlock={toggleBlock} blocked={blocked} />
 
-  return (
-    <div className={`app-shell page-with-mobile-nav public-profile-page ${isProvider ? 'is-provider' : 'is-client'}`}>
-      <header className="app-page-header"><BackHome /></header>
+  const reviewLabel = reviewsLabel(reviewCount)
+  const ctaLabel = isProvider || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'
+  const cta = () => navigate(isProvider ? (quoteEnabled ? `/objavi?za=${userId}` : '/objavi') : listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)
+  const hasExperience = isProvider && (profile.education?.length || profile.work_experience?.length || profile.specialties?.length || profile.transportation?.length || editHref)
 
-      <main className="content-container public-profile-layout">
-        <aside className="meet-card">
-          <span className="meet-label">Upoznaj</span>
-          <div className="meet-card-top">
-            <div>
-              <h1>{profile.display_name}</h1>
+  return (
+    <div className={`app-shell page-with-mobile-nav pf-page ${isProvider ? 'is-provider' : 'is-client'}`}>
+      <main className="pf">
+        <div className="pf-back"><BackHome /></div>
+
+        <header className="pf-head">
+          <AvatarWithBadges src={profile.avatar_url} tier={tier} size={104} />
+          <div className="pf-id">
+            <h1>{profile.display_name}</h1>
+            <div className="pf-meta">
+              {profile.city && <span><MapPin size={15} /> {profile.city}</span>}
+              <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
               <LastSeen value={profile.last_seen_at} />
             </div>
-            <AvatarWithBadges src={profile.avatar_url} tier={tier} badges={badges} size={120} />
-          </div>
-
-          <div className="meet-meta">
-            {profile.city && <span><MapPin size={15} /> {profile.city}</span>}
-            <span>Član od {formatBosnianMonthYear(profile.created_at)}</span>
-          </div>
-
-          <BadgeShowcase badges={badges} isOwn={isOwnProfile} userId={userId} />
-
-          <div className="meet-stats">
-            <div className="meet-stat">
-              <strong>{reviewCount > 0 ? Number(trust.avg_rating).toFixed(1) : '—'} <Star size={18} fill="currentColor" /></strong>
-              <span>Ukupna ocjena <Info size={13} title="Prosjek svih recenzija koje su ostavili klijenti nakon posla." /></span>
-              <small>{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</small>
-            </div>
-            {isProvider ? (
-              <div className="meet-stat">
-                <strong>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}</strong>
-                <span>Uspješnost <Info size={13} title="Udio prihvaćenih poslova koji su završeni, bez otkazivanja od strane izvođača." /></span>
-                <small>{trust?.completed_jobs || 0} {trust?.completed_jobs === 1 ? 'posao' : 'poslova'}{jobsDecided === 0 ? ' — još nema završenih' : ''}</small>
+            <dl className="pf-stats">
+              <div>
+                <dt>Ocjena</dt>
+                <dd>{reviewCount > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pf-star" /></> : '—'}<small>{reviewLabel}</small></dd>
               </div>
-            ) : (
-              <div className="meet-stat">
-                <strong>{trust?.client_completion_rate == null ? '—' : `${Math.round(trust.client_completion_rate)}%`}</strong>
-                <span>Dovršeni poslovi <Info size={13} title="Udio objavljenih poslova sa prihvaćenom ponudom koji su dovršeni." /></span>
-                <small>{trust?.jobs_posted || 0} objavljenih</small>
+              {isProvider ? (
+                <div title="Udio prihvaćenih poslova koji su završeni, bez otkazivanja od strane izvođača.">
+                  <dt>Uspješnost</dt>
+                  <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}<small>{jobsDecided === 0 ? 'još nema završenih poslova' : `${trust?.completed_jobs || 0} ${trust?.completed_jobs === 1 ? 'završen posao' : 'završenih poslova'}`}</small></dd>
+                </div>
+              ) : (
+                <div title="Udio objavljenih poslova sa prihvaćenom ponudom koji su dovršeni.">
+                  <dt>Dovršeni poslovi</dt>
+                  <dd>{trust?.client_completion_rate == null ? '—' : `${Math.round(trust.client_completion_rate)}%`}<small>{trust?.jobs_posted || 0} objavljenih</small></dd>
+                </div>
+              )}
+            </dl>
+          </div>
+          <div className="pf-actions">
+            {isOwnProfile
+              ? <Link to="/account/profil" className="ghost-button">Uredi profil</Link>
+              : <button type="button" className="primary-button" onClick={cta}>{ctaLabel}</button>}
+            {!isOwnProfile && user && (
+              <div className="pf-quiet-actions">
+                <button type="button" onClick={reportProfile}><Flag size={13} /> Prijavi</button>
+                <button type="button" onClick={toggleBlock}><Ban size={13} /> {blocked ? 'Odblokiraj' : 'Blokiraj'}</button>
               </div>
             )}
           </div>
+        </header>
+        {notice && <p className="pf-notice">{notice}</p>}
 
-          {isProvider && trust && (
-            <div className="meet-trust-line" title={TIER_HINT[trust.tier]}>
-              <TrustBadge tier={trust.tier} label={trust.label} trade={trust.verified_trade} />
-              <small>{TIER_HINT[trust.tier]}</small>
-            </div>
-          )}
+        <div className="pf-body">
+          <div className="pf-main">
+            <section className="pf-section">
+              <h2>O meni</h2>
+              {profile.bio
+                ? <p className="pf-about">{profile.bio}</p>
+                : isOwnProfile ? <Link to="/account/profil" className="pf-empty-link">Dodaj kratak opis o sebi</Link> : <p className="muted-text">{firstName} još nije dodao/la opis.</p>}
+            </section>
 
-          {isProvider && profile.trades?.length > 0 && (
-            <div className="trade-list">
-              {profile.trades.map((trade) => (
-                <span className="trade-tag" key={trade}>
-                  {trade}{profile.verified_trade === trade && <CheckCircle2 size={12} />}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {!isOwnProfile && user && (
-            <>
-              <button type="button" className="meet-report" onClick={reportProfile}><Flag size={13} /> Prijavi profil</button>
-              <button type="button" className="meet-report" onClick={toggleBlock}><Ban size={13} /> {blocked ? 'Odblokiraj korisnika' : 'Blokiraj korisnika'}</button>
-            </>
-          )}
-          {notice && <small className="meet-notice">{notice}</small>}
-        </aside>
-
-        <section className="public-profile-main pp-card">
-          <section className="pp-section">
-            <h3>O meni</h3>
-            {profile.bio
-              ? <p className="pp-about">{profile.bio}</p>
-              : isOwnProfile ? <Link to="/account/profil" className="pp-empty-link">Dodaj kratak opis o sebi →</Link> : <p className="muted-text">{firstName} još nije dodao/la opis.</p>}
-          </section>
-
-          <section className="pp-section">
-            <h3>Ukupna ocjena {reviewCount > 0 ? <strong>{Number(trust.avg_rating).toFixed(1)}</strong> : <strong>—</strong>} <Star size={18} fill="currentColor" className="review-summary-star" /></h3>
-            <span className="muted-text">{reviewCount} {reviewCount === 1 ? 'recenzija' : 'recenzija'}</span>
-
-            {reviews.length === 0 ? (
-              <div className="review-empty">
-                <MessageSquareQuote size={26} />
-                <p>{firstName} još nema recenzija. Prva recenzija dolazi nakon prvog završenog posla.</p>
+            <section className="pf-section">
+              <div className="pf-section-head">
+                <h2>Recenzije</h2>
+                {reviewCount > 0 && <span className="pf-section-note"><Star size={14} fill="currentColor" className="pf-star" /> {Number(trust.avg_rating).toFixed(1)} · {reviewLabel}</span>}
               </div>
-            ) : (
-              <>
-                <div className={`review-strip ${showAllReviews ? 'expanded' : ''}`}>
-                  {visibleReviews.map((review) => (
-                    <article className="review-card" key={review.id}>
-                      <div className="review-card-head">
+              {reviews.length === 0 ? (
+                <p className="muted-text">{firstName} još nema recenzija. Prva dolazi nakon prvog završenog posla.</p>
+              ) : (
+                <>
+                  <ul className="pf-reviews">
+                    {visibleReviews.map((review) => (
+                      <li className="pf-review" key={review.id}>
                         {review.reviewer?.avatar_url
-                          ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="review-avatar" />
-                          : <div className="review-avatar review-avatar-fallback"><UserRound size={16} /></div>}
+                          ? <img loading="lazy" decoding="async" src={review.reviewer.avatar_url} alt="" className="pf-review-avatar" />
+                          : <span className="pf-review-avatar"><UserRound size={16} /></span>}
                         <div>
-                          <strong>{review.reviewer?.display_name || 'Korisnik Zadatka'}</strong>
-                          <div className="review-card-rating">
-                            <Stars value={review.rating} />
+                          <div className="pf-review-head">
+                            <strong>{review.reviewer?.display_name || 'Korisnik Zadatka'}</strong>
                             <span>{formatBosnianDate(review.created_at)}</span>
                           </div>
+                          <Stars value={review.rating} size={13} />
+                          {review.comment && <p>{review.comment}</p>}
                         </div>
-                      </div>
-                      {review.comment && <blockquote>{review.comment}</blockquote>}
-                    </article>
+                      </li>
+                    ))}
+                  </ul>
+                  {reviews.length > 3 && (
+                    <button type="button" className="pf-more" onClick={() => setShowAllReviews((open) => !open)}>
+                      {showAllReviews ? 'Prikaži manje' : `Prikaži sve recenzije (${reviews.length})`}
+                    </button>
+                  )}
+                </>
+              )}
+            </section>
+
+            {isProvider && portfolio.length > 0 && (
+              <section className="pf-section">
+                <h2>Radovi</h2>
+                <div className="pf-portfolio">
+                  {portfolio.map((item) => (
+                    <a key={item.id} href={item.media_url} target="_blank" rel="noreferrer" className="pf-portfolio-item">
+                      {item.media_type === 'video'
+                        ? <span className="pf-portfolio-video"><Play size={20} /></span>
+                        : <img src={item.media_url} alt={item.caption || ''} loading="lazy" />}
+                    </a>
                   ))}
                 </div>
-                {reviews.length > 3 && (
-                  <button type="button" className="ghost-button review-see-all" onClick={() => setShowAllReviews((open) => !open)}>
-                    {showAllReviews ? 'Prikaži manje' : `Pogledaj svih ${reviews.length} recenzija`}
-                  </button>
-                )}
-              </>
+              </section>
             )}
-          </section>
 
-          {isProvider && (
-            <>
-              <SectionList icon={GraduationCap} title="Obrazovanje" items={profile.education} emptyHint="Dodaj obrazovanje →" editHref={editHref} />
-              <SectionList icon={Briefcase} title="Radno iskustvo" items={profile.work_experience} emptyHint="Dodaj radno iskustvo →" editHref={editHref} />
-              <SectionChips title="Specijalnosti" items={profile.specialties} emptyHint="Dodaj specijalnosti →" editHref={editHref} />
-              <SectionChips title="Prevoz" items={profile.transportation} emptyHint="Označi kako dolaziš do klijenta →" editHref={editHref} />
-            </>
-          )}
+            {hasExperience && (
+              <section className="pf-section">
+                <h2>Iskustvo</h2>
+                <SectionList title="Obrazovanje" items={profile.education} emptyHint="Dodaj obrazovanje" editHref={editHref} />
+                <SectionList title="Radno iskustvo" items={profile.work_experience} emptyHint="Dodaj radno iskustvo" editHref={editHref} />
+                <SectionChips title="Specijalnosti" items={profile.specialties} emptyHint="Dodaj specijalnosti" editHref={editHref} />
+                <SectionChips title="Prevoz" items={profile.transportation} emptyHint="Označi kako dolaziš do klijenta" editHref={editHref} />
+              </section>
+            )}
 
-          {isProvider && portfolio.length > 0 && (
-            <section className="pp-section">
-              <h3>Portfolio radova</h3>
-              <div className="portfolio-grid">
-                {portfolio.map((item) => (
-                  <div className="portfolio-item" key={item.id}>
-                    {item.media_type === 'video'
-                      ? <div className="portfolio-video-thumb"><Play size={22} /></div>
-                      : <img src={item.media_url} alt={item.caption || ''} loading="lazy" />}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {listings.length > 0 && (
-            <div className="looking-card">
-              <div>
-                <h2>{firstName} traži majstora</h2>
-                <p>
-                  {firstName} traži pomoć za <strong>{listings[0].title}</strong>
-                  {listings.length > 1 && ` i još ${listings.length - 1} ${listings.length - 1 === 1 ? 'posao' : 'posla'}`}. Jesi li ti prava osoba?
-                </p>
-                <div className="looking-card-actions">
-                  <Link className="primary-button" to={`/listings/${listings[0].id}`}>Pogledaj posao</Link>
-                  {listings.length > 1 && <a className="ghost-button" href="#aktivni-oglasi">Svi oglasi ({listings.length})</a>}
-                </div>
-              </div>
-              <div className="looking-card-art"><Briefcase size={54} /></div>
-            </div>
-          )}
-
-          {listings.length > 0 && (
-            <section className="pp-section" id="aktivni-oglasi">
-              <h3>Aktivni oglasi ({listings.length})</h3>
-              <div className="profile-listing-list">
-                {listings.map((listing) => (
-                  <Link className="profile-listing-row" key={listing.id} to={`/listings/${listing.id}`}>
-                    <div>
-                      <span className="tag">{listing.category}</span>
-                      <strong>{listing.title}</strong>
-                      <small><MapPin size={12} /> {listing.location || 'Bez lokacije'}</small>
-                    </div>
-                    <b>{formatPrice(listing.price, listing.currency)}</b>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </section>
-      </main>
-
-      {!isOwnProfile && (
-        <div className="profile-cta-bar">
-          <div>
-            <strong>{isProvider ? `Želiš raditi sa ${firstName}?` : `Želiš pomoći ${firstName}?`}</strong>
-            <span>{isProvider ? (quoteEnabled ? `Opiši posao i pošalji ga samo ${firstName} da ti da ponudu.` : 'Objavi posao i zatraži ponudu.') : 'Pogledaj šta traži i pošalji ponudu.'}</span>
+            {listings.length > 0 && (
+              <section className="pf-section" id="aktivni-oglasi">
+                <div className="pf-section-head"><h2>Aktivni oglasi</h2><span className="pf-section-note">{listings.length}</span></div>
+                <ul className="pf-jobs">
+                  {listings.map((listing) => (
+                    <li key={listing.id}>
+                      <Link className="pf-job" to={`/listings/${listing.id}`}>
+                        <div>
+                          <strong>{listing.title}</strong>
+                          <small>{listing.category} · {listing.location || 'Bez lokacije'}</small>
+                        </div>
+                        <b>{formatPrice(listing.price, listing.currency)}</b>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => navigate(isProvider ? (quoteEnabled ? `/objavi?za=${userId}` : '/objavi') : listings.length === 0 ? '/objavi' : `/listings/${listings[0].id}`)}
-          >
-            {isProvider || listings.length === 0 ? 'Zatraži ponudu' : 'Pošalji ponudu'}
-          </button>
+
+          <aside className="pf-side">
+            {isProvider && trust && (
+              <section className="pf-card">
+                <h2>Povjerenje</h2>
+                <TrustBadge tier={trust.tier} label={trust.label} trade={trust.verified_trade} />
+                <p className="pf-card-note">{TIER_HINT[trust.tier]}</p>
+              </section>
+            )}
+            {(badges.length > 0 || isOwnProfile) && (
+              <section className="pf-card">
+                <h2>Značke</h2>
+                <BadgeShowcase badges={badges} isOwn={isOwnProfile} userId={userId} />
+              </section>
+            )}
+            {isProvider && profile.trades?.length > 0 && (
+              <section className="pf-card">
+                <h2>Struka</h2>
+                <div className="chip-row">
+                  {profile.trades.map((trade) => (
+                    <span className="chip" key={trade}>{trade}{profile.verified_trade === trade && <CheckCircle2 size={13} className="chip-check" aria-label="provjerena" />}</span>
+                  ))}
+                </div>
+              </section>
+            )}
+          </aside>
         </div>
-      )}
+      </main>
     </div>
   )
 }

@@ -67,6 +67,16 @@ const PRICE_PRESETS = [
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
+function PosterAvatar({ person }) {
+  if (!person) return null
+  const name = person.display_name || 'Korisnik'
+  return (
+    <span className="task-card-avatar" title={`Objavio/la ${name}`}>
+      {person.avatar_url ? <img src={person.avatar_url} alt="" loading="lazy" decoding="async" /> : name.trim().charAt(0).toUpperCase()}
+    </span>
+  )
+}
+
 function FilterMenu({ id, label, active, open, onToggle, children, width }) {
   // phones: the popover becomes a bottom sheet rendered on <body> (the sticky, blurred
   // filter bar would otherwise trap a position: fixed panel inside itself)
@@ -304,6 +314,17 @@ function SearchPage() {
     return [...pinned, ...organic.filter((item) => !pinnedIds.has(item.id))]
   }, [promotedRows, organic, decorate, filters.remoteOnly, filters.inReach, me])
 
+  // who posted each job: their photo sits on the card, like on Airtasker
+  const posterIds = useMemo(() => [...new Set(listings.map((item) => item.user_id).filter(Boolean))].sort(), [listings])
+  const postersQuery = useQuery({
+    queryKey: ['poster-cards', posterIds],
+    queryFn: () => profileService.getPublicCards(posterIds),
+    enabled: posterIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
+  })
+  const posters = useMemo(() => new Map((postersQuery.data || EMPTY).map((person) => [person.user_id, person])), [postersQuery.data])
+
   const mapFocus = useMemo(() => {
     if (!origin) return null
     const zoom = filters.radius === 0 ? 7 : filters.radius <= 10 ? 11 : filters.radius <= 25 ? 10 : filters.radius <= 50 ? 9 : 8
@@ -524,6 +545,7 @@ function SearchPage() {
                   {item.reach?.status === 'ok' && <span className="task-card-reach is-ok" title={`Oko ${Math.round(item.reach.distanceKm)} km od tebe`}><Radar size={12} /> U dosegu</span>}
                   {item.reach?.status === 'too_far' && <span className="task-card-reach is-far" title={`Oko ${Math.round(item.reach.distanceKm)} km od tebe, ponude do ${item.reach.reachKm} km`}><Radar size={12} /> Predaleko</span>}
                   {Number(item.travel_allowance) > 0 && <span className="task-card-reach is-travel"><Car size={12} /> Put {Math.round(item.travel_allowance)} KM</span>}
+                  <PosterAvatar person={posters.get(item.user_id)} />
                   <span className="task-card-save-slot" aria-hidden="true" />
                 </div>
               </Link>

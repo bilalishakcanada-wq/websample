@@ -15,7 +15,7 @@ import { useAuth } from '../context/AuthContext'
 import { useUnreadMessages } from '../hooks/useUnreadMessages'
 
 /* Phone tab bar. Five tabs, like the apps people already know: home, browse, my tasks, messages, account.
-   On a computer the same places sit in the left sidebar (SideNav). */
+   On a computer the same places sit in the top bar (SiteHeader). */
 const tabs = [
   ['/', 'Uradi', CircleCheck],
   ['/search', 'Pretraži', Search],

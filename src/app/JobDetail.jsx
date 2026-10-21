@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import JobStatusTrack from '../components/JobStatusTrack'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import { JobPaymentCard } from '../components/JobPayment'
@@ -40,7 +41,6 @@ function JobDetail(props) {
   // a provider outside this job's reach is told so up front, not invited to offer
   const reach = !isOwner && user && (myCity || myPoint) ? reachFor(listing, myCity, myPoint) : null
   const tooFar = reach?.status === 'too_far'
-  const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
   const band = expired
     ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
@@ -87,7 +87,6 @@ function JobDetail(props) {
       </header>
 
       <section className={`jd-band ${isOwner ? 'is-owner' : ''}`}>
-        {isOwner && <div className="jd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>}
         <h2>{band[0]}</h2>
         <p>{band[1]}</p>
         {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
@@ -107,6 +106,7 @@ function JobDetail(props) {
       {travelCard && <div className="jd-travel">{travelCard}</div>}
 
       <section className="jd-sheet">
+        <JobStatusTrack status={listing.status} expired={expired} hasWorker={Boolean(acceptedBid)} />
         <h1 className="jd-title">{listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}{listing.title}</h1>
         {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} compact />}
 
@@ -162,7 +162,7 @@ function JobDetail(props) {
           </div>
         )}
 
-        {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && !(simple && myBid) && (
+        {!isRemote && !isPrivate && !['assigned', 'completed', 'cancelled'].includes(listing.status) && !(simple && myBid) && (
           <div className="jd-reqs">
             <h3>Doseg ponuda</h3>
             <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} compact />

@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { usePresence } from '../hooks/usePresence'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck, UserRound, X } from 'lucide-react'
+import { ChevronDown, HelpCircle, LayoutDashboard, LogOut, Menu, MessageCircle, ShieldCheck, UserRound, Wrench, X } from 'lucide-react'
+import { useUnreadMessages } from '../hooks/useUnreadMessages'
 import { useAuth } from '../context/AuthContext'
 import { serviceCategories } from '../data/categories'
 import NotificationBell from './NotificationBell'
@@ -17,6 +18,11 @@ const NAV_LINKS = [
   ['/kako-radi', 'Kako radi'],
   ['/cijene', 'Cijene'],
 ]
+// signed in (computer): the work links, like Airtasker's top bar (Browse tasks, My tasks)
+const USER_NAV_LINKS = [
+  ['/search', 'Pretraži poslove'],
+  ['/moji-poslovi', 'Moji poslovi'],
+]
 
 const firstNameOf = (user) => (user?.user_metadata?.full_name || user?.email || '').trim().split(/[\s@]+/)[0] || 'Profil'
 
@@ -28,6 +34,9 @@ function SiteHeader() {
   const [menuPinned, setMenuPinned] = useState(false)
   const [navMode, setNavMode] = useState('client')
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef(null)
+  const unreadMessages = useUnreadMessages(user?.id)
   useBackToClose(mobileOpen, () => setMobileOpen(false))
   const drawer = usePresence(mobileOpen, 180)
   const [scrolled, setScrolled] = useState(false)
@@ -41,7 +50,17 @@ function SiteHeader() {
     setCategoriesOpen(false)
     setMenuPinned(false)
     setMobileOpen(false)
+    setAccountOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (!accountOpen) return undefined
+    const onPointer = (event) => { if (!accountRef.current?.contains(event.target)) setAccountOpen(false) }
+    const onKey = (event) => event.key === 'Escape' && setAccountOpen(false)
+    document.addEventListener('pointerdown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('pointerdown', onPointer); document.removeEventListener('keydown', onKey) }
+  }, [accountOpen])
 
   // Subtle elevation once the page is scrolled.
   useEffect(() => {
@@ -77,7 +96,7 @@ function SiteHeader() {
 
   return (
     <>
-      <header ref={headerRef} className={`site-header ${scrolled ? 'scrolled' : ''}`}>
+      <header ref={headerRef} className={`site-header ${scrolled ? 'scrolled' : ''} ${user ? 'is-signed-in' : ''}`}>
         <div className="site-header-inner">
           <Link to="/" className="site-logo" aria-label="Zadatak početna">
             <BrandMark size={34} className="site-logo-mark" />
@@ -131,7 +150,7 @@ function SiteHeader() {
               )}
             </div>
 
-            {NAV_LINKS.map(([to, label]) => (
+            {(user ? USER_NAV_LINKS : NAV_LINKS).map(([to, label]) => (
               <NavLink key={to} to={to} className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}>{label}</NavLink>
             ))}
           </nav>
@@ -139,12 +158,28 @@ function SiteHeader() {
           <div className="site-header-right">
             {user ? (
               <>
-                <NavLink to="/messages" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><MessageCircle size={16} /> Poruke</NavLink>
-                <NavLink to="/account" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}><LayoutDashboard size={16} /> Moj nalog</NavLink>
-                {isAdmin && <NavLink to="/admin" className={({ isActive }) => `site-nav-link site-nav-admin ${isActive ? 'active' : ''}`}><ShieldCheck size={16} /> Admin</NavLink>}
-                {isModerator && <NavLink to="/mod" className={({ isActive }) => `site-nav-link site-nav-admin ${isActive ? 'active' : ''}`}><ShieldCheck size={16} /> Mod</NavLink>}
+                <NavLink to="/pomoc" className={({ isActive }) => `site-nav-link ${isActive ? 'active' : ''}`}>Pomoć</NavLink>
                 <NotificationBell />
-                <Link to="/account/profil" className="site-user-chip"><span className="site-user-avatar"><UserRound size={15} /></span>{firstNameOf(user)}</Link>
+                <NavLink to="/messages" className={({ isActive }) => `site-nav-link site-nav-messages ${isActive ? 'active' : ''}`}>
+                  Poruke{unreadMessages > 0 && <b className="site-nav-count" aria-label={`${unreadMessages} nepročitanih`}>{unreadMessages > 9 ? '9+' : unreadMessages}</b>}
+                </NavLink>
+                <div className="site-account" ref={accountRef}>
+                  <button type="button" className="site-user-chip" aria-haspopup="menu" aria-expanded={accountOpen} onClick={() => setAccountOpen((open) => !open)}>
+                    <span className="site-user-avatar"><UserRound size={15} /></span>{firstNameOf(user)} <ChevronDown size={14} />
+                  </button>
+                  {accountOpen && (
+                    <div className="site-account-menu" role="menu">
+                      <Link role="menuitem" to="/account"><LayoutDashboard size={16} /> Moj nalog</Link>
+                      <Link role="menuitem" to="/account/profil"><UserRound size={16} /> Moj profil</Link>
+                      <Link role="menuitem" to="/zaradi"><Wrench size={16} /> Postani izvođač</Link>
+                      <Link role="menuitem" to="/pomoc"><HelpCircle size={16} /> Pomoć</Link>
+                      {isAdmin && <Link role="menuitem" to="/admin"><ShieldCheck size={16} /> Admin panel</Link>}
+                      {isModerator && <Link role="menuitem" to="/mod"><ShieldCheck size={16} /> Mod panel</Link>}
+                      <hr />
+                      <button role="menuitem" type="button" onClick={async () => { setAccountOpen(false); await logout(); navigate('/') }}><LogOut size={16} /> Odjava</button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>

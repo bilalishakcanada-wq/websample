@@ -5,7 +5,7 @@ import { useBackToClose } from '../hooks/useBackToClose'
 import { useGoBack } from '../hooks/useGoBack'
 import { usePresence } from '../hooks/usePresence'
 import { useCategoryPrice } from '../hooks/useCategoryPrice'
-import { ArrowLeft, Bookmark, CalendarDays, Car, Copy, History, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, Users, Wallet, X, XCircle } from 'lucide-react'
+import { ArrowLeft, Bookmark, CalendarDays, Car, Copy, History, CheckCircle2, ChevronLeft, ChevronRight, Flag, Images, Lock, MapPin, MessageCircle, Pencil, ShieldCheck, Send, Share2, Sparkles, Star, Tag, UserRound, X, XCircle } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListingCard from '../components/ListingCard'
 import { bidService } from '../services/bidService'
@@ -15,7 +15,7 @@ import { profileService } from '../services/profileService'
 import { reviewService } from '../services/reviewService'
 import { matchService } from '../services/matchService'
 import { useAuth } from '../context/AuthContext'
-import { formatBosnianDate } from '../utils/dateFormat'
+import { formatBosnianDate, timeAgo } from '../utils/dateFormat'
 import { contactInfoMessage, findProhibitedTerm, scanContactInfo } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
@@ -49,6 +49,7 @@ import { QuoteRequestCard } from '../components/QuoteRequest'
 import { useMyCity } from '../hooks/useMyCity'
 import { reachFor, travelLabel } from '../utils/reach'
 import { TravelRequestSheet, TravelRequestStatus, TravelRequestsOwner, travelCta, useTravelRequests } from '../components/TravelRequest'
+import JobStatusTrack from '../components/JobStatusTrack'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { activePromotion } from '../services/promotionService'
@@ -57,22 +58,6 @@ const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
 /** Cover photo + thumbnail strip; a soft category placeholder when the job has no photos. */
-/** Otvoren → Dodijeljen → Završen across the top of the job, like Airtasker's OPEN / ASSIGNED / COMPLETED. */
-function StatusTrack({ status, expired, hasWorker }) {
-  if (status === 'cancelled' || expired) {
-    return <ol className="job-status-track"><li className="is-current is-stopped">{expired ? 'Rok prošao' : 'Otkazan'}</li></ol>
-  }
-  const step = status === 'completed' ? 2 : (status === 'assigned' || hasWorker) ? 1 : 0
-  const steps = ['Otvoren', 'Dodijeljen', 'Završen']
-  return (
-    <ol className="job-status-track" aria-label="Stanje posla">
-      {steps.map((label, index) => (
-        <li key={label} className={`${index < step ? 'is-done' : ''} ${index === step ? `is-current ${index === 1 ? 'is-assigned' : ''}` : ''}`} aria-current={index === step ? 'step' : undefined}>{label}</li>
-      ))}
-    </ol>
-  )
-}
-
 function Gallery({ images, title, onOpen }) {
   const [active, setActive] = useState(0)
   // no photos: the title leads the page (a grey "no photos" box only pushed the job below the fold)
@@ -614,7 +599,7 @@ function ListingDetailPage() {
             <Gallery images={images} title={listing.title} onOpen={(index) => setLightbox(index)} />
 
             <header className="job-head">
-              <StatusTrack status={listing.status} expired={expired} hasWorker={Boolean(acceptedBid)} />
+              <JobStatusTrack status={listing.status} expired={expired} hasWorker={Boolean(acceptedBid)} />
               <div className="job-chips">
                 {listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}
                 <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
@@ -623,18 +608,34 @@ function ListingDetailPage() {
                 {listing.status === 'published' && !acceptedBid && isPrivate && <span className="pill pill-soft"><Lock size={12} /> Privatni zahtjev</span>}
               </div>
               <h1>{listing.title}</h1>
-              <div className="job-meta">
-                <span><MapPin size={15} /> {listing.location || 'Lokacija nije navedena'}</span>
-                <span><CalendarDays size={15} /> {when}</span>
-                <span><Users size={15} /> {bids.length} {bids.length === 1 ? 'ponuda' : 'ponuda'}</span>
-                <span className="job-meta-date">Objavljeno {formatDate(listing.created_at)}</span>
-              </div>
+              {/* who, where, when: one row each, like Airtasker's POSTED BY / LOCATION / TO BE DONE ON */}
+              <dl className="job-who-where">
+                <Link to={`/korisnik/${listing.user_id}`} className="job-who-row">
+                  {poster?.avatar_url
+                    ? <img loading="lazy" decoding="async" src={poster.avatar_url} alt="" className="job-who-avatar" />
+                    : <span className="job-who-avatar"><UserRound size={18} /></span>}
+                  <div><dt>Objavio/la</dt><dd>{poster?.display_name || 'Korisnik Zadatka'} <small>{timeAgo(listing.created_at)}</small></dd></div>
+                </Link>
+                <div className="job-who-row">
+                  <span className="job-who-icon"><MapPin size={18} /></span>
+                  <div><dt>Lokacija</dt><dd>{isRemote ? 'Online / na daljinu' : listing.location || 'Lokacija nije navedena'}</dd></div>
+                </div>
+                <div className="job-who-row">
+                  <span className="job-who-icon"><CalendarDays size={18} /></span>
+                  <div><dt>Kada</dt><dd>{when}</dd></div>
+                </div>
+              </dl>
             </header>
 
             <section className="job-card">
-              <h2>Opis</h2>
+              <h2>Detalji</h2>
               <p className="job-description">{descriptionBody?.trim() || 'Vlasnik oglasa nije dodao detaljan opis.'}</p>
               {tags.length > 0 && <div className="tag-list job-tags">{tags.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>}
+              <div className="job-facts-line">
+                <span><Tag size={15} /> {listing.category || 'Ostalo'}</span>
+                {travelLabel(listing) && <span><Car size={15} /> Put: {travelLabel(listing)}</span>}
+              </div>
+              <ExactAddress listing={listing} isOwner={isOwner} acceptedForMe={Boolean(user && acceptedBid?.bidder_id === user.id)} />
             </section>
 
             {expired && (
@@ -666,7 +667,7 @@ function ListingDetailPage() {
 
             {travelCard}
 
-            {!isRemote && !isPrivate && !['completed', 'cancelled'].includes(listing.status) && (
+            {!isRemote && !isPrivate && !['assigned', 'completed', 'cancelled'].includes(listing.status) && (
               <section className="job-card">
                 <h2>Doseg ponuda</h2>
                 <ReachRadar listing={listing} myCity={myCity} myPoint={myPoint} isOwner={isOwner} signedIn={Boolean(user)} />
@@ -681,17 +682,6 @@ function ListingDetailPage() {
               </>
             )}
 
-            <section className="job-card">
-              <h2>Detalji</h2>
-              <div className="job-facts">
-                <div><span className="job-fact-icon"><CalendarDays size={17} /></span><div><small>Kada</small><strong>{when}</strong></div></div>
-                <div><span className="job-fact-icon"><MapPin size={17} /></span><div><small>Gdje</small><strong>{isRemote ? 'Online / na daljinu' : listing.location || '—'}</strong></div></div>
-                <div><span className="job-fact-icon"><Tag size={17} /></span><div><small>Kategorija</small><strong>{listing.category || 'Ostalo'}</strong></div></div>
-                <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
-                {travelLabel(listing) && <div><span className="job-fact-icon"><Car size={17} /></span><div><small>Put</small><strong>{travelLabel(listing)}</strong></div></div>}
-              </div>
-              <ExactAddress listing={listing} isOwner={isOwner} acceptedForMe={Boolean(user && acceptedBid?.bidder_id === user.id)} />
-            </section>
 
             <section className="job-card">
               <div className="section-heading"><h2>Ponude</h2><span className="muted-text">{bids.length}</span></div>
@@ -816,7 +806,7 @@ function ListingDetailPage() {
 
           <aside className="job-side">
             <div className="job-offer-card">
-              <span>Okvirni budžet</span>
+              <span>Budžet za posao</span>
               <strong>{formatPrice(listing.price, listing.currency)}</strong>
               {!isOwner && !myBid && listing.status === 'published' && <button type="button" className={simpleMode ? 'simple-apply-btn' : 'primary-button full-width'} onClick={openBidSheet}><Send size={simpleMode ? 24 : 18} /> {offerLabel}</button>}
               {canRebid && (
@@ -858,16 +848,6 @@ function ListingDetailPage() {
 
             {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} />}
 
-            <Link to={`/korisnik/${listing.user_id}`} className="job-poster">
-              {poster?.avatar_url
-                ? <img loading="lazy" decoding="async" src={poster.avatar_url} alt="" className="poster-avatar poster-avatar-photo" />
-                : <div className="poster-avatar"><UserRound size={22} /></div>}
-              <div>
-                <small>Objavio</small>
-                <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
-                <span>{poster?.city || 'Bosna i Hercegovina'}{poster?.created_at ? ` · član od ${new Date(poster.created_at).getFullYear()}.` : ''}</span>
-              </div>
-            </Link>
           </aside>
         </div>
       </main>

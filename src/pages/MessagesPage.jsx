@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { useAuth } from '../context/AuthContext'
@@ -352,7 +352,7 @@ function MessagesPage() {
             {!active ? (
               <div className="chat-welcome">
                 <div className="chat-welcome-empty">
-                  <div className="chat-welcome-art"><MessagesSquare size={32} /></div>
+                  <MailMascot className="chat-welcome-art" />
                   <strong>Odaberite razgovor</strong>
                   <span>Ovdje se otvara prepiska sa klijentom ili izvođačem, zajedno sa poslom o kojem pričate.</span>
                 </div>

@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { desktopNotify, notificationService, playPing } from '../services/notificationService'
 import { formatBosnianDate } from '../utils/dateFormat'
-import { notificationCategory, notificationIcon } from '../utils/notificationCategory'
+import { notificationCategory, notificationIcon, notificationTarget } from '../utils/notificationCategory'
 import './NotificationCenter.css'
 import { currentSubscription } from '../utils/push'
 import { toast } from './Toaster'
@@ -28,18 +28,23 @@ function NotificationBell() {
       // the header mounts two bells (desktop + phone): only one of them announces
       if (announced.has(row.id)) return
       announced.add(row.id)
-      // app in front: a toast (unless the user is already in the chat); in the
-      // background: the push service worker notifies, or the browser API if push is off
+      // app in front: a toast (unless the user is already in the chat), with a ping only while push is on;
+      // in the background: the push service worker notifies, or the browser API when this device has no
+      // push subscription. With "Push obavijesti" off nothing pops up or sounds: it only waits in the bell.
+      const pushOn = await notificationService.pushEnabled(user.id)
       if (document.visibilityState === 'visible') {
         if (!(row.type === 'message' && window.location.pathname.includes('/messages'))) {
-          playPing()
+          if (pushOn) playPing()
           toast(row.title, { kind: ['offer_accepted', 'wallet', 'task_live', 'review', 'welcome'].includes(row.type) ? 'success' : 'info' })
         }
-      } else if (!(await currentSubscription())) {
+      } else if (pushOn && !(await currentSubscription())) {
         desktopNotify(row.title, row.message || '')
       }
     })
-    return () => { active = false; unsubscribe() }
+    // read on another screen (the Obavijesti page, the other bell): the count here follows
+    const refresh = () => notificationService.listMine().then((rows) => active && setItems(rows))
+    window.addEventListener('zadatak:notifications-read', refresh)
+    return () => { active = false; unsubscribe(); window.removeEventListener('zadatak:notifications-read', refresh) }
   }, [user])
 
   useEffect(() => {
@@ -58,12 +63,7 @@ function NotificationBell() {
       await notificationService.markRead([item.id])
       setItems((current) => current.map((row) => (row.id === item.id ? { ...row, read_at: new Date().toISOString() } : row)))
     }
-    if (item.link) navigate(item.link)
-    else if (item.type === 'support' || item.type === 'moderation') navigate(isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : '/account/obavijesti')
-    else if (item.type === 'support_reply') navigate('/pomoc?chat=1')
-    else if (item.type === 'wallet') navigate('/account/novcanik')
-    else if (item.type === 'job') navigate('/account/placanja')
-    else navigate('/account/obavijesti')
+    navigate(notificationTarget(item, isAdmin) || '/account/obavijesti')
   }
 
   const markAll = async () => {

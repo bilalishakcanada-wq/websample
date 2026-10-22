@@ -111,3 +111,8 @@ export async function disableNativePush({ keepDevice = false } = {}) {
   write(TOKEN, null)
   try { await plugin()?.unregister() } catch { /* ignore */ }
 }
+
+/** Removes Zadatak's notifications from the phone's tray (the launcher dot goes with them). */
+export async function clearNativeDelivered() {
+  try { await plugin()?.removeAllDeliveredNotifications() } catch { /* ignore */ }
+}

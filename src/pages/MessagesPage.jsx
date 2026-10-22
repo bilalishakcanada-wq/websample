@@ -2,6 +2,7 @@ import { PrivateImage } from '../components/PrivateFile'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
+import CoffeeTalkArt from '../components/CoffeeTalkArt'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
@@ -352,7 +353,7 @@ function MessagesPage() {
             {!active ? (
               <div className="chat-welcome">
                 <div className="chat-welcome-empty">
-                  <MailMascot className="chat-welcome-art" />
+                  <CoffeeTalkArt className="chat-welcome-art" />
                   <strong>Odaberite razgovor</strong>
                   <span>Ovdje se otvara prepiska sa klijentom ili izvođačem, zajedno sa poslom o kojem pričate.</span>
                 </div>

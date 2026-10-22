@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
+import CoffeeTalkArt from '../components/CoffeeTalkArt'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
@@ -57,7 +58,7 @@ function Chat(props) {
         )}
         {!loading && !(error && inbox.length === 0) && visible.length === 0 && (
           <div className="ap-empty ap-empty-art">
-            <MailMascot />
+            {inbox.length === 0 ? <CoffeeTalkArt className="ch-empty-art" /> : <MailMascot />}
             <strong>{inbox.length === 0 ? 'Još nemaš poruka' : 'Nema razgovora u ovom filteru'}</strong>
             <span>{inbox.length === 0 ? 'Razgovor se otvara čim neka ponuda bude prihvaćena.' : 'Promijeni filter ili pretragu.'}</span>
             {inbox.length === 0 && <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>}

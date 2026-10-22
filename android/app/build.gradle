@@ -4,7 +4,7 @@ android {
     namespace = "ba.poso.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "ba.poso.app"
+        applicationId "ba.zadatak.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // CI stamps both from the run number (Google Play needs a higher versionCode on every upload)

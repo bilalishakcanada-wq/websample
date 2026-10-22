@@ -45,7 +45,7 @@
 .mt-state.s-off { color: var(--text-soft); }
 .mt-card-wrap .mt-card-foot { padding-right: 76px; }
 .mt .ap-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.mt .ap-tabs button { font-size: 0.84rem; line-height: 1.15; padding: 4px 6px; }
+.mt .ap-tabs button { font-size: 0.84rem; line-height: 1.15; padding: 4px 4px; white-space: nowrap; }
 
 /* Doseg ponuda (reach radar) */
 .reach { display: flex; gap: 18px; align-items: center; }

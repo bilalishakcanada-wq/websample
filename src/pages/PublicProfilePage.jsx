@@ -18,7 +18,7 @@ import { promptDialog } from '../utils/dialog'
 import { useBlocks } from '../hooks/useBlocks'
 import { toast } from '../components/Toaster'
 
-const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
+const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR')} ${currency === 'BAM' ? 'KM' : currency}`
 
 const firstNameOf = (displayName) => (displayName || '').trim().split(/\s+/)[0] || 'korisnik'
 

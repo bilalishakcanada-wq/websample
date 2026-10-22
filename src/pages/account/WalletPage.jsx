@@ -122,7 +122,7 @@ function WalletPage() {
 
       <div className="wallet-info">
         <Info size={16} />
-        <span>Ovo je tvoj novac na Zadatku. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Na račun se isplaćuje zarada od poslova. <Link to="/nivoi">Kako rade naknade →</Link></span>
+        <span>Ovo je tvoj novac na Zadatku. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (umanjena za naknadu) sjeda ovdje. Na račun se isplaćuje zarada od poslova. <Link to="/nivoi">Kako rade naknade →</Link></span>
       </div>
 
       {notice && <div className="form-success">{notice}</div>}

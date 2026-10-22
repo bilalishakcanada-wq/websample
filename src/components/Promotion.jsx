@@ -8,9 +8,10 @@ import { confirmDialog } from '../utils/dialog'
 import { toast } from './Toaster'
 import ActionError from './ActionError'
 import './Promotion.css'
+import { formatBosnianDate } from '../utils/dateFormat'
 
-const km = (value) => `${Number(value || 0).toLocaleString('bs-BA', { maximumFractionDigits: 2 })} KM`
-const untilLabel = (iso) => new Date(iso).toLocaleDateString('bs-BA', { day: 'numeric', month: 'long' })
+const km = (value) => `${Number(value || 0).toLocaleString('hr-HR', { maximumFractionDigits: 2 })} KM`
+const untilLabel = (iso) => formatBosnianDate(iso)
 
 const TIER_COPY = {
   standard: { title: 'Standardni', hint: 'Redovno mjesto u pretrazi' },

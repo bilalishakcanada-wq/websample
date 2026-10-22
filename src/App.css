@@ -681,6 +681,14 @@ button {
   display: block;
 }
 
+.job-card-icon-tile {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft, #e8efff);
+  color: var(--primary, #1f5fff);
+}
+
 .job-card-body {
   padding: 16px 18px 18px;
 }
@@ -876,11 +884,6 @@ button {
   color: #0f7a56 !important;
 }
 
-.provider-demo-note {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 0.82rem;
-}
 
 .provider-rate {
   margin-bottom: 16px;
@@ -3457,6 +3460,25 @@ button.back-home-link {
   .support-chat {
     right: 14px;
     bottom: 84px;
+  }
+  /* the round button covered the arrows of questions and form fields; the Help page opens the chat from its top */
+  .support-chat:not(.is-open) .support-chat-toggle { display: none; }
+}
+
+.help-hero-chat { display: none; }
+@media (max-width: 640px) {
+  .help-hero-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    font-weight: 700;
   }
 }
 
@@ -10542,8 +10564,9 @@ body:has(.profile-cta-bar) .support-chat {
   width: 100%;
   padding: 0.95rem 1rem;
   border-radius: 14px;
-  border: 1px solid transparent;
-  background: var(--surface-soft);
+  /* a white field with a visible edge: grey-on-grey fields looked like plain text, not something to fill in */
+  border: 1px solid #cfdaf0;
+  background: var(--surface);
   color: var(--text);
   font: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -10896,6 +10919,7 @@ body:has(.profile-cta-bar) .support-chat {
 .tier-table {
   display: grid;
   gap: 18px;
+  margin-bottom: 18px;
 }
 
 .tier-table-row {
@@ -12429,6 +12453,24 @@ button { touch-action: manipulation; }
   .info-header .breadcrumbs { margin-top: 0; }
   .info-page .reveal { opacity: 1; transform: none; transition: none; }
   .info-page .reveal-stagger > * { opacity: 1; transform: none; transition: none; }
+}
+/* phones: info pages used cards inside cards, so the text ran in a narrow column down 12 screens */
+@media (max-width: 640px) {
+  .info-section { margin-top: 22px; padding: 20px 16px; border-radius: 20px; }
+  .info-section-head { margin-bottom: 16px; }
+  .steps-timeline { gap: 14px; margin-bottom: 18px; }
+  .steps-timeline li { gap: 12px; }
+  .steps-timeline .step-index { width: 28px; height: 28px; font-size: 0.85rem; }
+  .steps-timeline li > div { padding: 2px 0 0; background: none; }
+  .steps-timeline li > div > svg { display: none; }
+  .info-grid { gap: 10px; }
+  .info-card { padding: 14px 16px; }
+  .tier-table-row { gap: 12px; }
+  .tier-table-row > svg { width: 34px; height: 42px; flex-shrink: 0; }
+  .tier-table-row b { white-space: nowrap; font-size: 0.9rem; }
+  .tier-table-row span { font-size: 0.84rem; }
+  .category-strip { gap: 10px; }
+  .category-strip .category-tile { aspect-ratio: 16 / 10; }
 }
 @media (max-width: 768px) {
   .breadcrumbs { flex-wrap: wrap; }

@@ -35,7 +35,7 @@ const QUICK_IDEAS = [
 ]
 const TRENDING = ['gardening', 'painting', 'cleaning', 'moving-transport', 'handyman', 'furniture', 'it-support', 'delivery']
 const BID_STATUS = { pending: ['Čeka odgovor', 'open'], accepted: ['Prihvaćena', 'done'], rejected: ['Odbijena', 'off'], withdrawn: ['Povučena', 'off'] }
-const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
+const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR')} KM`)
 
 const greeting = () => {
   const hour = new Date().getHours()
@@ -73,7 +73,7 @@ function MyOpenJobs({ userId }) {
           const offers = job.bids?.[0]?.count || 0
           return (
             <Link key={job.id} to={`/listings/${job.id}`} className="mt-card mt-card-compact" onClick={() => haptic('light')}>
-              <div className="mt-card-head"><strong>{job.title}</strong><em>{job.price == null ? 'Po dogovoru' : `${Number(job.price).toLocaleString('bs-BA')} KM`}</em></div>
+              <div className="mt-card-head"><strong>{job.title}</strong><em>{job.price == null ? 'Po dogovoru' : `${Number(job.price).toLocaleString('hr-HR')} KM`}</em></div>
               <div className="mt-card-foot">
                 <b className={`mt-state s-${tone}`}>{label}</b>
                 <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>

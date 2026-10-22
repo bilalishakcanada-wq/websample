@@ -1,14 +1,8 @@
 import { Clock3, MapPin, Tag } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { mockServiceCategories } from '../data/mockData'
-import { withBase } from '../utils/paths'
+import { categoryPhoto } from '../utils/categoryPhoto'
 
 const isRealListingId = (id) => /^[0-9a-f-]{36}$/i.test(String(id))
-
-const categoryImage = (category) => {
-  const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.webp')
-}
 
 function ListingCard({ listing, onSave, saved = false }) {
   const navigate = useNavigate()
@@ -19,7 +13,7 @@ function ListingCard({ listing, onSave, saved = false }) {
     navigate('/register')
   }
   const photo = [...(listing.listing_images || [])].sort((a, b) => a.position - b.position)[0]?.url
-  const image = photo || listing.image || categoryImage(listing.category)
+  const image = photo || listing.image || categoryPhoto(listing.category)
 
   return (
     <article className="listing-card">

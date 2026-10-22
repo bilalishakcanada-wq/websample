@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Banknote, ChevronDown, MessageCircle, ShieldCheck, Star } from 'lucide-react'
 import { contactService } from '../services/contactService'
@@ -9,8 +9,8 @@ const formatKM = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\
 
 const FAQS = [
   { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Zadatku je traži.' },
-  { q: 'Kako se naplaćujem?', a: 'Dogovaraš cijenu direktno sa klijentom kroz ponudu (bid). Naplata unutar platforme dolazi uskoro — trenutno se plaćanje dogovara sa klijentom.' },
-  { q: 'Da li moram platiti da se pridružim?', a: 'Ne. Registracija i pregledanje poslova su potpuno besplatni. Plan pretplate je opcionalan za dodatnu vidljivost.' },
+  { q: 'Kako se naplaćujem?', a: 'Cijenu predlažeš u ponudi. Kad je klijent prihvati, iznos se rezerviše na Zadatku; kad posao završiš i klijent oslobodi uplatu, zarada sjeda na tvoj Balans, a odatle je isplaćuješ na račun. Naknada platforme je 9–15% od plaćenog posla, zavisno od nivoa.' },
+  { q: 'Da li moram platiti da se pridružim?', a: 'Ne. Registracija, pregledanje poslova i slanje ponuda su besplatni. Nema pretplate; plaća se samo naknada od plaćenog posla.' },
   { q: 'Kako dobijam obavještenja o novim poslovima?', a: 'Aplikaciju možeš instalirati na telefon (Zadatak radi kao PWA) i dobijati obavještenja čim se objavi posao u tvojoj kategoriji.' },
   { q: 'Kako izgraditi povjerenje kod klijenata?', a: 'Dodaj portfolio sa slikama prošlih radova, zatraži verifikaciju, i sakupljaj recenzije nakon svakog posla — sve se prikazuje na tvom javnom profilu.' },
 ]
@@ -33,12 +33,6 @@ function EarnMoneyPage() {
     return () => { active = false }
   }, [])
 
-  // platform-wide average job price, weighted by how many priced listings each category has
-  const avgPrice = useMemo(() => {
-    const totals = stats.reduce((acc, row) => ({ sum: acc.sum + Number(row.avg_price) * Number(row.priced_count), n: acc.n + Number(row.priced_count) }), { sum: 0, n: 0 })
-    return totals.n ? Math.round(totals.sum / totals.n) : 0
-  }, [stats])
-  const monthlyPotential = avgPrice ? Math.round((avgPrice * 20) / 100) * 100 : 0
   const selectedAvg = Math.round(Number(stats.find((row) => row.category === calcCategory)?.avg_price || 0))
 
   useRevealOnScroll()
@@ -48,17 +42,11 @@ function EarnMoneyPage() {
       <section className="earn-stage">
         <div className="earn-stage-copy">
           <h1>Budi svoj šef</h1>
-          <p className="earn-stage-sub">
-            {monthlyPotential ? <>Zaradi do <strong>{formatKM(monthlyPotential)} KM</strong> mjesečno na Zadatku*</> : <>Ti biraš poslove, termine i cijenu.</>}
-          </p>
+          <p className="earn-stage-sub">Ti biraš poslove, termine i cijenu.</p>
           <button type="button" className="earn-stage-cta" onClick={() => navigate('/register')}>
             Pridruži se Zadatku <ArrowRight size={18} />
           </button>
-          <small>
-            {monthlyPotential
-              ? `*Primjer: 20 poslova mjesečno po prosječnoj cijeni oglasa na platformi (${avgPrice} KM). Zarada zavisi od tebe.`
-              : 'Besplatna registracija, bez provizije na dogovorenu cijenu.'}
-          </small>
+          <small>Registracija i ponude su besplatne. Naknada 9–15% samo od plaćenog posla.</small>
         </div>
         <div className="earn-stage-photo earn-stage-art">
           <EarnArt />
@@ -73,7 +61,7 @@ function EarnMoneyPage() {
             <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Zadatku — ne izmišljene brojke.</p>
             <ul className="check-list">
               <li>Ti šalješ ponudu sa svojom cijenom — klijent bira.</li>
-              <li>Nema provizije na dogovorenu cijenu.</li>
+              <li>Naknada 9–15% samo od plaćenog posla, nikad za ponude.</li>
               <li>Kontakt i dogovor idu kroz poruke tek kad klijent prihvati ponudu.</li>
             </ul>
           </div>
@@ -89,7 +77,7 @@ function EarnMoneyPage() {
               <input type="range" min="1" max="10" value={jobsPerWeek} onChange={(event) => setJobsPerWeek(Number(event.target.value))} />
             </label>
             <div className="earn-calc-result">
-              <span>Procjena mjesečno</span>
+              <span>Procjena mjesečno, prije naknade</span>
               <strong>{selectedAvg ? formatKM(Math.round(selectedAvg * jobsPerWeek * 4.3 / 10) * 10) : '—'} KM</strong>
               <small>{selectedAvg ? `${jobsPerWeek} × ~${selectedAvg} KM × 4,3 sedmice` : 'Još nema oglasa u ovoj kategoriji'}</small>
             </div>

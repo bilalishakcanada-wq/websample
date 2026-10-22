@@ -41,7 +41,7 @@ const spreadPoints = (listings) => {
   return points
 }
 
-const priceText = (item) => (item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('bs-BA')} KM`)
+const priceText = (item) => (item.price == null ? 'Po dogovoru' : `${Number(item.price).toLocaleString('hr-HR')} KM`)
 
 const toGeoJSON = (listings, activeId = null, points = spreadPoints(listings)) => ({
   type: 'FeatureCollection',

@@ -9,7 +9,7 @@ import { useGoBack } from '../hooks/useGoBack'
 import { useQuoteRequestsEnabled } from '../hooks/queries'
 import './app.css'
 
-const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
+const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('hr-HR')} ${currency === 'BAM' ? 'KM' : currency}`)
 const firstNameOf = (name) => (name || '').trim().split(/\s+/)[0] || 'korisnik'
 
 const Stars = ({ value, size = 15 }) => {

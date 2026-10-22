@@ -3,7 +3,7 @@ import { CalendarDays, CheckCircle2, MapPin } from 'lucide-react'
 import ActionError from './ActionError'
 import './SimpleOfferSheet.css'
 
-const km = (value) => `${Number(value).toLocaleString('bs-BA')} KM`
+const km = (value) => `${Number(value).toLocaleString('hr-HR')} KM`
 
 /** Poruka uz prijavu, napisana umjesto majstora (bez brojeva telefona i kontakta, da prođe Pravilo #1). */
 export function simpleOfferMessage(amount) {

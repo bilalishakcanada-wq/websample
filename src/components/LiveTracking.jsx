@@ -18,7 +18,7 @@ const CITY_SPEED = 30 / 3.6             // m/s when the phone doesn't report spe
 const ASK_AGAIN_MS = 2 * 60 * 1000      // same cooldown as request_live_location (booking/06)
 const SHARE_MINUTES = 120                // one sharing lasts 2 h, then stops by itself (sd's choice)
 
-const daleko = (m) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toLocaleString('bs-BA', { maximumFractionDigits: 1 })} km`)
+const daleko = (m) => (m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toLocaleString('hr-HR', { maximumFractionDigits: 1 })} km`)
 const ostalo = (ms) => {
   const min = Math.max(1, Math.round(ms / 60000))
   return min >= 60 ? `još ${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ''}` : `još ${min} min`

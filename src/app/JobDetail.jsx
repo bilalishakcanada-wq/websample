@@ -41,7 +41,6 @@ function JobDetail(props) {
   const open = listing.status === 'published' && !acceptedBid
   // how far the job is from the viewer: information only, anyone may offer (like Airtasker)
   const away = isOwner ? null : distanceLabel(distanceToJob(listing, myCity, myPoint))
-  const progress = listing.status === 'completed' ? 100 : listing.status === 'cancelled' ? 100 : acceptedBid ? 66 : bids.length > 0 ? 33 : 12
 
   const band = expired
     ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
@@ -87,7 +86,6 @@ function JobDetail(props) {
       </header>
 
       <section className={`jd-band ${isOwner ? 'is-owner' : ''}`}>
-        {isOwner && <div className="jd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>}
         {step ? <NextStep phone step={step} onAction={onStep} busy={outcomeBusy} /> : <><h2>{band[0]}</h2><p>{band[1]}</p></>}
         {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
         {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}

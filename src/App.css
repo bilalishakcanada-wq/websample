@@ -9662,8 +9662,8 @@ body:has(.profile-cta-bar) .support-chat {
 .chat-unread-total {
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   font-size: 0.76rem;
   font-weight: 800;
 }

@@ -1,7 +1,12 @@
 import { AlertTriangle, Check, FileCheck2, Megaphone, UserCheck, Wallet, Wrench } from 'lucide-react'
 import { workStateOf } from '../utils/jobStep'
 
-const kratko = (value) => (value ? new Date(value).toLocaleDateString('bs-BA', { day: 'numeric', month: 'short' }) : '')
+const MJESECI = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
+const kratko = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  return `${date.getDate()}. ${MJESECI[date.getMonth()]}`
+}
 const km = (value) => `${Number(value || 0).toLocaleString('de-DE', { maximumFractionDigits: 2 })} KM`
 const ponude = (count) => `${count} ${count === 1 ? 'ponuda' : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14) ? 'ponude' : 'ponuda'}`
 

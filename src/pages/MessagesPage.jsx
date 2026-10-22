@@ -20,6 +20,7 @@ import Chat from '../app/Chat'
 import { SkeletonRows } from '../components/Skeleton'
 import { promptDialog } from '../utils/dialog'
 import { useBlocks } from '../hooks/useBlocks'
+import { canGoBackInApp } from '../utils/backNav'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -137,8 +138,9 @@ function MessagesPage() {
     const fromInbox = Boolean(location.state?.fromInbox)
     setError('')
     setNotice('')
-    // closing a thread opened from the inbox is a plain step back, so history never doubles up
-    if (!id && fromInbox) { navigate(-1); return }
+    // closing a thread is a plain step back to whatever was open before it (the inbox, or the job
+    // or profile it was opened from); only a thread opened straight from outside falls back to the inbox
+    if (!id && (fromInbox || canGoBackInApp())) { navigate(-1); return }
     setActiveId(id)
     // opening a thread from the inbox is one new history entry (back returns to the inbox);
     // switching to another thread, or closing one that came from a link, replaces it

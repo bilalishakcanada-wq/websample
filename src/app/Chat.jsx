@@ -8,6 +8,7 @@ import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { jobStatus } from '../utils/jobStatus'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
 
@@ -30,6 +31,7 @@ function Chat(props) {
   const fitRef = useKeyboardFit(Boolean(active))
   const [menu, setMenu] = useState(false)
   const status = jobStatus(chatState, active?.contacts_allowed)
+  useBackToClose(menu, () => setMenu(false))
 
   if (!active) {
     return (

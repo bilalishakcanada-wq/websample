@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Bookmark, CalendarDays, Check, ChevronDown, Lock, MapPin, Plus, Users } from 'lucide-react'
+import { Bookmark, CalendarDays, Check, ChevronDown, ChevronRight, Lock, MapPin, Plus, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { keys, useMyBids, useMyListings } from '../hooks/queries'
 import { savedService } from '../services/savedService'
@@ -17,6 +17,8 @@ import './app.css'
 import { SkeletonMtCard } from '../components/Skeleton'
 import '../components/TaskExtras.css'
 import ProviderDashboard from '../components/ProviderDashboard'
+import { providerBoardService } from '../services/providerBoardService'
+import { clientStep } from '../utils/jobStep'
 
 const STATUS = { published: ['Objavljen', 'open'], assigned: ['Dodijeljen', 'assigned'], completed: ['Završen', 'done'], cancelled: ['Otkazan', 'off'], expired: ['Rok prošao', 'off'] }
 const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assigned', 'Dodijeljeni'], ['completed', 'Završeni'], ['cancelled', 'Otkazani'], ['expired', 'Rok prošao']]
@@ -39,6 +41,9 @@ function MyTasks() {
   const bidsQuery = useMyBids(user.id)
   const jobs = useMemo(() => (jobsQuery.isPending ? null : (jobsQuery.data || EMPTY)), [jobsQuery.isPending, jobsQuery.data])
   const bids = useMemo(() => (bidsQuery.isPending ? null : (bidsQuery.data || EMPTY)), [bidsQuery.isPending, bidsQuery.data])
+  // uplate na mojim poslovima: kartica kaže šta je sljedeće (npr. „Pregledaj predani rad“) i dogovorenu cijenu
+  const paymentsQuery = useQuery({ queryKey: keys.clientPayments(user.id), queryFn: () => providerBoardService.clientPayments(user.id), enabled: tab === 'objavljeni', meta: { persist: false } })
+  const paymentByJob = useMemo(() => new Map((paymentsQuery.data || EMPTY).map((row) => [row.listing_id, row])), [paymentsQuery.data])
   const savedQuery = useQuery({ queryKey: keys.savedListings(user.id), queryFn: () => savedService.list(user.id), enabled: tab === 'sacuvano' })
   const savedList = savedQuery.isPending ? null : (savedQuery.data || EMPTY)
   const saved = useSaved()
@@ -103,18 +108,21 @@ function MyTasks() {
             {visibleJobs.map((job) => {
               const [label, tone] = STATUS[job.status] || STATUS.published
               const offers = job.bids?.[0]?.count || 0
+              const payment = paymentByJob.get(job.id) || null
+              const next = clientStep({ listing: job, payment, pending: job.status === 'published' ? offers : 0, expired: job.status === 'expired', reviewed: true })
               return (
-                <Link key={job.id} to={`/listings/${job.id}`} className="mt-card">
-                  <div className="mt-card-head"><strong>{job.title}</strong><em>{money(job.price)}</em></div>
+                <Link key={job.id} to={`/listings/${job.id}`} className={`mt-card ${next.tone === 'act' ? 'needs-me' : ''}`}>
+                  <div className="mt-card-head"><strong>{job.title}</strong><em>{money(payment ? payment.amount : job.price)}</em></div>
                   <span><MapPin size={14} /> {job.location || 'Online'}</span>
                   <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
                   {job.invited_provider && <span><Lock size={14} /> Privatni zahtjev za ponudu</span>}
                   <div className="mt-card-foot">
-                    <b className={`mt-state s-${tone}`}>{label}</b>
-                    {job.status === 'expired'
-                      ? <small>Izaberi novi datum da primaš ponude</small>
-                      : <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>}
+                    <b className={`mt-state s-${tone}`}>{payment && next.tone === 'wait' ? next.short : label}</b>
+                    {job.status === 'published' && !payment
+                      ? <small><Users size={13} /> {offers === 0 ? 'Još nema ponuda' : `${offers} ${offers === 1 ? 'ponuda' : offers < 5 ? 'ponude' : 'ponuda'}`}</small>
+                      : null}
                   </div>
+                  {next.tone === 'act' && <span className="mt-next" data-testid="mt-next">{next.short} <ChevronRight size={15} /></span>}
                 </Link>
               )
             })}
@@ -145,7 +153,7 @@ function MyTasks() {
                     <span><CalendarDays size={14} /> {scheduleLabel(job)}</span>
                     <div className="mt-card-foot">
                       <b className={`mt-state s-${closed ? 'off' : 'open'}`}>{closed ? 'Ne prima ponude' : 'Otvoren'}</b>
-                      <small><Users size={13} /> {job.bid_count || 0} {(job.bid_count || 0) === 1 ? 'ponuda' : 'ponuda'}</small>
+                      <small><Users size={13} /> {job.bid_count || 0} {[2, 3, 4].includes(job.bid_count || 0) ? 'ponude' : 'ponuda'}</small>
                     </div>
                   </Link>
                   <button type="button" className="mt-unsave" onClick={() => saved.remove(job.id)}>Ukloni</button>

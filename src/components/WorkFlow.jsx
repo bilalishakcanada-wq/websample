@@ -2,7 +2,7 @@ import { PrivateImage } from './PrivateFile'
 import { usePrivateFile } from '../lib/privateFiles'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle, BadgeCheck, Camera, CheckCircle2, Clock, Handshake, ImagePlus, MapPin, RotateCcw, Send, TrendingUp, X,
+  AlertTriangle, BadgeCheck, Camera, CheckCircle2, Clock, Handshake, ImagePlus, Lock, MapPin, RotateCcw, Send, TrendingUp, X,
 } from 'lucide-react'
 import { paymentService } from '../services/paymentService'
 import ProofCamera from './ProofCamera'
@@ -57,6 +57,14 @@ function ProofGallery({ rows }) {
       {rows.map((row) => <ProofItem key={row.id} row={row} />)}
     </div>
   )
+}
+
+const TRACK = [['funded', 'Plaćeno'], ['work', 'Radi se'], ['submitted', 'Rad predat'], ['paid', 'Isplaćeno']]
+const trackIndex = (payment, state) => {
+  if (payment.status === 'released' || state === 'completed') return 3
+  if (['submitted', 'disputed'].includes(state) || payment.status === 'requested') return 2
+  if (['in_progress', 'revision', 'cancel_requested'].includes(state)) return 1
+  return 0
 }
 
 const km = (value) => `${Number(value || 0).toLocaleString('bs-BA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
@@ -166,12 +174,12 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
 
   const oslobodiOdmah = async () => {
     const ok = await confirmDialog({
-      title: 'Oslobodiš uplatu prije predaje rada?',
+      title: 'Isplatiti izvođača prije predaje rada?',
       text: 'Izvođač odmah dobija novac, bez dokaza o obavljenom poslu. Ovo se ne može poništiti.',
-      confirmLabel: 'Oslobodi uplatu', danger: true,
+      confirmLabel: 'Isplati odmah', danger: true,
     })
     if (!ok || !(await confirmPaymentIdentity(`Isplata za posao: ${km(payment.amount)}`))) return
-    run('release', () => paymentService.releasePayment(payment.listing_id), 'Uplata je oslobođena izvođaču.')
+    run('release', () => paymentService.releasePayment(payment.listing_id), 'Izvođač je isplaćen.')
   }
 
   const traziPrekid = () => run('cancelreq', async () => {
@@ -193,6 +201,16 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
     if (!ok || !(await confirmPaymentIdentity(`Plaćanje +${km(increase.request.amount_km)} za posao`))) return
     run('incresp', () => paymentService.respondPriceIncrease(increase.request.id, true), 'Povećanje je odobreno i plaćeno.')
   }
+
+  // dugme „sljedeći korak“ na vrhu stranice posla pokreće istu radnju kao dugme ovdje
+  useEffect(() => {
+    const onStep = (event) => {
+      if (event.detail === 'approve' && state === 'submitted') odobri()
+      else if (event.detail === 'submit' && radiSe) setForm('submit')
+    }
+    window.addEventListener('zadatak:korak', onStep)
+    return () => window.removeEventListener('zadatak:korak', onStep)
+  })
 
   const naknada = naknadaZaOtkaz(payment)
   const odgovornaStrana = cancelReq?.responsible
@@ -228,10 +246,25 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
   }[state]), [state, isClient])
 
   return (
-    <section data-testid="workflow" className="job-card wf-card">
+    <section data-testid="workflow" id="tok-posla" className="job-card wf-card">
       <div className="wf-head">
-        <h2><Handshake size={18} /> Tok posla</h2>
+        <h2><Handshake size={18} /> Posao i uplata</h2>
         <span data-testid="workflow-state" className={`pill wf-${state}`}>{naslov}</span>
+      </div>
+
+      <ol className="wf-track" aria-label="Koraci posla">
+        {TRACK.map(([id, label], index) => {
+          const at = trackIndex(payment, state)
+          const stopped = ['cancelled', 'disputed', 'cancel_requested'].includes(state) && index === at
+          return <li key={id} className={`${index < at || (index === at && state === 'completed') ? 'is-done' : ''} ${index === at && state !== 'completed' ? 'is-now' : ''} ${stopped ? 'is-stopped' : ''}`}>{label}</li>
+        })}
+      </ol>
+
+      {/* novac: klijent vidi cijenu koju plaća, izvođač i naknadu i šta mu sjeda */}
+      <div className="wf-money" data-testid="workflow-money">
+        <span><Lock size={14} /> {payment.status === 'released' ? 'Isplaćeno' : payment.status === 'refunded' ? 'Vraćeno klijentu' : payment.status === 'disputed' ? 'Zamrznuto dok tim ne odluči' : 'Osigurano na Zadatku'}</span>
+        <strong>{km(payment.amount)}</strong>
+        {!isClient && <small>Naknada {Number(payment.fee_percent)} % · tebi {km(payment.net_amount)}</small>}
       </div>
 
       {state === 'submitted' && payment.review_deadline && <Countdown until={payment.review_deadline} />}
@@ -424,7 +457,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       )}
 
       {/* --- dugmad po stanju ---------------------------------------------- */}
-      {form === null && (
+      {form === null && (<>
         <div className="wf-actions wf-actions-main">
           {!isClient && ['in_progress', 'revision'].includes(state) && (
             <button data-testid="workflow-submit" type="button" className="primary-button" onClick={() => setForm('submit')} disabled={Boolean(busy)}>
@@ -443,12 +476,6 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
               )}
             </>
           )}
-          {isClient && state === 'in_progress' && (
-            // klijent smije platiti i prije predaje rada — svoj novac, svoja odluka
-            <button data-testid="workflow-release" type="button" className="ghost-button" onClick={oslobodiOdmah} disabled={Boolean(busy)}>
-              <CheckCircle2 size={15} /> Oslobodi uplatu odmah
-            </button>
-          )}
           {state === 'cancel_requested' && !mojZahtjevZaPrekid && (
             <>
               <button type="button" className="primary-button" onClick={() => odgovoriNaPrekid(true)} disabled={Boolean(busy)}>
@@ -459,23 +486,32 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
               </button>
             </>
           )}
+        </div>
+        {/* rjeđe radnje: tiho ispod glavnog dugmeta, da se ne takmiče s njim */}
+        <div className="wf-more">
+          {isClient && state === 'in_progress' && (
+            // klijent smije platiti i prije predaje rada — svoj novac, svoja odluka
+            <button data-testid="workflow-release" type="button" className="wf-link" onClick={oslobodiOdmah} disabled={Boolean(busy)}>
+              <CheckCircle2 size={15} /> Isplati odmah
+            </button>
+          )}
           {!isClient && increase.available && !increase.request && ['in_progress', 'revision'].includes(state) && (
-            <button type="button" className="ghost-button" onClick={() => setForm('increase')} disabled={Boolean(busy)}>
+            <button type="button" className="wf-link" onClick={() => setForm('increase')} disabled={Boolean(busy)}>
               <TrendingUp size={15} /> Zatraži povećanje cijene
             </button>
           )}
           {['in_progress', 'submitted', 'revision'].includes(state) && (
-            <button data-testid="workflow-cancel" type="button" className="ghost-button" onClick={() => setForm('cancel')} disabled={Boolean(busy)}>
+            <button data-testid="workflow-cancel" type="button" className="wf-link" onClick={() => setForm('cancel')} disabled={Boolean(busy)}>
               Zatraži prekid
             </button>
           )}
           {['in_progress', 'submitted', 'revision', 'cancel_requested'].includes(state) && (
-            <button data-testid="workflow-dispute" type="button" className="ghost-button danger" onClick={() => setForm('dispute')} disabled={Boolean(busy)}>
+            <button data-testid="workflow-dispute" type="button" className="wf-link is-danger" onClick={() => setForm('dispute')} disabled={Boolean(busy)}>
               <AlertTriangle size={15} /> Prijavi problem
             </button>
           )}
         </div>
-      )}
+      </>)}
     </section>
   )
 }

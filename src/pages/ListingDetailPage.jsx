@@ -18,7 +18,9 @@ import { useAuth } from '../context/AuthContext'
 import { formatBosnianDate } from '../utils/dateFormat'
 import { contactInfoMessage, findProhibitedTerm, findStreetAddress, scanContactInfo, streetAddressMessage } from '../utils/moderation'
 import RuleOneNotice from '../components/RuleOneNotice'
-import { AcceptOfferSheet, HowPaymentWorks, JobPaymentCard } from '../components/JobPayment'
+import { AcceptOfferSheet, HowPaymentWorks } from '../components/JobPayment'
+import NextStep from '../components/NextStep'
+import { clientStep, workStateOf, workerStep } from '../utils/jobStep'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
 import ExactAddress from '../components/ExactAddress'
@@ -447,6 +449,39 @@ function ListingDetailPage() {
     }
   }
 
+  // ko je tražio prekid: od toga zavisi da li se čeka drugu stranu ili se od mene traži odgovor
+  const [cancelBy, setCancelBy] = useState(null)
+  const contractState = workStateOf(payment)
+  useEffect(() => {
+    if (contractState !== 'cancel_requested' || !payment?.id) { setCancelBy(null); return undefined }
+    let alive = true
+    paymentService.pendingCancellation(payment.id).then((row) => alive && setCancelBy(row?.requested_by || null)).catch(() => {})
+    return () => { alive = false }
+  }, [contractState, payment?.id])
+
+  const iAmWorker = Boolean(user && ((payment && payment.provider_id === user.id) || (acceptedBid && acceptedBid.bidder_id === user.id)))
+  const step = !listing ? null
+    : isOwner ? clientStep({
+      listing, payment, expired: listing.status === 'expired', reviewed: Boolean(myReview), cancelByMe: cancelBy ? cancelBy === user?.id : null,
+      pending: listing.status === 'published' && !acceptedBid ? bids.filter((bid) => bid.status === 'pending').length : 0,
+      hasWorker: Boolean(acceptedBid) && !payment && listing.status === 'published',
+    })
+      : iAmWorker ? workerStep({ listing, payment, cancelByMe: cancelBy ? cancelBy === user?.id : null })
+        : null
+  const scrollTo = (selector) => window.requestAnimationFrame(() => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  const runStep = (action) => {
+    if (action === 'offers') { setTab('ponude'); scrollTo(isPhone ? '.jd-tabs' : '#ponude') }
+    else if (action === 'approve' || action === 'submit') { window.dispatchEvent(new CustomEvent('zadatak:korak', { detail: action })); if (action === 'submit') scrollTo('#tok-posla') }
+    else if (action === 'workflow') scrollTo('#tok-posla')
+    else if (action === 'review') scrollTo('#recenzija')
+    else if (action === 'messages') navigate(`/messages?listing=${id}`)
+    else if (action === 'repost') navigate(`/objavi?copy=${id}`)
+    else if (action === 'reschedule') navigate(`/objavi?edit=${id}&step=time`)
+    else if (action === 'outcome') setOutcome('completed')
+  }
+  // posao koji je dodijeljen, plaćen ili gotov se više ne uređuje (baza ga ionako ne pušta)
+  const editable = Boolean(listing) && ['published', 'expired'].includes(listing.status) && !acceptedBid && !payment
+
   if (loading) return isPhone ? <SkeletonJobPhone /> : <div className="app-shell page-with-mobile-nav"><main className="content-container"><div className="detail-skeleton" /><div className="skeleton-card" /><div className="skeleton-card" /></main></div>
   // a failed request is not a missing job: on a weak mobile connection people need a retry, not a dead end
   if (error) {
@@ -534,7 +569,7 @@ function ListingDetailPage() {
           onAccept={(bidId) => setBidStatus(bidId, 'accepted')} onReject={async (bidId) => { if (await confirmDialog({ title: 'Odbiti ovu ponudu?', text: 'Izvođač dobija obavijest da ponuda nije prošla.', confirmLabel: 'Odbij', danger: true })) setBidStatus(bidId, 'rejected') }}
           onAsk={askQuestion} onOutcome={setOutcome} outcomeBusy={outcomeBusy} onOpenImage={(index) => setLightbox(index)} refreshJob={refreshJob}
           reviewForm={reviewForm} setReviewForm={setReviewForm} submitReview={submitReview} submittingReview={submittingReview} message={message}
-          tab={tab} setTab={setTab}
+          tab={tab} setTab={setTab} step={step} onStep={runStep} editable={editable}
         />
         {overlays}
       </>
@@ -551,14 +586,14 @@ function ListingDetailPage() {
           <button type="button" className="job-back" onClick={goBack}><ArrowLeft size={16} /> Nazad</button>
           <div className="job-top-actions">
             {!isPrivate && <button type="button" className="job-icon" onClick={share} aria-label="Podijeli oglas" title="Podijeli"><Share2 size={16} /></button>}
-            {!isOwner && (
+            {!isOwner && !iAmWorker && (
               <button type="button" className={`job-icon job-icon-text ${saved.isSaved(listing.id) ? 'is-saved' : ''}`} onClick={() => saved.toggle(listing.id)} aria-pressed={saved.isSaved(listing.id)}>
                 <Bookmark size={15} fill={saved.isSaved(listing.id) ? 'currentColor' : 'none'} /> {saved.isSaved(listing.id) ? 'Sačuvano' : 'Sačuvaj'}
               </button>
             )}
             {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${id}`} className="job-icon job-icon-text"><Copy size={15} /> Objavi sličan</Link>}
             {isOwner
-              ? <Link to={`/objavi?edit=${id}`} className="job-icon job-icon-text"><Pencil size={15} /> Uredi</Link>
+              ? editable && <Link to={`/objavi?edit=${id}`} className="job-icon job-icon-text"><Pencil size={15} /> Uredi</Link>
               : <button type="button" className="job-icon" onClick={reportListing} aria-label="Prijavi oglas" title="Prijavi oglas"><Flag size={16} /></button>}
           </div>
         </div>
@@ -583,7 +618,7 @@ function ListingDetailPage() {
               <div className="job-meta">
                 <span><MapPin size={15} /> {listing.location || 'Lokacija nije navedena'}</span>
                 <span><CalendarDays size={15} /> {when}</span>
-                <span><Users size={15} /> {bids.length} {bids.length === 1 ? 'ponuda' : 'ponuda'}</span>
+                <span><Users size={15} /> {bids.length} {bids.length % 10 >= 2 && bids.length % 10 <= 4 && (bids.length % 100 < 12 || bids.length % 100 > 14) ? 'ponude' : 'ponuda'}</span>
                 <span className="job-meta-date">Objavljeno {formatDate(listing.created_at)}</span>
               </div>
             </header>
@@ -624,7 +659,6 @@ function ListingDetailPage() {
             {payment && (isOwner || user?.id === payment.provider_id) && (
               <>
                 <LiveTracking payment={payment} listing={listing} role={isOwner ? 'client' : 'provider'} />
-                <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
                 <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
               </>
             )}
@@ -635,15 +669,15 @@ function ListingDetailPage() {
                 <div><span className="job-fact-icon"><CalendarDays size={17} /></span><div><small>Kada</small><strong>{when}</strong></div></div>
                 <div><span className="job-fact-icon"><MapPin size={17} /></span><div><small>{listing.dropoff_location ? 'Odakle → Dokle' : 'Gdje'}</small><strong>{isRemote ? 'Online / na daljinu' : listingRoute(listing) || listing.location || '—'}</strong>{!isOwner && distanceLabel(distanceToJob(listing, myCity, myPoint)) && <small>{distanceLabel(distanceToJob(listing, myCity, myPoint))}</small>}</div></div>
                 <div><span className="job-fact-icon"><Tag size={17} /></span><div><small>Kategorija</small><strong>{listing.category || 'Ostalo'}</strong></div></div>
-                <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>Budžet</small><strong>{formatPrice(listing.price, listing.currency)}</strong></div></div>
+                <div><span className="job-fact-icon"><Wallet size={17} /></span><div><small>{payment ? 'Dogovorena cijena' : 'Budžet'}</small><strong>{formatPrice(payment ? payment.amount : listing.price, listing.currency)}</strong></div></div>
                 {travelLabel(listing) && <div><span className="job-fact-icon"><Car size={17} /></span><div><small>Put</small><strong>{travelLabel(listing)}</strong></div></div>}
               </div>
               <ExactAddress listing={listing} isOwner={isOwner} acceptedForMe={Boolean(user && acceptedBid?.bidder_id === user.id)} />
             </section>
 
-            <section className="job-card">
+            <section className="job-card" id="ponude">
               <div className="section-heading"><h2>Ponude</h2><span className="muted-text">{bids.length}</span></div>
-              {!isOwner && bids.length > 0 && (
+              {!isOwner && bids.length > 0 && !acceptedBid && (
                 <p className="contact-protection-note"><ShieldCheck size={15} /> Kontakt podaci su zaštićeni dok vlasnik ne prihvati ponudu.</p>
               )}
               {bids.length === 0 ? <p className="muted-text">Još nema ponuda. Budi prvi koji će poslati ponudu.</p> : (
@@ -674,7 +708,8 @@ function ListingDetailPage() {
               )}
             </section>
 
-            <section className="job-card" id="pitanja">
+            {/* na mom dodijeljenom ili gotovom poslu bez pitanja nema šta pitati ni odgovarati */}
+            {(questions.length > 0 || (listing.status === 'published' && !acceptedBid)) && <section className="job-card" id="pitanja">
               <div className="section-heading"><h2>Pitanja</h2><span className="muted-text">{questions.length}</span></div>
               {questions.length === 0 && <p className="muted-text">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.')}</p>}
               {questions.length > 0 && (
@@ -702,7 +737,7 @@ function ListingDetailPage() {
               ) : (
                 <Link to={`/login?next=${encodeURIComponent(`/listings/${listing.id}#pitanja`)}`} className="ghost-button">Prijavi se da pitaš</Link>
               )}
-            </section>
+            </section>}
 
             {isOwner && listing.status === 'published' && !acceptedBid && suggested.length > 0 && (
               <section className="job-card">
@@ -742,7 +777,7 @@ function ListingDetailPage() {
               <section className="job-card review-done"><CheckCircle2 size={18} /> Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</section>
             )}
             {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
-              <section className="job-card">
+              <section className="job-card" id="recenzija">
                 <h2>Ostavi recenziju</h2>
                 <form className="auth-form" onSubmit={submitReview}>
                   <div className="rating-picker">
@@ -758,14 +793,15 @@ function ListingDetailPage() {
               </section>
             )}
 
-            {related.length > 0 && <section className="job-card job-card-plain"><h2>Slični oglasi</h2><div className="listing-grid">{related.map((item) => <ListingCard key={item.id} listing={{ ...item, price: formatPrice(item.price, item.currency), time: formatDate(item.created_at) }} />)}</div></section>}
+            {related.length > 0 && !isOwner && !iAmWorker && <section className="job-card job-card-plain"><h2>Slični oglasi</h2><div className="listing-grid">{related.map((item) => <ListingCard key={item.id} listing={{ ...item, price: formatPrice(item.price, item.currency), time: formatDate(item.created_at) }} />)}</div></section>}
             {message && <div className="form-success" role="status">{message}</div>}
           </div>
 
           <aside className="job-side">
             <div className="job-offer-card">
-              <span>Okvirni budžet</span>
-              <strong>{formatPrice(listing.price, listing.currency)}</strong>
+              <span>{payment ? 'Dogovorena cijena' : 'Okvirni budžet'}</span>
+              <strong>{formatPrice(payment ? payment.amount : listing.price, listing.currency)}</strong>
+              {step && <NextStep step={step} onAction={runStep} busy={outcomeBusy} />}
               {!isOwner && !myBid && listing.status === 'published' && <button type="button" className={simpleMode ? 'simple-apply-btn' : 'primary-button full-width'} onClick={openBidSheet}><Send size={simpleMode ? 24 : 18} /> {offerLabel}</button>}
               {canRebid && (
                 <div className="rebid-note" data-testid="rebid-note">
@@ -774,7 +810,7 @@ function ListingDetailPage() {
                 </div>
               )}
               {canRebid && <button type="button" className="primary-button full-width" data-testid="rebid-open" onClick={openBidSheet}><Send size={18} /> Pošalji novu cijenu</button>}
-              {!isOwner && myBid && (
+              {!isOwner && myBid && !step && (
                 <div className={`my-bid-status status-${myBid.status}`}>
                   {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
                     ? <>Dogovorena cijena: <strong>{formatPrice(payment.amount)}</strong> (ponuda {formatPrice(myBid.amount)} + odobreno povećanje)</>
@@ -783,21 +819,14 @@ function ListingDetailPage() {
                   {myBid.status === 'pending' && <button type="button" className="link-button my-bid-withdraw" onClick={withdrawBid}>Povuci ponudu</button>}
                 </div>
               )}
-              {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
+              {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && step?.action !== 'messages' && step?.secondary !== 'messages' && (
                 <Link to={`/messages?listing=${listing.id}`} className="ghost-button full-width"><MessageCircle size={16} /> Otvori poruke</Link>
               )}
               {isOwner && acceptedBid && !payment && listing.status === 'published' && (
-                <div className="outcome-actions">
-                  <button type="button" className="primary-button full-width" onClick={() => setOutcome('completed')} disabled={outcomeBusy}><CheckCircle2 size={16} /> Posao završen</button>
-                  <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
-                </div>
+                <button type="button" className="ghost-button full-width" onClick={() => setOutcome('cancelled')} disabled={outcomeBusy}>Otkaži posao</button>
               )}
-              {listing.status === 'completed' && <div className="outcome-state done"><CheckCircle2 size={15} /> Posao završen</div>}
-              {listing.status === 'cancelled' && <div className="outcome-state cancelled">Posao otkazan</div>}
-              {expired && <div className="outcome-state cancelled">Rok je prošao</div>}
-              {payment && <div className={`pay-side pay-status-${payment.status}`}><Lock size={13} /> {payment.status === 'released' ? 'Isplaćeno izvođaču' : payment.status === 'refunded' ? 'Vraćeno klijentu' : `${formatPrice(payment.amount)} osigurano na Zadatku`}</div>}
-              <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Zadatak Pay: novac se rezerviše kad prihvatiš ponudu i isplaćuje tek kad potvrdiš da je posao završen.</p>
-              {!payment && <HowPaymentWorks />}
+              {!payment && !step && <p className="job-safety"><ShieldCheck size={13} /> Plaćanje ide kroz Zadatak Pay: novac se rezerviše kad klijent prihvati ponudu i isplaćuje tek kad odobri urađen posao.</p>}
+              {!payment && (!isOwner || listing.status === 'published') && <HowPaymentWorks />}
             </div>
 
             {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} />}

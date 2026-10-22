@@ -158,8 +158,8 @@ export function HowPaymentWorks() {
       <summary><ShieldCheck size={14} /> Kako radi plaćanje na Zadatku?</summary>
       <ol>
         <li><strong>Klijent prihvati ponudu</strong> — cijena se rezerviše sa njegovog balansa i čuva na Zadatku.</li>
-        <li><strong>Izvođač uradi posao</strong> i klikne „Zatraži isplatu“.</li>
-        <li><strong>Klijent oslobodi uplatu</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou).</li>
+        <li><strong>Izvođač uradi posao</strong> i klikne „Predaj rad“.</li>
+        <li><strong>Klijent odobri rad</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou). Ako klijent ne odgovori za 72 sata, isplata ide automatski.</li>
         <li>Problem? <strong>„Prijavi problem“</strong> zamrzava novac dok Zadatak tim ne odluči. Otkazivanje prije početka vraća pun iznos.</li>
       </ol>
     </details>

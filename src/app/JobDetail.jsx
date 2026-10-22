@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, Star, UserRound } from 'lucide-react'
-import { JobPaymentCard } from '../components/JobPayment'
+import NextStep from '../components/NextStep'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
@@ -28,7 +28,7 @@ function JobDetail(props) {
   const {
     listing, images, bids, metrics, questions, poster, payment, user, isOwner, expired = false, isPrivate = false, requirements = [], myCity = null, myPoint = null, saved = false, onSave, myBid, canRebid = false, freshBidIds = null, onWithdraw, acceptedBid, myReview, when, isRemote, descriptionBody,
     onBack, onShare, onReport, onOpenBid, onEditBid, offerLabel = 'Pošalji ponudu', offerGate = 'ok', simple = false, conditionCheck = null, onAccept, onReject, onAsk, onOutcome, outcomeBusy, onOpenImage, refreshJob,
-    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
+    reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab, step = null, onStep, editable = false,
   } = props
   const [menu, setMenu] = useState(false)
   const [question, setQuestion] = useState('')
@@ -77,7 +77,7 @@ function JobDetail(props) {
             {!isOwner && onSave && <button type="button" role="menuitem" onClick={onSave}><Bookmark size={16} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Ukloni iz sačuvanih' : 'Sačuvaj posao'}</button>}
             {isOwner && ['completed', 'cancelled', 'expired'].includes(listing.status) && <Link to={`/objavi?copy=${listing.id}`} role="menuitem"><Copy size={16} /> Objavi sličan posao</Link>}
             {isOwner
-              ? <Link to={`/objavi?edit=${listing.id}`} role="menuitem"><Pencil size={16} /> Uredi posao</Link>
+              ? editable && <Link to={`/objavi?edit=${listing.id}`} role="menuitem"><Pencil size={16} /> Uredi posao</Link>
               : <button type="button" role="menuitem" onClick={onReport}><Flag size={16} /> Prijavi</button>}
           </div>
         )}
@@ -85,19 +85,15 @@ function JobDetail(props) {
 
       <section className={`jd-band ${isOwner ? 'is-owner' : ''}`}>
         {isOwner && <div className="jd-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>}
-        <h2>{band[0]}</h2>
-        <p>{band[1]}</p>
+        {step ? <NextStep phone step={step} onAction={onStep} busy={outcomeBusy} /> : <><h2>{band[0]}</h2><p>{band[1]}</p></>}
         {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
         {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}
-        {simple && !isOwner && myBid?.status === 'accepted' && <Link to={`/messages?listing=${listing.id}`} className="simple-apply-btn"><MessageCircle size={24} /> Piši klijentu</Link>}
+        {!step && simple && !isOwner && myBid?.status === 'accepted' && <Link to={`/messages?listing=${listing.id}`} className="simple-apply-btn"><MessageCircle size={24} /> Piši klijentu</Link>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>{simple ? 'Promijeni cijenu' : 'Izmijeni ponudu'}</button>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>{simple ? 'Ipak ne želim ovaj posao' : 'Povuci ponudu'}</button>}
-        {isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
+        {!step && isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
         {!isOwner && !myBid && open && onSave && (
           <button type="button" className="ap-btn ap-btn-light jd-save" onClick={onSave} aria-pressed={saved}><Bookmark size={18} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Sačuvano' : 'Sačuvaj za kasnije'}</button>
-        )}
-        {isOwner && acceptedBid && !payment && listing.status === 'published' && (
-          <button type="button" className="ap-btn ap-btn-primary" onClick={() => onOutcome('completed')} disabled={outcomeBusy}>Posao je završen</button>
         )}
       </section>
 
@@ -135,7 +131,7 @@ function JobDetail(props) {
           </li>
           <li>
             <Coins size={20} />
-            <span><strong>{money(listing.price, listing.currency)}</strong><small>Budžet</small></span>
+            <span><strong>{money(payment ? payment.amount : listing.price, listing.currency)}</strong><small>{payment ? 'Dogovorena cijena' : 'Budžet'}</small></span>
             {isOwner && open && <Link to={`/objavi?edit=${listing.id}&step=budget`} className="jd-link">Uredi</Link>}
           </li>
           {travelLabel(listing) && (
@@ -177,12 +173,11 @@ function JobDetail(props) {
         {payment && (isOwner || user?.id === payment.provider_id) && (
           <div className="jd-payment">
             <LiveTracking payment={payment} listing={listing} role={isOwner ? 'client' : 'provider'} />
-            <JobPaymentCard payment={payment} role={isOwner ? 'client' : 'provider'} />
             <WorkFlow payment={payment} role={isOwner ? 'client' : 'provider'} user={user} onChanged={refreshJob} title={listing.title} />
           </div>
         )}
 
-        {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && (
+        {acceptedBid && (user?.id === acceptedBid.bidder_id || isOwner) && step?.action !== 'messages' && (
           <Link to={`/messages?listing=${listing.id}`} className="ap-btn ap-btn-light jd-messages"><MessageCircle size={18} /> Otvori poruke</Link>
         )}
 
@@ -257,7 +252,7 @@ function JobDetail(props) {
 
         {user && listing.status === 'completed' && myReview && <p className="jd-review-done">Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</p>}
         {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
-          <form className="jd-review" onSubmit={submitReview}>
+          <form className="jd-review" id="recenzija" onSubmit={submitReview}>
             <h3>Ostavi recenziju</h3>
             <div className="rating-picker">
               {[1, 2, 3, 4, 5].map((value) => (

@@ -1,0 +1,46 @@
+/* Tok posla: „sljedeći korak“ na vrhu posla, jedna kartica za posao i novac, kartice u „Moji poslovi“. */
+
+.next-step { display: grid; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--surface-soft, #eef3fb); border-left: 3px solid var(--stroke); text-align: left; }
+.next-step.tone-act { background: #fff; border: 1px solid var(--stroke); border-left: 3px solid var(--accent); }
+.next-step.tone-done { border-left-color: var(--success, #19b37b); }
+.next-step.tone-off { border-left-color: #c2c9d8; }
+.next-step-title { font-size: 1.02rem; font-weight: 750; color: var(--text); line-height: 1.3; }
+.next-step-text { margin: 0; color: var(--text-soft); font-size: 0.92rem; line-height: 1.45; }
+.next-step-actions { display: grid; gap: 8px; margin-top: 6px; }
+.next-step-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.job-offer-card .next-step { margin: 2px 0 4px; padding: 2px 0 2px 12px; background: none; border: 0; border-left: 3px solid var(--stroke); border-radius: 0; }
+.job-offer-card .next-step.tone-act { border-left-color: var(--accent); }
+.job-offer-card .next-step.tone-done { border-left-color: var(--success, #19b37b); }
+
+/* telefon: kutija stoji u traci na vrhu posla, bez okvira, kao naslov trake */
+.jd-band .next-step.is-phone { padding: 0; background: none; border: 0; border-radius: 0; }
+.jd-band .next-step.is-phone .next-step-title { font-size: 1.35rem; font-weight: 800; color: var(--primary-strong); letter-spacing: -0.01em; }
+.jd-band .next-step.is-phone .next-step-text { font-size: 1rem; }
+.jd-band .next-step.is-phone .next-step-actions { margin-top: 10px; }
+.jd-band .next-step.is-phone .ap-btn { margin-top: 0; }
+
+/* posao i novac u jednoj kartici */
+.wf-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; counter-reset: wf; }
+.wf-track li { counter-increment: wf; display: grid; gap: 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-soft); }
+.wf-track li::before { content: ''; height: 4px; border-radius: 2px; background: var(--stroke); }
+.wf-track li.is-done::before { background: var(--success, #19b37b); }
+.wf-track li.is-now { color: var(--text); }
+.wf-track li.is-now::before { background: var(--accent); }
+.wf-track li.is-stopped::before { background: #e0a42b; }
+.wf-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface-soft, #eef3fb); }
+.wf-money span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-soft); font-size: 0.88rem; }
+.wf-money strong { margin-left: auto; font-size: 1.05rem; color: var(--text); }
+.wf-money small { flex-basis: 100%; color: var(--text-soft); font-size: 0.8rem; }
+
+/* „Moji poslovi“: posao koji čeka mene ima traku sa sljedećim korakom */
+.mt-card.needs-me { border-color: color-mix(in srgb, var(--accent) 45%, var(--stroke)); }
+.mt-card .mt-next { display: flex; align-items: center; justify-content: space-between; margin: 8px -16px -14px; padding: 10px 16px; border-top: 1px solid var(--stroke); color: var(--accent); font-weight: 700; font-size: 0.92rem; }
+.dashboard-next { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; color: var(--accent); font-weight: 700; font-size: 0.92rem; }
+
+.wf-actions-main:empty { display: none; }
+.wf-more { display: flex; flex-wrap: wrap; gap: 4px 18px; padding-top: 10px; border-top: 1px solid var(--stroke); }
+.wf-more:empty { display: none; }
+.wf-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: none; color: var(--text-soft); font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.wf-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.wf-link.is-danger { color: #b42318; }
+.wf-link:disabled { opacity: 0.5; cursor: default; }

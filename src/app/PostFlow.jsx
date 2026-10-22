@@ -224,7 +224,8 @@ function PostFlow() {
       if (!editId) recordInterest('post', { category: listing.category ?? form.category })
       haptic('medium')
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
-      navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true })
+      // the finished job takes the form's place: back from it returns to where posting started, not to an empty form
+      leaveFlow(() => navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true }))
     } catch (requestError) {
       setError(requestError.message)
       setSaving(false)

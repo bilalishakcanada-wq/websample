@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Copy, Eye, EyeOff, Lock, Trash2, UserRound } from 'lucide-react'
+import { ArrowRight, Check, Copy, Eye, EyeOff, Lock, Trash2, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
@@ -15,6 +15,7 @@ import { queryClient } from '../../lib/queryClient'
 import RuleOneNotice from '../../components/RuleOneNotice'
 import { withBase } from '../../utils/paths'
 import { confirmDialog } from '../../utils/dialog'
+import ProfileCardArt from '../../components/ProfileCardArt'
 
 const splitName = (fullName) => {
   const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean)
@@ -25,24 +26,47 @@ const splitDate = (value) => {
   return { d, m, y }
 }
 
-function VerificationMeter() {
+// where each verification step is done (keys from my_verification_progress)
+const STEP_LINKS = {
+  email: '/account/informacije',
+  mobile: '/account/znacke#mobile_verified',
+  id: '/account/verifikacija',
+  payment: '/account/nacini-placanja',
+}
+
+/** The real verification checks as a short list; each open step says where it is done. */
+function ProfileSteps({ onPickAvatar }) {
   const [progress, setProgress] = useState(null)
   useEffect(() => { accountService.verificationProgress().then(setProgress) }, [])
-  // deep links from "Informacije o nalogu" (#telefon, #brisanje)
-  useEffect(() => {
-    const id = window.location.hash.replace('#', '')
-    if (!id) return undefined
-    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
-    return () => window.clearTimeout(timer)
-  }, [])
   if (!progress) return null
+  const items = progress.items || []
+  const done = items.filter((item) => item.done).length
+  const open = (item) => {
+    if (item.key === 'avatar') return <button type="button" onClick={onPickAvatar}>Dodaj</button>
+    if (item.key === 'bio') return <a href="#o-meni" onClick={(event) => { event.preventDefault(); const box = document.getElementById('o-meni'); box?.scrollIntoView({ behavior: 'smooth', block: 'center' }); box?.focus({ preventScroll: true }) }}>Napiši</a>
+    return STEP_LINKS[item.key] ? <Link to={STEP_LINKS[item.key]}>Uradi</Link> : null
+  }
   return (
-    <div className="verif-meter" title={progress.items.map((item) => `${item.done ? '✓' : '○'} ${item.label}`).join('\n')}>
-      <span>Verifikacije: {progress.percent}%</span>
-      <div className="verif-meter-bar"><span style={{ width: `${progress.percent}%` }} /></div>
-    </div>
+    <section className="pe-steps" aria-label="Verifikacije">
+      <div className="pe-steps-head">
+        <h2>Verifikacije</h2>
+        <span>{done} od {items.length}</span>
+      </div>
+      <div className="pe-steps-bar" aria-hidden="true"><span style={{ width: `${progress.percent}%` }} /></div>
+      <ul>
+        {items.map((item) => (
+          <li key={item.key} className={item.done ? 'is-done' : ''}>
+            {item.done ? <Check size={15} strokeWidth={2.4} /> : <span className="pe-step-dot" />}
+            <span>{item.label}</span>
+            {!item.done && open(item)}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
+
+const GOAL_LABEL = { client: 'Klijent', provider: 'Izvođač', both: 'Klijent i izvođač' }
 
 function ProfileSettingsPage() {
   const { user, updateProfile, deleteAccount } = useAuth()
@@ -76,7 +100,16 @@ function ProfileSettingsPage() {
     return () => { live = false }
   }, [user.id])
 
+  // deep links from "Informacije o nalogu" (#telefon, #brisanje)
+  useEffect(() => {
+    const id = window.location.hash.replace('#', '')
+    if (!id) return undefined
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250)
+    return () => window.clearTimeout(timer)
+  }, [])
+
   const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim()
+  const shownName = [form.firstName.trim(), form.lastName.trim() && `${form.lastName.trim().charAt(0).toUpperCase()}.`].filter(Boolean).join(' ')
   const nameOk = fullName === '' || isValidFullName(fullName)
   const phoneOk = isValidBosnianPhone(form.phone)
   const bioScan = useMemo(() => scanContactInfo(form.bio), [form.bio])
@@ -144,14 +177,30 @@ function ProfileSettingsPage() {
 
   return (
     <div className="account-section pe">
-      <div className="pe-head">
+      <header className="pe-head">
         <div>
           <h1>Profil</h1>
           <p>Ime, slika i opis su javni. Telefon, datum rođenja i JMBG vidiš samo ti.</p>
         </div>
-        <Link to={`/korisnik/${user.id}`} className="ghost-button pe-public">Pogledaj javni profil</Link>
-      </div>
-      <VerificationMeter />
+        <ProfileCardArt className="pe-head-art" />
+      </header>
+
+      <div className="pe-layout">
+      <aside className="pe-aside">
+        <section className="pe-preview" aria-label="Ovako te drugi vide">
+          <span className="pe-preview-label">Ovako te drugi vide</span>
+          <div className="pe-preview-who">
+            <div className="pe-preview-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={24} strokeWidth={1.6} />}</div>
+            <div>
+              <strong>{shownName || 'Tvoje ime'}</strong>
+              <small>{[form.city, GOAL_LABEL[form.accountType]].filter(Boolean).join(' · ')}</small>
+            </div>
+          </div>
+          <p className={form.bio.trim() ? '' : 'is-empty'}>{form.bio.trim() ? (form.bio.trim().length > 160 ? `${form.bio.trim().slice(0, 160)}…` : form.bio.trim()) : 'Još nema opisa. Napiši par rečenica o sebi ispod.'}</p>
+          <Link to={`/korisnik/${user.id}`} className="pe-preview-link">Pogledaj javni profil <ArrowRight size={15} /></Link>
+        </section>
+        <ProfileSteps onPickAvatar={openAvatarPicker} />
+      </aside>
 
       <form className="pe-form" onSubmit={submit}>
         <section className="pe-section">
@@ -176,7 +225,7 @@ function ProfileSettingsPage() {
               <span>Prezime*</span>
               <input value={form.lastName} onChange={set('lastName')} required autoComplete="family-name" />
             </label>
-            <small className={`pe-span ${!nameOk ? 'is-error' : 'pe-hint'}`}>{!nameOk ? 'Pravo ime i prezime, samo slova.' : `Drugi te vide kao ${fullName ? `${form.firstName.trim()} ${form.lastName.trim().charAt(0).toUpperCase()}.` : '—'}`}</small>
+            <small className={`pe-span ${!nameOk ? 'is-error' : 'pe-hint'}`}>{!nameOk ? 'Pravo ime i prezime, samo slova.' : `Drugi te vide kao ${shownName || '—'}`}</small>
             <label className="account-field">
               <span>Email</span>
               <input value={user.email} readOnly className="is-readonly" />
@@ -220,7 +269,7 @@ function ProfileSettingsPage() {
           <h2>O meni</h2>
           <label className="account-field">
             <span className="visually-hidden">O meni</span>
-            <textarea value={form.bio} onChange={set('bio')} rows={5} maxLength={1000} placeholder="Ko si, šta radiš i koliko dugo. Kratko i jasno." />
+            <textarea id="o-meni" value={form.bio} onChange={set('bio')} rows={5} maxLength={1000} placeholder="Ko si, šta radiš i koliko dugo. Kratko i jasno." />
             <small className={!bioScan.clean ? 'is-error' : 'pe-count'}>{!bioScan.clean ? contactInfoMessage(bioScan, 'opis') : `${form.bio.length} / 1000`}</small>
           </label>
           <RuleOneNotice compact />
@@ -240,7 +289,7 @@ function ProfileSettingsPage() {
 
         <section className="pe-section">
           <h2>Privatno</h2>
-          <div className="pe-grid">
+          <div className="pe-grid pe-grid-one">
             <label className="account-field">
               <span>JMBG / JIB (opciono)</span>
               <div className="account-secret">
@@ -275,6 +324,7 @@ function ProfileSettingsPage() {
           <button type="submit" className="primary-button" disabled={saving || !canSave}>{saving ? 'Čuvam…' : 'Sačuvaj promjene'}</button>
         </div>
       </form>
+      </div>
 
       {searchParams.get('setup') !== '1' && (
         <section className="pe-danger" id="brisanje">

@@ -366,7 +366,7 @@
 /* =========================================================================
    Nalog → Profil (editing)
    ========================================================================= */
-.pe { max-width: 760px; }
+.pe { max-width: 1040px; }
 .pe-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .pe-head h1 { margin: 0; }
 .pe-head p { margin: 6px 0 0; color: var(--cr-soft); font-size: 14px; }
@@ -488,3 +488,96 @@
 .provider-card .badge-pill, .featured-tasker-badges .badge-pill { font-size: 12.5px; padding: 3px 8px; }
 .job-card-image.no-image .live-badge { position: static; display: inline-block; margin-bottom: 4px; }
 .pe .account-secret button { background: none; border: 0; box-shadow: none; }
+
+/* ================================================================ Nalog (account) */
+/* sidebar: who you are, then the pages in three named groups */
+.account-sidebar .account-type { font-size: 13px; color: var(--cr-mute); font-weight: 500; }
+.account-side-public { align-self: flex-start; display: inline-block; margin-top: 6px; color: var(--cr-blue); font-size: 13.5px; font-weight: 600; min-height: 0; }
+.account-side-public:hover { text-decoration: underline; }
+.account-nav { gap: 1px; }
+.account-nav-group { display: block; margin: 16px 12px 4px; font-size: 12px; font-weight: 600; color: var(--cr-mute); letter-spacing: 0; text-transform: none; }
+.account-nav a { min-height: 38px; padding: 8px 12px; font-size: 14.5px; color: var(--cr-text); }
+.account-nav a svg:first-child { color: #8a93a6; }
+.account-nav a.active { background: var(--cr-blue-tint); color: var(--cr-ink); font-weight: 600; box-shadow: inset 2px 0 0 var(--cr-blue); border-radius: 0 var(--cr-r) var(--cr-r) 0; }
+.account-nav a.active svg:first-child { color: var(--cr-blue); }
+
+/* profile page: heading with the drawing, form on the left, live preview + steps on the right */
+.pe-head { align-items: center; padding: 4px 0 18px; border-bottom: 1px solid var(--cr-line-soft); }
+.pe-head p { max-width: 540px; }
+.pe-head-art { flex: 0 0 auto; width: 190px; height: auto; margin: -12px 0 -14px; }
+.pe-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; align-items: start; }
+.pe-grid.pe-grid-one { grid-template-columns: 1fr; max-width: 420px; }
+.pe-id code { white-space: nowrap; }
+.pe-layout > .pe-form { grid-column: 1; grid-row: 1; margin-top: 0; }
+.pe-aside { grid-column: 2; grid-row: 1; position: sticky; top: 88px; display: grid; gap: 16px; padding-top: 24px; }
+.pe-preview { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; }
+.pe-preview-label { font-size: 12.5px; font-weight: 600; color: var(--cr-mute); }
+.pe-preview-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pe-preview-who > div:last-child { display: grid; min-width: 0; }
+.pe-preview-who strong { font-size: 16px; font-weight: 700; color: var(--cr-ink); overflow-wrap: anywhere; }
+.pe-preview-who small { font-size: 13px; color: var(--cr-mute); }
+.pe-preview-avatar { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: #eef0f4; color: #8a93a6; }
+.pe-preview-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pe-preview p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--cr-text); overflow-wrap: anywhere; }
+.pe-preview p.is-empty { color: var(--cr-mute); font-style: italic; }
+.pe-preview-link { display: inline-flex; align-items: center; gap: 4px; justify-self: start; min-height: 0; padding-top: 10px; border-top: 1px solid var(--cr-line-soft); width: 100%; color: var(--cr-blue); font-size: 14px; font-weight: 600; }
+.pe-preview-link:hover { text-decoration: underline; }
+.pe-steps { padding: 18px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; }
+.pe-steps-head { display: flex; align-items: baseline; justify-content: space-between; }
+.pe-steps-head h2 { margin: 0; font-family: inherit; font-size: 15px; font-weight: 700; color: var(--cr-ink); letter-spacing: 0; }
+.pe-steps-head span { font-size: 13px; color: var(--cr-mute); font-variant-numeric: tabular-nums; }
+.pe-steps-bar { height: 4px; margin: 10px 0 6px; border-radius: 2px; background: #e6e9ef; overflow: hidden; }
+.pe-steps-bar span { display: block; height: 100%; background: var(--cr-blue); }
+.pe-steps ul { margin: 0; padding: 0; list-style: none; }
+.pe-steps li { display: flex; align-items: center; gap: 10px; min-height: 38px; border-bottom: 1px solid var(--cr-line-soft); font-size: 14px; color: var(--cr-text); }
+.pe-steps li:last-child { border-bottom: 0; }
+.pe-steps li > span:not(.pe-step-dot) { flex: 1; }
+.pe-steps li.is-done { color: var(--cr-mute); }
+.pe-steps li.is-done svg { color: var(--cr-green); flex: 0 0 auto; }
+.pe-step-dot { flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--cr-line-strong); }
+.pe-steps li a, .pe-steps li button { min-height: 0; padding: 4px 0; border: 0; background: none; color: var(--cr-blue); font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.pe-steps li a:hover, .pe-steps li button:hover { text-decoration: underline; }
+@media (max-width: 1100px) {
+  .pe-layout { grid-template-columns: 1fr; gap: 0; }
+  .pe-aside { grid-column: 1; grid-row: auto; position: static; grid-template-columns: 1fr 1fr; padding-top: 20px; }
+  .pe-grid.pe-grid-one { grid-template-columns: 1fr; max-width: 420px; }
+.pe-id code { white-space: nowrap; }
+.pe-layout > .pe-form { grid-row: auto; }
+}
+@media (max-width: 640px) {
+  .pe-head { flex-direction: row; align-items: center; gap: 12px; padding: 0 0 14px; }
+  .pe-head p { font-size: 13.5px; }
+  .pe-head-art { width: 120px; margin: -6px 0; }
+  .pe-aside { grid-template-columns: 1fr; gap: 12px; padding-top: 16px; }
+  .pe-preview, .pe-steps { padding: 16px; }
+}
+
+/* phone Nalog screen: plain title, a profile card with two actions, then grouped rows */
+.ap-account { padding-top: 0; }
+.ap-account-top { display: flex; align-items: center; justify-content: space-between; padding: calc(10px + var(--safe-top, 0px)) 0 8px; }
+.ap-account-top h1 { margin: 0; font-family: inherit; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; color: var(--cr-ink); }
+.ap-account .ap-account-bell { position: relative; top: auto; right: auto; width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 1px solid var(--cr-line); color: var(--cr-ink); }
+.ap-account .ap-account-bell .ap-bell-count { border-color: #fff; }
+.ap-me { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px 14px; margin: 6px 0 18px; padding: 16px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; }
+.ap-me .ap-account-avatar { width: 60px; height: 60px; border: 0; background: #eef0f4; color: #8a93a6; }
+.ap-me .ap-account-avatar > span { width: 22px; height: 22px; right: -3px; bottom: -3px; background: var(--cr-ink); border: 2px solid #fff; }
+.ap-me-text { display: grid; gap: 2px; min-width: 0; }
+.ap-me-text strong { font-size: 18px; font-weight: 700; color: var(--cr-ink); line-height: 1.2; overflow-wrap: anywhere; }
+.ap-me-text small { font-size: 13.5px; color: var(--cr-mute); }
+.ap-me-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ap-me-actions a { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: var(--cr-r); font-size: 15px; font-weight: 600; }
+.ap-me-edit { background: var(--cr-ink); color: #fff; }
+.ap-me-public { border: 1px solid var(--cr-line-strong); background: #fff; color: var(--cr-ink); }
+.ap-account .ap-mode { border-radius: var(--cr-r-lg); background: #eceef2; padding: 3px; }
+.ap-account .ap-mode button { border-radius: 9px; font-weight: 600; color: var(--cr-soft); }
+.ap-account .ap-mode button.active { background: #fff; color: var(--cr-ink); box-shadow: 0 1px 2px rgba(11, 22, 64, 0.12); }
+.ap-account .ap-label.ap-eyebrow { margin: 24px 0 6px; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--cr-mute); }
+.ap-account .ap-menu-plain { border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; overflow: hidden; }
+.ap-account .ap-menu-plain .ap-menu-row { min-height: 54px; padding: 10px 14px; border-bottom: 1px solid var(--cr-line-soft); font-size: 16px; font-weight: 500; color: var(--cr-ink); }
+.ap-account .ap-menu-plain .ap-menu-row:last-child { border-bottom: 0; }
+.ap-account .ap-menu-plain .ap-menu-row > svg:first-child { color: var(--cr-soft); }
+.ap-account .ap-menu-plain .ap-menu-row:active { opacity: 1; background: #f6f7f9; }
+.ap-account .ap-menu-row span small { font-size: 13px; color: var(--cr-mute); }
+.ap-account .ap-menu-logout { margin-top: 20px; min-height: 52px; padding: 0 14px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; color: var(--cr-red); font-weight: 600; }
+.ap-account .ap-menu-logout > svg:first-child { color: var(--cr-red); }
+.pe .account-field .city-field input:not([type='checkbox']):not([type='radio']) { padding-left: 38px; padding-right: 44px; }

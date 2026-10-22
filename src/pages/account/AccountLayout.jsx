@@ -1,9 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useMyBundle } from '../../hooks/queries'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
-  Award, Bell, Camera, MousePointerClick, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Sparkles, Trophy, UserRound, Wallet, Wrench,
+  Award, Bell, Camera, MousePointerClick, ChevronRight, CreditCard, History, Home, IdCard, Images, Settings, ShieldBan, Trophy, UserRound, Wallet, Wrench,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { profileService } from '../../services/profileService'
@@ -18,18 +18,18 @@ export const useAccount = () => useContext(AccountContext)
 
 export const ACCOUNT_NAV = [
   { to: '/account', label: 'Početna', icon: Home, end: true },
-  { to: '/account/ploca', label: 'Ploča izvođača', icon: Trophy, providerOnly: true },
-  { to: '/account/placanja', label: 'Historija plaćanja', icon: History },
-  { to: '/account/nacini-placanja', label: 'Načini plaćanja', icon: CreditCard },
-  { to: '/account/novcanik', label: 'Balans', icon: Wallet },
-  { to: '/account/obavijesti', label: 'Obavijesti', icon: Bell },
-  { to: '/account/profil', label: 'Profil', icon: IdCard },
-  { to: '/account/vjestine', label: 'Vještine', icon: Wrench, providerOnly: true },
-  { to: '/account/znacke', label: 'Značke', icon: Award },
-  { to: '/account/portfolio', label: 'Portfolio', icon: Images, providerOnly: true },
-  { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true },
-  { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick },
-  { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true },
+  { to: '/account/ploca', label: 'Ploča izvođača', icon: Trophy, providerOnly: true, group: 'Posao i novac' },
+  { to: '/account/novcanik', label: 'Balans', icon: Wallet, group: 'Posao i novac' },
+  { to: '/account/placanja', label: 'Historija plaćanja', icon: History, group: 'Posao i novac' },
+  { to: '/account/nacini-placanja', label: 'Načini plaćanja', icon: CreditCard, group: 'Posao i novac' },
+  { to: '/account/profil', label: 'Profil', icon: IdCard, group: 'Tvoj profil' },
+  { to: '/account/vjestine', label: 'Vještine', icon: Wrench, providerOnly: true, group: 'Tvoj profil' },
+  { to: '/account/znacke', label: 'Značke', icon: Award, group: 'Tvoj profil' },
+  { to: '/account/portfolio', label: 'Portfolio', icon: Images, providerOnly: true, group: 'Tvoj profil' },
+  { to: '/account/obavijesti', label: 'Obavijesti', icon: Bell, group: 'Postavke' },
+  { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true, group: 'Postavke' },
+  { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick, group: 'Postavke' },
+  { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true, group: 'Postavke' },
   { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
   { to: '/account/placanje', label: 'Opcije plaćanja', icon: CreditCard, hidden: true },
   { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
@@ -47,7 +47,7 @@ function SetupReminder({ onProfilePage }) {
   const hide = () => { try { sessionStorage.setItem(SETUP_LATER, '1') } catch { /* private mode */ } setLater(true) }
   return (
     <div className="profile-setup-banner">
-      <Sparkles size={18} />
+      <IdCard size={18} />
       <div>
         <strong>Dobrodošao/la na Zadatak!</strong>
         <span>Dopuni osnovne podatke — traje minutu.</span>
@@ -210,13 +210,17 @@ function AccountLayout() {
             </button>
             <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleAvatarChange} />
             <strong className="account-name">{profile.full_name || 'Tvoj nalog'}</strong>
-            <span className="account-type">{isProvider ? (profile.account_type === 'both' ? 'Klijent i izvođač' : 'Izvođač') : 'Klijent'}</span>
+            <span className="account-type">{[isProvider ? (profile.account_type === 'both' ? 'Klijent i izvođač' : 'Izvođač') : 'Klijent', profile.city].filter(Boolean).join(' · ')}</span>
+            <Link to={`/korisnik/${profile.user_id}`} className="account-side-public">Javni profil</Link>
             {avatarNotice && <small className="account-avatar-notice">{avatarNotice}</small>}
             <nav ref={navRef} className="account-nav" aria-label="Nalog">
-              {nav.map(({ to, label, icon: Icon, end, chevron }) => (
-                <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
-                  <Icon size={16} /> <span>{label}</span>{chevron && <ChevronRight size={16} className="account-nav-chevron" />}
-                </NavLink>
+              {nav.map(({ to, label, icon: Icon, end, chevron, group }, index) => (
+                <Fragment key={to}>
+                  {group && group !== nav[index - 1]?.group && <span className="account-nav-group">{group}</span>}
+                  <NavLink to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
+                    <Icon size={16} /> <span>{label}</span>{chevron && <ChevronRight size={16} className="account-nav-chevron" />}
+                  </NavLink>
+                </Fragment>
               ))}
             </nav>
           </aside>

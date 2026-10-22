@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, MousePointerClick, ShieldCheck, UserRound, Users, Wrench } from 'lucide-react'
+import { Award, Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, MousePointerClick, ShieldCheck, UserRound, Users, Wrench } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
@@ -17,6 +17,18 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
 
   const groups = [
     {
+      title: 'Tvoj profil',
+      rows: [
+        ['/account/profil', 'Profil', 'Slika, ime, lokacija i opis', IdCard],
+        ['/account/znacke', 'Značke', 'Verifikacije i dostignuća', Award],
+        ...(isProvider ? [
+          ['/account/vjestine', 'Vještine', null, Wrench],
+          ['/account/portfolio', 'Portfolio radova', null, Images],
+          ['/account/ploca', 'Moja ploča', 'Nivo, naknada i zarada', LayoutDashboard],
+        ] : []),
+      ],
+    },
+    {
       title: 'Postavke naloga',
       rows: [
         ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
@@ -31,14 +43,6 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
         ...(isProvider ? [['/account/alarmi', 'Alarmi za poslove', 'Budi prvi koji sazna za nove poslove', BellRing]] : []),
       ],
     },
-    ...(isProvider ? [{
-      title: 'Za izvođače',
-      rows: [
-        ['/account/ploca', 'Moja ploča', 'Nivo, naknada i zarada', LayoutDashboard],
-        ['/account/vjestine', 'Vještine', null, Wrench],
-        ['/account/portfolio', 'Portfolio radova', null, Images],
-      ],
-    }] : []),
     {
       title: 'Pomoć i podrška',
       rows: [
@@ -59,21 +63,24 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
 
   return (
     <div className="ap ap-page ap-account">
-      <header className="ap-account-head">
+      <div className="ap-account-top">
+        <h1>Nalog</h1>
         <NotifBellLink className="ap-account-bell" />
+      </div>
+      <section className="ap-me">
         <button type="button" className="ap-account-avatar" onClick={onPickAvatar} disabled={uploadingAvatar} aria-label="Promijeni profilnu sliku">
-          {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={36} />}
+          {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={30} strokeWidth={1.6} />}
           <span><Camera size={13} /></span>
         </button>
-        <div>
-          <h1>{profile.full_name || 'Tvoj nalog'}</h1>
-          {profile.city && <small>{profile.city}</small>}
-          <div className="ap-account-links">
-            <Link to={`/korisnik/${profile.user_id}`}>Vidi javni profil</Link>
-            <Link to="/account/profil">✎ Uredi</Link>
-          </div>
+        <div className="ap-me-text">
+          <strong>{profile.full_name || 'Tvoj nalog'}</strong>
+          <small>{[profile.city, isProvider ? (profile.account_type === 'both' ? 'Klijent i izvođač' : 'Izvođač') : 'Klijent'].filter(Boolean).join(' · ')}</small>
         </div>
-      </header>
+        <div className="ap-me-actions">
+          <Link to="/account/profil" className="ap-me-edit">Uredi profil</Link>
+          <Link to={`/korisnik/${profile.user_id}`} className="ap-me-public">Javni profil</Link>
+        </div>
+      </section>
       {notice}
 
       <div className="ap-mode" role="radiogroup" aria-label="Način korištenja">

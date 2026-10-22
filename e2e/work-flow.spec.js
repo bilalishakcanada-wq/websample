@@ -72,14 +72,14 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
 
   test('izvođač ne može predati rad bez dokaza', async () => {
     await provider.goto(listingUrl)
-    await provider.getByRole('button', { name: /^Predaj rad$/ }).click()
+    await provider.getByTestId('workflow-submit').click()
     await provider.getByTestId('workflow-report').fill('kratko')       // ispod 20 znakova
-    await expect(provider.getByRole('button', { name: /Predaj rad/ }).last()).toBeDisabled()
+    await expect(provider.getByTestId('workflow-submit-confirm')).toBeDisabled()
   })
 
   test('izvođač predaje rad, klijentu teče rok od 72 sata', async () => {
     await provider.getByTestId('workflow-report').fill('Montirani svi elementi, police poravnate i provjerene nivelirom.')
-    await provider.getByRole('button', { name: /Predaj rad/ }).last().click()
+    await provider.getByTestId('workflow-submit-confirm').click()
     await expect(provider.getByTestId('workflow-state')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
 
     await client.goto(listingUrl)
@@ -97,19 +97,19 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
 
     await provider.goto(listingUrl)
     await expect(provider.getByTestId('workflow-state')).toHaveText('Klijent traži ispravku')
-    await provider.getByRole('button', { name: /Predaj ispravljen rad/ }).click()
+    await provider.getByTestId('workflow-submit').click()
     await provider.getByTestId('workflow-report').fill('Police su poravnate i ponovo provjerene, sve je po dogovoru.')
-    await provider.getByRole('button', { name: /Predaj rad/ }).last().click()
+    await provider.getByTestId('workflow-submit-confirm').click()
     await expect(provider.getByTestId('workflow-state')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
   })
 
   test('klijent odobrava i izvođač dobija novac', async () => {
     await client.goto(listingUrl)
     await expect(client.getByTestId('workflow-submission')).toContainText('ponovo provjerene')
-    await client.getByRole('button', { name: /Odobri i isplati/ }).click()
+    await client.getByTestId('workflow-approve').click()
     await client.getByRole('dialog').getByRole('button', { name: /Odobri i isplati/ }).click()
     await expect(client.getByTestId('workflow-state')).toHaveText('Posao je završen', { timeout: 25_000 })
-    await expect(client.getByText(/Uplata oslobođena/).first()).toBeVisible()
+    await expect(client.getByTestId('workflow-money')).toContainText('Isplaćeno')
   })
 
   test('test oglas se briše', async () => {

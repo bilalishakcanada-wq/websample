@@ -1,0 +1,758 @@
+/* =========================================================================
+   Work screens (Pretraga, posao, Moji poslovi, Poruke, Obavijesti, Objavi, Nalog):
+   flat white surfaces on a quiet page, hairline borders instead of floating shadows,
+   one corner radius, the display font only for page titles. Loaded after finish.css.
+   ========================================================================= */
+
+:root {
+  --ws-page: #f5f6f8;
+  --ws-line: #e3e6ec;
+  --ws-line-strong: #cdd3de;
+  --ws-ink: #0b1640;
+  --ws-soft: #5a6481;
+  --ws-radius: 12px;
+  --ws-radius-sm: 8px;
+  --ws-open: #0f7b4f;
+  --ws-assigned: #1f5fff;
+  --ws-done: #5a6481;
+}
+
+/* ---------- Page and shared surfaces ---------- */
+.browse-page,
+.job-page,
+.account-page,
+.messages-page,
+.wizard-shell {
+  background: var(--ws-page);
+}
+
+.job-card,
+.task-card,
+.account-section,
+.notif-list > li,
+.offer-row {
+  box-shadow: none;
+}
+
+.job-card {
+  border-radius: var(--ws-radius);
+  border: 1px solid var(--ws-line);
+  padding: 20px 24px;
+}
+
+.job-card h2,
+.account-section h2 {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* ---------- Pretraga (računar): traka s filterima preko cijele širine, lista lijevo, mapa do ivice ---------- */
+@media (min-width: 769px) {
+  .browse-page .browse-header {
+    width: 100%;
+    margin: 0;
+    padding: 20px 24px 12px;
+    background: #fff;
+  }
+  .browse-page .browse-header h1 { font-size: 1.6rem; }
+  .browse-page .back-home { display: none; }
+
+  .browse-page .filter-bar {
+    width: 100%;
+    margin: 0;
+    padding: 10px 24px 12px;
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid var(--ws-line);
+    background: #fff;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .browse-page .filter-search {
+    border-radius: var(--ws-radius-sm);
+    background: #fff;
+    border: 1px solid var(--ws-line-strong);
+    min-width: 260px;
+  }
+  .browse-page .filter-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .browse-page .filter-pill {
+    border-radius: var(--ws-radius-sm);
+    border: 1px solid var(--ws-line-strong);
+    background: #fff;
+    font-weight: 600;
+    box-shadow: none;
+  }
+  .browse-page .filter-pill.active {
+    border-color: var(--ws-ink);
+    background: var(--ws-ink);
+    color: #fff;
+  }
+
+  .browse-page .browse-layout {
+    width: 100%;
+    margin: 0;
+    grid-template-columns: minmax(380px, 520px) 1fr;
+    border-top: 0;
+  }
+
+  .browse-page .browse-list {
+    gap: 10px;
+    padding: 16px 16px 24px 24px;
+    max-height: calc(100dvh - 150px);
+    background: var(--ws-page);
+  }
+
+  .browse-page .browse-map {
+    top: 0;
+    height: calc(100dvh - 150px);
+    border-radius: 0;
+    border: 0;
+    border-left: 1px solid var(--ws-line);
+    box-shadow: none;
+  }
+}
+
+/* ---------- Kartica posla u pretrazi (kao Airtasker: naslov i cijena, tri reda, status i ponude) ---------- */
+.task-card {
+  border-radius: var(--ws-radius);
+  border: 1px solid var(--ws-line);
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+
+.task-card:hover,
+.task-card.active {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--accent);
+}
+
+.task-card-link { padding: 16px 18px 14px; }
+
+.task-card-head h3 {
+  font-family: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--ws-ink);
+}
+
+.task-card-price {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ws-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.task-card-facts { gap: 4px; margin-bottom: 12px; }
+.task-card-facts li { font-weight: 500; color: var(--ws-soft); font-size: 0.86rem; }
+.task-card-facts svg { color: #8a93ab; }
+
+.task-card-foot { padding-top: 10px; border-top-color: var(--ws-line); }
+
+.task-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ws-open);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.task-card-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.task-card-status::after { content: none; }
+
+.task-card-offers { font-weight: 500; color: var(--ws-soft); }
+
+.task-card-reach {
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+/* ---------- Stranica posla ---------- */
+.job-status-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #9aa2b8;
+}
+.job-status-track li { display: inline-flex; align-items: center; gap: 8px; }
+.job-status-track li + li::before {
+  content: '';
+  width: 28px;
+  height: 2px;
+  margin: 0 10px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.45;
+}
+.job-status-track li.is-done { color: var(--ws-soft); }
+.job-status-track li.is-current { color: var(--ws-open); }
+.job-status-track li.is-current.is-assigned { color: var(--ws-assigned); }
+.job-status-track li.is-current.is-stopped { color: #c2410c; }
+
+.job-page .job-head h1 {
+  font-size: clamp(1.7rem, 2.6vw, 2.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.job-page .job-chips .pill { border-radius: 6px; }
+
+.job-page .job-facts > div {
+  border-radius: var(--ws-radius-sm);
+  background: transparent;
+  border: 1px solid var(--ws-line);
+}
+
+.job-page .job-side > * { box-shadow: none; }
+
+/* ---------- Ponude: redovi odvojeni linijom, ne kartice u karticama ---------- */
+.offers-list { gap: 0; }
+.offers-list .offer-row {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 16px 0;
+  border-top: 1px solid var(--ws-line);
+}
+.offers-list .offer-row:first-child { border-top: 0; padding-top: 4px; }
+
+.browse-page .task-card-status { color: var(--ws-open); }
+.browse-page .task-card { border-radius: var(--ws-radius); }
+
+@media (min-width: 769px) {
+  .browse-page .back-home-link { display: none; }
+}
+
+.task-card-save {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ws-radius-sm);
+  border: 1px solid var(--ws-line);
+  box-shadow: none;
+}
+
+/* ---------- Izdvoji oglas: obična kartica, dugmad jedne boje (VIP je imao smeđi tekst na plavoj podlozi) ---------- */
+.promo-card.promo-card {
+  border: 1px solid var(--ws-line);
+  border-radius: var(--ws-radius);
+  background: #fff;
+}
+section.promo-card.is-hitno,
+section.promo-card.is-vip { background: #fff; border-color: var(--accent); }
+button.promo-buy {
+  border-radius: var(--ws-radius-sm);
+  min-height: 40px;
+}
+.promo-card .promo-buy.is-hitno { background: #fff; color: var(--ws-ink); box-shadow: inset 0 0 0 1px var(--ws-line-strong); }
+.promo-card .promo-buy.is-vip { background: var(--ws-ink); color: #fff; }
+
+.browse-list .task-card.is-promo-hitno { background: #fff; box-shadow: inset 3px 0 0 #6b94f3; border-color: var(--ws-line); }
+.browse-list .task-card.is-promo-vip { background: #fff; box-shadow: inset 3px 0 0 var(--accent); border-color: var(--ws-line); }
+
+/* ---------- Detalji posla: popis kao na Airtaskeru, bez kutija u kutiji ---------- */
+.job-page .job-facts { gap: 0 24px; }
+.job-page .job-facts > div {
+  border: 0;
+  border-top: 1px solid var(--ws-line);
+  border-radius: 0;
+  padding: 14px 0;
+}
+.job-page .job-facts > div:nth-child(-n + 2) { border-top: 0; padding-top: 4px; }
+.job-page .job-fact-icon { background: transparent; color: var(--ws-soft); width: auto; height: auto; }
+
+/* ---------- Budžet i ponuda (desno): jedna kartica, glavna radnja kao dugme ---------- */
+.job-offer-card,
+.job-poster {
+  border-radius: var(--ws-radius);
+  border: 1px solid var(--ws-line);
+  box-shadow: none;
+}
+.job-offer-card > strong { font-variant-numeric: tabular-nums; }
+.job-offer-card .my-bid-status {
+  border-radius: var(--ws-radius-sm);
+  background: var(--ws-page);
+  border: 0;
+  text-align: left;
+}
+.my-bid-actions { display: grid; gap: 8px; }
+.job-offer-card .primary-button,
+.job-offer-card .ghost-button,
+.my-bid-actions .primary-button,
+.my-bid-actions .ghost-button { border-radius: var(--ws-radius-sm); min-height: 46px; }
+
+/* =========================================================================
+   Gornja traka (računar), kao na Airtaskeru: logo, „Objavi posao“, Pretraži poslove,
+   Moji poslovi; desno Pomoć, obavijesti, Poruke i meni naloga. Bijela, tanka linija ispod.
+   ========================================================================= */
+@media (min-width: 769px) {
+  .site-header {
+    background: #fff;
+    border-bottom: 1px solid var(--ws-line);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .site-header.scrolled { box-shadow: none; }
+  .site-header .site-nav-link {
+    border-radius: var(--ws-radius-sm);
+    font-weight: 600;
+    color: var(--ws-ink);
+  }
+  .site-header .site-nav-link.active { color: var(--accent); background: transparent; }
+  .site-header .site-nav-link.active::after { content: none; }
+  .site-header-cta {
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    box-shadow: none;
+  }
+  .site-nav-messages { position: relative; }
+  .site-nav-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #e5484d;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+  .site-account { position: relative; }
+  .site-header .site-user-chip {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ws-ink);
+    cursor: pointer;
+    box-shadow: none;
+  }
+  .site-account-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 90;
+    display: grid;
+    gap: 2px;
+    width: 230px;
+    padding: 6px;
+    border-radius: var(--ws-radius);
+    border: 1px solid var(--ws-line);
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(11, 22, 64, 0.12);
+  }
+  .site-account-menu a,
+  .site-account-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: var(--ws-radius-sm);
+    background: transparent;
+    color: var(--ws-ink);
+    font: inherit;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+  .site-account-menu a:hover,
+  .site-account-menu button:hover { background: var(--ws-page); }
+  .site-account-menu hr { margin: 4px 0; border: 0; border-top: 1px solid var(--ws-line); }
+}
+
+/* fotografija onoga ko je objavio posao, dolje desno na kartici */
+.task-card .task-card-avatar {
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  background: #e8edf8;
+  color: var(--ws-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.task-card .task-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.task-card .task-card-avatar + .task-card-save-slot { margin-left: 0; width: 36px; }
+
+/* Pretraga na računaru: bez velikog naslova, filteri odmah ispod gornje trake (kao „Browse tasks“) */
+@media (min-width: 769px) {
+  .browse-page .browse-header { display: none; }
+  .browse-page .filter-bar { padding-top: 12px; }
+  .browse-page .browse-list { max-height: calc(100dvh - var(--header-h) - 66px); }
+  .browse-page .browse-map { height: calc(100dvh - var(--header-h) - 66px); top: calc(var(--header-h) + 66px); }
+}
+
+/* ---------- Stranica posla: ko, gdje, kada (kao Airtasker) ---------- */
+.job-who-where {
+  display: grid;
+  gap: 2px;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.job-who-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  color: inherit;
+  text-decoration: none;
+}
+a.job-who-row:hover dd { color: var(--accent); }
+.job-who-row dt {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ws-soft);
+}
+.job-who-row dd {
+  margin: 1px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ws-ink);
+}
+.job-who-row dd small { margin-left: 6px; font-weight: 500; color: var(--ws-soft); font-size: 0.85rem; }
+.job-who-avatar,
+.job-who-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e8edf8;
+  color: var(--ws-ink);
+}
+.job-who-icon { background: transparent; color: var(--ws-soft); }
+
+.job-facts-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ws-line);
+  font-size: 0.9rem;
+  color: var(--ws-soft);
+}
+.job-facts-line span { display: inline-flex; align-items: center; gap: 6px; }
+
+.job-offer-card > span { letter-spacing: 0.07em; }
+.job-offer-card > strong { font-size: 2.6rem; }
+
+/* Stranica posla na računaru: bijela stranica, dijelovi odvojeni linijom (bez kartica), kao na Airtaskeru */
+@media (min-width: 769px) {
+  .job-page { background: #fff; }
+  .job-page .job-main > .job-card {
+    border: 0;
+    border-top: 1px solid var(--ws-line);
+    border-radius: 0;
+    background: transparent;
+    padding: 26px 0;
+  }
+  .job-page .job-main > .job-card h2 { font-size: 1.15rem; margin-bottom: 14px; }
+  .job-page .job-side .job-offer-card { background: var(--ws-page); border-color: transparent; }
+  .job-page .job-side .job-offer-card .my-bid-status { background: #fff; }
+}
+.job-page .section-heading { justify-content: flex-start; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+.job-page .section-heading h2 { margin: 0; }
+.job-page .section-heading .muted-text { font-size: 1.05rem; font-weight: 600; color: var(--ws-soft); }
+.job-page .section-heading .muted-text::before { content: '('; }
+.job-page .section-heading .muted-text::after { content: ')'; }
+
+.qa-row { background: transparent; border-radius: 0; padding: 12px 0; border-bottom: 1px solid var(--ws-line); }
+.qa-row.is-owner { background: transparent; padding-left: 28px; }
+.qa-form input { border-radius: var(--ws-radius-sm); border-color: var(--ws-line-strong); }
+.qa-form .primary-button { border-radius: var(--ws-radius-sm); }
+.contact-protection-note { border-radius: var(--ws-radius-sm); }
+
+/* =========================================================================
+   Moji poslovi (telefon i računar), kao Airtaskerov „My tasks“:
+   podvučene kartice (tabovi), filter, kartice poslova iste kao u pretrazi, stanje velikim slovima.
+   ========================================================================= */
+.mt .ap-tabs,
+.pd .pd-tabs {
+  display: flex;
+  gap: 22px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--ws-line);
+}
+.mt .ap-tabs button,
+.pd .pd-tabs button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 2px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ws-soft);
+  font-weight: 700;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.mt .ap-tabs button.active,
+.pd .pd-tabs button.active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ws-ink);
+  border-bottom-color: var(--accent);
+}
+.pd .pd-tabs { gap: 18px; }
+.pd-tabs button b { background: #e8edf8; color: var(--ws-ink); }
+.pd-tabs button.active b { background: var(--accent); color: #fff; }
+
+.mt-card,
+.pd-card {
+  border-radius: var(--ws-radius);
+  border: 1px solid var(--ws-line);
+  box-shadow: none;
+}
+.mt-card:hover,
+.pd-card:hover { border-color: var(--accent); }
+.mt-card-head strong,
+.pd-card-head strong { font-weight: 700; color: var(--ws-ink); }
+.mt-card-head em,
+.pd-card-head em {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ws-ink);
+  font-variant-numeric: tabular-nums;
+}
+.mt-card-foot { padding-top: 8px; border-top: 1px solid var(--ws-line); }
+
+.mt-state,
+.pd-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent !important;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.mt-state::before,
+.pd-state::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.mt-state.s-open { color: var(--ws-open); }
+.mt-state.s-assigned { color: var(--ws-assigned); }
+.pd-state.s-pending { color: var(--ws-open); }
+.pd-state.s-funded, .pd-state.s-accepted, .pd-state.s-requested { color: var(--ws-assigned); }
+.pd-state.s-paid, .pd-state.s-completed { color: var(--ws-soft); }
+
+.pd-summary { border-radius: var(--ws-radius-sm); background: var(--ws-page); color: var(--ws-ink); }
+.pd-btn { border-radius: var(--ws-radius-sm); }
+.pd-btn.is-primary { background: var(--accent); border-color: var(--accent); }
+
+@media (min-width: 769px) {
+  .ap-page.mt {
+    width: min(100% - 48px, 1080px);
+    margin: 0 auto;
+    padding: 28px 0 48px;
+    background: transparent;
+  }
+  .mt .ap-sticky { position: static; margin: 0; padding: 0; background: transparent; }
+  .mt .ap-sticky::after { content: none; }
+  .mt .ap-page-head { position: static; padding: 0 0 18px; margin: 0; background: transparent; }
+  .mt .ap-page-head::after { content: none; }
+  .mt .ap-page-head h1 { font-size: 2rem; color: var(--ws-ink); }
+  .mt .ap-page-head .ap-bell,
+  .mt .ap-page-head > a { display: none; }
+  .mt .mt-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .mt .mt-filter { margin: 16px 0 12px; padding: 0 12px; min-height: 38px; border: 1px solid var(--ws-line-strong); border-radius: var(--ws-radius-sm); background: #fff; }
+  .mt .pd { margin-top: 16px; }
+}
+
+/* =========================================================================
+   Poruke na računaru, kao Airtasker: dva dijela preko cijele visine, lista lijevo, razgovor desno.
+   ========================================================================= */
+@media (min-width: 769px) {
+  .chat-page { background: #fff; }
+  .chat-page > .content-container { width: 100%; max-width: none; padding: 0; }
+  .chat-page .chat-topline { display: none; }
+  .chat-page .chat-layout {
+    gap: 0;
+    height: calc(100dvh - var(--header-h));
+    min-height: 480px;
+    margin: 0;
+    grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  }
+  .chat-page .chat-sidebar,
+  .chat-page .chat-main { border: 0; border-radius: 0; box-shadow: none; }
+  .chat-page .chat-sidebar { border-right: 1px solid var(--ws-line); }
+  .chat-page .chat-main { background: var(--ws-page); }
+  .chat-page .chat-welcome .chat-safety-card { display: none; }
+  .chat-page .chat-welcome { align-content: start; }
+  .chat-page .chat-welcome-empty { margin-top: 18vh; }
+}
+.chat-search { border-radius: var(--ws-radius-sm); }
+.chat-filters button { border-radius: 999px; }
+.chat-list-item { border-radius: 0; }
+.chat-list-item.active { background: #eef3ff; box-shadow: inset 3px 0 0 var(--accent); }
+.chat-list-listing { color: var(--ws-soft); font-weight: 500; }
+.chat-safety-banner { border-radius: var(--ws-radius-sm); }
+
+/* =========================================================================
+   Obavijesti: jedna lista sa linijama između redova (ne kartica ispod kartice), nepročitane plavkaste.
+   ========================================================================= */
+.notif-list { gap: 0; border: 1px solid var(--ws-line); border-radius: var(--ws-radius); background: #fff; overflow: hidden; }
+.notif-list .notif-card {
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--ws-line);
+  padding: 14px 16px;
+  background: #fff;
+}
+.notif-list .notif-card:first-child { border-top: 0; }
+.notif-list .notif-card.is-unread { background: #f2f6ff; }
+.notif-card-action { border-radius: var(--ws-radius-sm); background: #fff; color: var(--ws-ink); box-shadow: inset 0 0 0 1px var(--ws-line-strong); }
+.notif-card-action:hover { background: var(--ws-page); color: var(--ws-ink); }
+.notif-list-open { background: transparent !important; color: #9aa2b8; }
+.notif-pill { border-radius: 999px; }
+.notif-group-head { letter-spacing: 0.07em; font-weight: 800; }
+
+/* =========================================================================
+   Nalog (računar), kao Airtaskerov „Account“: lijevo obična lista linkova, mala slika i ime.
+   ========================================================================= */
+@media (min-width: 769px) {
+  .account-page { background: #fff; }
+  .account-sidebar {
+    align-items: stretch;
+    padding: 4px 0 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .account-sidebar .account-avatar { width: 72px; height: 72px; border-width: 0; background: #e8edf8; color: #8a93ab; }
+  .account-sidebar .account-avatar-edit { right: -2px; bottom: -2px; width: 26px; height: 26px; }
+  .account-sidebar .account-name { margin-top: 10px; text-align: left; font-family: inherit; font-size: 1.1rem; font-weight: 700; color: var(--ws-ink); }
+  .account-sidebar .account-type { text-align: left; }
+  .account-nav { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--ws-line); }
+  .account-nav a { border-radius: var(--ws-radius-sm); padding: 10px 12px; font-weight: 500; }
+  .account-nav a.active { background: var(--ws-page); box-shadow: none; color: var(--ws-ink); font-weight: 700; }
+  .account-nav a.active svg:first-child { color: var(--accent); }
+}
+
+/* Nadzorna ploča: bez natpisa iznad naslova; brojke u jednoj traci umjesto tri kartice */
+.account-home .small-eyebrow { display: none; }
+.account-home .dashboard-grid {
+  gap: 0;
+  border: 1px solid var(--ws-line);
+  border-radius: var(--ws-radius);
+  background: #fff;
+  overflow: hidden;
+}
+.account-home .stat-card {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  border-left: 1px solid var(--ws-line);
+}
+.account-home .stat-card:first-child { border-left: 0; }
+.account-home .stat-card strong { font-variant-numeric: tabular-nums; }
+.dashboard-listing { border-radius: var(--ws-radius); border: 1px solid var(--ws-line); box-shadow: none; }
+.status-pill { border-radius: 6px; }
+
+/* =========================================================================
+   Objavi posao (računar), kao Airtasker: koraci okomito lijevo, obrazac desno, bijela stranica.
+   ========================================================================= */
+@media (min-width: 900px) {
+  .wizard-shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 640px);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'head head' 'steps body';
+    justify-content: center;
+    column-gap: 56px;
+    background: #fff;
+  }
+  .wizard-shell > .wizard-header { grid-area: head; }
+  .wizard-shell > .wizard-progress {
+    grid-area: steps;
+    flex-direction: column;
+    gap: 0;
+    width: auto;
+    margin: 0;
+    padding: 36px 0 0;
+    overflow: visible;
+    align-self: start;
+    position: sticky;
+    top: 24px;
+  }
+  .wizard-shell .wizard-step {
+    flex: none;
+    min-width: 0;
+    padding: 12px 0 12px 14px;
+    border-bottom: 0;
+    border-left: 3px solid var(--ws-line);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .wizard-shell .wizard-step::after { left: -3px; right: auto; top: 0; bottom: 0; width: 3px; height: auto; transform: scaleY(0); transform-origin: top; }
+  .wizard-shell .wizard-step.active::after { transform: scaleY(1); }
+  .wizard-shell .wizard-step.active { color: var(--ws-ink); font-weight: 800; }
+  .wizard-shell .wizard-step.done { color: var(--ws-soft); }
+  .wizard-shell > .wizard-body { grid-area: body; width: auto; margin: 0; padding: 36px 0 120px; }
+  .wizard-shell .wizard-panel { border: 0; box-shadow: none; padding: 0; background: transparent; }
+  .wizard-shell .wizard-panel h2 { font-size: 2rem; letter-spacing: -0.02em; }
+}
+.wizard-panel input,
+.wizard-panel textarea,
+.wizard-panel select { border-radius: var(--ws-radius-sm); background: #fff; }
+.wizard-option { border-radius: var(--ws-radius-sm); box-shadow: none; }
+.wizard-option.selected { border-color: var(--accent); background: #eef3ff; box-shadow: inset 0 0 0 1px var(--accent); }
+.wizard-footer .primary-button,
+.wizard-footer .ghost-button { border-radius: 999px; }
+
+/* polja u Nalogu: bijela sa okvirom, kao na Airtaskeru (siva polja izgledaju kao isključena) */
+.account-field input,
+.account-field textarea,
+.account-field select,
+.account-form input:not([type='checkbox']):not([type='radio']),
+.account-form textarea,
+.account-form select {
+  background: #fff;
+  border: 1px solid var(--ws-line-strong);
+  border-radius: var(--ws-radius-sm);
+}
+.account-field input:focus,
+.account-form input:focus,
+.account-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+
+/* radni ekrani na računaru stoje na bijeloj podlozi */
+@media (min-width: 769px) {
+  body:has(.mt, .chat-page, .account-page, .job-page, .wizard-shell) { background: #fff; }
+}
+.tx-tod .tx-tod-chip { background: #fff; border: 1px solid var(--ws-line-strong); border-radius: var(--ws-radius-sm); box-shadow: none; }
+.tx-tod .tx-tod-chip.is-on { border-color: var(--accent); background: #eef3ff; box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* telefon: traka stanja iznad naslova posla */
+.jd-sheet .job-status-track { margin: 0 0 12px; font-size: 0.7rem; }
+.jd-sheet .job-status-track li + li::before { width: 18px; margin: 0 8px; }

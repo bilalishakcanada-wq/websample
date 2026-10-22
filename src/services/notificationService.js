@@ -1,4 +1,8 @@
 import { supabase } from '../lib/supabase'
+import { PUSH_PREF_CHANGED } from '../utils/push'
+
+const pushPref = { userId: null, value: null }
+if (typeof window !== 'undefined') window.addEventListener(PUSH_PREF_CHANGED, () => { pushPref.value = null })
 
 export const notificationService = {
   async listMine(limit = 20) {
@@ -25,6 +29,20 @@ export const notificationService = {
   async unreadCount() {
     const { count, error } = await supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null)
     return error ? 0 : count || 0
+  },
+
+  /**
+   * The account's "Push obavijesti" switch. Off means the app stays quiet too: no ping, no desktop pop-up
+   * (the bell still counts what came in). Cached until the switch moves (PUSH_PREF_CHANGED).
+   */
+  pushEnabled(userId) {
+    if (!userId) return Promise.resolve(false)
+    if (pushPref.userId !== userId || !pushPref.value) {
+      pushPref.userId = userId
+      pushPref.value = supabase.from('profiles').select('notify_push').eq('user_id', userId).maybeSingle()
+        .then(({ data, error }) => (error ? true : data?.notify_push !== false))
+    }
+    return pushPref.value
   },
 
   /** Realtime: new notifications for this user. Returns an unsubscribe function. */

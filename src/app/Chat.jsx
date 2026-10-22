@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
-import CoffeeTalkArt from '../components/CoffeeTalkArt'
+import { chatSceneUrl } from '../art/chatScene'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
@@ -32,7 +32,7 @@ function Chat(props) {
 
   if (!active) {
     return (
-      <div className="ap ap-page ch">
+      <div className="ap ap-page ch" style={{ '--chat-scene': chatSceneUrl }}>
         {/* only the title stays pinned on a phone: search and filters scroll with the list, so pinned bars don't eat a third of the screen */}
         <header className="ap-page-head"><h1>Poruke</h1><NotifBellLink /></header>
         <div className="ch-tools">
@@ -58,7 +58,7 @@ function Chat(props) {
         )}
         {!loading && !(error && inbox.length === 0) && visible.length === 0 && (
           <div className="ap-empty ap-empty-art">
-            {inbox.length === 0 ? <CoffeeTalkArt className="ch-empty-art" /> : <MailMascot />}
+            <MailMascot />
             <strong>{inbox.length === 0 ? 'Još nemaš poruka' : 'Nema razgovora u ovom filteru'}</strong>
             <span>{inbox.length === 0 ? 'Razgovor se otvara čim neka ponuda bude prihvaćena.' : 'Promijeni filter ili pretragu.'}</span>
             {inbox.length === 0 && <Link to="/search" className="ap-btn ap-btn-primary ap-btn-inline">Pregledaj poslove</Link>}
@@ -85,7 +85,7 @@ function Chat(props) {
   }
 
   return (
-    <div className="ap ch ch-thread-page" ref={fitRef}>
+    <div className="ap ch ch-thread-page" ref={fitRef} style={{ '--chat-scene': chatSceneUrl }}>
       <header className="ch-head" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">

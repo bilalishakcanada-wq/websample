@@ -2,12 +2,12 @@ import { PrivateImage } from '../components/PrivateFile'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
-import CoffeeTalkArt from '../components/CoffeeTalkArt'
+import { chatSceneUrl } from '../art/chatScene'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { useAuth } from '../context/AuthContext'
@@ -299,7 +299,7 @@ function MessagesPage() {
   }
 
   return (
-    <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`}>
+    <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`} style={{ '--chat-scene': chatSceneUrl }}>
       <main className="content-container">
         <div className="chat-topline">
           <h1>Poruke</h1>
@@ -353,7 +353,7 @@ function MessagesPage() {
             {!active ? (
               <div className="chat-welcome">
                 <div className="chat-welcome-empty">
-                  <CoffeeTalkArt className="chat-welcome-art" />
+                  <div className="chat-welcome-art"><MessagesSquare size={30} /></div>
                   <strong>Odaberite razgovor</strong>
                   <span>Ovdje se otvara prepiska sa klijentom ili izvođačem, zajedno sa poslom o kojem pričate.</span>
                 </div>

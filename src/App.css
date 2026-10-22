@@ -9637,11 +9637,6 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 /* ---------- Messages (PIK-style inbox) ---------- */
-/* chat wallpaper: faint line drawings of home — Stari Most, Sebilj, džezva and fildžan, the tram, the mountains, ćevapi — and a few tools */
-:root {
-  --chat-wallpaper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260' fill='none' stroke='%231f5fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='.11'%3E%3Cg transform='translate(16 20)'%3E%3Cpath d='M0 30 V8 L4 4 L8 8 V30 M48 30 V8 L52 4 L56 8 V30 M8 30 Q28 -4 48 30 M8 13 Q28 4 48 13 M2 36 q4 -2 8 0 t8 0 t8 0 t8 0 t8 0 t8 0'/%3E%3C/g%3E%3Cg transform='translate(112 12) rotate(4)'%3E%3Cpath d='M3 36 H27 M6 36 V20 H24 V36 M10 36 V27 a5 5 0 0 1 10 0 V36 M2 20 L15 15 L28 20 M8 15 Q15 3 22 15 M15 5 V0'/%3E%3C/g%3E%3Cg transform='translate(196 28) rotate(-14)'%3E%3Cpath d='M6 8 H22 L24 28 Q14 32 4 28 Z M6 8 L0 4 M22 11 L36 3 M7 14 H22'/%3E%3C/g%3E%3Cg transform='translate(70 92)'%3E%3Cpath d='M2 8 H20 L17 22 Q11 26 5 22 Z M0 27 H22 M8 4 q-2 -4 0 -8 M14 4 q-2 -4 0 -8'/%3E%3C/g%3E%3Cg transform='translate(150 84) rotate(-3)'%3E%3Crect x='2' y='6' width='44' height='17' rx='4'/%3E%3Cpath d='M7 10 h8 v6 h-8z M20 10 h8 v6 h-8z M33 10 h8 v6 h-8z M24 6 L20 0 H30'/%3E%3Ccircle cx='11' cy='26' r='2.4'/%3E%3Ccircle cx='37' cy='26' r='2.4'/%3E%3C/g%3E%3Cg transform='translate(10 150)'%3E%3Cpath d='M0 30 L16 8 L26 20 L34 12 L50 30 M12 13 L16 8 L20 13 M30 16 L34 12 L38 16 M58 30 V25 M58 13 L52 25 H64 Z'/%3E%3C/g%3E%3Cg transform='translate(108 160) rotate(6)'%3E%3Cellipse cx='18' cy='12' rx='18' ry='9'/%3E%3Crect x='5' y='8' width='26' height='3.6' rx='1.8'/%3E%3Crect x='5' y='13' width='26' height='3.6' rx='1.8'/%3E%3Cpath d='M10 4 h0 M18 3 h0 M26 4 h0'/%3E%3C/g%3E%3Cg transform='translate(200 140) rotate(-18)'%3E%3Cpath d='M4 26 L18 12 M14 8 a6 6 0 1 0 8 8 l-3-1 -2-2 -1-3z M2 24 l4 4'/%3E%3C/g%3E%3Cg transform='translate(190 206) rotate(12)'%3E%3Crect x='2' y='2' width='20' height='9' rx='2'/%3E%3Cpath d='M22 6 h4 v8 h-12 v4 M12 18 h4 v10 h-4z'/%3E%3C/g%3E%3Cg transform='translate(46 214) rotate(-8)'%3E%3Cpath d='M3 4 h22 a3 3 0 0 1 3 3 v12 a3 3 0 0 1-3 3 h-13 l-6 5 v-5 h-3 a3 3 0 0 1-3-3 v-12 a3 3 0 0 1 3-3z M9 13 h0 M15 13 h0 M21 13 h0'/%3E%3C/g%3E%3Ccircle cx='100' cy='64' r='1.8'/%3E%3Ccircle cx='240' cy='110' r='1.8'/%3E%3Ccircle cx='150' cy='236' r='1.6'/%3E%3Ccircle cx='34' cy='118' r='1.6'/%3E%3Ccircle cx='246' cy='250' r='1.4'/%3E%3C/svg%3E");
-}
-
 .chat-page .content-container {
   padding-top: 18px;
 }
@@ -9962,10 +9957,11 @@ body:has(.profile-cta-bar) .support-chat {
   overflow-y: auto;
   padding: 32px;
   display: grid;
+  padding-bottom: 200px;
   gap: 24px;
-  align-content: center;
+  align-content: start;
   justify-items: center;
-  background: var(--chat-wallpaper) 0 0 / 260px 260px, linear-gradient(180deg, #f9fbff 0%, #f1f6ff 100%);
+  background: var(--chat-scene) center bottom / max(100%, 900px) auto no-repeat, linear-gradient(180deg, #f6f9ff 0%, #dfeaff 100%);
 }
 
 .chat-welcome-empty {
@@ -9988,9 +9984,15 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .chat-welcome-art {
-  width: 260px;
-  height: auto;
-  margin-bottom: 4px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 6px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(31, 95, 255, 0.3);
 }
 
 .chat-safety-card {
@@ -10042,6 +10044,9 @@ body:has(.profile-cta-bar) .support-chat {
 
 .chat-safety-card a {
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: -10px;
   font-size: 0.86rem;
   font-weight: 700;
   color: var(--accent);
@@ -10204,8 +10209,8 @@ body:has(.profile-cta-bar) .support-chat {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: var(--chat-wallpaper) 0 0 / 260px 260px, linear-gradient(180deg, #f9fbff 0%, #f1f6ff 100%);
-  background-attachment: local, scroll;
+  /* the scene (set from src/art/chatScene.js) stays put at the bottom while the messages scroll over it */
+  background: var(--chat-scene) center bottom / max(100%, 900px) auto no-repeat, linear-gradient(180deg, #f6f9ff 0%, #dfeaff 100%);
 }
 
 /* short threads sit at the bottom, next to the composer, like any messenger */
@@ -10273,6 +10278,7 @@ body:has(.profile-cta-bar) .support-chat {
   align-self: flex-start;
   background: var(--surface);
   border: 1px solid #e3e9f4;
+  box-shadow: 0 2px 10px rgba(8, 22, 74, 0.08);
   border-bottom-left-radius: 4px;
 }
 
@@ -10280,6 +10286,7 @@ body:has(.profile-cta-bar) .support-chat {
   align-self: flex-end;
   background: var(--accent);
   color: white;
+  box-shadow: 0 2px 10px rgba(31, 95, 255, 0.25);
   border-bottom-right-radius: 4px;
 }
 

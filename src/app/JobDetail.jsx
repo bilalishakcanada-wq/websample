@@ -14,6 +14,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
 import { activePromotion } from '../services/promotionService'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -31,6 +32,7 @@ function JobDetail(props) {
     reviewForm, setReviewForm, submitReview, submittingReview, message, tab, setTab,
   } = props
   const [menu, setMenu] = useState(false)
+  useBackToClose(menu, () => setMenu(false))
   const [question, setQuestion] = useState('')
   const [asking, setAsking] = useState(false)
   const [askError, setAskError] = useState('')

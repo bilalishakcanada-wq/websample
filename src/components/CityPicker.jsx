@@ -4,9 +4,11 @@ import { featuredCities, otherCitiesImage } from '../data/featuredCities'
 import { bosniaCities } from '../data/cities'
 import { rememberPlace } from '../data/cityCoordinates'
 import { useLocationSearch } from '../hooks/useLocationSearch'
+import { useBackToClose } from '../hooks/useBackToClose'
 
 function CityPicker({ value, onChange, onClose }) {
   const [query, setQuery] = useState('')
+  useBackToClose(true, onClose)
 
   // nothing typed: every town; typing: towns and settlements ("Otes" → Otes, Ilidža · Otes, Kakanj)
   const { places, loading } = useLocationSearch(query, { limit: 20, popular: bosniaCities })

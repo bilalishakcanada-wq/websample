@@ -7,6 +7,7 @@ import { formatBosnianDate } from '../utils/dateFormat'
 import { useFullscreen } from './useFullscreen'
 import { useGoBack } from '../hooks/useGoBack'
 import { useQuoteRequestsEnabled } from '../hooks/queries'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -23,6 +24,7 @@ function ProfileView({ bundle, user, onReport, onBlock, blocked = false }) {
   useFullscreen()
   const quoteEnabled = useQuoteRequestsEnabled()
   const [menu, setMenu] = useState(false)
+  useBackToClose(menu, () => setMenu(false))
   const [showAll, setShowAll] = useState(false)
   const { profile, trust, badges = [], reviews = [], listings = [], portfolio = [] } = bundle
   const reviewCount = bundle.review_count ?? reviews.length

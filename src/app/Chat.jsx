@@ -7,6 +7,7 @@ import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import ChatStateNotice from '../components/ChatStateNotice'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
 
@@ -28,6 +29,7 @@ function Chat(props) {
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
   const [menu, setMenu] = useState(false)
+  useBackToClose(menu, () => setMenu(false))
 
   if (!active) {
     return (

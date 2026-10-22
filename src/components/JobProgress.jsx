@@ -27,7 +27,7 @@ function JobProgress({ listing, payment = null, bids = [], acceptedBid = null, e
 
   const steps = [
     { icon: Megaphone, label: 'Objavljen', meta: kratko(listing.created_at) },
-    { icon: UserCheck, label: 'Izvođač', meta: at > 1 ? (payment ? `${km(payment.amount)} osigurano` : 'Dogovoren') : pending ? ponude(pending) : 'Čeka ponude' },
+    { icon: UserCheck, label: 'Izvođač', meta: at > 1 ? (payment ? `${km(payment.amount)}${done ? '' : ' osigurano'}` : 'Dogovoren') : pending ? ponude(pending) : 'Čeka ponude' },
     { icon: Wrench, label: 'Radi se', meta: at > 2 ? '' : { revision: 'Ispravka', cancel_requested: 'Traži se prekid' }[state] || (at === 2 ? 'U toku' : '') },
     { icon: FileCheck2, label: 'Rad predat', meta: at > 3 ? kratko(payment?.submitted_at) : at === 3 && payment?.review_deadline && state !== 'disputed' ? `Pregled do ${kratko(payment.review_deadline)}` : state === 'disputed' ? 'Prijavljen problem' : '' },
     { icon: Wallet, label: payment ? 'Isplaćeno' : 'Završen', meta: done ? kratko(payment?.released_at) : '' },

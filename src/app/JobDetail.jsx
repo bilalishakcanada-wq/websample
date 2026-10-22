@@ -111,6 +111,17 @@ function JobDetail(props) {
             <ChevronRight size={18} />
           </Link>
         )}
+        {/* klijent vidi koga je izabrao, jednim dodirom do profila */}
+        {isOwner && acceptedBid && (
+          <Link to={`/korisnik/${acceptedBid.bidder_id}`} className="jd-poster" data-testid="chosen-worker">
+            <Avatar url={acceptedBid.bidder?.avatar_url} size={44} />
+            <div>
+              <strong>{acceptedBid.bidder?.display_name || 'Izvođač'}</strong>
+              <span>Tvoj izvođač za ovaj posao</span>
+            </div>
+            <ChevronRight size={18} />
+          </Link>
+        )}
 
         <ul className="jd-facts">
           <li>

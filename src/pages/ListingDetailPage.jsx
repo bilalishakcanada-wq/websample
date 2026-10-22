@@ -802,6 +802,15 @@ function ListingDetailPage() {
               <span>{payment ? 'Dogovorena cijena' : 'Okvirni budžet'}</span>
               <strong>{formatPrice(payment ? payment.amount : listing.price, listing.currency)}</strong>
               {step && <NextStep step={step} onAction={runStep} busy={outcomeBusy} />}
+              {isOwner && acceptedBid && (
+                <Link to={`/korisnik/${acceptedBid.bidder_id}`} className="side-worker" data-testid="chosen-worker">
+                  {acceptedBid.bidder?.avatar_url
+                    ? <img loading="lazy" decoding="async" src={acceptedBid.bidder.avatar_url} alt="" className="side-worker-avatar" />
+                    : <span className="side-worker-avatar"><UserRound size={18} /></span>}
+                  <span><small>Tvoj izvođač</small><strong>{acceptedBid.bidder?.display_name || 'Izvođač'}</strong></span>
+                  <ChevronRight size={16} />
+                </Link>
+              )}
               {!isOwner && !myBid && listing.status === 'published' && <button type="button" className={simpleMode ? 'simple-apply-btn' : 'primary-button full-width'} onClick={openBidSheet}><Send size={simpleMode ? 24 : 18} /> {offerLabel}</button>}
               {canRebid && (
                 <div className="rebid-note" data-testid="rebid-note">

@@ -9,6 +9,17 @@ import { contactInfoMessage, scanContactInfo } from '../utils/moderation'
 export const isValidFullName = (value) => /^\p{L}[\p{L}'’.-]*(\s+\p{L}[\p{L}'’.-]*)+$/u.test(String(value || '').trim()) && String(value || '').trim().length <= 120
 
 export const profileService = {
+  /** Name and photo of several people at once (who posted the jobs on a list). Missing ones are skipped. */
+  async getPublicCards(userIds) {
+    if (!userIds.length) return []
+    const { data, error } = await supabase.from('public_profiles').select('user_id, display_name, avatar_url').in('user_id', userIds)
+    if (error) {
+      console.error('Supabase public cards fetch failed', { message: error.message, code: error.code })
+      return []
+    }
+    return data || []
+  },
+
   async getPublicProfile(userId) {
     const { data, error } = await supabase
       .from('public_profiles')

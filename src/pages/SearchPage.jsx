@@ -66,6 +66,16 @@ const PRICE_PRESETS = [
 
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
 
+function PosterAvatar({ person }) {
+  if (!person) return null
+  const name = person.display_name || 'Korisnik'
+  return (
+    <span className="task-card-avatar" title={`Objavio/la ${name}`}>
+      {person.avatar_url ? <img src={person.avatar_url} alt="" loading="lazy" decoding="async" /> : name.trim().charAt(0).toUpperCase()}
+    </span>
+  )
+}
+
 function FilterMenu({ id, label, active, open, onToggle, children, width }) {
   // phones: the popover becomes a bottom sheet rendered on <body> (the sticky, blurred
   // filter bar would otherwise trap a position: fixed panel inside itself)
@@ -123,6 +133,8 @@ function SearchPage() {
     media.addEventListener('change', onChange)
     return () => media.removeEventListener('change', onChange)
   }, [])
+  // the phone's map is a screen of its own: back returns to the list before leaving the search
+  useBackToClose(isPhone && mobileView === 'map', () => setMobileView('list'))
   const filterBarRef = useRef(null)
   const cardRefs = useRef({})
 
@@ -296,6 +308,17 @@ function SearchPage() {
     const pinnedIds = new Set(pinned.map((item) => item.id))
     return [...pinned, ...organic.filter((item) => !pinnedIds.has(item.id))]
   }, [promotedRows, organic, decorate, filters.remoteOnly])
+
+  // who posted each job: their photo sits on the card, like on Airtasker
+  const posterIds = useMemo(() => [...new Set(listings.map((item) => item.user_id).filter(Boolean))].sort(), [listings])
+  const postersQuery = useQuery({
+    queryKey: ['poster-cards', posterIds],
+    queryFn: () => profileService.getPublicCards(posterIds),
+    enabled: posterIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
+  })
+  const posters = useMemo(() => new Map((postersQuery.data || EMPTY).map((person) => [person.user_id, person])), [postersQuery.data])
 
   const mapFocus = useMemo(() => {
     if (!origin) return null
@@ -509,6 +532,7 @@ function SearchPage() {
                   <span className="task-card-status">Otvoren</span>
                   <span className="task-card-offers"><Users size={13} /> {item.offers} {item.offers === 1 ? 'ponuda' : 'ponuda'}</span>
                   {Number(item.travel_allowance) > 0 && <span className="task-card-reach is-travel"><Car size={12} /> Put {Math.round(item.travel_allowance)} KM</span>}
+                  <PosterAvatar person={posters.get(item.user_id)} />
                   <span className="task-card-save-slot" aria-hidden="true" />
                 </div>
               </Link>

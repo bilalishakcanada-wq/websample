@@ -8,6 +8,7 @@ import { SITE_GUIDE } from '../data/siteGuide'
 import { HUMAN_LABEL, localAnswer, starterSuggestions } from '../utils/supportBrain'
 import { SUPPORT_IDLE_MS, currentSession, humanInSession, readReset, writeReset } from '../utils/supportSessions'
 import { SkeletonLines } from './Skeleton'
+import { useBackToClose } from '../hooks/useBackToClose'
 
 const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
 const GUIDE = SITE_GUIDE.map(({ path, title, where }) => ({ path, title, where }))
@@ -117,6 +118,7 @@ function SupportChat({ openRequested = false }) {
 
   const push = (row) => setMessages((list) => (list.some((item) => item.id === row.id) ? list : [...list, row]))
   const closeChat = () => setOpen(false)
+  useBackToClose(open, closeChat)
 
   const handOff = async (summary) => {
     await supportService.send({ userId: user.id, sender: 'user', message: `${HANDOFF_PREFIX} ${summary}`, needsHuman: true }).then(push).catch(() => {})

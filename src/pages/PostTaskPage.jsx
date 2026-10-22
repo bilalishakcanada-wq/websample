@@ -178,6 +178,12 @@ function PostTaskPage() {
 
   const submit = async () => {
     setError('')
+    // a visitor writes the whole job first (the draft is kept on the device) and signs up only to publish it
+    if (!user) {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, tags: tagList, za: zaParam || null })) } catch { /* ignore */ }
+      navigate(`/register?next=${encodeURIComponent(zaParam ? `/objavi?za=${zaParam}` : '/objavi')}`)
+      return
+    }
     if (postGate === 'needed' || postGate === 'rejected') { navigate(postVerifyHref(postBack)); return }
     if (postGate === 'pending') return
     // notifications are offered once (never required): the client hears about offers right away
@@ -190,7 +196,8 @@ function PostTaskPage() {
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       if (freshPost) { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
-      navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`)
+      // the finished job takes the form's place: back from it returns to where posting started, not to an empty form
+      leaveFlow(() => navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true }))
     } catch (requestError) {
       setError(requestError)
       setSaving(false)
@@ -436,7 +443,7 @@ function PostTaskPage() {
         )}
         {step === STEPS.length - 1 && (
           <button type="button" className="primary-button wizard-next" disabled={saving || postGate === 'pending' || needsBudget} onClick={submit}>
-            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
+            {saving ? (photos.files.length > 0 ? 'Učitavam slike...' : inviteId ? 'Šaljem...' : 'Objavljujem...') : !user ? (zaParam ? 'Prijavi se i pošalji' : 'Prijavi se i objavi') : POST_CTA[postGate] || (editId ? 'Sačuvaj izmjene' : inviteId ? 'Pošalji zahtjev' : 'Objavi posao')}
           </button>
         )}
       </footer>

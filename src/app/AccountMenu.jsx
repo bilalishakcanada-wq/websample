@@ -8,7 +8,7 @@ import './app.css'
 import NotifBellLink from '../components/NotifBellLink'
 
 /** Phone account screen: who you are, which face of the app you use, and plain rows to everything else. */
-function AccountMenu({ onPickAvatar, uploadingAvatar }) {
+function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
   const navigate = useNavigate()
   const { logout, isStaff } = useAuth()
   const { profile } = useAccount()
@@ -74,6 +74,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar }) {
           </div>
         </div>
       </header>
+      {notice}
 
       <div className="ap-mode" role="radiogroup" aria-label="Način korištenja">
         <button type="button" role="radio" aria-checked={mode === 'poster'} className={mode === 'poster' ? 'active' : ''} onClick={() => { setMode('poster'); haptic('light') }}>Uradi posao</button>

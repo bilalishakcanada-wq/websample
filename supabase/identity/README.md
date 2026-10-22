@@ -66,6 +66,19 @@ i `require_for_bids` i beta prekidačem ispod):
 | `require_for_chat` | ❌ | dopisivanje ostaje otvoreno |
 | `grandfather_before` | trenutak migracije | **postojeći nalozi su izuzeti** |
 
+### Prekidač „Obavezna verifikacija za sve" (admin → Identitet)
+
+Jedno dugme za admina. **Uključeno:** svaki korisnik mora imati ličnu kartu potvrđenu od tima
+da bi objavio posao, poslao ponudu ili dao/dobio posao (prihvatanje ponude). **Isključeno:**
+sve to radi bez lične karte. Pregled poslova je otvoren u oba slučaja. U bazi je to isti
+par polja (`require_for_jobs`, `require_for_bids`) koji mijenja `set_identity_beta`.
+
+Dodjela posla: [`assign_require_verified.sql`](assign_require_verified.sql) (na čekanju) —
+kad ponuda prelazi u `accepted`, provjerava i klijenta i izvođača, pa se ne može prihvatiti
+ni ponuda poslana dok je provjera bila isključena. Klijent bez potvrde dobija
+`VERIFIKACIJA_POTREBNA` (link na verifikaciju), a za neverifikovanog izvođača
+`IZVODJAC_NIJE_VERIFIKOVAN`.
+
 ### Beta prekidač (`beta_skip_identity.sql`)
 
 Za beta testiranje admin u konzoli (Identitet → „Isključi za beta test") postavlja

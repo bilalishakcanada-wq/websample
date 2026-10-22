@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Camera, LocateFixed, X } from 'lucide-react'
+import { useBackToClose } from '../hooks/useBackToClose'
 
 /**
  * Foto dokaz na licu mjesta: slika se pravi kamerom u aplikaciji (galerija nije ponuđena),
@@ -54,6 +55,7 @@ function stampedJpeg(source, width, height, { kind, title, fix, at }) {
 }
 
 function ProofCamera({ kind, title, onCapture, onClose }) {
+  useBackToClose(true, onClose)
   const videoRef = useRef(null)
   const fileRef = useRef(null)
   const streamRef = useRef(null)

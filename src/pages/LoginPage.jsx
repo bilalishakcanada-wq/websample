@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Turnstile } from '@marsidev/react-turnstile'
@@ -7,6 +7,7 @@ import AuthLayout from '../components/AuthLayout'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
 import { authService } from '../services/authService'
+import { forgetReturn, rememberReturn, safeNext } from '../utils/afterAuth'
 
 /** "Didn't get the mail?" — sends the signup confirmation again, with a short cooldown. */
 function ResendConfirmation({ email }) {
@@ -47,9 +48,11 @@ function LoginPage() {
   const isPhone = useMediaQuery('(max-width: 768px)')
 
   // ?next=/objavi (phone flows) or the guarded page that sent us here
-  const safeNext = (value) => (value && value.startsWith('/') && !value.startsWith('//') ? value : '')
+  const wanted = safeNext(searchParams.get('next')) || safeNext(location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : '')
   // phones land on the app home, the website on the account dashboard
-  const destination = safeNext(searchParams.get('next')) || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null) || (isPhone ? '/' : '/account')
+  const destination = wanted || (isPhone ? '/' : '/account')
+  // kept on the device too: signing up instead, or with Google, still comes back here
+  useEffect(() => { if (wanted) rememberReturn(wanted) }, [wanted])
 
   if (user) return <Navigate to={destination} replace />
 
@@ -66,6 +69,7 @@ function LoginPage() {
 
     try {
       await login({ ...form, captchaToken })
+      forgetReturn()
       navigate(destination)
     } catch (err) {
       setError(err.message)
@@ -102,7 +106,7 @@ function LoginPage() {
       </form>
 
       <p className="auth-switch">
-        Nemaš račun? <Link to={`/register${searchParams.get('next') ? `?next=${encodeURIComponent(searchParams.get('next'))}` : ''}`}>Registruj se</Link>
+        Nemaš račun? <Link to={`/register${wanted ? `?next=${encodeURIComponent(wanted)}` : ''}`}>Registruj se</Link>
       </p>
 
       <OAuthButtons verb="Prijavi se" onError={setError} />

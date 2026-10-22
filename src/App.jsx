@@ -6,6 +6,8 @@ import './App.css'
 import './app/app.css'
 import './styles/mobile.css'
 import './styles/finish.css'
+import './styles/redesign.css'
+import './styles/flow.css'
 // Every other page loads on demand — the phone downloads only what it opens.
 const DashboardPage = lazy(lazyImport(() => import('./pages/DashboardPage')))
 // sign-in screens pull the illustrations (Mascots) with them; signed-in people never need them in the entry
@@ -77,6 +79,7 @@ import Toaster from './components/Toaster'
 import { lazyImport } from './utils/appUpdates'
 import SwBridge from './components/SwBridge'
 import LiveReachSync from './components/LiveReachSync'
+import AuthReturn from './components/AuthReturn'
 import { RouteFallback, RouteGuard } from './components/RouteBoundary'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import DialogHost from './components/DialogHost'
@@ -112,7 +115,10 @@ const MascotGallery = import.meta.env.DEV ? lazy(() => import('./app/MascotGalle
 /** Phones get the one-question-per-screen flow; wider screens keep the wizard. */
 function PostRoute() {
   const isPhone = useMediaQuery('(max-width: 768px)')
-  return isPhone ? <PostFlow /> : <ProtectedRoute><PostTaskPage /></ProtectedRoute>
+  const [params] = useSearchParams()
+  // anyone can write a new job and sign up at the end; changing or copying an existing one needs the account
+  const needsAccount = params.has('edit') || params.has('copy')
+  return isPhone ? <PostFlow /> : needsAccount ? <ProtectedRoute><PostTaskPage /></ProtectedRoute> : <PostTaskPage />
 }
 
 const ConfirmEmailPage = lazy(lazyImport(() => import('./pages/ConfirmEmailPage')))
@@ -137,6 +143,7 @@ function App() {
       <NativeBack />
       <SwBridge />
       <LiveReachSync />
+      <AuthReturn />
       <RealtimeSync />
       <SiteHeader />
       <SupportChatSlot />

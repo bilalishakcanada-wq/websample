@@ -1,21 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, BadgeCheck, Check, CircleDollarSign, Handshake, Lock, ShieldCheck, Wallet, X } from 'lucide-react'
+import { AlertTriangle, Check, Lock, ShieldCheck, Wallet, X } from 'lucide-react'
 import { paymentService } from '../services/paymentService'
 import { accountService } from '../services/accountService'
-import { formatBosnianDate } from '../utils/dateFormat'
 import { haptic } from '../utils/native'
 import { toast } from './Toaster'
+import ActionError from './ActionError'
 
 export const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
-
-const STEPS = [
-  { id: 'accepted', label: 'Ponuda prihvaćena', icon: Handshake },
-  { id: 'funded', label: 'Uplata osigurana', icon: Lock },
-  { id: 'done', label: 'Posao urađen', icon: BadgeCheck },
-  { id: 'released', label: 'Uplata oslobođena', icon: CircleDollarSign },
-]
-const stepIndex = (status) => ({ funded: 1, requested: 2, disputed: 2, released: 3, refunded: 1 }[status] ?? 0)
 
 /**
  * Accept-and-pay sheet: the client sees exactly what is reserved from the balance, then
@@ -45,7 +37,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
       onDone?.()
       onClose()
     } catch (requestError) {
-      setError(requestError.message)
+      setError(requestError)
     } finally {
       setBusy(false)
     }
@@ -80,7 +72,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
           </div>
         )}
 
-        {error && <div className="form-error">{error}</div>}
+        <ActionError error={error} />
         <div className="pay-sheet-actions">
           <button type="button" className="ghost-button" onClick={onClose}>Odustani</button>
           <button data-testid="payment-confirm" type="button" className="primary-button" onClick={confirm} disabled={busy || !wallet || !enough}><Lock size={16} /> {busy ? 'Osiguravam…' : `Prihvati i osiguraj ${money(amount)}`}</button>
@@ -91,65 +83,6 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
   )
 }
 
-/** Payment card on the job page: timeline, breakdown and the right action for the viewer. */
-export function JobPaymentCard({ payment, role }) {
-  const current = stepIndex(payment.status)
-
-
-
-  return (
-    <section className="job-card pay-card">
-      <div className="pay-card-head">
-        <h2><ShieldCheck size={18} /> Zadatak Pay</h2>
-        <span className={`pill pay-status-${payment.status}`}>
-          {{ funded: 'Uplata osigurana', requested: 'Čeka oslobađanje', released: 'Isplaćeno', refunded: 'Vraćeno klijentu', disputed: 'Spor — tim pregleda' }[payment.status]}
-        </span>
-      </div>
-
-      <ol className="pay-steps">
-        {STEPS.map((step, index) => {
-          const Icon = step.icon
-          const state = payment.status === 'refunded' && index > 1 ? 'off' : index < current ? 'done' : index === current ? (payment.status === 'released' ? 'done' : 'active') : 'todo'
-          return (
-            <li key={step.id} className={`pay-step ${state}`}>
-              <span className="pay-step-dot">{state === 'done' ? <Check size={14} /> : <Icon size={14} />}</span>
-              <span className="pay-step-label">{step.label}</span>
-            </li>
-          )
-        })}
-      </ol>
-
-      {/* Klijent vidi samo cijenu koju plaća; naknadu i neto iznos vidi samo izvođač. */}
-      {role === 'provider' ? (
-        <div className="pay-breakdown">
-          <div><span>Cijena posla</span><strong>{money(payment.amount)}</strong></div>
-          <div><span>Naknada platforme ({payment.fee_percent} %)</span><strong>− {money(payment.fee_amount)}</strong></div>
-          <div className="pay-breakdown-total"><span>Ti dobijaš</span><strong>{money(payment.net_amount)}</strong></div>
-        </div>
-      ) : (
-        <div className="pay-breakdown">
-          <div className="pay-breakdown-total"><span>Cijena posla</span><strong>{money(payment.amount)}</strong></div>
-        </div>
-      )}
-
-      <p className="pay-note muted-text">
-        {payment.status === 'funded' && (role === 'client'
-          ? `Novac je rezervisan na Zadatku od ${formatBosnianDate(payment.funded_at)} Kad posao bude urađen, oslobodi uplatu — izvođač je dobija odmah.`
-          : `Klijent je platio i novac je sigurno rezervisan (${formatBosnianDate(payment.funded_at)}). Uradi posao, pa zatraži isplatu.`)}
-        {payment.status === 'requested' && (role === 'client'
-          ? `Izvođač javlja da je posao završen (${formatBosnianDate(payment.requested_at)}). Provjeri i oslobodi uplatu — ili prijavi problem.`
-          : `Zatražio si isplatu ${formatBosnianDate(payment.requested_at)} Čeka se da klijent potvrdi.`)}
-        {payment.status === 'released' && `Uplata oslobođena ${formatBosnianDate(payment.released_at)} ${role === 'provider' ? `${money(payment.net_amount)} je na tvom balansu.` : 'Hvala — ostavi recenziju izvođaču.'}`}
-        {payment.status === 'refunded' && `Posao otkazan ${formatBosnianDate(payment.refunded_at)} — ${money(payment.amount)} vraćeno klijentu. ${payment.resolution || ''}`}
-        {payment.status === 'disputed' && `Prijavljen problem ${formatBosnianDate(payment.disputed_at)} Uplata je zamrznuta; Zadatak tim pregleda razgovor i dokaze i donosi odluku (obično u roku 48 h).`}
-      </p>
-
-      {/* Radnje su namjerno SAMO u kartici „Tok posla" (WorkFlow): dvije kartice
-          sa istim dugmadima su zbunjivale — ovdje ostaje samo stanje novca. */}
-    </section>
-  )
-}
-
 /** Short explainer under the offer button for visitors. */
 export function HowPaymentWorks() {
   return (
@@ -157,8 +90,8 @@ export function HowPaymentWorks() {
       <summary><ShieldCheck size={14} /> Kako radi plaćanje na Zadatku?</summary>
       <ol>
         <li><strong>Klijent prihvati ponudu</strong> — cijena se rezerviše sa njegovog balansa i čuva na Zadatku.</li>
-        <li><strong>Izvođač uradi posao</strong> i klikne „Zatraži isplatu“.</li>
-        <li><strong>Klijent oslobodi uplatu</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou).</li>
+        <li><strong>Izvođač uradi posao</strong> i klikne „Predaj rad“.</li>
+        <li><strong>Klijent odobri rad</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou). Ako klijent ne odgovori za 72 sata, isplata ide automatski.</li>
         <li>Problem? <strong>„Prijavi problem“</strong> zamrzava novac dok Zadatak tim ne odluči. Otkazivanje prije početka vraća pun iznos.</li>
       </ol>
     </details>

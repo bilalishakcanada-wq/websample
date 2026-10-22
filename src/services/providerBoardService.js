@@ -15,6 +15,21 @@ export const providerBoardService = {
     }
     return data || []
   },
+
+  /** Escrow rows on jobs I posted: „Moji poslovi“ shows the next step from them (predan rad, ispravka…). */
+  async clientPayments(userId, limit = 100) {
+    const { data, error } = await supabase
+      .from('job_payments')
+      .select('id, listing_id, amount, status, work_state')
+      .eq('client_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) {
+      console.error('Supabase client payments fetch failed', { message: error.message, code: error.code })
+      return []
+    }
+    return data || []
+  },
 }
 
 const WORK_LABEL = {

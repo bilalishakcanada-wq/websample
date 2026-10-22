@@ -6,6 +6,7 @@ import TierMedal from './TierMedal'
 import { useBadgeVault } from '../hooks/useTopBadges'
 import { TIERS, progressOf } from '../utils/badgeRanking'
 import { formatBosnianDate } from '../utils/dateFormat'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './BadgeRanking.css'
 
 const seenKey = (userId) => `zadatak:badges-seen:${userId}`
@@ -96,6 +97,7 @@ export function BadgeVault({ userId, earnedBadges }) {
 
 /** Trezor u prozoru (s javnog profila): bottom sheet na telefonu, centriran na računaru. */
 export function BadgeVaultModal({ userId, earnedBadges, onClose }) {
+  useBackToClose(true, onClose)
   useEffect(() => {
     const onKey = (event) => { if (event.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)

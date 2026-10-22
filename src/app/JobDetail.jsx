@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import NextStep from '../components/NextStep'
+import JobProgress from '../components/JobProgress'
 import OfferReplies from '../components/OfferReplies'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
@@ -98,6 +99,7 @@ function JobDetail(props) {
       </section>
 
       <section className="jd-sheet">
+        <JobProgress listing={listing} payment={payment} bids={bids} acceptedBid={acceptedBid} expired={expired} />
         <h1 className="jd-title">{listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}{listing.title}</h1>
         {isOwner && <PromoteCard listing={listing} userId={user?.id} onDone={refreshJob} compact />}
 

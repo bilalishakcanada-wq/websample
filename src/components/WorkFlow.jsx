@@ -59,14 +59,6 @@ function ProofGallery({ rows }) {
   )
 }
 
-const TRACK = [['funded', 'Plaćeno'], ['work', 'Radi se'], ['submitted', 'Rad predat'], ['paid', 'Isplaćeno']]
-const trackIndex = (payment, state) => {
-  if (payment.status === 'released' || state === 'completed') return 3
-  if (['submitted', 'disputed'].includes(state) || payment.status === 'requested') return 2
-  if (['in_progress', 'revision', 'cancel_requested'].includes(state)) return 1
-  return 0
-}
-
 const km = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
 
 /** Naknada za otkazivanje (ista formula kao cancellation_fee_for u bazi). */
@@ -252,13 +244,6 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
         <span data-testid="workflow-state" className={`pill wf-${state}`}>{naslov}</span>
       </div>
 
-      <ol className="wf-track" aria-label="Koraci posla">
-        {TRACK.map(([id, label], index) => {
-          const at = trackIndex(payment, state)
-          const stopped = ['cancelled', 'disputed', 'cancel_requested'].includes(state) && index === at
-          return <li key={id} className={`${index < at || (index === at && state === 'completed') ? 'is-done' : ''} ${index === at && state !== 'completed' ? 'is-now' : ''} ${stopped ? 'is-stopped' : ''}`}>{label}</li>
-        })}
-      </ol>
 
       {/* novac: klijent vidi cijenu koju plaća, izvođač i naknadu i šta mu sjeda */}
       <div className="wf-money" data-testid="workflow-money">

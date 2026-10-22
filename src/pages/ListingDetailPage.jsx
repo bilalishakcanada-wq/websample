@@ -20,6 +20,7 @@ import { contactInfoMessage, findProhibitedTerm, findStreetAddress, scanContactI
 import RuleOneNotice from '../components/RuleOneNotice'
 import { AcceptOfferSheet, HowPaymentWorks } from '../components/JobPayment'
 import NextStep from '../components/NextStep'
+import JobProgress from '../components/JobProgress'
 import { clientStep, workStateOf, workerStep } from '../utils/jobStep'
 import WorkFlow from '../components/WorkFlow'
 import LiveTracking from '../components/LiveTracking'
@@ -603,15 +604,10 @@ function ListingDetailPage() {
             <Gallery images={images} title={listing.title} category={listing.category} onOpen={(index) => setLightbox(index)} />
 
             <header className="job-head">
+              <JobProgress listing={listing} payment={payment} bids={bids} acceptedBid={acceptedBid} expired={expired} />
               <div className="job-chips">
                 {listing.status === 'published' && <PromoBadge tier={activePromotion(listing)} />}
                 <span className="pill pill-soft">{listing.category || 'Ostalo'}</span>
-                {listing.status === 'completed' && <span className="pill pill-ok"><CheckCircle2 size={12} /> Završen</span>}
-                {listing.status === 'assigned' && <span className="pill pill-gold"><Lock size={12} /> Izvođač odabran · uplata osigurana</span>}
-                {listing.status === 'cancelled' && <span className="pill pill-danger">Otkazan</span>}
-                {expired && <span className="pill pill-danger"><History size={12} /> Rok je prošao</span>}
-                {listing.status === 'published' && acceptedBid && <span className="pill pill-gold">Izvođač odabran</span>}
-                {listing.status === 'published' && !acceptedBid && !isPrivate && <span className="pill pill-ok">Otvoren za ponude</span>}
                 {listing.status === 'published' && !acceptedBid && isPrivate && <span className="pill pill-soft"><Lock size={12} /> Privatni zahtjev</span>}
               </div>
               <h1>{listing.title}</h1>

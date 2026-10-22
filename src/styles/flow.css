@@ -20,13 +20,6 @@
 .jd-band .next-step.is-phone .ap-btn { margin-top: 0; }
 
 /* posao i novac u jednoj kartici */
-.wf-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 0; list-style: none; counter-reset: wf; }
-.wf-track li { counter-increment: wf; display: grid; gap: 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-soft); }
-.wf-track li::before { content: ''; height: 4px; border-radius: 2px; background: var(--stroke); }
-.wf-track li.is-done::before { background: var(--success, #19b37b); }
-.wf-track li.is-now { color: var(--text); }
-.wf-track li.is-now::before { background: var(--accent); }
-.wf-track li.is-stopped::before { background: #e0a42b; }
 .wf-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface-soft, #eef3fb); }
 .wf-money span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-soft); font-size: 0.88rem; }
 .wf-money strong { margin-left: auto; font-size: 1.05rem; color: var(--text); }
@@ -62,3 +55,30 @@
 .side-worker small { color: var(--text-soft); font-size: 0.78rem; }
 .side-worker strong { font-size: 0.95rem; }
 .side-worker:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Napredak posla: pet koraka s ikonom, datumom i istaknutim trenutnim korakom */
+.job-progress { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 4px 0 18px; padding: 0; list-style: none; }
+.job-progress::before, .job-progress::after { content: ''; position: absolute; top: 16px; left: 10%; height: 2px; border-radius: 2px; }
+.job-progress::before { right: 10%; background: var(--stroke); }
+.job-progress::after { width: calc(var(--jp-fill, 0%) * 0.8); background: var(--accent); transition: width 0.4s ease; }
+.job-progress li { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; }
+.jp-dot { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 50%; border: 2px solid var(--stroke); background: var(--surface, #fff); color: var(--text-soft); }
+.jp-label { font-size: 0.8rem; font-weight: 600; color: var(--text-soft); line-height: 1.2; }
+.jp-meta { font-size: 0.72rem; color: var(--text-soft); line-height: 1.25; overflow-wrap: anywhere; }
+.job-progress li.is-done .jp-dot { border-color: var(--accent); background: var(--accent); color: #fff; }
+.job-progress li.is-done .jp-label { color: var(--text); }
+.job-progress li.is-now .jp-dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); }
+.job-progress li.is-now .jp-label { color: var(--text); font-weight: 800; }
+.job-progress li.is-now .jp-meta { color: var(--accent); font-weight: 700; }
+.job-progress li.is-stopped .jp-dot { border-color: #d98a1c; color: #b86e0b; box-shadow: 0 0 0 5px rgba(217, 138, 28, 0.15); }
+.job-progress li.is-stopped .jp-meta { color: #b86e0b; }
+@media (prefers-reduced-motion: no-preference) {
+  .job-progress li.is-now:not(.is-stopped) .jp-dot { animation: jp-pulse 2.4s ease-out infinite; }
+}
+@keyframes jp-pulse { 0%, 100% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); } 50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 6%, transparent); } }
+@media (max-width: 520px) {
+  .jp-dot { width: 30px; height: 30px; }
+  .job-progress::before, .job-progress::after { top: 14px; }
+  .jp-label { font-size: 0.72rem; }
+  .jp-meta { font-size: 0.66rem; }
+}

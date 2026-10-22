@@ -67,7 +67,7 @@ const trackIndex = (payment, state) => {
   return 0
 }
 
-const km = (value) => `${Number(value || 0).toLocaleString('bs-BA', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
+const km = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
 
 /** Naknada za otkazivanje (ista formula kao cancellation_fee_for u bazi). */
 function naknadaZaOtkaz(payment) {

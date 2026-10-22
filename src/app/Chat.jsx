@@ -1,13 +1,13 @@
 import { PrivateImage } from '../components/PrivateFile'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
-import { chatSceneUrl } from '../art/chatScene'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import ChatStateNotice from '../components/ChatStateNotice'
+import { jobStatus } from '../utils/jobStatus'
 import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
 
@@ -29,10 +29,11 @@ function Chat(props) {
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
   const [menu, setMenu] = useState(false)
+  const status = jobStatus(chatState, active?.contacts_allowed)
 
   if (!active) {
     return (
-      <div className="ap ap-page ch" style={{ '--chat-scene': chatSceneUrl }}>
+      <div className="ap ap-page ch">
         {/* only the title stays pinned on a phone: search and filters scroll with the list, so pinned bars don't eat a third of the screen */}
         <header className="ap-page-head"><h1>Poruke</h1><NotifBellLink /></header>
         <div className="ch-tools">
@@ -85,12 +86,12 @@ function Chat(props) {
   }
 
   return (
-    <div className="ap ch ch-thread-page" ref={fitRef} style={{ '--chat-scene': chatSceneUrl }}>
+    <div className="ap ch ch-thread-page" ref={fitRef}>
       <header className="ch-head" onClick={(event) => { if (menu && event.target === event.currentTarget) setMenu(false) }}>
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">
           <Avatar src={active.other_avatar} name={active.other_name} size={40} />
-          <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}{active.contacts_allowed ? '' : ' · kontakt zaštićen'}</small></span>
+          <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small></span>
         </Link>
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>
         {menu && (
@@ -105,8 +106,9 @@ function Chat(props) {
 
       {active.listing_id && (
         <Link to={`/listings/${active.listing_id}`} className="ch-job">
-          <span><small>Posao</small><strong>{active.listing_title}</strong></span>
-          <em>Otvori <ChevronRight size={16} /></em>
+          <span className="ch-job-icon"><BriefcaseBusiness size={18} /></span>
+          <span className="ch-job-text"><small>Posao · <b className={`ch-job-status ${status.tone}`}>{status.label}</b></small><strong>{active.listing_title}</strong></span>
+          <ChevronRight size={18} className="ch-chev" />
         </Link>
       )}
 

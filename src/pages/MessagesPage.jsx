@@ -2,14 +2,14 @@ import { PrivateImage } from '../components/PrivateFile'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
-import { chatSceneUrl } from '../art/chatScene'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
+import { jobStatus } from '../utils/jobStatus'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
 import { reportService } from '../services/reportService'
@@ -101,6 +101,7 @@ function MessagesPage() {
   const { isBlocked, toggle: toggleBlockUser } = useBlocks()
   const otherBlocked = Boolean(active && isBlocked(active.other_id))
   const chatState = otherBlocked ? 'blocked' : (active?.chat_state || 'open')
+  const status = jobStatus(chatState, active?.contacts_allowed)
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
   // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
@@ -299,7 +300,7 @@ function MessagesPage() {
   }
 
   return (
-    <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`} style={{ '--chat-scene': chatSceneUrl }}>
+    <div className={`app-shell page-with-mobile-nav chat-page ${active ? 'has-active' : ''}`}>
       <main className="content-container">
         <div className="chat-topline">
           <h1>Poruke</h1>
@@ -390,8 +391,12 @@ function MessagesPage() {
 
                 {active.listing_id && (
                   <Link to={`/listings/${active.listing_id}`} className="chat-job-link">
-                    <small>Posao</small>
-                    <strong>{active.listing_title}</strong>
+                    <span className="chat-job-icon"><BriefcaseBusiness size={18} /></span>
+                    <span className="chat-job-text">
+                      <small>Posao</small>
+                      <strong>{active.listing_title}</strong>
+                    </span>
+                    <span className={`chat-job-status ${status.tone}`}>{status.label}</span>
                     <em>Otvori <ChevronRight size={15} /></em>
                   </Link>
                 )}

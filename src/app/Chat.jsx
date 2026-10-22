@@ -115,11 +115,12 @@ function Chat(props) {
         {grouped.map((group) => (
           <div key={group.key} className="ch-day">
             <span className="ch-day-label">{group.label}</span>
-            {group.items.map((item) => {
+            {group.items.map((item, index) => {
               const mine = item.sender_id === user.id
               const image = item.attachment_type === 'image' && item.attachment_url
+              const follows = index > 0 && group.items[index - 1].sender_id === item.sender_id
               return (
-                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
+                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${follows ? 'follows' : ''} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                   {image ? <PrivateImage fileRef={item.attachment_url} alt="Slika" /> : <p>{item.content}</p>}
                   <span className="ch-meta">{timeOf(item.created_at)}{mine && (item.read_at ? <CheckCheck size={13} className="seen" /> : <Check size={13} />)}</span>
                 </div>

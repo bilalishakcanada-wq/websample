@@ -1,0 +1,1 @@
+import{r as e}from"./rolldown-runtime-hePW80VL.js";import{_ as t,c as n,l as r}from"./react-Xqap_ISW.js";import{n as i,t as a}from"./index-ZxWJwfep.js";var o=e(t(),1);function s(e){let t=r(),{pathname:s,search:c}=n();return(0,o.useCallback)(()=>{a()?t(-1):t(e||i(s,c)||`/`,{replace:!0})},[t,e,s,c])}export{s as t};

@@ -1,0 +1,1 @@
+import{p as e}from"./react-Xqap_ISW.js";import{t}from"./arrow-left-BNhXAllX.js";import{t as n}from"./index-ZxWJwfep.js";import{t as r}from"./useGoBack-D9coSTLj.js";var i=e();function a({label:e=`Početna`}){let a=r(`/`);return(0,i.jsxs)(`button`,{type:`button`,className:`back-home-link`,onClick:a,children:[(0,i.jsx)(t,{size:16}),` `,n()?`Nazad`:e]})}export{a as t};

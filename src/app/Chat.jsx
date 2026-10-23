@@ -1,12 +1,14 @@
 import { PrivateImage } from '../components/PrivateFile'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Ban, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
 import { useKeyboardFit } from '../hooks/useKeyboardAvoid'
 import ChatStateNotice from '../components/ChatStateNotice'
+import { jobStatus } from '../utils/jobStatus'
+import { useBackToClose } from '../hooks/useBackToClose'
 import './app.css'
 import { SkeletonChatRow } from '../components/Skeleton'
 
@@ -28,6 +30,8 @@ function Chat(props) {
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
   const [menu, setMenu] = useState(false)
+  const status = jobStatus(chatState, active?.contacts_allowed)
+  useBackToClose(menu, () => setMenu(false))
 
   if (!active) {
     return (
@@ -89,7 +93,7 @@ function Chat(props) {
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">
           <Avatar src={active.other_avatar} name={active.other_name} size={40} />
-          <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}{active.contacts_allowed ? '' : ' · kontakt zaštićen'}</small></span>
+          <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small></span>
         </Link>
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>
         {menu && (
@@ -104,8 +108,9 @@ function Chat(props) {
 
       {active.listing_id && (
         <Link to={`/listings/${active.listing_id}`} className="ch-job">
-          <span><small>Posao</small><strong>{active.listing_title}</strong></span>
-          <em>Otvori <ChevronRight size={16} /></em>
+          <span className="ch-job-icon"><BriefcaseBusiness size={18} /></span>
+          <span className="ch-job-text"><small>Posao · <b className={`ch-job-status ${status.tone}`}>{status.label}</b></small><strong>{active.listing_title}</strong></span>
+          <ChevronRight size={18} className="ch-chev" />
         </Link>
       )}
 
@@ -115,11 +120,12 @@ function Chat(props) {
         {grouped.map((group) => (
           <div key={group.key} className="ch-day">
             <span className="ch-day-label">{group.label}</span>
-            {group.items.map((item) => {
+            {group.items.map((item, index) => {
               const mine = item.sender_id === user.id
               const image = item.attachment_type === 'image' && item.attachment_url
+              const follows = index > 0 && group.items[index - 1].sender_id === item.sender_id
               return (
-                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
+                <div key={item.id} className={`ch-bubble ${mine ? 'mine' : 'theirs'} ${follows ? 'follows' : ''} ${image ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                   {image ? <PrivateImage fileRef={item.attachment_url} alt="Slika" /> : <p>{item.content}</p>}
                   <span className="ch-meta">{timeOf(item.created_at)}{mine && (item.read_at ? <CheckCheck size={13} className="seen" /> : <Check size={13} />)}</span>
                 </div>

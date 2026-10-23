@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { notificationService } from '../services/notificationService'
 import { keys } from './queryKeys'
+import { clearDeliveredNotifications } from '../utils/push'
 
 /** Number of unread notifications for the signed-in user — cached, live (new one in, or some marked read). */
 export function useUnreadNotifications(userId) {
@@ -23,5 +24,9 @@ export function useUnreadNotifications(userId) {
     window.addEventListener('zadatak:notifications-read', bump)
     return () => { stop(); window.removeEventListener('zadatak:notifications-read', bump) }
   }, [userId, queryClient])
+  // everything read: the notifications still sitting on the phone / computer (and the app-icon dot) go too
+  useEffect(() => {
+    if (userId && data === 0) clearDeliveredNotifications()
+  }, [userId, data])
   return data || 0
 }

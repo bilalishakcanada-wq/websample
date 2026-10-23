@@ -7,6 +7,7 @@ import './app/app.css'
 import './styles/mobile.css'
 import './styles/finish.css'
 import './styles/redesign.css'
+import './styles/flow.css'
 import './styles/craft.css'
 // Every other page loads on demand — the phone downloads only what it opens.
 const DashboardPage = lazy(lazyImport(() => import('./pages/DashboardPage')))

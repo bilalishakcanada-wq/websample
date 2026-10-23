@@ -96,11 +96,8 @@ Odgovori za Play Console su ispod, da se samo prepišu.
 - **Account deletion**: *Yes, users can request deletion* · URL:
   `https://bilalishakcanada-wq.github.io/websample/privatnost#brisanje-naloga`
 - **Sensitive permissions**: nema `ACCESS_BACKGROUND_LOCATION`, SMS-a, poziva, svih fajlova ni medija.
-- **Foreground service** (App content → *Foreground service permissions*): prijavi `FOREGROUND_SERVICE_LOCATION`.
-  Opis: „Lokacija uživo and 'Krećem' keep sharing the user's position while they use other apps during a job
-  (reach of offers, live map for the client). Started only by a tap in the app, with a persistent notification,
-  stopped from the app.“ Play traži kratak video (telefon: Postavke → Lokacija uživo → Uključi, pa otvori drugu
-  aplikaciju i pokaži obavijest „Lokacija uživo je uključena“).
+- **Foreground service**: nema. Aplikacija ne traži `FOREGROUND_SERVICE` ni `FOREGROUND_SERVICE_LOCATION`, pa
+  Play ne traži izjavu ni video. Lokacija uživo i „Krećem“ rade dok je Zadatak otvoren.
 
 ### Data safety
 Opšte: **Yes** prikupljamo podatke · **Encrypted in transit: Yes** · **Users can request deletion: Yes** ·
@@ -134,8 +131,7 @@ reklamni ID.
 |---|---|---|
 | `INTERNET` | aplikacija učitava Zadatak | nikad (automatski) |
 | `CAMERA` | foto-dokaz urađenog posla, slike za oglas/profil/poruke | kad otvoriš kameru |
-| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | doseg ponuda (koliko je izvođač daleko od posla), mjesto na foto-dokazu, „Krećem“ (mapa uživo); uz Lokaciju uživo / „Krećem“ i kad je Zadatak u pozadini, s obavješću na telefonu | prije pravljenja računa i objave posla, poslije ekrana koji objašnjava zašto (dugme „Dozvoli“); odbijanje ne zaključava aplikaciju, samo tu radnju, s dugmetom „Otvori postavke“ |
-| `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION` | Lokacija uživo i „Krećem“ rade i dok korisnik koristi druge aplikacije; obavijest „Lokacija uživo je uključena“ / „Dijeliš lokaciju s klijentom“ stoji dok radi | nikad posebno: kreće tek na dodir „Uključi“ / „Krećem“, s već datom dozvolom za lokaciju |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | doseg ponuda (koliko je izvođač daleko od posla), mjesto na foto-dokazu, „Krećem“ (mapa uživo), samo dok je Zadatak otvoren | prije pravljenja računa i objave posla, poslije ekrana koji objašnjava zašto (dugme „Dozvoli“); odbijanje ne zaključava aplikaciju, samo tu radnju, s dugmetom „Otvori postavke“ |
 | `USE_BIOMETRIC`, `USE_FINGERPRINT` (iz `androidx.biometric`) | otisak/lice prije isplate | nikad (obična dozvola) |
 | `VIBRATE` (iz `@capacitor/haptics`) | kratka vibracija na dodir dugmeta | nikad (obična dozvola) |
 | `ACCESS_NETWORK_STATE`, `WAKE_LOCK` | ako ih biblioteka doda: provjera veze | nikad (obične dozvole) |

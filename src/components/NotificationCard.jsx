@@ -1,14 +1,17 @@
 import { createElement } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
-import { notificationAction, notificationCategory, notificationIcon, plainTitle } from '../utils/notificationCategory'
+import { useAuth } from '../context/AuthContext'
+import { notificationAction, notificationCategory, notificationIcon, notificationTarget, plainTitle } from '../utils/notificationCategory'
 import { timeAgo } from '../utils/dateFormat'
 import './NotificationCenter.css'
 
 /** One alert: the coloured circle says what it is before the text is read. */
 function NotificationCard({ item, unread }) {
   const category = notificationCategory(item)
+  const { isAdmin } = useAuth()
   const action = notificationAction(item)
+  const target = notificationTarget(item, isAdmin)
   return (
     <li className={`notif-card notif-cat-${category}${unread ? ' is-unread' : ''}`}>
       <span className="notif-card-icon" aria-hidden="true">{createElement(notificationIcon(item), { size: 18 })}</span>
@@ -21,7 +24,7 @@ function NotificationCard({ item, unread }) {
         </div>
       </div>
       {unread && <span className="notif-card-dot" aria-label="Novo" />}
-      {item.link && !action && <Link to={item.link} className="notif-list-open" aria-label="Otvori"><ChevronRight size={18} /></Link>}
+      {target && !action && <Link to={target} className="notif-list-open" aria-label="Otvori"><ChevronRight size={18} /></Link>}
     </li>
   )
 }

@@ -6,7 +6,7 @@ import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { useBlocks } from '../../hooks/useBlocks'
-import { disablePush, enablePush, pushDeviceState } from '../../utils/push'
+import { useNotificationSwitches } from '../../hooks/useNotificationSwitches'
 import { isLiveReachOn, LIVE_REACH_REPORTED, setLiveReach } from '../../utils/liveReach'
 import { isJobShareAuto, setJobShareAuto } from '../../utils/jobShare'
 import { locationPermission, openAppSettings, requestLocation } from '../../utils/permissions'
@@ -52,9 +52,8 @@ function SettingsPage() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { profile, bundle, saveProfile } = useAccount()
-  const [notifyEmail, setNotifyEmail] = useState(profile.notify_email !== false)
-  const [notifyPush, setNotifyPush] = useState(profile.notify_push !== false)
-  const [device, setDevice] = useState('loading') // 'on' | 'off' | 'blocked' | 'install' | 'unsupported' | 'native'
+  const notif = useNotificationSwitches({ profile, saveProfile })
+  const { notifyEmail, notifyPush, device, deviceOn } = notif
   const [password, setPassword] = useState('')
   const { blocked, toggle: toggleBlockUser } = useBlocks()
   // Lokacija uživo: the distance to jobs follows where the person is right now (utils/liveReach.js)
@@ -67,13 +66,15 @@ function SettingsPage() {
   const [message, setMessage] = useState('')
   // a long page: what went wrong (or right) shows as a toast where the person is looking
   useEffect(() => { if (error) toast(error, { kind: 'error', duration: 5200 }) }, [error])
+  useEffect(() => { if (notif.error) toast(notif.error, { kind: 'error', duration: 5200 }) }, [notif.error])
   useEffect(() => { if (message) toast(message, { kind: 'success' }) }, [message])
 
   // back from the phone's settings: the permission may have changed there
+  const { recheckDevice } = notif
   const recheck = useCallback(() => {
     locationPermission().then(setGeo)
-    pushDeviceState().then(setDevice)
-  }, [])
+    recheckDevice()
+  }, [recheckDevice])
   useEffect(() => {
     recheck()
     const reported = (event) => setLastPoint(event.detail)
@@ -120,22 +121,7 @@ function SettingsPage() {
     setJobShareAuto(true); setJobShare(true)
   }
 
-  const toggleDevice = async () => {
-    setBusy('device'); setError('')
-    try {
-      if (device === 'on') { await disablePush(); setDevice('off') }
-      else if (device === 'blocked') { if (!(await openAppSettings())) setError('Dozvoli obavijesti za Zadatak u postavkama telefona ili preglednika, pa se vrati ovdje.') }
-      else { const result = await enablePush(); setDevice(result === 'granted' ? 'on' : result === 'denied' ? 'blocked' : device) }
-    } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
-  }
-
-  // like WhatsApp: a switch saves the moment it moves, there is no "Sačuvaj"
-  const savePref = async (patch, undo) => {
-    setBusy('prefs'); setError(''); setMessage('')
-    try { await saveProfile(patch) } catch (requestError) { undo(); setError(requestError.message) } finally { setBusy('') }
-  }
-  const togglePush = () => { const next = !notifyPush; setNotifyPush(next); savePref({ notify_push: next }, () => setNotifyPush(!next)) }
-  const toggleEmail = () => { const next = !notifyEmail; setNotifyEmail(next); savePref({ notify_email: next }, () => setNotifyEmail(!next)) }
+  // like WhatsApp: a switch saves the moment it moves, there is no "Sačuvaj" (hooks/useNotificationSwitches.js)
 
   const changePassword = async (event) => {
     event.preventDefault()
@@ -152,9 +138,8 @@ function SettingsPage() {
   }, [])
 
   const [geoLabel, geoTone] = GEO_TEXT[geo] || GEO_TEXT.loading
-  const deviceOn = device === 'on'
   const deviceSub = {
-    on: 'Ovaj telefon prima obavijesti, i kad je Zadatak zatvoren.',
+    on: notifyPush ? 'Ovaj telefon prima obavijesti, i kad je Zadatak zatvoren.' : 'Ugašeno, jer su push obavijesti isključene. Uključi da opet stižu.',
     off: 'Uključi da ti nova ponuda ili poruka stigne odmah.',
     blocked: isNativeApp() ? 'Isključene u postavkama telefona. Dodirni da ih otvoriš.' : 'Blokirane u pregledniku. Dozvoli ih za Zadatak (katanac lijevo od adrese).',
     install: 'Na iPhoneu prvo dodaj Zadatak na početni ekran (Dijeli → Dodaj na početni ekran).',
@@ -205,14 +190,14 @@ function SettingsPage() {
       <div className="st-group">
         <Row icon={Smartphone} tone="orange" title="Na ovom telefonu" sub={deviceSub} testid="device-push">
           {device === 'on' || device === 'off'
-            ? <Switch on={deviceOn} onChange={toggleDevice} disabled={busy === 'device'} label="Obavijesti na ovom telefonu" testid="device-push-toggle" />
-            : device === 'blocked' && isNativeApp() ? <button type="button" className="st-action" onClick={toggleDevice}><Settings size={14} /> Otvori</button> : null}
+            ? <Switch on={deviceOn} onChange={notif.toggleDevice} disabled={notif.busy !== ''} label="Obavijesti na ovom telefonu" testid="device-push-toggle" />
+            : device === 'blocked' && isNativeApp() ? <button type="button" className="st-action" onClick={notif.toggleDevice}><Settings size={14} /> Otvori</button> : null}
         </Row>
         <Row icon={BellRing} tone="red" title="Push obavijesti" sub="Ponude, poruke i plaćanja.">
-          <Switch on={notifyPush} onChange={togglePush} disabled={busy === 'prefs'} label="Push obavijesti" testid="notify-push-toggle" />
+          <Switch on={notifyPush} onChange={notif.togglePush} disabled={notif.busy !== ''} label="Push obavijesti" testid="notify-push-toggle" />
         </Row>
         <Row icon={Mail} tone="blue" title="Email obavijesti" sub={`Na ${user.email}`}>
-          <Switch on={notifyEmail} onChange={toggleEmail} disabled={busy === 'prefs'} label="Email obavijesti" testid="notify-email-toggle" />
+          <Switch on={notifyEmail} onChange={notif.toggleEmail} disabled={notif.busy !== ''} label="Email obavijesti" testid="notify-email-toggle" />
         </Row>
         <Row as={Link} to="/account/postavke-obavijesti" icon={ListChecks} tone="purple" title="Šta ti javljamo" sub="Ponude i poslovi, poruke, plaćanja, alarmi">
           <ChevronRight size={18} className="st-chevron" />

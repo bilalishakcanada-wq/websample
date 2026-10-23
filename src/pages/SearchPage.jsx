@@ -133,6 +133,8 @@ function SearchPage() {
     media.addEventListener('change', onChange)
     return () => media.removeEventListener('change', onChange)
   }, [])
+  // the phone's map is a screen of its own: back returns to the list before leaving the search
+  useBackToClose(isPhone && mobileView === 'map', () => setMobileView('list'))
   const filterBarRef = useRef(null)
   const cardRefs = useRef({})
 

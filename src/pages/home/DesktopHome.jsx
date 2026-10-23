@@ -55,7 +55,7 @@ function DesktopHome() {
   const [cityPickerOpen, setCityPickerOpen] = useState(false)
   const [savedTasks, setSavedTasks] = useLocalStorage('zadatak-saved-tasks', [])
   const isTouch = useMemo(() => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches, [])
-  const { combined: allTasks, hasLive, loading: listingsLoading } = useLiveListings({ limit: 6 })
+  const { listings: allTasks, loading: listingsLoading } = useLiveListings({ limit: 6 })
   const { combined: providers, hasLive: hasLiveProviders } = useRankedProviders(6)
   const { proof, rating, loading: statsLoading } = usePlatformStats()
   const filteredTasks = useMemo(() => {
@@ -192,7 +192,7 @@ function DesktopHome() {
                   <div
                     key={`${task.id}-${index}`}
                     className="ticker-card"
-                    onClick={() => task.isLive && navigate(`/listings/${task.id}`)}
+                    onClick={() => navigate(`/listings/${task.id}`)}
                   >
                     <div className="ticker-card-top">
                       <span className="ticker-tag">{task.tag}</span>
@@ -249,7 +249,7 @@ function DesktopHome() {
         <section className="jobs-section reveal" id="poslovi">
           <div className="section-heading">
             <div>
-              <span className="eyebrow small-eyebrow">{hasLive ? 'Uživo na platformi' : 'Nedavno objavljeno'}</span>
+              <span className="eyebrow small-eyebrow">Uživo na platformi</span>
               <h2>Najtraženiji poslovi u vašoj blizini</h2>
             </div>
             <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Pogledaj sve <ArrowRight size={16} /></a>
@@ -257,15 +257,24 @@ function DesktopHome() {
 
           <div className="job-list reveal-stagger reveal">
             {listingsLoading && [1, 2].map((item) => <div className="skeleton-card" key={item} />)}
+            {!listingsLoading && filteredTasks.length === 0 && (
+              <div className="jobs-empty">
+                <h3>{allTasks.length === 0 ? 'Trenutno nema otvorenih poslova u vašoj blizini' : 'Nijedan otvoren posao ne odgovara pretrazi'}</h3>
+                <p>{allTasks.length === 0 ? 'Novi poslovi se pojavljuju ovdje čim ih neko objavi.' : 'Probajte drugu riječ ili pogledajte sve poslove.'}</p>
+                {allTasks.length === 0
+                  ? <button type="button" className="primary-button" onClick={() => navigate('/objavi')}>Objavi posao</button>
+                  : <button type="button" className="ghost-button" onClick={() => navigate('/search')}>Pogledaj sve poslove</button>}
+              </div>
+            )}
             {!listingsLoading && filteredTasks.map((task) => (
               <article
                 key={task.id}
-                className={`job-card ${task.isLive ? 'job-card-live' : ''}`}
-                onClick={() => task.isLive && navigate(`/listings/${task.id}`)}
-                role={task.isLive ? 'link' : undefined}
-                tabIndex={task.isLive ? 0 : undefined}
+                className="job-card job-card-live"
+                onClick={() => navigate(`/listings/${task.id}`)}
+                role="link"
+                tabIndex={0}
                 onKeyDown={(event) => {
-                  if (task.isLive && (event.key === 'Enter' || event.key === ' ')) {
+                  if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault()
                     navigate(`/listings/${task.id}`)
                   }
@@ -286,7 +295,7 @@ function DesktopHome() {
                       {savedTasks.includes(task.id) ? 'Sačuvano' : 'Sačuvaj'}
                     </button>
                   </div>
-                  {task.isLive && <span className="live-badge">Novo</span>}
+                  <span className="live-badge">Novo</span>
                 </div>
                 <div className="job-card-body">
                   <h3>{task.title}</h3>
@@ -297,9 +306,7 @@ function DesktopHome() {
                     <span>{task.time}</span>
                   </div>
                   <div className="job-footer">
-                    {task.isLive
-                      ? <div className="offers-badge"><Users size={14} /> {task.offers} {task.offers === 1 ? 'ponuda' : 'ponuda'}</div>
-                      : <div className="rating-box"><Star size={14} fill="currentColor" /> {task.rating} ({task.reviews})</div>}
+                    <div className="offers-badge"><Users size={14} /> {task.offers} {task.offers === 1 ? 'ponuda' : 'ponuda'}</div>
                     <div className="job-price">{task.price}</div>
                   </div>
                 </div>

@@ -45,6 +45,17 @@ export const notificationIcon = (item) => {
   return TYPE_ICONS[item?.type] || CATEGORY_ICONS[category] || Bell
 }
 
+/** Where tapping a notification goes; rows without a link still lead somewhere useful. */
+export const notificationTarget = (item, isAdmin = false) => {
+  if (item?.link) return item.link
+  if (item?.type === 'support' || item?.type === 'moderation') return isAdmin ? `/admin?tab=${item.type === 'support' ? 'support' : 'moderation'}` : null
+  if (item?.type === 'support_reply') return '/pomoc?chat=1'
+  if (item?.type === 'wallet') return '/account/novcanik'
+  if (item?.type === 'job') return '/account/placanja'
+  if (item?.type === 'badge') return '/account/znacke'
+  return null
+}
+
 /** Quick action shown inside the card, so offers are one tap away. */
 export const notificationAction = (item) => {
   if (!item?.link) return null

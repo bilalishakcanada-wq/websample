@@ -1,5 +1,21 @@
 import { useCallback, useEffect, useRef } from 'react'
 
+// overlays holding a history entry right now; an overlay entry nobody holds is left over
+let openOverlays = 0
+
+/*
+ * An overlay closed by a link inside it (the new page was pushed on top) or by a reload leaves
+ * its entry behind. Landing on such an entry would make one back press do nothing visible, so
+ * step straight past it: every press of back always shows the previous screen.
+ */
+if (typeof window !== 'undefined') {
+  window.addEventListener('popstate', () => {
+    window.setTimeout(() => {
+      if (window.history.state?.zadatakOverlay && openOverlays === 0) window.history.back()
+    }, 0)
+  })
+}
+
 /**
  * Pops the entry this hook pushed, after this commit's other effects (the page may have just
  * replaced the URL), and keeps whatever URL the page wrote meanwhile, since the pop would drop it.
@@ -31,21 +47,30 @@ export function useBackToClose(open, onClose) {
   const closeRef = useRef(onClose)
   closeRef.current = onClose
 
+  const release = () => {
+    if (!pushedRef.current) return false
+    pushedRef.current = false
+    openOverlays = Math.max(0, openOverlays - 1)
+    return true
+  }
+
   useEffect(() => {
     if (!open) {
-      if (pushedRef.current) {
-        pushedRef.current = false
-        popOwnEntry(lengthRef.current)
-      }
+      if (release()) popOwnEntry(lengthRef.current)
       return undefined
     }
     window.history.pushState({ ...(window.history.state || {}), zadatakOverlay: true }, '')
     pushedRef.current = true
+    openOverlays += 1
     lengthRef.current = window.history.length
-    const onPop = () => { pushedRef.current = false; closeRef.current?.() }
+    const onPop = () => { if (release()) closeRef.current?.() }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [open])
+
+  // an overlay that only exists while open (unmounted to close it) gives its entry back too
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (release()) popOwnEntry(lengthRef.current) }, [])
 }
 
 /**

@@ -193,7 +193,8 @@ function PostTaskPage() {
       if (flaggedPhotos > 0) toast(`Pravilo #1: ${flaggedPhotos} ${flaggedPhotos === 1 ? 'slika je uklonjena' : 'slike su uklonjene'} jer sadrži kontakt podatke.`, { kind: 'error' })
       if (editId) toast('Izmjene su sačuvane.', { kind: 'success' })
       if (freshPost) { try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }
-      navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`)
+      // the finished job takes the form's place: back from it returns to where posting started, not to an empty form
+      leaveFlow(() => navigate(`/listings/${listing.id}${editId ? '' : inviteId ? '?published=quote' : '?published=1'}`, { replace: true }))
     } catch (requestError) {
       setError(requestError)
       setSaving(false)

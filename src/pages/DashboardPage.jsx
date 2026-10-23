@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
+import { ChevronRight, Eye, MapPin, Pencil, Plus, Sparkles, Trash2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { listingService } from '../services/listingService'
 import { formatBosnianDate } from '../utils/dateFormat'
@@ -11,6 +11,9 @@ import { keys, useMyBids, useMyListings, useRecommendedListings } from '../hooks
 import { useAccount } from './account/AccountLayout'
 import { confirmDialog } from '../utils/dialog'
 import ProviderDashboard from '../components/ProviderDashboard'
+import { useQuery } from '@tanstack/react-query'
+import { providerBoardService } from '../services/providerBoardService'
+import { clientStep } from '../utils/jobStep'
 
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 
@@ -43,6 +46,8 @@ function DashboardPage() {
   const loading = listingsQuery.isPending
   const bids = isProvider ? (bidsQuery.data ?? null) : null
   const recommended = recommendedQuery.data || []
+  const paymentsQuery = useQuery({ queryKey: keys.clientPayments(user.id), queryFn: () => providerBoardService.clientPayments(user.id), enabled: isClient, meta: { persist: false } })
+  const paymentByJob = new Map((paymentsQuery.data || []).map((row) => [row.listing_id, row]))
   const recommendedLoading = recommendedQuery.isPending
   const loadError = listingsQuery.error && !listingsQuery.data ? listingsQuery.error.message : ''
 
@@ -148,29 +153,40 @@ function DashboardPage() {
             </div>
           )}
 
-          {!loading && listings.map((listing) => (
+          {!loading && listings.map((listing) => {
+            const payment = paymentByJob.get(listing.id) || null
+            const offers = listing.bids?.[0]?.count || 0
+            const next = clientStep({ listing, payment, pending: listing.status === 'published' ? offers : 0, expired: listing.status === 'expired', reviewed: true })
+            // dodijeljen, plaćen ili završen posao se ne uređuje; dok je novac na Zadatku ne briše se ni on
+            const editable = ['published', 'expired', 'draft', 'paused'].includes(listing.status) && !payment
+            const deletable = listing.status !== 'assigned' && !['funded', 'requested', 'disputed'].includes(payment?.status)
+            return (
             <article data-testid="dashboard-listing" className="dashboard-listing" key={listing.id}>
               <div className="dashboard-listing-main">
                 <span className={`status-pill status-${listing.status}`}>{STATUS_LABELS[listing.status] || listing.status}</span>
                 <h3><Link to={`/listings/${listing.id}`}>{listing.title}</Link></h3>
                 <div className="dashboard-listing-meta">
                   <span><MapPin size={14} /> {listing.location || 'Bez lokacije'}</span>
-                  <span><Users size={14} /> {listing.bids?.[0]?.count || 0} ponuda</span>
+                  <span><Users size={14} /> {offers} {[2, 3, 4].includes(offers) ? 'ponude' : 'ponuda'}</span>
                   <span>{formatBosnianDate(listing.created_at)}</span>
                 </div>
+                {next.tone === 'act' && <Link to={`/listings/${listing.id}`} className="dashboard-next" data-testid="dashboard-next">{next.short} <ChevronRight size={15} /></Link>}
               </div>
               <div className="dashboard-listing-actions">
-                <strong>{listing.price == null ? 'Po dogovoru' : `${Number(listing.price).toLocaleString('bs-BA')} KM`}</strong>
+                <strong>{money(payment ? payment.amount : listing.price)}</strong>
                 <div className="dashboard-listing-buttons">
                   <Link className="ghost-button" to={`/listings/${listing.id}`}><Eye size={15} /> Pogledaj</Link>
-                  <Link className="ghost-button" to={`/objavi?edit=${listing.id}`}><Pencil size={15} /> Uredi</Link>
-                  <button type="button" className="danger-button" disabled={deletingId === listing.id} onClick={() => deleteListing(listing)}>
-                    <Trash2 size={15} /> {deletingId === listing.id ? 'Brišem...' : 'Obriši'}
-                  </button>
+                  {editable && <Link className="ghost-button" to={`/objavi?edit=${listing.id}`}><Pencil size={15} /> Uredi</Link>}
+                  {deletable && (
+                    <button type="button" className="danger-button" disabled={deletingId === listing.id} onClick={() => deleteListing(listing)}>
+                      <Trash2 size={15} /> {deletingId === listing.id ? 'Brišem...' : 'Obriši'}
+                    </button>
+                  )}
                 </div>
               </div>
             </article>
-          ))}
+            )
+          })}
         </section>
         )}
     </div>

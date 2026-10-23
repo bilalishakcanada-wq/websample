@@ -6,9 +6,10 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Ban, Check, CheckCheck, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
+import { jobStatus } from '../utils/jobStatus'
 import { useAuth } from '../context/AuthContext'
 import { messageService } from '../services/messageService'
 import { reportService } from '../services/reportService'
@@ -19,6 +20,7 @@ import Chat from '../app/Chat'
 import { SkeletonRows } from '../components/Skeleton'
 import { promptDialog } from '../utils/dialog'
 import { useBlocks } from '../hooks/useBlocks'
+import { canGoBackInApp } from '../utils/backNav'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -100,6 +102,7 @@ function MessagesPage() {
   const { isBlocked, toggle: toggleBlockUser } = useBlocks()
   const otherBlocked = Boolean(active && isBlocked(active.other_id))
   const chatState = otherBlocked ? 'blocked' : (active?.chat_state || 'open')
+  const status = jobStatus(chatState, active?.contacts_allowed)
 
   // the thread arrives from the cache/query; unread rows addressed to me are marked read. One call at a time,
   // and the rows are patched locally: markRead's 'zadatak:messages-read' event already refreshes inbox + badge
@@ -135,8 +138,9 @@ function MessagesPage() {
     const fromInbox = Boolean(location.state?.fromInbox)
     setError('')
     setNotice('')
-    // closing a thread opened from the inbox is a plain step back, so history never doubles up
-    if (!id && fromInbox) { navigate(-1); return }
+    // closing a thread is a plain step back to whatever was open before it (the inbox, or the job
+    // or profile it was opened from); only a thread opened straight from outside falls back to the inbox
+    if (!id && (fromInbox || canGoBackInApp())) { navigate(-1); return }
     setActiveId(id)
     // opening a thread from the inbox is one new history entry (back returns to the inbox);
     // switching to another thread, or closing one that came from a link, replaces it
@@ -351,24 +355,19 @@ function MessagesPage() {
           <section className="chat-main">
             {!active ? (
               <div className="chat-welcome">
+                <div className="chat-welcome-empty">
+                  <div className="chat-welcome-art"><MessagesSquare size={30} /></div>
+                  <strong>Odaberite razgovor</strong>
+                  <span>Ovdje se otvara prepiska sa klijentom ili izvođačem, zajedno sa poslom o kojem pričate.</span>
+                </div>
                 {tipsOpen && (
-                  <div className="chat-safety-banner">
-                    <div>
-                      <strong>Kako prepoznati prevaru i sigurno sarađivati?</strong>
-                      <p>Ne dijelite lične podatke ni brojeve kartica, ne otvarajte sumnjive linkove, a sav dogovor vodite kroz Zadatak poruke. <Link to="/pravila-zajednice#pravilo-1">Saznaj više</Link></p>
-                    </div>
-                    <button type="button" onClick={hideTips} aria-label="Zatvori"><X size={18} /></button>
+                  <div className="chat-safety-card">
+                    <h3><ShieldCheck size={18} /> Savjeti za sigurnu saradnju</h3>
+                    <button type="button" className="chat-safety-close" onClick={hideTips} aria-label="Zatvori"><X size={16} /></button>
+                    <ul>{SAFETY_TIPS.map((tip) => <li key={tip}><Check size={14} />{tip}</li>)}</ul>
+                    <Link to="/pravila-zajednice#pravilo-1">Više o sigurnosti</Link>
                   </div>
                 )}
-                <div className="chat-safety-card">
-                  <h3><ShieldCheck size={18} /> Savjeti za sigurnu saradnju</h3>
-                  <ul>{SAFETY_TIPS.map((tip) => <li key={tip}>{tip}</li>)}</ul>
-                  <Link to="/pravila-zajednice">Više o sigurnosti</Link>
-                </div>
-                <div className="chat-welcome-empty">
-                  <div className="chat-welcome-art"><MessagesSquare size={40} /></div>
-                  <strong>Odaberite razgovor za detaljni pregled</strong>
-                </div>
               </div>
             ) : (
               <>
@@ -378,7 +377,7 @@ function MessagesPage() {
                     <Avatar src={active.other_avatar} name={active.other_name} size={40} />
                     <span>
                       <strong>{active.other_name}</strong>
-                      <small>{active.listing_title || 'Razgovor'} · {active.other_type === 'client' ? 'klijent' : 'izvođač'}</small>
+                      <small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small>
                     </span>
                   </Link>
                   <span className={`chat-contact-state ${active.contacts_allowed ? 'open' : ''}`} title={active.contacts_allowed ? 'Ponuda je prihvaćena' : 'Kontakt se otključava kad klijent prihvati ponudu'}>
@@ -392,6 +391,18 @@ function MessagesPage() {
                   </div>
                 </header>
 
+                {active.listing_id && (
+                  <Link to={`/listings/${active.listing_id}`} className="chat-job-link">
+                    <span className="chat-job-icon"><BriefcaseBusiness size={18} /></span>
+                    <span className="chat-job-text">
+                      <small>Posao</small>
+                      <strong>{active.listing_title}</strong>
+                    </span>
+                    <span className={`chat-job-status ${status.tone}`}>{status.label}</span>
+                    <em>Otvori <ChevronRight size={15} /></em>
+                  </Link>
+                )}
+
                 <div className="chat-thread" ref={listRef}>
                   {thread.length === 0 && (
                     <div className="chat-thread-intro">
@@ -402,10 +413,11 @@ function MessagesPage() {
                   {grouped.map((group) => (
                     <div key={group.key} className="chat-day">
                       <span className="chat-day-label">{group.label}</span>
-                      {group.items.map((item) => {
+                      {group.items.map((item, index) => {
                         const mine = item.sender_id === user.id
+                        const follows = index > 0 && group.items[index - 1].sender_id === item.sender_id
                         return (
-                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${item.attachment_type === 'image' ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
+                          <div key={item.id} className={`chat-bubble ${mine ? 'mine' : 'theirs'} ${follows ? 'follows' : ''} ${item.attachment_type === 'image' ? 'has-image' : ''} ${item.pending ? 'is-pending' : ''}`} data-testid="chat-message">
                             {item.attachment_type === 'image' && item.attachment_url
                               ? <PrivateImage fileRef={item.attachment_url} alt="Slika" className="chat-image" />
                               : <p>{item.content}</p>}

@@ -1,9 +1,8 @@
 // One way to follow the phone's position on every platform:
 //  - iOS / Android app → Capacitor's native Geolocation plugin (system permission dialog, GPS, no browser limits);
 //  - browser (laptop, mobile web, installed web app) or an older app build without the plugin → HTML5 Geolocation.
-//  - { background: true } in the app → @capacitor-community/background-geolocation: the position keeps coming
-//    while the person uses other apps or locks the phone, with a notification on the phone as long as it runs
-//    (Android foreground service "location"). A browser can't do this: there it stops when the page is hidden.
+//  - { background: true } uses a BackgroundGeolocation plugin only if a build has one; the Android app has none
+//    (no foreground service for Google Play), so the position flows only while Zadatak is open.
 // Callers get the same { lat, lng, accuracy, heading, speed, at } shape and the same Bosnian error texts.
 import { isNativeApp } from './native'
 

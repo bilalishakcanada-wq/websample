@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useJobFeed } from './useFeed'
-import { mockServiceCategories, mockTasks } from '../data/mockData'
+import { mockServiceCategories } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
 
 const categoryImage = (category) => {
@@ -29,13 +29,11 @@ export const toCardListing = (listing) => ({
   isLive: true,
 })
 
-/** The job feed as cards: ranked for whoever is looking (see useFeed), newest-first no longer. */
-export function useLiveListings({ limit = 8, fallbackToDemo = true } = {}) {
+/** The job feed as cards: ranked for whoever is looking (see useFeed). Only real published jobs, never demo ones. */
+export function useLiveListings({ limit = 8 } = {}) {
   const { user } = useAuth()
   const { feed, loading } = useJobFeed({ userId: user?.id ?? null, limit })
   const listings = useMemo(() => feed.map(toCardListing), [feed])
 
-  const demoFill = fallbackToDemo ? mockTasks.slice(0, Math.max(0, limit - listings.length)) : []
-
-  return { listings, demoListings: demoFill, combined: [...listings, ...demoFill], loading, hasLive: listings.length > 0 }
+  return { listings, loading, hasLive: listings.length > 0 }
 }

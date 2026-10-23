@@ -24,14 +24,11 @@ const tabs = [
   ['/account', 'Nalog', UserRound],
 ]
 
-const TAB_ROOTS = tabs.map(([to]) => to)
-
 // Focused flows (auth, post flow, staff console) run full-screen without the tab bar.
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/start', '/intro']
 
 function MobileNav() {
-  const location = useLocation()
-  const { pathname } = location
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const unread = useUnreadMessages(user?.id)
@@ -47,24 +44,16 @@ function MobileNav() {
   useEffect(() => { warmMainRoutes() }, [])
 
   /*
-   * Tabs don't stack up: from home a tab is one step (back returns home); hopping between the
-   * other tabs replaces that step, and the home tab steps back to home instead of adding it again.
-   * From a deeper screen (a job, a profile) a tab is a normal new step.
+   * Every tab is one step, like every other screen: back always returns to the screen that was
+   * open before, one at a time (Početna → Pretraži → Poruke, back → Pretraži → Početna).
+   * Tapping the tab you are on scrolls back to the top.
    */
-  const onTab = (event, to, index) => {
+  const onTab = (event, to) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
     haptic('light')
-    if (index === active) {
-      if (pathname === to) scrollHome()
-      else navigateWithTransition(navigate, to, { replace: true, state: location.state, dir: 'back' }) // tab root again
-      return
-    }
-    const onTabRoot = TAB_ROOTS.includes(pathname)
-    const fromHome = pathname === '/' || Boolean(location.state?.tabFromHome)
-    if (to === '/' && onTabRoot && location.state?.tabFromHome && (window.history.state?.idx ?? 0) > 0) { navigate(-1); return }
-    if (to === '/') { navigateWithTransition(navigate, '/'); return }
-    navigateWithTransition(navigate, to, { replace: onTabRoot && pathname !== '/', state: { tabFromHome: onTabRoot && fromHome } })
+    if (pathname === to) { scrollHome(); return }
+    navigateWithTransition(navigate, to)
   }
 
   if (hidden) return null
@@ -73,7 +62,7 @@ function MobileNav() {
   return (
     <nav className="mobile-nav" aria-label="Mobilna navigacija">
       {tabs.map(([to, label, Icon], index) => (
-        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" data-testid={`nav-${to === '/' ? 'home' : to.slice(1).replace(/\//g, '-')}`} onClick={(event) => onTab(event, to, index)} onPointerDown={() => prefetchRoute(to)}>
+        <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`} data-own-nav="" data-testid={`nav-${to === '/' ? 'home' : to.slice(1).replace(/\//g, '-')}`} onClick={(event) => onTab(event, to)} onPointerDown={() => prefetchRoute(to)}>
           <span className="mobile-nav-icon">
             <Icon size={24} weight={index === active ? "fill" : "regular"} />
             {to === '/messages' && unread > 0 && <b key={unread} className="mobile-nav-badge">{unread > 9 ? '9+' : unread}</b>}

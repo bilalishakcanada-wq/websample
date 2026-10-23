@@ -43,7 +43,7 @@ export function useRealtimeSync() {
       if (wait <= 0) { lastSearch = Date.now(); invalidate(['search']); return }
       if (!searchTimer) searchTimer = window.setTimeout(() => { searchTimer = 0; lastSearch = Date.now(); invalidate(['search']) }, wait)
     }
-    const mine = () => [keys.myBids(uid), keys.myListings(uid), keys.providerPayments(uid)]
+    const mine = () => [keys.myBids(uid), keys.myListings(uid), keys.providerPayments(uid), keys.clientPayments(uid)]
 
     const onBid = ({ eventType, new: row, old }) => {
       const bid = row?.id ? row : old

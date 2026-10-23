@@ -552,32 +552,56 @@
   .pe-preview, .pe-steps { padding: 16px; }
 }
 
-/* phone Nalog screen: plain title, a profile card with two actions, then grouped rows */
-.ap-account { padding-top: 0; }
-.ap-account-top { display: flex; align-items: center; justify-content: space-between; padding: calc(10px + var(--safe-top, 0px)) 0 8px; }
-.ap-account-top h1 { margin: 0; font-family: inherit; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; color: var(--cr-ink); }
-.ap-account .ap-account-bell { position: relative; top: auto; right: auto; width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 1px solid var(--cr-line); color: var(--cr-ink); }
-.ap-account .ap-account-bell .ap-bell-count { border-color: #fff; }
-.ap-me { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px 14px; margin: 6px 0 18px; padding: 16px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; }
-.ap-me .ap-account-avatar { width: 60px; height: 60px; border: 0; background: #eef0f4; color: #8a93a6; }
-.ap-me .ap-account-avatar > span { width: 22px; height: 22px; right: -3px; bottom: -3px; background: var(--cr-ink); border: 2px solid #fff; }
-.ap-me-text { display: grid; gap: 2px; min-width: 0; }
-.ap-me-text strong { font-size: 18px; font-weight: 700; color: var(--cr-ink); line-height: 1.2; overflow-wrap: anywhere; }
-.ap-me-text small { font-size: 13.5px; color: var(--cr-mute); }
-.ap-me-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ap-me-actions a { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: var(--cr-r); font-size: 15px; font-weight: 600; }
-.ap-me-edit { background: var(--cr-ink); color: #fff; }
-.ap-me-public { border: 1px solid var(--cr-line-strong); background: #fff; color: var(--cr-ink); }
-.ap-account .ap-mode { border-radius: var(--cr-r-lg); background: #eceef2; padding: 3px; }
-.ap-account .ap-mode button { border-radius: 9px; font-weight: 600; color: var(--cr-soft); }
-.ap-account .ap-mode button.active { background: #fff; color: var(--cr-ink); box-shadow: 0 1px 2px rgba(11, 22, 64, 0.12); }
-.ap-account .ap-label.ap-eyebrow { margin: 24px 0 6px; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--cr-mute); }
-.ap-account .ap-menu-plain { border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; overflow: hidden; }
-.ap-account .ap-menu-plain .ap-menu-row { min-height: 54px; padding: 10px 14px; border-bottom: 1px solid var(--cr-line-soft); font-size: 16px; font-weight: 500; color: var(--cr-ink); }
-.ap-account .ap-menu-plain .ap-menu-row:last-child { border-bottom: 0; }
-.ap-account .ap-menu-plain .ap-menu-row > svg:first-child { color: var(--cr-soft); }
-.ap-account .ap-menu-plain .ap-menu-row:active { opacity: 1; background: #f6f7f9; }
-.ap-account .ap-menu-row span small { font-size: 13px; color: var(--cr-mute); }
-.ap-account .ap-menu-logout { margin-top: 20px; min-height: 52px; padding: 0 14px; border: 1px solid var(--cr-line); border-radius: var(--cr-r-lg); background: #fff; color: var(--cr-red); font-weight: 600; }
+/* phone Nalog screen: the app's navy header (as on Početna) with the Stari most drawing, the balance card
+   resting on its edge, then grouped rows on the app's light page */
+.ap-account { padding-top: 0; background: #f4f6fb; min-height: 100%; }
+body:has(.ap-account) { background: #f4f6fb; }
+.acc-hero { position: relative; overflow: hidden; margin: 0 calc(-1 * var(--ap-x)); padding: calc(10px + var(--safe-top, 0px)) var(--ap-x) 62px; background: radial-gradient(ellipse at 95% 10%, rgba(79, 134, 255, 0.5), transparent 58%), radial-gradient(ellipse at 0% 100%, rgba(31, 95, 255, 0.28), transparent 55%), #0a1f63; color: #fff; border-radius: 0 0 28px 28px; isolation: isolate; }
+.acc-hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: radial-gradient(rgba(169, 198, 255, 0.12) 1px, transparent 1px); background-size: 16px 16px; -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%); mask-image: linear-gradient(to bottom, #000, transparent 85%); }
+.acc-hero-top { display: flex; align-items: center; justify-content: space-between; min-height: 48px; }
+.acc-hero-top h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a9c6ff; }
+.ap-account .ap-account-bell { position: relative; top: auto; right: auto; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(169, 198, 255, 0.25); color: #fff; }
+.ap-account .ap-account-bell .ap-bell-count { border-color: #0a1f63; }
+.acc-hero-body { display: grid; grid-template-columns: minmax(0, 1fr) 128px; align-items: end; gap: 6px; margin-top: 8px; }
+.acc-id { display: grid; justify-items: start; gap: 4px; min-width: 0; }
+.acc-id .ap-account-avatar { width: 68px; height: 68px; margin-bottom: 10px; border: 0; padding: 0; border-radius: 50%; background: #1f5fff; color: #fff; box-shadow: 0 0 0 3px #0a1f63, 0 0 0 5px #7fe0b4; }
+.acc-id .ap-account-avatar > .acc-initial { position: static; width: auto; height: auto; border: 0; border-radius: 0; background: none; font-family: var(--font-display); font-size: 30px; font-weight: 700; line-height: 1; color: #fff; }
+.acc-id .ap-account-avatar > .acc-cam { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; color: #0a1f63; border: 2px solid #0a1f63; }
+.acc-id strong { font-family: var(--font-display); font-size: 25px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; color: #fff; overflow-wrap: anywhere; }
+.acc-id small { font-size: 14px; color: #a9c6ff; }
+.acc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.acc-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px; border-radius: 999px; font-size: 14px; font-weight: 700; }
+.acc-edit { background: #fff; color: #0a1f63; }
+.acc-public { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(169, 198, 255, 0.35); color: #fff; }
+.acc-art { position: relative !important; display: block; width: 150px; height: 132px; margin: 0 -18px -8px 0; justify-self: end; pointer-events: none; -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent); mask-image: linear-gradient(to bottom, #000 80%, transparent); }
+.acc-art svg { width: 100%; height: 100%; }
+@media (max-width: 380px) {
+  .acc-hero-body { grid-template-columns: minmax(0, 1fr) 100px; }
+  .acc-art { width: 118px; height: 106px; }
+  .acc-actions a { padding: 0 12px; font-size: 13.5px; }
+  .acc-id strong { font-size: 23px; }
+}
+@media (max-width: 339px) { .acc-hero-body { grid-template-columns: 1fr; } .acc-art { display: none; } }
+.acc-wallet { position: relative; z-index: 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; margin: -40px 0 18px; padding: 16px 18px; border-radius: 20px; background: #fff; color: #0a1f63; box-shadow: 0 1px 0 rgba(10, 31, 99, 0.04), 0 14px 30px -14px rgba(10, 31, 99, 0.35); }
+.acc-wallet:active { transform: scale(0.99); }
+.acc-wallet-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: #1f5fff; color: #fff; }
+.acc-wallet-text { display: grid; gap: 1px; min-width: 0; }
+.acc-wallet-text small { font-size: 13px; font-weight: 600; color: #5a6481; }
+.acc-wallet-text strong { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: #0a1f63; }
+.acc-wallet-go { display: inline-flex; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 999px; background: #e8f0ff; font-size: 14px; font-weight: 700; color: #1a43b8; }
+.ap-account .ap-mode { border-radius: 14px; background: #e6ebf5; padding: 4px; }
+.ap-account .ap-mode button { border-radius: 10px; font-weight: 700; color: #5a6481; }
+.ap-account .ap-mode button.active { background: #0a1f63; color: #fff; box-shadow: none; }
+.ap-account .ap-mode-hint { color: #5a6481; }
+.ap-account .ap-label.ap-eyebrow { margin: 26px 0 8px 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5a6481; }
+.ap-account .ap-menu-plain { border: 0; border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgba(10, 31, 99, 0.06); }
+.ap-account .ap-menu-plain .ap-menu-row { gap: 14px; min-height: 58px; padding: 9px 16px 9px 12px; border-bottom: 0; font-size: 16px; font-weight: 500; color: #0a1f63; position: relative; }
+.ap-account .ap-menu-plain .ap-menu-row + .ap-menu-row::before { content: ''; position: absolute; top: 0; left: 62px; right: 0; border-top: 1px solid #edf0f6; }
+.acc-tile { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #e8f0ff; color: #1f5fff; }
+.ap-account .ap-menu-plain .ap-menu-row > svg:last-child { color: #c3c4ca; }
+.ap-account .ap-menu-plain .ap-menu-row:active { opacity: 1; background: #f4f6fb; }
+.ap-account .ap-menu-row span small { font-size: 13px; color: #6b7489; }
+.ap-account .ap-menu-logout { margin-top: 22px; min-height: 54px; padding: 0 16px; border: 0; border-radius: 18px; background: #fff; color: var(--cr-red); font-weight: 600; box-shadow: 0 1px 2px rgba(11, 22, 64, 0.05); }
 .ap-account .ap-menu-logout > svg:first-child { color: var(--cr-red); }
+.ap-account .ap-version { color: #5a6481; }
 .pe .account-field .city-field input:not([type='checkbox']):not([type='radio']) { padding-left: 38px; padding-right: 44px; }

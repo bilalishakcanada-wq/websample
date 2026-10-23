@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { Sparkles, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import TierMedal from './TierMedal'
 import { useBadgeVault } from '../hooks/useTopBadges'
 import { TIERS, progressOf } from '../utils/badgeRanking'
@@ -58,7 +58,7 @@ export function BadgeVault({ userId, earnedBadges }) {
         </span>
       </div>
       {fresh.size > 0 && (
-        <p className="vault-celebrate"><Sparkles size={16} /> Nova značka{fresh.size > 1 ? ` (${fresh.size})` : ''}! Svaka je odmah na tvom profilu, a 5 najjačih je na vrhu.</p>
+        <p className="vault-celebrate">{fresh.size > 1 ? `${fresh.size} nove značke` : 'Nova značka'} od tvoje zadnje posjete. Odmah je na tvom profilu.</p>
       )}
 
       <div className="vault-grid" onMouseLeave={() => setOpen(null)}>
@@ -77,7 +77,7 @@ export function BadgeVault({ userId, earnedBadges }) {
               aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}
             >
               {fresh.has(badge.code) && <span className="vault-new">Novo</span>}
-              <TierMedal badge={badge} size={52} locked={!badge.earned} />
+              <TierMedal badge={badge} size={40} locked={!badge.earned} />
               <strong>{badge.label}</strong>
               <small className={`vault-tier tier-${badge.tier.key}`}>{badge.tier.label}</small>
               {!badge.earned && <ProgressLine progress={badge.progress} />}

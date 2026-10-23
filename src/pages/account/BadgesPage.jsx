@@ -14,7 +14,7 @@ function VerificationMeter({ progress }) {
   if (!progress) return null
   return (
     <div className="verif-meter">
-      <span>Tvoje verifikacije su {progress.percent}% završene</span>
+      <span>Verifikacije: {progress.percent}%</span>
       <div className="verif-meter-bar"><span style={{ width: `${progress.percent}%` }} /></div>
     </div>
   )

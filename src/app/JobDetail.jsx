@@ -108,7 +108,7 @@ function JobDetail(props) {
             <Avatar url={poster?.avatar_url} size={44} />
             <div>
               <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
-              <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član!' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '—'}.`}</span>
+              <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '—'}.`}</span>
             </div>
             <ChevronRight size={18} />
           </Link>

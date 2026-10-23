@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { desktopNotify, notificationService, playPing } from '../services/notificationService'
 import { formatBosnianDate } from '../utils/dateFormat'
-import { notificationCategory, notificationIcon, notificationTarget } from '../utils/notificationCategory'
+import { notificationCategory, notificationIcon, notificationTarget, plainTitle } from '../utils/notificationCategory'
 import './NotificationCenter.css'
 import { currentSubscription } from '../utils/push'
 import { toast } from './Toaster'
@@ -35,10 +35,10 @@ function NotificationBell() {
       if (document.visibilityState === 'visible') {
         if (!(row.type === 'message' && window.location.pathname.includes('/messages'))) {
           if (pushOn) playPing()
-          toast(row.title, { kind: ['offer_accepted', 'wallet', 'task_live', 'review', 'welcome'].includes(row.type) ? 'success' : 'info' })
+          toast(plainTitle(row.title), { kind: ['offer_accepted', 'wallet', 'task_live', 'review', 'welcome'].includes(row.type) ? 'success' : 'info' })
         }
       } else if (pushOn && !(await currentSubscription())) {
-        desktopNotify(row.title, row.message || '')
+        desktopNotify(plainTitle(row.title), row.message || '')
       }
     })
     // read on another screen (the Obavijesti page, the other bell): the count here follows
@@ -91,7 +91,7 @@ function NotificationBell() {
                     <button type="button" className={item.read_at ? '' : 'unread'} onClick={() => openItem(item)}>
                       <span className={`notif-panel-icon notif-cat-${notificationCategory(item)}`}>{createElement(notificationIcon(item), { size: 14 })}</span>
                       <span>
-                        <strong>{item.title}</strong>
+                        <strong>{plainTitle(item.title)}</strong>
                         {item.message && <small>{item.message}</small>}
                         <time>{formatBosnianDate(item.created_at)}</time>
                       </span>

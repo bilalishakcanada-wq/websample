@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { Award, Clock, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react'
+import { Award, Clock, ShieldAlert, ShieldCheck, UserRound } from 'lucide-react'
 
 const TIERS = {
   top: { icon: Award, className: 'tier-top' },
   trusted: { icon: ShieldCheck, className: 'tier-trusted' },
   verified: { icon: ShieldCheck, className: 'tier-verified' },
-  new: { icon: Sparkles, className: 'tier-new' },
+  new: { icon: UserRound, className: 'tier-new' },
   unverified: { icon: ShieldAlert, className: 'tier-unverified' },
 }
 
@@ -15,7 +15,7 @@ function TrustBadge({ tier, label, trade, size = 'md' }) {
   const text = trade && (tier === 'verified' || tier === 'trusted' || tier === 'top') ? `${label} — ${trade}` : label
   return (
     <span className={`trust-badge ${config.className} trust-badge-${size}`} title={text}>
-      <Icon size={size === 'lg' ? 18 : 14} />
+      <Icon size={size === 'lg' ? 16 : 14} strokeWidth={2} />
       {text}
     </span>
   )

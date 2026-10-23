@@ -1,27 +1,18 @@
-import { UserRound } from 'lucide-react'
-import { badgeIcon } from './badgeIcons'
-import { useTopBadges } from '../hooks/useTopBadges'
+import { BadgeCheck, UserRound } from 'lucide-react'
+
+const VERIFIED = new Set(['verified', 'trusted', 'top'])
 
 /**
- * Round avatar with a trust-tier ring and up to four badge medallions on the
- * rim. `tier` is the trust tier (new/unverified/verified/trusted/top),
- * `badges` are rows from the badges table; the four heaviest (weight_score) are shown.
+ * Round profile photo. A verified person (tier verified / trusted / top) gets one small check on the rim;
+ * the badges themselves are listed under the profile, not stuck around the photo.
  */
-function AvatarWithBadges({ src, tier = 'unverified', badges = [], size = 128 }) {
-  const { top: sorted } = useTopBadges(badges, 4)
+function AvatarWithBadges({ src, tier = 'unverified', size = 128 }) {
   return (
-    <div className={`avatar-badged tier-${tier}`} style={{ '--size': `${size}px` }}>
+    <div className="avatar-badged" style={{ '--size': `${size}px` }}>
       <div className="avatar-badged-ring">
-        {src ? <img loading="lazy" decoding="async" src={src} alt="" /> : <div className="avatar-badged-fallback"><UserRound size={size * 0.38} /></div>}
+        {src ? <img loading="lazy" decoding="async" src={src} alt="" /> : <div className="avatar-badged-fallback"><UserRound size={Math.round(size * 0.4)} strokeWidth={1.6} /></div>}
       </div>
-      {sorted.map((badge, index) => {
-        const Icon = badgeIcon(badge.icon)
-        return (
-          <span key={badge.code} className={`avatar-medal medal-${index} badge-${badge.code} ${badge.color ? 'badge-colored' : ''}`} style={badge.color ? { '--badge-color': badge.color } : undefined} title={`${badge.label} — ${badge.description || ''}`} aria-label={badge.label}>
-            <Icon size={size >= 120 ? 15 : 12} />
-          </span>
-        )
-      })}
+      {VERIFIED.has(tier) && <span className="avatar-verified" title="Verifikovan"><BadgeCheck size={Math.max(16, Math.round(size * 0.2))} /></span>}
     </div>
   )
 }

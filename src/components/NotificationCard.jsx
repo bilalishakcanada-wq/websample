@@ -2,7 +2,7 @@ import { createElement } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { notificationAction, notificationCategory, notificationIcon, notificationTarget } from '../utils/notificationCategory'
+import { notificationAction, notificationCategory, notificationIcon, notificationTarget, plainTitle } from '../utils/notificationCategory'
 import { timeAgo } from '../utils/dateFormat'
 import './NotificationCenter.css'
 
@@ -16,7 +16,7 @@ function NotificationCard({ item, unread }) {
     <li className={`notif-card notif-cat-${category}${unread ? ' is-unread' : ''}`}>
       <span className="notif-card-icon" aria-hidden="true">{createElement(notificationIcon(item), { size: 18 })}</span>
       <div className="notif-card-body">
-        <strong>{item.title}</strong>
+        <strong>{plainTitle(item.title)}</strong>
         {item.message && <p>{item.message}</p>}
         <div className="notif-card-meta">
           <time dateTime={item.created_at}>{timeAgo(item.created_at)}</time>

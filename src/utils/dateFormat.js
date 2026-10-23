@@ -29,3 +29,10 @@ export const timeAgo = (value) => {
   if (days < 7) return `prije ${days} dana`
   return formatBosnianDate(value)
 }
+
+/** "1 recenzija", "3 recenzije", "5 recenzija": Bosnian plural for review counts. */
+export const reviewsLabel = (n) => {
+  const last = n % 10
+  const lastTwo = n % 100
+  return `${n} ${last === 1 && lastTwo !== 11 ? 'recenzija' : last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14) ? 'recenzije' : 'recenzija'}`
+}

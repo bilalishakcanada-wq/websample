@@ -1,3 +1,4 @@
+import { reviewsLabel } from '../../utils/dateFormat'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -30,6 +31,8 @@ import { withBase } from '../../utils/paths'
 import SpotlightCard from '../../components/reactbits/SpotlightCard'
 import '../../components/reactbits/SpotlightCard.css'
 import { useDesktopHomeMotion } from './homeMotion'
+
+const badgeCount = (n) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'značka' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'značke' : 'znački'}`
 
 const categoryCards = [
   ...mockServiceCategories.map((category) => ({
@@ -70,11 +73,11 @@ function DesktopHome() {
         name: top.display_name || 'Korisnik Zadatka',
         photo: top.avatar_url,
         rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '—',
-        reviewLabel: top.review_count > 0 ? `${top.review_count} ${top.review_count === 1 ? 'ocjena' : 'ocjena'}` : 'Nova na platformi',
+        reviewLabel: top.review_count > 0 ? reviewsLabel(top.review_count) : 'Nova na platformi',
         jobsLabel: `${top.active_listings} ${top.active_listings === 1 ? 'aktivan oglas' : 'aktivnih oglasa'}`,
         city: top.city,
         specialties: null,
-        badges: [top.is_verified ? 'Verifikovan' : null, top.badge_count > 0 ? `${top.badge_count} znački` : null].filter(Boolean),
+        badges: [top.is_verified ? 'Verifikovan' : null, top.badge_count > 0 ? badgeCount(top.badge_count) : null].filter(Boolean),
         quote: null,
       }
     }
@@ -192,7 +195,6 @@ function DesktopHome() {
                     onClick={() => navigate(`/listings/${task.id}`)}
                   >
                     <div className="ticker-card-top">
-                      <div className="ticker-avatar">{(task.tag || 'P').charAt(0)}</div>
                       <span className="ticker-tag">{task.tag}</span>
                     </div>
                     <strong>{task.title}</strong>
@@ -278,8 +280,8 @@ function DesktopHome() {
                   }
                 }}
               >
-                <div className="job-card-image">
-                  <img src={task.image} alt={task.title} loading="lazy" />
+                <div className={`job-card-image ${task.image ? '' : 'no-image'}`}>
+                  {task.image && <img src={task.image} alt={task.title} loading="lazy" />}
                   <div className="job-topline">
                     <span className="tag">{task.tag}</span>
                     <button
@@ -357,13 +359,15 @@ function DesktopHome() {
               {featuredProvider.photo
                 ? <img src={featuredProvider.photo} alt={featuredProvider.name} loading="lazy" />
                 : <div className="provider-photo-fallback featured-tasker-photo-fallback"><UserRound size={40} /></div>}
-              <div className="featured-tasker-rating-card">
-                <Star size={18} fill="currentColor" color="var(--accent-strong)" />
-                <div>
-                  <strong>{featuredProvider.rating}</strong>
-                  <span>{featuredProvider.reviewLabel}</span>
+              {featuredProvider.rating !== '—' && (
+                <div className="featured-tasker-rating-card">
+                  <Star size={18} fill="currentColor" />
+                  <div>
+                    <strong>{featuredProvider.rating}</strong>
+                    <span>{featuredProvider.reviewLabel}</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="featured-tasker-info">
               <h3>{featuredProvider.name}</h3>
@@ -415,7 +419,7 @@ function DesktopHome() {
               const name = isLive ? (provider.display_name || 'Korisnik Zadatka') : provider.name
               const photo = isLive ? provider.avatar_url : provider.photo
               const badgeLabel = isLive
-                ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? `${provider.badge_count} znački` : 'Aktivan'))
+                ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? badgeCount(provider.badge_count) : 'Aktivan'))
                 : provider.badge
               const rating = isLive ? provider.avg_rating : provider.rating
               const jobsLabel = isLive ? `${provider.active_listings} aktivnih oglasa` : `${provider.jobs} završenih poslova`

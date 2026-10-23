@@ -3,11 +3,11 @@ import { useAuth } from '../context/AuthContext'
 import { useJobFeed } from './useFeed'
 import { mockServiceCategories } from '../data/mockData'
 import { formatBosnianDate } from '../utils/dateFormat'
-import { withBase } from '../utils/paths'
 
 const categoryImage = (category) => {
   const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.webp')
+  // a job in a category without its own photo shows no picture, not someone else's (wood shavings on a logo job)
+  return match?.image || null
 }
 
 const shortTag = (category) => {

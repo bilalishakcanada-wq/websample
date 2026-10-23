@@ -21,7 +21,7 @@ function ClientErrors({ openUser }) {
   }, [])
   if (error) return <div className="form-error">{error}</div>
   if (rows === null) return <SkeletonList n={4} h={96} />
-  if (rows.length === 0) return <p className="muted-text">Nema prijavljenih grešaka — aplikacija radi bez padova. 🎉</p>
+  if (rows.length === 0) return <p className="muted-text">Nema prijavljenih grešaka. Aplikacija radi bez padova.</p>
   return rows.map((row) => (
     <div key={row.id} className="admin-row feed-error">
       <div className="admin-feed-main">

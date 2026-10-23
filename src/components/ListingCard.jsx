@@ -1,13 +1,13 @@
-import { Clock3, MapPin, Tag } from 'lucide-react'
+import { Clock3, MapPin } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { mockServiceCategories } from '../data/mockData'
-import { withBase } from '../utils/paths'
 
 const isRealListingId = (id) => /^[0-9a-f-]{36}$/i.test(String(id))
 
 const categoryImage = (category) => {
   const match = mockServiceCategories.find((item) => item.name === category)
-  return match?.image || withBase('/images/categories/home.webp')
+  // a job in a category without its own photo shows no picture, not someone else's (wood shavings on a logo job)
+  return match?.image || null
 }
 
 function ListingCard({ listing, onSave, saved = false }) {
@@ -23,9 +23,7 @@ function ListingCard({ listing, onSave, saved = false }) {
 
   return (
     <article className="listing-card">
-      {image
-        ? <div className="listing-card-image"><img src={image} alt="" loading="lazy" /></div>
-        : <div className="listing-card-image" aria-hidden="true"><Tag size={24} /></div>}
+      {image && <div className="listing-card-image"><img src={image} alt="" loading="lazy" /></div>}
       <div className="listing-card-content">
         <div className="listing-card-topline">
           <span className="tag">{listing.tag || listing.category}</span>

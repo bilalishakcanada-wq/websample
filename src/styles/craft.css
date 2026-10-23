@@ -588,20 +588,20 @@ body:has(.ap-account) { background: #f4f6fb; }
 .acc-wallet-text { display: grid; gap: 1px; min-width: 0; }
 .acc-wallet-text small { font-size: 13px; font-weight: 600; color: #5a6481; }
 .acc-wallet-text strong { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: #0a1f63; }
-.acc-wallet-go { display: inline-flex; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 999px; background: #e8f0ff; font-size: 14px; font-weight: 700; color: #1f5fff; }
+.acc-wallet-go { display: inline-flex; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 999px; background: #e8f0ff; font-size: 14px; font-weight: 700; color: #1a43b8; }
 .ap-account .ap-mode { border-radius: 14px; background: #e6ebf5; padding: 4px; }
 .ap-account .ap-mode button { border-radius: 10px; font-weight: 700; color: #5a6481; }
 .ap-account .ap-mode button.active { background: #0a1f63; color: #fff; box-shadow: none; }
 .ap-account .ap-mode-hint { color: #5a6481; }
-.ap-account .ap-label.ap-eyebrow { margin: 26px 0 8px 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6b7489; }
+.ap-account .ap-label.ap-eyebrow { margin: 26px 0 8px 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5a6481; }
 .ap-account .ap-menu-plain { border: 0; border-radius: 18px; background: #fff; overflow: hidden; box-shadow: 0 1px 2px rgba(10, 31, 99, 0.06); }
 .ap-account .ap-menu-plain .ap-menu-row { gap: 14px; min-height: 58px; padding: 9px 16px 9px 12px; border-bottom: 0; font-size: 16px; font-weight: 500; color: #0a1f63; position: relative; }
 .ap-account .ap-menu-plain .ap-menu-row + .ap-menu-row::before { content: ''; position: absolute; top: 0; left: 62px; right: 0; border-top: 1px solid #edf0f6; }
 .acc-tile { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #e8f0ff; color: #1f5fff; }
 .ap-account .ap-menu-plain .ap-menu-row > svg:last-child { color: #c3c4ca; }
 .ap-account .ap-menu-plain .ap-menu-row:active { opacity: 1; background: #f4f6fb; }
-.ap-account .ap-menu-row span small { font-size: 13px; color: #868892; }
+.ap-account .ap-menu-row span small { font-size: 13px; color: #6b7489; }
 .ap-account .ap-menu-logout { margin-top: 22px; min-height: 54px; padding: 0 16px; border: 0; border-radius: 18px; background: #fff; color: var(--cr-red); font-weight: 600; box-shadow: 0 1px 2px rgba(11, 22, 64, 0.05); }
 .ap-account .ap-menu-logout > svg:first-child { color: var(--cr-red); }
-.ap-account .ap-version { color: #6b7489; }
+.ap-account .ap-version { color: #5a6481; }
 .pe .account-field .city-field input:not([type='checkbox']):not([type='radio']) { padding-left: 38px; padding-right: 44px; }

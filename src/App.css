@@ -661,6 +661,28 @@ button {
   gap: 18px;
 }
 
+.jobs-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--stroke);
+  border-radius: 20px;
+  color: var(--text-soft);
+}
+
+.jobs-empty h3,
+.jobs-empty p {
+  margin: 0;
+}
+
+.jobs-empty h3 {
+  color: var(--text);
+}
+
 .job-card {
   background: var(--surface);
   border: 1px solid var(--stroke);

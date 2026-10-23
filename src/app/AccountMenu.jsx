@@ -8,6 +8,7 @@ import { haptic } from '../utils/native'
 import { accountService } from '../services/accountService'
 import './app.css'
 import NotifBellLink from '../components/NotifBellLink'
+import { CropArt } from '../components/BosniaArt'
 
 /** Phone account screen: who you are, which face of the app you use, and plain rows to everything else. */
 function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
@@ -66,24 +67,24 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
   return (
     <div className="ap ap-page ap-account">
       <section className="acc-hero">
-        <AccountSkyline />
         <div className="acc-hero-top">
           <h1>Nalog</h1>
           <NotifBellLink className="ap-account-bell" />
         </div>
-        <div className="acc-id">
-          <button type="button" className="ap-account-avatar" onClick={onPickAvatar} disabled={uploadingAvatar} aria-label="Promijeni profilnu sliku">
-            {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <span className="acc-initial">{(profile.full_name || 'Z').trim().charAt(0).toUpperCase()}</span>}
-            <span className="acc-cam"><Camera size={13} /></span>
-          </button>
-          <div className="acc-id-text">
+        <div className="acc-hero-body">
+          <div className="acc-id">
+            <button type="button" className="ap-account-avatar" onClick={onPickAvatar} disabled={uploadingAvatar} aria-label="Promijeni profilnu sliku">
+              {profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <span className="acc-initial">{(profile.full_name || 'Z').trim().charAt(0).toUpperCase()}</span>}
+              <span className="acc-cam"><Camera size={13} /></span>
+            </button>
             <strong>{profile.full_name || 'Tvoj nalog'}</strong>
             <small>{[profile.city, role].filter(Boolean).join(' · ')}</small>
+            <div className="acc-actions">
+              <Link to="/account/profil" className="acc-edit">Uredi profil</Link>
+              <Link to={`/korisnik/${profile.user_id}`} className="acc-public">Javni profil</Link>
+            </div>
           </div>
-        </div>
-        <div className="acc-actions">
-          <Link to="/account/profil" className="acc-edit">Uredi profil</Link>
-          <Link to={`/korisnik/${profile.user_id}`} className="acc-public">Javni profil</Link>
+          <CropArt crop="most" className="acc-art" />
         </div>
       </section>
 
@@ -121,21 +122,5 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
 }
 
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
-
-/** Thin line drawing of Sarajevo behind the header: Vijećnica, a minaret and the Latinska ćuprija arches. */
-function AccountSkyline() {
-  return (
-    <svg className="acc-skyline" viewBox="0 0 400 120" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
-      <g fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M0 112H400" />
-        <path d="M150 112V78H230V112M150 78L160 68H220L230 78M170 68V58H210V68M178 58C178 44 202 44 202 58M190 46V38" />
-        <path d="M160 112V90M172 112V90M184 112V90M196 112V90M208 112V90M220 112V90M156 86H224" />
-        <path d="M270 112V40M266 40H274M267 40L270 26L273 40M266 60H274M267 60V54H273V60" />
-        <path d="M296 112C306 92 330 92 340 112M340 112C350 92 374 92 384 112M290 100H392" />
-        <path d="M40 112V92L60 80L80 92V112M48 112V100H56V112M100 112V84L118 74L136 84V112" />
-      </g>
-    </svg>
-  )
-}
 
 export default AccountMenu

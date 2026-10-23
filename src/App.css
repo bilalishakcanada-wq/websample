@@ -9092,21 +9092,23 @@ body:has(.profile-cta-bar) .support-chat {
   position: relative;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  background: var(--surface-soft);
-  color: var(--text);
+  background: transparent;
+  color: var(--ws-ink, var(--text));
+  transition: color 0.18s ease;
 }
 
-.notif-button.has-unread {
+.notif-button:hover,
+.notif-button[aria-expanded='true'] {
   color: var(--primary);
 }
 
 .notif-count {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: 4px;
+  right: 2px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;

@@ -358,6 +358,15 @@ export const listingService = {
   },
 
   /** True once supabase/offers/job_conditions.sql is on the database (the column and the bid gate come together). */
+  /** { enabled, balance }: enabled once publishing a job holds its budget (supabase/payments/03). */
+  async budgetHold(userId) {
+    const rule = await supabase.rpc('budget_hold_enabled')
+    if (rule.error || rule.data !== true) return { enabled: false, balance: null }
+    if (!userId) return { enabled: true, balance: null }
+    const { data } = await supabase.from('profiles').select('balance').eq('user_id', userId).maybeSingle()
+    return { enabled: true, balance: data?.balance == null ? null : Number(data.balance) }
+  },
+
   async jobConditionsEnabled() {
     const { error } = await supabase.rpc('job_perk_codes')
     return !error

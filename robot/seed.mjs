@@ -34,7 +34,7 @@ if (old?.length) {
 const jobs = [
   { title: `${TAG} Popravka curenja ispod sudopera`, description: 'Curi voda ispod sudopera u kuhinji, treba zamijeniti sifon i provjeriti spojeve. Imam osnovni alat.', category: 'Vodoinstalater', location: 'Sarajevo', price: 80 },
   { title: `${TAG} Dizajn logotipa za malu pekaru`, description: 'Treba mi jednostavan logo i vizit karta za pekaru u Tuzli. Rad na daljinu, dostava u PDF i PNG formatu.', category: 'Dizajn', location: 'Online', price: 300 },
-  { title: `${TAG} Generalno čišćenje stana 60 m²`, description: 'Čišćenje stana nakon renoviranja: prašina, prozori, kupatilo i kuhinja. Sredstva za čišćenje su obezbijeđena.', category: 'Čišćenje', location: 'Mostar', price: null },
+  { title: `${TAG} Generalno čišćenje stana 60 m²`, description: 'Čišćenje stana nakon renoviranja: prašina, prozori, kupatilo i kuhinja. Sredstva za čišćenje su obezbijeđena.', category: 'Čišćenje', location: 'Mostar', price: 120 },
   { title: `${TAG} Pomoć pri selidbi — dva kreveta i ormar`, description: 'Treba prenijeti dva kreveta i jedan ormar sa trećeg sprata bez lifta u kombi. Sve je rastavljeno.', category: 'Selidba', location: 'Sarajevo', price: 60 },
   { title: `${TAG} Montaža rasvjete u dnevnom boravku`, description: 'Postaviti tri nove lampe na plafon i jednu zidnu. Instalacija postoji, samo treba spojiti i učvrstiti.', category: 'Električar', location: 'Sarajevo', price: 150 },
 ]

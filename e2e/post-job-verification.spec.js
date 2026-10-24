@@ -106,7 +106,7 @@ test.describe.serial('Objava posla tek poslije potvrde identiteta', () => {
     await user.getByPlaceholder(/Opišite šta tačno treba uraditi/).fill('Automatski test: objava posla tek kad je identitet potvrđen.')
     await user.getByRole('button', { name: 'Nastavi' }).click()
     await user.getByRole('button', { name: 'Nastavi' }).click() // slike nisu obavezne
-    await user.getByPlaceholder(/Ostavite prazno/).fill('1')
+    await user.getByTestId('post-price').fill('1')
     await expect(user.getByRole('button', { name: 'Objavi posao' })).toHaveCount(0)
     await expect(user.getByTestId('post-gate')).toBeVisible()
   })
@@ -159,11 +159,14 @@ test.describe.serial('Objava posla tek poslije potvrde identiteta', () => {
     await expect(admin.getByText('Identitet potvrđen.')).toBeVisible({ timeout: 20_000 })
   })
 
-  test('korisnik objavljuje posao', async () => {
+  test('identitet prolazi; bez novca na balansu objava traži dopunu', async () => {
     await user.reload()
     await expect(user.getByTestId('post-gate')).toHaveCount(0, { timeout: 20_000 })
+    // the budget is held from the balance on publishing: a new account has 0 KM
+    await expect(user.getByText('Nemaš dovoljno na balansu za ovaj budžet.')).toBeVisible()
     await user.getByRole('button', { name: 'Objavi posao' }).click()
-    await expect(user).toHaveURL(/\/listings\/[0-9a-f-]{36}/, { timeout: 30_000 })
-    await expect(user.getByRole('heading', { name: naslov })).toBeVisible()
+    await expect(user.getByRole('alert').filter({ hasText: 'Nemaš dovoljno na balansu (potrebno 1.00 KM' })).toBeVisible({ timeout: 30_000 })
+    await expect(user.getByRole('link', { name: 'Dopuni balans →' }).first()).toHaveAttribute('href', '/account/novcanik')
+    await expect(user).toHaveURL(/\/objavi/)
   })
 })

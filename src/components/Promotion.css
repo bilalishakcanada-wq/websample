@@ -1,56 +1,56 @@
 /* Izdvojeni oglasi: Hitno i VIP. Mala ravna oznaka, bez sjaja: forma, stranica posla, kartice u pretrazi */
 .promo-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.35; white-space: nowrap; }
-.promo-badge.is-hitno { background: #fff; color: #b42318; box-shadow: inset 0 0 0 1px #f0b8b2; }
-.promo-badge.is-vip { background: #0b1640; color: #fff; }
+.promo-badge.is-hitno { background: var(--surface); color: #b42318; box-shadow: inset 0 0 0 1px #f0b8b2; }
+.promo-badge.is-vip { background: var(--text); color: var(--surface); }
 
 .promo-picker { display: grid; gap: 8px; margin: 18px 0 0; padding: 0; border: 0; min-width: 0; }
 .promo-picker legend { padding: 0; margin-bottom: 8px; font-weight: 800; font-size: 1rem; color: var(--text); }
 .promo-picker legend small { font-weight: 600; color: var(--text-soft); }
-.promo-option { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto 20px; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 10px 12px; border-radius: 14px; border: 2px solid var(--stroke); background: var(--surface); color: var(--text); text-align: left; transition: border-color 0.15s ease, background 0.15s ease; }
-.promo-option-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #eef2f8; color: var(--text-soft); }
-.promo-option.is-hitno .promo-option-icon { background: #fdf0ef; color: #b42318; }
-.promo-option.is-vip .promo-option-icon { background: #0b1640; color: #fff; }
+.promo-option { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto 20px; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 10px 12px; border-radius: var(--r-md); border: 2px solid var(--stroke); background: var(--surface); color: var(--text); text-align: left; transition: border-color 0.15s ease, background 0.15s ease; }
+.promo-option-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--gray-100); color: var(--text-soft); }
+.promo-option.is-hitno .promo-option-icon { background: var(--danger-soft); color: #b42318; }
+.promo-option.is-vip .promo-option-icon { background: var(--text); color: var(--surface); }
 .promo-option-text { display: grid; gap: 2px; min-width: 0; }
 .promo-option-text strong { font-size: 0.95rem; }
 .promo-option-text small { font-size: 0.8rem; color: var(--text-soft); line-height: 1.35; overflow-wrap: anywhere; }
-.promo-option-text .promo-option-short { color: #b45309; font-weight: 700; }
+.promo-option-text .promo-option-short { color: var(--warning-strong); font-weight: 700; }
 .promo-option-price { font-weight: 800; font-size: 0.92rem; white-space: nowrap; }
-.promo-option-check { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; color: white; }
-.promo-option.is-selected { border-color: var(--primary-strong); background: #f3f6ff; }
+.promo-option-check { display: grid; place-items: center; width: 20px; height: 20px; border-radius: var(--r-pill); color: white; }
+.promo-option.is-selected { border-color: var(--primary-strong); background: var(--bg); }
 .promo-option.is-selected .promo-option-check { background: var(--primary-strong); }
-.promo-option.is-hitno.is-selected { border-color: #0c4de6; background: #ebf1fe; }
-.promo-option.is-hitno.is-selected .promo-option-check { background: #0a42c4; }
-.promo-option.is-vip.is-selected { border-color: #0c4ee9; background: #e3ebfe; }
-.promo-option.is-vip.is-selected .promo-option-check { background: #0b45ce; }
+.promo-option.is-hitno.is-selected { border-color: var(--accent-strong); background: var(--surface-alt); }
+.promo-option.is-hitno.is-selected .promo-option-check { background: var(--accent-strong); }
+.promo-option.is-vip.is-selected { border-color: var(--accent-strong); background: var(--stroke); }
+.promo-option.is-vip.is-selected .promo-option-check { background: var(--accent-strong); }
 .promo-option.is-short { opacity: 0.6; cursor: not-allowed; }
 .promo-picker-note { margin: 2px 0 0; font-size: 0.82rem; color: var(--text-soft); }
 .promo-picker-note a { font-weight: 800; color: var(--primary-strong); }
 
-.promo-card { display: grid; gap: 8px; margin: 14px 0; padding: 14px 16px; border-radius: 12px; border: 1px solid #e3e6ec; background: #fff; }
+.promo-card { display: grid; gap: 8px; margin: 14px 0; padding: 14px 16px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--surface); }
 .promo-card.is-hitno { border-color: #f0b8b2; }
-.promo-card.is-vip { border-color: #0b1640; }
-.promo-card-head { display: flex; align-items: center; gap: 8px; color: #0b1640; }
+.promo-card.is-vip { border-color: var(--text); }
+.promo-card-head { display: flex; align-items: center; gap: 8px; color: var(--text); }
 .promo-card-head strong { color: var(--text); font-size: 0.98rem; }
 .promo-card p { margin: 0; font-size: 0.86rem; color: var(--text-soft); }
 .promo-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.promo-buy { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 8px 14px; border-radius: 8px; border: 1px solid #cdd3de; background: #fff; color: #0b1640; font-weight: 700; font-size: 0.88rem; }
+.promo-buy { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 8px 14px; border-radius: var(--r-sm); border: 1px solid var(--gray-300); background: var(--surface); color: var(--text); font-weight: 700; font-size: 0.88rem; }
 .promo-buy.is-hitno { color: #b42318; border-color: #f0b8b2; }
-.promo-buy.is-vip { background: #0b1640; border-color: #0b1640; color: #fff; }
+.promo-buy.is-vip { background: var(--text); border-color: var(--text); color: var(--surface); }
 .promo-buy:disabled { opacity: 0.6; }
-.promo-buy-placeholder { width: 150px; height: 42px; border-radius: 8px; }
+.promo-buy-placeholder { width: 150px; height: 42px; border-radius: var(--r-sm); }
 .promo-card.is-compact { margin: 10px 0; }
 
 /* kartice u pretrazi */
 .task-card.is-promo-hitno { border-color: #f0b8b2; }
-.task-card.is-promo-vip { border-color: #0b1640; box-shadow: inset 3px 0 0 #0b1640; }
+.task-card.is-promo-vip { border-color: var(--text); box-shadow: inset 3px 0 0 var(--text); }
 .task-card .promo-badge { margin-right: 6px; vertical-align: 2px; }
 
 /* nova ponuda nakon odbijanja (stranica posla, izvođač) */
-.rebid-note { display: grid; gap: 4px; margin: 10px 0; padding: 12px 14px; border-radius: 14px; background: #e6edfe; color: #062774; }
+.rebid-note { display: grid; gap: 4px; margin: 10px 0; padding: 12px 14px; border-radius: var(--r-md); background: var(--surface-alt); color: var(--primary); }
 .rebid-note strong { font-size: 0.95rem; }
 .rebid-note span { font-size: 0.84rem; }
 
 /* ponuda koja je upravo stigla uživo */
-@keyframes bid-arrived { from { background-color: #e6fff2; box-shadow: 0 0 0 2px #19b37b; } to { background-color: transparent; box-shadow: 0 0 0 0 transparent; } }
+@keyframes bid-arrived { from { background-color: var(--success-soft); box-shadow: 0 0 0 2px var(--success); } to { background-color: transparent; box-shadow: 0 0 0 0 transparent; } }
 .is-just-arrived { animation: bid-arrived 2.4s ease-out 1; }
 @media (prefers-reduced-motion: reduce) { .is-just-arrived { animation: none; } }

@@ -5,7 +5,7 @@
 .mobile-nav, .side-nav { display: none; }
 
 .mobile-nav-icon, .side-nav-icon { position: relative; display: inline-grid; place-items: center; transition: transform 150ms ease-in-out; }
-.mobile-nav-badge { position: absolute; top: -5px; right: -9px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--badge-red, #c8352b); color: #fff; font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px var(--surface); }
+.mobile-nav-badge { position: absolute; top: -5px; right: -9px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); background: var(--badge-red, var(--red-600)); color: var(--surface); font-size: 0.68rem; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px var(--surface); }
 
 @keyframes nav-pop { 0% { transform: scale(0.84); } 55% { transform: scale(1.14); } 100% { transform: scale(1); } }
 
@@ -24,7 +24,7 @@
     margin: 0;
     padding: 0 4px var(--safe-bottom); /* icons stay clear of the iPhone home bar and the Android gesture bar */
     background: var(--surface); /* fully solid: nothing scrolling underneath shows through */
-    border-top: 1px solid #e3e7ee;
+    border-top: 1px solid var(--line);
   }
   .mobile-nav-item {
     display: flex;
@@ -41,7 +41,7 @@
   .mobile-nav-item.active { color: var(--accent); font-weight: 800; }
   /* the active tab is just the bold blue icon and label, no pill behind it (like Instagram) */
   .mobile-nav-icon { display: grid; place-items: center; width: 56px; height: 30px; transition: transform 150ms ease-in-out; }
-  .mobile-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: 12px; }
+  .mobile-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: var(--r-sm); }
   /* fixed-height label: going bold never moves the icon or the line the labels sit on */
   .mobile-nav-label { display: inline-grid; max-width: 100%; overflow: hidden; line-height: 1.25; white-space: nowrap; }
   /* an invisible bold copy keeps each label's width the same whether the tab is active or not */

@@ -18,7 +18,7 @@
   gap: 16px;
   min-width: 0;
   padding: 20px 22px 22px;
-  border-radius: 20px;
+  border-radius: var(--r-lg);
   background: var(--surface);
   border: 1px solid var(--stroke);
   box-shadow: 0 1px 2px rgba(10, 31, 99, 0.04), 0 8px 24px rgba(10, 31, 99, 0.05);
@@ -36,7 +36,7 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   background: var(--surface-alt);
   color: var(--accent);
 }
@@ -63,7 +63,7 @@
 .sk-count {
   flex-shrink: 0;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--primary-soft);
   color: var(--primary);
   font-size: 0.78rem;
@@ -84,7 +84,7 @@
   gap: 7px;
   min-height: 40px;
   padding: 0 14px 0 12px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   border: 1px solid var(--stroke);
   background: var(--surface);
   color: var(--text);
@@ -129,12 +129,12 @@
 .sk-chip.active {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--surface);
   box-shadow: 0 6px 14px rgba(10, 31, 99, 0.18);
 }
 
 .sk-chip.active .sk-chip-icon { color: var(--accent-light); }
-.sk-chip.active .sk-chip-code { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.sk-chip.active .sk-chip-code { background: rgba(255, 255, 255, 0.16); color: var(--surface); }
 .sk-chip-check { flex-shrink: 0; margin-left: 1px; color: var(--accent-light); }
 
 /* qualifications, work, specialties */
@@ -152,7 +152,7 @@
   gap: 12px;
   min-height: 52px;
   padding: 8px 8px 8px 14px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   background: var(--surface-soft);
   border: 1px solid transparent;
   font-weight: 600;
@@ -181,21 +181,21 @@
   height: 34px;
   min-height: 0;
   padding: 0;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   background: transparent;
   color: var(--text-soft);
   transition: background 0.18s ease, color 0.18s ease;
 }
 
 .sk-list li button:hover {
-  background: #fde8e8;
-  color: #b93c3c;
+  background: var(--danger-soft);
+  color: var(--danger-strong);
 }
 
 .sk-empty {
   margin: 0;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   border: 1px dashed var(--stroke);
   color: var(--text-soft);
   font-size: 0.9rem;
@@ -211,7 +211,7 @@
   min-width: 0;
   min-height: 48px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   border: 1px solid var(--stroke);
   background: var(--surface);
   color: var(--text);
@@ -235,7 +235,7 @@
   gap: 6px;
   min-height: 48px;
   padding: 0 18px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   background: var(--surface-alt);
   color: var(--accent-strong);
   font-weight: 800;
@@ -245,7 +245,7 @@
 
 .sk-add-button:not(:disabled):hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--surface);
 }
 
 .sk-add-button:disabled {
@@ -263,7 +263,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 12px 12px 12px 18px;
-  border-radius: 18px;
+  border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--stroke);
   box-shadow: 0 12px 32px rgba(10, 31, 99, 0.12);
@@ -284,7 +284,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #0f7a56; /* same dark green as .form-success: the bright success green is too faint for text */
+  color: var(--success-strong); /* same dark green as .form-success: the bright success green is too faint for text */
   font-weight: 800;
   font-size: 0.92rem;
 }
@@ -299,14 +299,14 @@
 @media (max-width: 768px) {
   .sk-form { gap: 12px; margin-top: 4px; }
   .sk-pair { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .sk-card { gap: 14px; padding: 16px; border-radius: 18px; box-shadow: none; }
-  .sk-card-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .sk-card { gap: 14px; padding: 16px; border-radius: var(--r-md); box-shadow: none; }
+  .sk-card-icon { width: 36px; height: 36px; border-radius: var(--r-sm); }
   .sk-card-title h2 { font-size: 1rem; }
   .sk-card-title p { font-size: 0.82rem; }
   .sk-chips { gap: 6px; }
   .sk-chip { gap: 6px; min-height: 36px; padding: 0 11px 0 9px; font-size: 0.84rem; }
   .sk-list li { min-height: 48px; font-size: 0.92rem; }
-  .sk-add input, .sk-add-button { min-height: 46px; }
+  .sk-add input, .sk-add-button { min-height: var(--btn-md); }
   .sk-add-button { padding: 0 14px; }
 
   .sk-savebar {
@@ -320,5 +320,5 @@
     box-shadow: none;
     backdrop-filter: none;
   }
-  .sk-savebar .primary-button { width: 100%; justify-content: center; min-height: 52px; }
+  .sk-savebar .primary-button { width: 100%; justify-content: center; min-height: var(--btn-lg); }
 }

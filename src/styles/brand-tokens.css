@@ -1,14 +1,14 @@
 /* Zadatak brand palette (blue and white). One source for the site, the apps and the e-mail templates. */
 :root {
-  --brand-navy: #0a1f63;       /* hero and footer panels */
-  --brand-navy-deep: #071647;  /* status bar, deepest shade */
-  --brand-blue: #1f5fff;       /* primary buttons, links */
-  --brand-blue-strong: #1149e0;/* pressed / hover */
-  --brand-blue-light: #7fb0ff; /* accent line in headlines on navy */
-  --brand-sky: #e8f0ff;        /* secondary buttons, soft surfaces */
-  --brand-page: #eef4ff;       /* page background */
-  --brand-ink: #08164a;        /* text and illustration outlines */
-  --brand-soft: #4b5a85;       /* secondary text */
-  --brand-white: #ffffff;
+  --brand-navy: var(--primary);       /* hero and footer panels */
+  --brand-navy-deep: var(--primary-strong);  /* status bar, deepest shade */
+  --brand-blue: var(--accent);       /* primary buttons, links */
+  --brand-blue-strong: var(--accent-strong);/* pressed / hover */
+  --brand-blue-light: var(--accent-light); /* accent line in headlines on navy */
+  --brand-sky: var(--surface-alt);        /* secondary buttons, soft surfaces */
+  --brand-page: var(--bg);       /* page background */
+  --brand-ink: var(--primary-strong);        /* text and illustration outlines */
+  --brand-soft: var(--text-soft);       /* secondary text */
+  --brand-white: var(--surface);
   --brand-bright: #3d74f5;     /* small illustration accent (scarf stripes, finials); no yellow anywhere */
 }

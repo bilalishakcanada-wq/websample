@@ -1,16 +1,16 @@
 /* Tok posla: „sljedeći korak“ na vrhu posla, jedna kartica za posao i novac, kartice u „Moji poslovi“. */
 
-.next-step { display: grid; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--surface-soft, #eef3fb); border-left: 3px solid var(--stroke); text-align: left; }
-.next-step.tone-act { background: #fff; border: 1px solid var(--stroke); border-left: 3px solid var(--accent); }
-.next-step.tone-done { border-left-color: var(--success, #19b37b); }
-.next-step.tone-off { border-left-color: #c2c9d8; }
+.next-step { display: grid; gap: 6px; padding: 14px 16px; border-radius: var(--r-sm); background: var(--surface-soft, var(--bg)); border-left: 3px solid var(--stroke); text-align: left; }
+.next-step.tone-act { background: var(--surface); border: 1px solid var(--stroke); border-left: 3px solid var(--accent); }
+.next-step.tone-done { border-left-color: var(--success, var(--success)); }
+.next-step.tone-off { border-left-color: var(--gray-300); }
 .next-step-title { font-size: 1.02rem; font-weight: 750; color: var(--text); line-height: 1.3; }
 .next-step-text { margin: 0; color: var(--text-soft); font-size: 0.92rem; line-height: 1.45; }
 .next-step-actions { display: grid; gap: 8px; margin-top: 6px; }
 .next-step-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .job-offer-card .next-step { margin: 2px 0 4px; padding: 2px 0 2px 12px; background: none; border: 0; border-left: 3px solid var(--stroke); border-radius: 0; }
 .job-offer-card .next-step.tone-act { border-left-color: var(--accent); }
-.job-offer-card .next-step.tone-done { border-left-color: var(--success, #19b37b); }
+.job-offer-card .next-step.tone-done { border-left-color: var(--success, var(--success)); }
 
 /* telefon: kutija stoji u traci na vrhu posla, bez okvira, kao naslov trake */
 .jd-band .next-step.is-phone { padding: 0; background: none; border: 0; border-radius: 0; }
@@ -20,7 +20,7 @@
 .jd-band .next-step.is-phone .ap-btn { margin-top: 0; }
 
 /* posao i novac u jednoj kartici */
-.wf-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface-soft, #eef3fb); }
+.wf-money { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-soft, var(--bg)); }
 .wf-money span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-soft); font-size: 0.88rem; }
 .wf-money strong { margin-left: auto; font-size: 1.05rem; color: var(--text); }
 .wf-money small { flex-basis: 100%; color: var(--text-soft); font-size: 0.8rem; }
@@ -43,14 +43,14 @@
 .jd-offer { padding: 18px 0; border-bottom: 1px solid var(--stroke); }
 .jd-offer:last-of-type { border-bottom: 0; }
 .jd-offer-head .jd-avatar { width: 48px !important; height: 48px !important; }
-.jd-offer-msg { background: var(--surface-soft, #eef3fb); border-radius: 4px 14px 14px 14px; }
+.jd-offer-msg { background: var(--surface-soft, var(--bg)); border-radius: 4px 14px 14px 14px; }
 .jd-offer-actions { display: flex; flex-direction: row-reverse; gap: 10px; margin-top: 4px; }
-.jd-offer-actions .ap-btn { flex: 1; width: auto; min-height: 46px; box-shadow: none; }
-.jd-offer-actions .jd-reject { flex: 1; min-height: 46px; border: 1px solid var(--stroke); border-radius: 999px; background: #fff; }
+.jd-offer-actions .ap-btn { flex: 1; width: auto; min-height: var(--btn-md); box-shadow: none; }
+.jd-offer-actions .jd-reject { flex: 1; min-height: 46px; border: 1px solid var(--stroke); border-radius: var(--r-pill); background: var(--surface); }
 
 /* izabrani izvođač u kartici sa cijenom (računar) */
 .side-worker { display: flex; align-items: center; gap: 10px; padding: 10px 0 2px; border-top: 1px solid var(--stroke); color: var(--text); }
-.side-worker-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--surface-soft, #eef3fb); object-fit: cover; color: var(--text-soft); flex: none; }
+.side-worker-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--surface-soft, var(--bg)); object-fit: cover; color: var(--text-soft); flex: none; }
 .side-worker > span:not(.side-worker-avatar) { display: grid; flex: 1; min-width: 0; }
 .side-worker small { color: var(--text-soft); font-size: 0.78rem; }
 .side-worker strong { font-size: 0.95rem; }
@@ -62,10 +62,10 @@
 .job-progress::before { right: 10%; background: var(--stroke); }
 .job-progress::after { width: calc(var(--jp-fill, 0%) * 0.8); background: var(--accent); transition: width 0.4s ease; }
 .job-progress li { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; text-align: center; }
-.jp-dot { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 50%; border: 2px solid var(--stroke); background: var(--surface, #fff); color: var(--text-soft); }
+.jp-dot { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 6px; border-radius: 50%; border: 2px solid var(--stroke); background: var(--surface, var(--surface)); color: var(--text-soft); }
 .jp-label { font-size: 0.8rem; font-weight: 600; color: var(--text-soft); line-height: 1.2; }
 .jp-meta { font-size: 0.72rem; color: var(--text-soft); line-height: 1.25; overflow-wrap: anywhere; }
-.job-progress li.is-done .jp-dot { border-color: var(--accent); background: var(--accent); color: #fff; }
+.job-progress li.is-done .jp-dot { border-color: var(--accent); background: var(--accent); color: var(--surface); }
 .job-progress li.is-done .jp-label { color: var(--text); }
 .job-progress li.is-now .jp-dot { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent); }
 .job-progress li.is-now .jp-label { color: var(--text); font-weight: 800; }

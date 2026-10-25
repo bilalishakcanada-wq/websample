@@ -10273,8 +10273,8 @@ body:has(.profile-cta-bar) .support-chat {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* WhatsApp-style wallpaper: faint doodles over the soft blue */
-  background: url('./assets/chat-doodle.svg') 0 0 / 260px 260px repeat, linear-gradient(180deg, #f6f9ff 0%, #eaf1ff 100%);
+  /* chat wallpaper: soft blue, lavender and mint glows, nothing drawn */
+  background: radial-gradient(60% 50% at 0% 0%, #dbe6ff 0%, transparent 100%), radial-gradient(55% 45% at 100% 30%, #e6e0fb 0%, transparent 100%), radial-gradient(60% 50% at 20% 100%, #d9efe6 0%, transparent 100%), radial-gradient(50% 45% at 100% 100%, #dce9fb 0%, transparent 100%), #f3f6fc;
 }
 
 /* short threads sit at the bottom, next to the composer, like any messenger */

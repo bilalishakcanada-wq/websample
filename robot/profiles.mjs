@@ -8,6 +8,9 @@ export const PROFILES = {
   phone: { phone: true, context: iphone },
   // cheap Android phones are still 360px wide; the narrowest screen the site must handle
   small: { phone: true, context: { viewport: { width: 360, height: 640 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 11; SM-A125F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36' } },
+  // a phone with the system text size turned up (many older people in BiH have it): Android's app WebView
+  // follows the system font scale, so every text grows by about a third while the screen stays the same
+  bigtext: { phone: true, textScale: 130, context: { viewport: { width: 393, height: 851 }, deviceScaleFactor: 2.75, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36' } },
   // the Android app: same site inside a WebView, with the Capacitor bridge present
   app: { phone: true, context: { viewport: { width: 412, height: 915 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 7 Build/UQ1A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.0.0 Mobile Safari/537.36' } },
 }
@@ -36,4 +39,15 @@ export function appShellStub() {
     Plugins: plugins,
     convertFileSrc: (s) => s,
   }
+}
+
+/** Runs before the site in the "bigtext" profile: scales all text like the phone's font-size setting does. */
+export function textScaleStub(percent) {
+  const add = () => {
+    const style = document.createElement('style')
+    style.textContent = `html { -webkit-text-size-adjust: ${percent}% !important; text-size-adjust: ${percent}% !important; }`
+    document.documentElement.appendChild(style)
+  }
+  if (document.documentElement) add()
+  else document.addEventListener('DOMContentLoaded', add, { once: true })
 }

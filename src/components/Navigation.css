@@ -43,7 +43,7 @@
   .mobile-nav-icon { display: grid; place-items: center; width: 56px; height: 30px; transition: transform 150ms ease-in-out; }
   .mobile-nav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; border-radius: 12px; }
   /* fixed-height label: going bold never moves the icon or the line the labels sit on */
-  .mobile-nav-label { display: inline-grid; height: 13px; max-width: 100%; overflow: hidden; line-height: 13px; white-space: nowrap; }
+  .mobile-nav-label { display: inline-grid; max-width: 100%; overflow: hidden; line-height: 1.25; white-space: nowrap; }
   /* an invisible bold copy keeps each label's width the same whether the tab is active or not */
   .mobile-nav-label::after { content: attr(data-label); height: 0; font-weight: 800; visibility: hidden; overflow: hidden; }
   /* a press you can feel: the icon dips while the finger is down */

@@ -40,7 +40,7 @@ function BadgeShowcase({ badges, isOwn = false, userId, compact = false }) {
                   aria-label={`${badge.label}, ${badge.tier.label}`}
                   aria-pressed={active.code === badge.code}
                 >
-                  <TierMedal badge={badge} size={compact ? 44 : 38} className="medal-pop" />
+                  <TierMedal badge={badge} size={compact ? 52 : 48} className="medal-pop" />
                 </button>
               </li>
             ))}

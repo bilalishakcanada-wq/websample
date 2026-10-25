@@ -41,7 +41,7 @@ function BadgeDetail({ badge, onClose }) {
       <div className={`badge-detail tier-${badge.tier.key} ${locked ? 'is-locked' : ''}`} role="dialog" aria-modal="true" aria-label={badge.label} onClick={(event) => event.stopPropagation()}>
         <button type="button" className="badge-detail-close" onClick={onClose} aria-label="Zatvori"><X size={18} /></button>
         <div className="badge-detail-stage">
-          <TierMedal badge={badge} size={112} locked={locked} shine={!locked} className="medal-reveal" />
+          <TierMedal badge={badge} size={168} locked={locked} stamp={!locked} />
         </div>
         <span className={`badge-tier-tag tier-${badge.tier.key}`}>{locked ? `${badge.tier.label} · zaključana` : TIER_NAME[badge.tier.key]}</span>
         <h2>{badge.label}</h2>

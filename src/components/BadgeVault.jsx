@@ -45,7 +45,7 @@ export function BadgeVault({ userId, earnedBadges }) {
       aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}
     >
       {fresh.has(badge.code) && <span className="vault-new">Novo</span>}
-      <TierMedal badge={badge} size={56} locked={!badge.earned} shine={fresh.has(badge.code)} className="medal-pop" />
+      <TierMedal badge={badge} size={78} locked={!badge.earned} stamp={fresh.has(badge.code)} className={fresh.has(badge.code) ? '' : 'medal-pop'} />
       <strong>{badge.label}</strong>
       <small className={`vault-tier tier-${badge.tier.key}`}>{badge.tier.label}</small>
       {!badge.earned && <BadgeProgress progress={badge.progress} />}
@@ -63,7 +63,7 @@ export function BadgeVault({ userId, earnedBadges }) {
         <ul className="vault-tier-counts">
           {counts.map(({ level, n }) => (
             <li key={level} className={`vault-tier-count tier-${TIERS[level].key} ${n ? '' : 'is-zero'}`}>
-              <TierMedal badge={{ tier: TIERS[level], icon: 'award' }} size={26} locked={!n} />
+              <i aria-hidden="true">{'★'.repeat(level)}</i>
               <span><b>{n}</b>{TIERS[level].label}</span>
             </li>
           ))}

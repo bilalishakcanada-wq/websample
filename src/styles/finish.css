@@ -183,6 +183,12 @@
 
 .how-steps-list button:hover strong { color: var(--primary-strong); }
 
+/* no sharp blue box around a clicked step; the keyboard still gets a soft rounded ring */
+.how-steps-list button:focus,
+.how-steps-list button:focus-visible { outline: none; }
+.how-steps-list button:focus-visible .how-steps-num { box-shadow: 0 0 0 4px var(--accent-soft); }
+.how-steps-list button:focus-visible strong { color: var(--primary-strong); }
+
 /* a thin line over the open step fills up until the next one takes over */
 .how-steps-bar {
   position: absolute;

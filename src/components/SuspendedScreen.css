@@ -18,3 +18,4 @@
 .suspended-unit small { color: var(--text-soft); font-size: 0.78rem; font-weight: 700; }
 .suspended-end { margin: 0; color: var(--text-soft); font-size: 0.9rem; }
 .suspended-logout { margin-top: 6px; min-height: 44px; width: 100%; }
+.update-icon { background: #e8efff; color: var(--primary); }

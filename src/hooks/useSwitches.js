@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 export const switchesQuery = {
   queryKey: ['switches'],
   queryFn: async () => {
-    const { data, error } = await supabase.from('feature_switches').select('key, label, enabled, message, value')
+    const { data, error } = await supabase.from('feature_switches').select('key, label, enabled, message, value, updated_at')
     if (error) throw error
     return Object.fromEntries((data || []).map((row) => [row.key, row]))
   },

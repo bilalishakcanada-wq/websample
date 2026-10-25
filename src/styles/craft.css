@@ -457,6 +457,7 @@
 .pe .account-field textarea { padding: 10px 12px; font-size: 15px; line-height: 1.55; }
 .pe .account-field small { display: block; }
 .pe .account-field small a { display: inline; min-height: 0; }
+.pe .account-field small .pe-inline-link { display: inline; min-height: 0; padding: 0; border: 0; background: none; color: var(--cr-blue); font: inherit; font-weight: 700; cursor: pointer; }
 .pe .account-date { gap: 8px; }
 .ap-sub .pe-head h1 { display: none; }
 .ap-sub .pe-public { padding: 8px 12px; font-size: 14px; }

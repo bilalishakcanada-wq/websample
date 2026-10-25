@@ -35,7 +35,7 @@ export const DEFAULT_RANK = {
   payment_verified: { tier: 2, weight: 40, hint: 'Dodaj IBAN za primanje uplata u Moj nalog → Načini plaćanja.' },
   fast_responder: { tier: 2, weight: 35, hint: 'Odgovaraj na poruke u prosjeku za manje od 1 sat (bar 3 odgovora).' },
   rising_talent: { tier: 2, weight: 30, hint: 'U prvih 30 dana dobij 1–9 recenzija s prosjekom 4.5 ili više.' },
-  mobile_verified: { tier: 1, weight: 15, hint: 'Potvrdi broj telefona SMS kodom u Moj nalog → Značke.' },
+  mobile_verified: { tier: 1, weight: 15, hint: 'Potvrdi broj telefona SMS kodom u Postavke → Broj telefona.' },
   jobs_5: { tier: 1, weight: 12, hint: 'Završi 5 poslova kao izvođač.' },
   email_verified: { tier: 1, weight: 10, hint: 'Klikni link iz e-maila koji ti je Zadatak poslao pri registraciji.' },
 }

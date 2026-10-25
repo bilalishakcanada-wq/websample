@@ -4,9 +4,9 @@ import { Car, CheckCircle2, Clock, CreditCard, Droplets, Flame, HardHat, IdCard,
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService, LICENCES } from '../../services/accountService'
-import { formatBosnianPhone, isValidBosnianPhone, digitsOnly } from '../../utils/phone'
 import { withBase } from '../../utils/paths'
 import { BadgeVault } from '../../components/BadgeVault'
+import PhoneVerify from '../../components/PhoneVerify'
 
 const LICENCE_ICON = { electrician: Zap, plumber: Droplets, gas: Flame, hvac: Thermometer, construction: HardHat, driver: Car }
 
@@ -45,12 +45,9 @@ function BadgesPage() {
   const [progress, setProgress] = useState(null)
   const [requests, setRequests] = useState([])
   const [uploadFor, setUploadFor] = useState(null) // { kind, licenceType }
-  const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [phoneStep, setPhoneStep] = useState('idle') // idle | code
-  const [phone, setPhone] = useState(formatBosnianPhone(profile.phone || ''))
-  const [code, setCode] = useState('')
+  const [verifyPhone, setVerifyPhone] = useState(false)
   const fileRef = useRef(null)
   // stiže s posla koji traži značku (/account/znacke?next=/listings/…#licence_gas): pokaži tu značku i put nazad
   const location = useLocation()
@@ -85,7 +82,6 @@ function BadgesPage() {
   const onFile = async (event) => {
     const file = event.target.files?.[0]
     if (!file || !uploadFor) return
-    setBusy(true)
     try {
       await accountService.requestVerification({ userId: user.id, kind: uploadFor.kind, licenceType: uploadFor.licenceType, file })
       setMessage('Dokument je poslan. Tim ga pregleda — značka se dodaje čim bude odobren.')
@@ -93,39 +89,8 @@ function BadgesPage() {
     } catch (requestError) {
       setError(requestError.message)
     } finally {
-      setBusy(false)
       setUploadFor(null)
       if (fileRef.current) fileRef.current.value = ''
-    }
-  }
-
-  const toE164 = (value) => {
-    const digits = digitsOnly(value)
-    if (digits.startsWith('387')) return `+${digits}`
-    if (digits.startsWith('00387')) return `+${digits.slice(2)}`
-    return `+387${digits.replace(/^0/, '')}`
-  }
-
-  const sendCode = async () => {
-    setError('')
-    if (!isValidBosnianPhone(phone) || !phone) { setError('Unesi ispravan BiH broj, npr. 061 234 567.'); return }
-    setBusy(true)
-    try { await accountService.sendPhoneCode(toE164(phone)); setPhoneStep('code'); setMessage('Kod je poslan SMS-om.') } catch (requestError) { setError(requestError.message) } finally { setBusy(false) }
-  }
-
-  const confirmCode = async () => {
-    setError('')
-    setBusy(true)
-    try {
-      await accountService.verifyPhoneCode(toE164(phone), code.trim())
-      setMessage('Telefon je verifikovan — značka je dodana.')
-      setPhoneStep('idle')
-      await reload()
-      await refresh()
-    } catch (requestError) {
-      setError(requestError.message)
-    } finally {
-      setBusy(false)
     }
   }
 
@@ -139,6 +104,7 @@ function BadgesPage() {
       <p>Značke pomažu drugima da budu sigurni ko si i šta znaš. Što ih više skupiš, to će ti klijenti i izvođači više vjerovati.</p>
       <p className="muted-text">Značka se dodjeljuje automatski kad je uslov ispunjen — zelena kvačica znači da je verifikacija trenutno aktivna. <Link to="/pravila-zajednice">Saznaj više</Link></p>
 
+      {verifyPhone && <PhoneVerify initialPhone={profile.phone || ''} onClose={() => setVerifyPhone(false)} onVerified={async () => { await reload(); await refresh() }} />}
       <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onChange={onFile} />
       {error && <div className="form-error">{error}</div>}
       {message && <div className="form-success">{message}</div>}
@@ -150,20 +116,7 @@ function BadgesPage() {
       <div className="badge-grid">
         <BadgeRow icon={ShieldCheck} title="Uvjerenje o nekažnjavanju" text="Umiri druge članove — priloži važeće uvjerenje o nekažnjavanju (MUP / sud)." id="police_check" state={stateFor('police_check', 'police_check')} onAdd={() => startUpload('police_check')} />
         <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Načinima plaćanja." id="payment_verified" state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign(withBase('/account/nacini-placanja')) }} addLabel="Dodaj" />
-        <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom — dobijaš trenutne obavijesti o poslovima." id="mobile_verified" state={stateFor('mobile_verified', '__none__')} onAdd={() => setPhoneStep('phone')}>
-          {phoneStep !== 'idle' && badgeCodes.has('mobile_verified') === false && (
-            <div className="phone-verify">
-              <input value={phone} onChange={(event) => setPhone(formatBosnianPhone(event.target.value))} placeholder="061 234 567" inputMode="tel" disabled={phoneStep === 'code'} />
-              {phoneStep === 'phone' && <button type="button" className="primary-button" onClick={sendCode} disabled={busy}>{busy ? 'Šaljem…' : 'Pošalji kod'}</button>}
-              {phoneStep === 'code' && (
-                <>
-                  <input value={code} onChange={(event) => setCode(event.target.value)} placeholder="6-cifreni kod" inputMode="numeric" maxLength={6} />
-                  <button type="button" className="primary-button" onClick={confirmCode} disabled={busy || code.trim().length < 4}>{busy ? 'Provjeravam…' : 'Potvrdi'}</button>
-                </>
-              )}
-            </div>
-          )}
-        </BadgeRow>
+        <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom — dobijaš trenutne obavijesti o poslovima." id="mobile_verified" state={stateFor('mobile_verified', '__none__')} onAdd={() => setVerifyPhone(true)} />
         <BadgeRow icon={IdCard} title="Lična karta verifikovana" text="Slikaj ličnu kartu ili pasoš — tim provjerava da li se podaci slažu sa profilom." id="id_verified" state={stateFor('id_verified', 'identity')} onAdd={() => startUpload('identity')} />
       </div>
 

@@ -88,11 +88,11 @@ function JobDetail(props) {
 
       <section className={`jd-band ${isOwner ? 'is-owner' : ''}`}>
         {step ? <NextStep phone step={step} onAction={onStep} busy={outcomeBusy} /> : <><h2>{band[0]}</h2><p>{band[1]}</p></>}
-        {!isOwner && open && !myBid && <button type="button" className={simple ? 'simple-apply-btn' : 'ap-btn ap-btn-primary'} onClick={onOpenBid}>{offerLabel}</button>}
+        {/* the offer button itself is the one pinned at the bottom (jd-sticky): one main button per screen */}
         {canRebid && <button type="button" className="ap-btn ap-btn-primary" data-testid="rebid-open" onClick={onOpenBid}>Pošalji novu cijenu</button>}
         {!step && simple && !isOwner && myBid?.status === 'accepted' && <Link to={`/messages?listing=${listing.id}`} className="simple-apply-btn"><MessageCircle size={24} /> Piši klijentu</Link>}
         {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-primary" onClick={onEditBid}>{simple ? 'Promijeni cijenu' : 'Izmijeni ponudu'}</button>}
-        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light" onClick={onWithdraw}>{simple ? 'Ipak ne želim ovaj posao' : 'Povuci ponudu'}</button>}
+        {!isOwner && myBid?.status === 'pending' && <button type="button" className="ap-btn ap-btn-light jd-secondary" onClick={onWithdraw}>{simple ? 'Ipak ne želim ovaj posao' : 'Povuci ponudu'}</button>}
         {!step && isOwner && expired && <Link to={`/objavi?edit=${listing.id}&step=time`} className="ap-btn ap-btn-primary">Izaberi novi datum</Link>}
         {!isOwner && !myBid && open && onSave && (
           <button type="button" className="ap-btn ap-btn-light jd-save" onClick={onSave} aria-pressed={saved}><Bookmark size={18} fill={saved ? 'currentColor' : 'none'} /> {saved ? 'Sačuvano' : 'Sačuvaj za kasnije'}</button>

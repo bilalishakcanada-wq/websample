@@ -283,6 +283,7 @@
 .jd-band h2 { margin: 0 0 4px; font-size: 1.35rem; font-weight: 800; color: var(--primary-strong); letter-spacing: -0.01em; }
 .jd-band p { margin: 0; color: var(--text-soft); font-size: 1rem; }
 .jd-band .ap-btn { width: 100%; margin-top: 16px; }
+.jd-band .jd-save, .jd-band .jd-secondary { display: flex; width: auto; min-height: var(--btn-sm); margin: 12px auto 0; padding: 0 16px; background: transparent; box-shadow: none; color: var(--text-soft); font-weight: 700; font-size: 0.95rem; } /* secondary: smaller and grey next to the main button */
 .jd-progress { height: 4px; margin: 4px 0 18px; border-radius: var(--r-pill); background: var(--line); overflow: hidden; }
 .jd-progress span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--accent); transition: width 0.4s ease; }
 /* the white sheet runs to the bottom of the screen (flex: 1), with room for the sticky CTA when there is one */

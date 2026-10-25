@@ -171,7 +171,7 @@
 }
 .vault-score { display: grid; gap: 2px; min-width: 160px; flex: 1 1 160px; max-width: 260px; }
 .vault-score strong { font-size: 28px; font-weight: 700; line-height: 1.1; color: #0b1640; }
-.vault-score strong span { font-size: 16px; font-weight: 600; color: #8a93a6; }
+.vault-score strong span { font-size: 16px; font-weight: 600; color: #5a6481; }
 .vault-score small { font-size: 13px; color: #5a6481; }
 .vault-score .badge-progress-bar { margin-top: 8px; height: 6px; }
 .vault-tier-counts { display: flex; flex-wrap: wrap; gap: 14px 18px; margin: 0; padding: 0; list-style: none; }
@@ -180,7 +180,7 @@
 .vault-tier-count.is-zero > i { background: #c3c9d4; }
 .vault-tier-count > span { display: grid; line-height: 1.15; font-size: 12px; color: #5a6481; }
 .vault-tier-count b { font-size: 16px; font-weight: 700; color: #0b1640; }
-.vault-tier-count.is-zero b { color: #a3abbd; }
+.vault-tier-count.is-zero b { color: #5a6481; font-weight: 600; }
 .vault-celebrate {
   margin: 0;
   padding: 10px 14px;
@@ -229,7 +229,7 @@
 .vault-tier.tier-silver { color: var(--tier-silver); }
 .vault-tier.tier-gold { color: var(--tier-gold-text); }
 .vault-tier.tier-platinum { color: var(--tier-platinum); }
-.vault-tile.is-locked .vault-tier { color: #8a93a6; font-weight: 500; }
+.vault-tile.is-locked .vault-tier { color: #5a6481; font-weight: 500; }
 .vault-tile.is-fresh { border-color: #9db8ff; animation: fresh-ring 1600ms 500ms ease-out 2; }
 @keyframes fresh-ring {
   from { box-shadow: 0 0 0 0 rgba(31, 95, 255, 0.35); }

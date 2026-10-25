@@ -96,7 +96,7 @@ function RulesPage() {
         <section className="info-section reveal">
           <h2>9. Brisanje naloga</h2>
           <p>
-            Nalog možeš obrisati u bilo kojem trenutku u <Link to="/account/profil">Moj nalog → Profil</Link>. Šta se tada briše piše u{' '}
+            Nalog možeš obrisati u bilo kojem trenutku u <Link to="/account/postavke#brisanje">Moj nalog → Postavke</Link>. Šta se tada briše piše u{' '}
             <Link to="/privatnost#brisanje-naloga">Politici privatnosti</Link>. Nalog koji krši ova pravila možemo suspendovati ili zatvoriti;
             novac koji ti pripada tada isplaćujemo nakon provjere identiteta.
           </p>

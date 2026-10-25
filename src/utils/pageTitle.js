@@ -27,7 +27,6 @@ const STATIC = {
   '/account/portfolio': 'Portfolio',
   '/account/postavke': 'Postavke',
   '/account/alarmi': 'Alarmi za poslove',
-  '/account/informacije': 'Informacije o nalogu',
   '/account/placanje': 'Opcije plaćanja',
   '/account/postavke-obavijesti': 'Postavke obavijesti',
   '/nivoi': 'Nivoi i naknade',

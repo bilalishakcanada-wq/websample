@@ -50,7 +50,6 @@ const NotificationsPage = lazy(lazyImport(() => import('./pages/account/Notifica
 const VerificationPage = lazy(lazyImport(() => import('./pages/account/VerificationPage')))
 const SettingsPage = lazy(lazyImport(() => import('./pages/account/SettingsPage')))
 const SimpleModePage = lazy(lazyImport(() => import('./pages/account/SimpleModePage')))
-const PaymentOptionsPage = lazy(lazyImport(() => import('./pages/account/PaymentOptionsPage')))
 const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
 
 import HomePage from './pages/HomePage'
@@ -196,7 +195,7 @@ function App() {
           <Route path="jednostavan-nacin" element={<SimpleModePage />} />
           <Route path="alarmi" element={<TaskAlertsPage />} />
           <Route path="informacije" element={<Navigate to="/account/postavke" replace />} />
-          <Route path="placanje" element={<PaymentOptionsPage />} />
+          <Route path="placanje" element={<Navigate to="/account/novcanik" replace />} />
           <Route path="postavke-obavijesti" element={<NotificationPrefsPage />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage mode="admin" /></ProtectedRoute>} />

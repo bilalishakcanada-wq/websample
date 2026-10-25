@@ -16,7 +16,7 @@ const PAY_ERRORS = [
   [/VERIFIKACIJA_POTREBNA/, 'Za isplatu prvo potvrdi identitet.'],
   [/ISPLATA_MIN/, 'Najmanja isplata je 20 KM.'],
   [/ISPLATA_PREKO_ZARADE/, 'Na račun se može isplatiti samo zarada od poslova, ne novac uplaćen karticom.'],
-  [/NEMA_RACUNA_ZA_ISPLATU/, 'Prvo dodaj račun za isplatu u „Načini plaćanja“.'],
+  [/NEMA_RACUNA_ZA_ISPLATU/, 'Prvo dodaj račun za isplatu u „Plaćanje → Račun za isplatu“.'],
   [/IME_RACUNA_SE_NE_POKLAPA/, 'Račun za isplatu mora glasiti na ime sa tvog profila.'],
   [/ISPLATA_VEC_CEKA/, 'Već imaš zahtjev za isplatu na čekanju.'],
   [/INSUFFICIENT/, 'Nemaš dovoljno na balansu.'],
@@ -75,6 +75,25 @@ export const accountService = {
   async cancelPayout(id) {
     const { error } = await supabase.rpc('cancel_payout', { p_id: id })
     if (error) { console.error('Payout cancel failed', { message: error.message, code: error.code }); throw payError(error.message) }
+  },
+
+  /** Money not settled yet: job payments still held and the latest bank payouts. */
+  async moneyOnTheWay(userId) {
+    const [jobs, payouts] = await Promise.all([
+      supabase.from('job_payments')
+        .select('id, listing_id, client_id, provider_id, amount, net_amount, status, funded_at, requested_at, review_deadline, listing:listings(title)')
+        .or(`client_id.eq.${userId},provider_id.eq.${userId}`)
+        .in('status', ['funded', 'requested', 'disputed'])
+        .order('funded_at', { ascending: false }),
+      supabase.from('payout_requests')
+        .select('id, amount_km, bank_name, iban, status, note, created_at, reviewed_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5),
+    ])
+    if (jobs.error) console.error('Pending jobs failed', { message: jobs.error.message, code: jobs.error.code })
+    if (payouts.error) console.error('Payouts failed', { message: payouts.error.message, code: payouts.error.code })
+    return { jobs: jobs.data || [], payouts: payouts.data || [] }
   },
 
   /** Balance, totals and the ledger of the signed-in user. */

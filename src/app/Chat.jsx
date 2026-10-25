@@ -25,7 +25,7 @@ function Chat(props) {
   const {
     user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, chatState,
     grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading, sending,
-    error, notice, togglePref, reportConversation, toggleBlock, otherBlocked, timeOf, shortDate, retry,
+    error, notice, togglePref, reportConversation, toggleBlock, otherBlocked, timeOf, shortDate, retry, otherTyping,
   } = props
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
@@ -93,7 +93,7 @@ function Chat(props) {
         <button type="button" className="ap-back" onClick={() => openConversation('')} aria-label="Nazad"><ArrowLeft size={22} /></button>
         <Link to={`/korisnik/${active.other_id}`} className="ch-head-person">
           <Avatar src={active.other_avatar} name={active.other_name} size={40} />
-          <span><strong>{active.other_name}</strong><small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small></span>
+          <span><strong>{active.other_name}</strong>{otherTyping ? <small className="ch-head-typing">kuca…</small> : <small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small>}</span>
         </Link>
         <button type="button" className="ap-back" onClick={() => setMenu((value) => !value)} aria-label="Više"><MoreHorizontal size={22} /></button>
         {menu && (
@@ -134,6 +134,7 @@ function Chat(props) {
           </div>
         ))}
         {lastOwnRead && <div className="ch-seen">Pročitano {timeOf(lastOwnRead.read_at)}</div>}
+        {otherTyping && <div className="ch-typing" aria-label={`${active.other_name} kuca`}><i /><i /><i /></div>}
       </div>
 
       {error && <div className="form-error ch-alert">{error}</div>}

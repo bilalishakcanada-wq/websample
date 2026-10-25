@@ -131,4 +131,25 @@ export const messageService = {
       .subscribe()
     return () => supabase.removeChannel(channel)
   },
+
+  // "kuca…": both people in a thread join the same broadcast channel; nothing is stored.
+  // ping() is throttled so a fast typist sends one event every few seconds, not one per key
+  typingChannel(conversationId, userId, onTyping) {
+    let lastPing = 0
+    const channel = supabase
+      .channel(`typing-${conversationId}`)
+      .on('broadcast', { event: 'typing' }, ({ payload }) => { if (payload?.user_id !== userId) onTyping(payload?.state !== 'stop') })
+      .subscribe()
+    const send = (state) => channel.send({ type: 'broadcast', event: 'typing', payload: { user_id: userId, state } }).catch(() => {})
+    return {
+      ping() {
+        const now = Date.now()
+        if (now - lastPing < 2500) return
+        lastPing = now
+        send('typing')
+      },
+      stop() { lastPing = 0; send('stop') },
+      close() { supabase.removeChannel(channel) },
+    }
+  },
 }

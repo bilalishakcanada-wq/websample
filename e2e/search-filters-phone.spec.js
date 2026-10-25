@@ -26,6 +26,8 @@ test('telefon: filteri se zatvaraju dodirom pored ili povlačenjem nadolje, bez 
   await page.goto('/search')
   const sheet = page.locator('.filter-sheet')
   const open = async (menu) => {
+    // a tap straight after a swipe can be eaten by the browser stopping that swipe's momentum
+    await sleep(600)
     await page.locator(`.filter-menu[data-menu=${menu}] .filter-pill`).tap()
     await expect(sheet).toBeVisible()
     await sleep(400)

@@ -6,7 +6,7 @@ import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
 import { isValidFullName } from '../../services/profileService'
 import { contactInfoMessage, scanContactInfo } from '../../utils/moderation'
-import { formatBosnianPhone, isValidBosnianPhone } from '../../utils/phone'
+import { digitsOnly, formatBosnianPhone, isValidBosnianPhone } from '../../utils/phone'
 import CityField from '../../components/CityField'
 import ExactLocationPicker from '../../components/ExactLocationPicker'
 import { placeService } from '../../services/placeService'
@@ -16,6 +16,7 @@ import RuleOneNotice from '../../components/RuleOneNotice'
 import { withBase } from '../../utils/paths'
 import { confirmDialog } from '../../utils/dialog'
 import ProfileCardArt from '../../components/ProfileCardArt'
+import PhoneVerify from '../../components/PhoneVerify'
 
 const splitName = (fullName) => {
   const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean)
@@ -29,7 +30,7 @@ const splitDate = (value) => {
 // where each verification step is done (keys from my_verification_progress)
 const STEP_LINKS = {
   email: '/account/informacije',
-  mobile: '/account/znacke#mobile_verified',
+  mobile: '/account/postavke#telefon',
   id: '/account/verifikacija',
   payment: '/account/nacini-placanja',
 }
@@ -70,7 +71,8 @@ const GOAL_LABEL = { client: 'Klijent', provider: 'Izvođač', both: 'Klijent i 
 
 function ProfileSettingsPage() {
   const { user, updateProfile, deleteAccount } = useAuth()
-  const { profile, saveProfile, openAvatarPicker, uploadingAvatar } = useAccount()
+  const { profile, saveProfile, openAvatarPicker, uploadingAvatar, reload } = useAccount()
+  const [verifyPhone, setVerifyPhone] = useState(false)
   const [searchParams] = useSearchParams()
   const [form, setForm] = useState(() => ({
     ...splitName(profile.full_name),
@@ -112,6 +114,9 @@ function ProfileSettingsPage() {
   const shownName = [form.firstName.trim(), form.lastName.trim() && `${form.lastName.trim().charAt(0).toUpperCase()}.`].filter(Boolean).join(' ')
   const nameOk = fullName === '' || isValidFullName(fullName)
   const phoneOk = isValidBosnianPhone(form.phone)
+  // "potvrđen" vrijedi samo za broj koji je potvrđen; upisan drugi broj treba novi kod
+  const samePhone = (a, b) => digitsOnly(formatBosnianPhone(a)).replace(/^(387|0)/, '') === digitsOnly(formatBosnianPhone(b)).replace(/^(387|0)/, '')
+  const phoneVerified = Boolean(profile.phone_verified_at) && samePhone(form.phone, profile.phone)
   const bioScan = useMemo(() => scanContactInfo(form.bio), [form.bio])
   const nameScan = useMemo(() => scanContactInfo(fullName), [fullName])
   const birthDate = form.y && form.m && form.d ? `${form.y.padStart(4, '0')}-${form.m.padStart(2, '0')}-${form.d.padStart(2, '0')}` : ''
@@ -177,6 +182,7 @@ function ProfileSettingsPage() {
 
   return (
     <div className="account-section pe">
+      {verifyPhone && <PhoneVerify initialPhone={form.phone} onClose={() => setVerifyPhone(false)} onVerified={reload} />}
       <header className="pe-head">
         <div>
           <h1>Profil</h1>
@@ -233,7 +239,7 @@ function ProfileSettingsPage() {
             <label className="account-field">
               <span id="telefon">Telefon (privatno)</span>
               <input value={form.phone} onChange={set('phone')} type="tel" inputMode="tel" placeholder="061 234 567" autoComplete="tel" />
-              <small className={!phoneOk ? 'is-error' : ''}>{!phoneOk ? 'Oblik: 061 234 567 ili +387 61 234 567.' : profile.phone_verified_at ? 'Verifikovan SMS kodom' : <>Verifikuj ga u <Link to="/account/znacke#mobile_verified">Značkama</Link>.</>}</small>
+              <small className={!phoneOk ? 'is-error' : ''}>{!phoneOk ? 'Oblik: 061 234 567 ili +387 61 234 567.' : phoneVerified ? 'Potvrđen SMS kodom' : <>Nije potvrđen. <button type="button" className="pe-inline-link" onClick={() => setVerifyPhone(true)} data-testid="profile-phone-verify">Potvrdi SMS kodom</button></>}</small>
             </label>
             <div className="account-field">
               <span>Datum rođenja</span>

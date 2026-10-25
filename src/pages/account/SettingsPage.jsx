@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
+import { Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Phone, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
@@ -13,6 +13,8 @@ import { locationPermission, openAppSettings, requestLocation } from '../../util
 import { isNativeApp } from '../../utils/native'
 import { backgroundLocationSupported } from '../../utils/location'
 import { toast } from '../../components/Toaster'
+import PhoneVerify from '../../components/PhoneVerify'
+import { formatBosnianPhone } from '../../utils/phone'
 import './SettingsPage.css'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
@@ -51,10 +53,11 @@ const GEO_TEXT = {
 function SettingsPage() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const { profile, bundle, saveProfile } = useAccount()
+  const { profile, bundle, saveProfile, reload } = useAccount()
   const notif = useNotificationSwitches({ profile, saveProfile })
   const { notifyEmail, notifyPush, device, deviceOn } = notif
   const [password, setPassword] = useState('')
+  const [verifyPhone, setVerifyPhone] = useState(false)
   const { blocked, toggle: toggleBlockUser } = useBlocks()
   // Lokacija uživo: the distance to jobs follows where the person is right now (utils/liveReach.js)
   const [live, setLive] = useState(isLiveReachOn)
@@ -151,6 +154,7 @@ function SettingsPage() {
   return (
     <div className="account-section st">
       <div className="account-section-head"><h1>Postavke</h1></div>
+      {verifyPhone && <PhoneVerify initialPhone={profile.phone || ''} onClose={() => setVerifyPhone(false)} onVerified={reload} />}
 
       <Link to="/account/profil" className="st-profile">
         <span className="st-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={28} />}</span>
@@ -207,6 +211,12 @@ function SettingsPage() {
       <h2 className="st-group-title">Račun</h2>
       <div className="st-group">
         <Row icon={Mail} tone="blue" title="Email" sub={user.email} />
+        <Row icon={Phone} tone="green" title="Broj telefona" testid="phone-verify-row" id="telefon"
+          sub={profile.phone ? formatBosnianPhone(profile.phone) : 'Nije dodan. Potvrdi ga SMS kodom.'}>
+          {profile.phone_verified_at
+            ? <span className="st-pill st-pill-ok">Potvrđen</span>
+            : <button type="button" className="st-action" onClick={() => setVerifyPhone(true)} data-testid="phone-verify-open">Potvrdi</button>}
+        </Row>
         {isOAuth ? (
           <Row icon={KeyRound} tone="gray" title="Lozinka" sub="Prijavljuješ se preko Google naloga, lozinka se mijenja kod Googlea." />
         ) : (

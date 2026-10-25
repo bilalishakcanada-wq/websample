@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { X } from 'lucide-react'
 import TierMedal from './TierMedal'
 import { useBadgeVault } from '../hooks/useTopBadges'
-import { TIERS, progressOf } from '../utils/badgeRanking'
-import { formatBosnianDate } from '../utils/dateFormat'
+import BadgeDetail, { BadgeProgress } from './BadgeDetail'
+import { TIERS } from '../utils/badgeRanking'
 import { useBackToClose } from '../hooks/useBackToClose'
 import './BadgeRanking.css'
 
@@ -17,30 +17,17 @@ const writeSeen = (userId, codes) => {
   try { window.localStorage.setItem(seenKey(userId), JSON.stringify(codes)) } catch { /* privatni prozor */ }
 }
 
-function ProgressLine({ progress }) {
-  const value = progressOf(progress)
-  if (!value) return null
-  return (
-    <span className="vault-progress">
-      <span className="vault-progress-bar"><span style={{ width: `${Math.round(value.ratio * 100)}%` }} /></span>
-      <small>{value.current} / {value.target} {value.unit}{value.left > 0 ? ` · još ${value.left}` : ''}</small>
-    </span>
-  )
-}
-
 /**
- * Trezor znački (vidi ga samo vlasnik): sve osvojene značke po težini, pa zaključane (sive)
- * s uputom kako ih otključati. Dodir / hover / fokus na pločicu otvara objašnjenje.
+ * Trezor znački (vidi ga samo vlasnik): osvojene značke po težini, pa zaključane (sive) s napretkom.
+ * Dodir na pločicu otvara značku izbliza (opis, datum ili kako je otključati).
  */
 export function BadgeVault({ userId, earnedBadges }) {
   const { loading, badges } = useBadgeVault(userId, earnedBadges)
   const [open, setOpen] = useState(null)
-  // dodir na otvorenu pločicu je zatvara, osim ako ju je hover ili fokus upravo otvorio (isti dodir)
-  const openedAt = useRef(0)
-  const show = (code, event) => { if (open !== code) openedAt.current = event.timeStamp; setOpen(code) }
   const earned = useMemo(() => badges.filter((badge) => badge.earned), [badges])
+  const locked = useMemo(() => badges.filter((badge) => !badge.earned), [badges])
 
-  // značke osvojene od zadnje posjete trezoru dobiju "Novo" i kratku proslavu
+  // značke osvojene od zadnje posjete trezoru dobiju "Novo" i jedan odsjaj
   const [seen] = useState(() => readSeen(userId))
   const fresh = useMemo(() => (seen ? new Set(earned.map((badge) => badge.code).filter((code) => !seen.includes(code))) : new Set()), [seen, earned])
   useEffect(() => { if (!loading) writeSeen(userId, earned.map((badge) => badge.code)) }, [loading, userId, earned])
@@ -48,49 +35,58 @@ export function BadgeVault({ userId, earnedBadges }) {
   if (loading) return <div className="vault-grid vault-loading">{Array.from({ length: 8 }, (_, index) => <span key={index} className="vault-tile skeleton-card" />)}</div>
 
   const counts = [4, 3, 2, 1].map((level) => ({ level, n: earned.filter((badge) => badge.tier_level === level).length }))
+  const tile = (badge, index) => (
+    <button
+      key={badge.code}
+      type="button"
+      className={`vault-tile tier-${badge.tier.key} ${badge.earned ? 'is-earned' : 'is-locked'} ${fresh.has(badge.code) ? 'is-fresh' : ''}`}
+      style={{ '--i': index }}
+      onClick={() => setOpen(badge)}
+      aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}
+    >
+      {fresh.has(badge.code) && <span className="vault-new">Novo</span>}
+      <TierMedal badge={badge} size={78} locked={!badge.earned} stamp={fresh.has(badge.code)} className={fresh.has(badge.code) ? '' : 'medal-pop'} />
+      <strong>{badge.label}</strong>
+      <small className={`vault-tier tier-${badge.tier.key}`}>{badge.tier.label}</small>
+      {!badge.earned && <BadgeProgress progress={badge.progress} />}
+    </button>
+  )
 
   return (
     <div className="vault">
       <div className="vault-summary">
-        <strong>{earned.length} od {badges.length} znački</strong>
-        <span className="vault-tier-counts">
-          {counts.map(({ level, n }) => <span key={level} className={`vault-tier-count tier-${TIERS[level].key}`}><i />{TIERS[level].label} {n}</span>)}
-        </span>
+        <div className="vault-score">
+          <strong>{earned.length}<span> / {badges.length}</span></strong>
+          <small>osvojenih znački</small>
+          <span className="badge-progress-bar"><span style={{ '--fill': badges.length ? earned.length / badges.length : 0 }} /></span>
+        </div>
+        <ul className="vault-tier-counts">
+          {counts.map(({ level, n }) => (
+            <li key={level} className={`vault-tier-count tier-${TIERS[level].key} ${n ? '' : 'is-zero'}`}>
+              <i aria-hidden="true">{'★'.repeat(level)}</i>
+              <span><b>{n}</b>{TIERS[level].label}</span>
+            </li>
+          ))}
+        </ul>
       </div>
       {fresh.size > 0 && (
         <p className="vault-celebrate">{fresh.size > 1 ? `${fresh.size} nove značke` : 'Nova značka'} od tvoje zadnje posjete. Odmah je na tvom profilu.</p>
       )}
 
-      <div className="vault-grid" onMouseLeave={() => setOpen(null)}>
-        {badges.map((badge) => {
-          const isOpen = open === badge.code
-          return (
-            <button
-              key={badge.code}
-              type="button"
-              className={`vault-tile ${badge.earned ? 'is-earned' : 'is-locked'} ${fresh.has(badge.code) ? 'is-fresh' : ''} ${isOpen ? 'is-open' : ''}`}
-              onClick={(event) => (isOpen && event.timeStamp - openedAt.current > 400 ? setOpen(null) : show(badge.code, event))}
-              onMouseEnter={(event) => show(badge.code, event)}
-              onFocus={(event) => show(badge.code, event)}
-              onBlur={() => setOpen(null)}
-              aria-expanded={isOpen}
-              aria-label={`${badge.label}, ${badge.tier.label}${badge.earned ? '' : ', zaključana'}`}
-            >
-              {fresh.has(badge.code) && <span className="vault-new">Novo</span>}
-              <TierMedal badge={badge} size={40} locked={!badge.earned} />
-              <strong>{badge.label}</strong>
-              <small className={`vault-tier tier-${badge.tier.key}`}>{badge.tier.label}</small>
-              {!badge.earned && <ProgressLine progress={badge.progress} />}
-              <span className="vault-tip" role="tooltip">
-                {badge.earned
-                  ? <>{badge.description}{badge.awarded_at && <em>Osvojeno {formatBosnianDate(badge.awarded_at)}</em>}</>
-                  : <><b>Kako je otključati</b>{badge.unlock_hint || badge.description}</>}
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      {earned.length > 0 && (
+        <section className="vault-section" aria-label="Osvojene">
+          <h3>Osvojene <span>{earned.length}</span></h3>
+          <div className="vault-grid">{earned.map(tile)}</div>
+        </section>
+      )}
+      {locked.length > 0 && (
+        <section className="vault-section" aria-label="Još za otključati">
+          <h3>Još za otključati <span>{locked.length}</span></h3>
+          <div className="vault-grid">{locked.map((badge, index) => tile(badge, earned.length + index))}</div>
+        </section>
+      )}
       <p className="muted-text vault-foot">Drugi vide samo tvojih 5 najjačih znački. Licence i dokumente dodaješ u <Link to="/account/znacke">Moj nalog → Značke</Link>.</p>
+      {open && <BadgeDetail badge={open} onClose={() => setOpen(null)} />}
     </div>
   )
 }

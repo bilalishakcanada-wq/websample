@@ -8,6 +8,7 @@ import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
 import MoneyOnTheWay from './MoneyOnTheWay'
+import BalanceArt from './BalanceArt'
 
 // the big balance: whole KM large, cents small, like a banking app
 const bigAmount = (value) => {
@@ -89,7 +90,8 @@ function WalletPage() {
     <div className="account-section">
       <PaymentTabs />
 
-      <section className="bal-card" aria-label="Stanje računa">
+      <section className="bal-card has-art" aria-label="Stanje računa">
+        <BalanceArt />
         <div className="bal-top">
           <span className="bal-label"><Wallet size={15} /> Stanje na Zadatku</span>
           <span className="bal-chip"><ShieldCheck size={13} /> Zaštićeno</span>

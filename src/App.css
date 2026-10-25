@@ -12453,6 +12453,11 @@ body:has(.profile-cta-bar) .support-chat {
   .bal-split > div:nth-child(2) { padding-left: 0; border-left: 0; }
   .bal-btn { font-size: 0.88rem; padding: 0 10px; }
 }
+.bal-card.has-art::after { display: none; }
+.bal-card.has-art { background: linear-gradient(180deg, #0b1f66 0%, #0a1f63 50%, #081a55 100%); }
+.bal-art { position: relative; height: clamp(130px, 18vw, 170px); margin: -22px -24px -6px; overflow: hidden; border-radius: 24px 24px 0 0; background: #14287a; }
+.bal-art svg { display: block; width: 100%; height: 100%; }
+@media (max-width: 480px) { .bal-art { height: 140px; margin: -20px -18px -4px; border-radius: 22px 22px 0 0; } }
 .pay-tabs { display: flex; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 14px; background: var(--surface-soft); }
 .ap-sub .pay-tabs { margin-top: 10px; }
 .pay-tabs a { flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; padding: 8px 10px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; color: var(--text-soft); text-align: center; text-decoration: none; }

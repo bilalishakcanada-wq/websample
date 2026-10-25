@@ -174,9 +174,14 @@ export const accountService = {
   async sendPhoneCode(phoneE164) {
     const { error } = await supabase.auth.updateUser({ phone: phoneE164 })
     if (error) {
+      const code = error.code || ''
       const text = error.message || ''
-      if (/sms|provider|not enabled|unsupported/i.test(text)) throw new Error('SMS verifikacija još nije uključena na platformi. Administrator treba dodati SMS provajdera u Supabase Auth.')
-      throw new Error(text || 'Slanje koda nije uspjelo.')
+      console.error('Phone code failed', { code, message: text })
+      if (code === 'phone_exists' || /already (been )?registered|already exists/i.test(text)) throw new Error('Ovaj broj već koristi drugi nalog na Zadatku.')
+      if (code === 'over_sms_send_rate_limit' || error.status === 429) throw new Error('Previše pokušaja. Sačekaj minut pa traži novi kod.')
+      if (code === 'phone_provider_disabled' || /provider.*(disabled|not enabled)|unsupported phone provider/i.test(text)) throw new Error('SMS potvrda trenutno nije uključena. Pokušaj kasnije.')
+      if (code === 'sms_send_failed' || /sending .*otp|sms/i.test(text)) throw new Error('SMS nije moguće poslati na ovaj broj. Provjeri broj i pokušaj ponovo.')
+      throw new Error('Slanje koda nije uspjelo. Pokušaj ponovo.')
     }
   },
 

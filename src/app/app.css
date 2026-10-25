@@ -474,6 +474,7 @@
 .ch-head-person span { display: grid; min-width: 0; }
 .ch-head-person strong { font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ch-head-person small { font-size: 0.78rem; color: #b9caf5; }
+.ch-head-person small.ch-head-typing { color: #8ff0b5; font-weight: 700; }
 .ch-head .jd-menu { top: calc(54px + var(--safe-top)); }
 .ch-job { display: flex; align-items: center; gap: 12px; padding: 10px var(--ap-x); border-bottom: 1px solid #edf0f5; background: var(--surface); color: var(--text); }
 .ch-job-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; background: #e4ecff; color: var(--accent); }
@@ -481,7 +482,7 @@
 .ch-job-text small { font-size: 0.74rem; font-weight: 700; color: var(--text-soft); }
 .ch-job-text .ch-job-status { padding: 1px 7px; font-size: 0.72rem; }
 .ch-job-text strong { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ch-thread { flex: 1; overflow-y: auto; padding: 12px var(--ap-x) 12px; display: flex; flex-direction: column; gap: 2px; background: linear-gradient(180deg, #f6f9ff 0%, #eaf1ff 100%); -webkit-overflow-scrolling: touch; }
+.ch-thread { flex: 1; overflow-y: auto; padding: 12px var(--ap-x) 12px; display: flex; flex-direction: column; gap: 2px; background: radial-gradient(60% 50% at 0% 0%, #dbe6ff 0%, transparent 100%), radial-gradient(55% 45% at 100% 30%, #e6e0fb 0%, transparent 100%), radial-gradient(60% 50% at 20% 100%, #d9efe6 0%, transparent 100%), radial-gradient(50% 45% at 100% 100%, #dce9fb 0%, transparent 100%), #f3f6fc; -webkit-overflow-scrolling: touch; }
 .ch-safety, .ch-intro { margin: 4px auto 10px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.85); max-width: 300px; text-align: center; font-size: 0.8rem; line-height: 1.45; color: var(--text-soft); }
 .ch-safety svg { display: inline-block; vertical-align: -2px; margin-right: 4px; }
 .ch-day { display: flex; flex-direction: column; gap: 2px; }

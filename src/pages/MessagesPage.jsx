@@ -130,9 +130,29 @@ function MessagesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId, user.id])
 
+  // "kuca…" while the other person types: their pings keep it on, it goes away 4 s after the last
+  // one, when they send, or when their message lands
+  const [otherTyping, setOtherTyping] = useState(false)
+  const typingRef = useRef(null)
+  useEffect(() => {
+    setOtherTyping(false)
+    if (!activeId) return undefined
+    let timer
+    const typing = messageService.typingChannel(activeId, user.id, (on) => {
+      clearTimeout(timer)
+      setOtherTyping(on)
+      if (on) timer = setTimeout(() => setOtherTyping(false), 4000)
+    })
+    typingRef.current = typing
+    return () => { clearTimeout(timer); typing.close(); typingRef.current = null }
+  }, [activeId, user.id])
+  const lastFromOther = thread.length > 0 && thread[thread.length - 1].sender_id !== user.id ? thread[thread.length - 1].id : ''
+  useEffect(() => { if (lastFromOther) setOtherTyping(false) }, [lastFromOther])
+  useEffect(() => { if (draft.trim()) typingRef.current?.ping() }, [draft])
+
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
-  }, [thread])
+  }, [thread, otherTyping])
 
   const openConversation = (id) => {
     const fromInbox = Boolean(location.state?.fromInbox)
@@ -210,6 +230,7 @@ function MessagesPage() {
     const tempId = `pending-${Date.now()}`
     setThread((current) => [...current, { id: tempId, sender_id: user.id, receiver_id: active.other_id, content: text, created_at: new Date().toISOString(), pending: true }])
     setDraft('')
+    typingRef.current?.stop()
     inputRef.current?.focus()
     try {
       const created = await messageService.send({ conversationId: active.id, senderId: user.id, receiverId: active.other_id, content: text })
@@ -296,7 +317,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage} sending={sending}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} toggleBlock={toggleBlock} otherBlocked={otherBlocked} timeOf={timeOf} shortDate={shortDate}
-        retry={() => loadInbox()} chatState={chatState}
+        retry={() => loadInbox()} chatState={chatState} otherTyping={otherTyping}
       />
     )
   }
@@ -377,7 +398,7 @@ function MessagesPage() {
                     <Avatar src={active.other_avatar} name={active.other_name} size={40} />
                     <span>
                       <strong>{active.other_name}</strong>
-                      <small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small>
+                      {otherTyping ? <small className="chat-head-typing">kuca…</small> : <small>{active.other_type === 'client' ? 'Klijent' : 'Izvođač'}</small>}
                     </span>
                   </Link>
                   <span className={`chat-contact-state ${active.contacts_allowed ? 'open' : ''}`} title={active.contacts_allowed ? 'Ponuda je prihvaćena' : 'Kontakt se otključava kad klijent prihvati ponudu'}>
@@ -431,6 +452,7 @@ function MessagesPage() {
                     </div>
                   ))}
                   {lastOwnRead && <div className="chat-seen-note">Pročitano {timeOf(lastOwnRead.read_at)}</div>}
+                  {otherTyping && <div className="chat-typing" aria-label={`${active.other_name} kuca`}><i /><i /><i /></div>}
                 </div>
 
                 {error && <div className="form-error chat-alert">{error}</div>}

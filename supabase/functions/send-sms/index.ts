@@ -1,6 +1,6 @@
-// Supabase Auth "Send SMS" hook: sends the phone verification code through Infobip.
-// Secrets: SEND_SMS_HOOK_SECRETS (from Auth → Hooks, "v1,whsec_…"), INFOBIP_API_KEY; INFOBIP_BASE_URL and INFOBIP_SENDER optional
-// (default: the sender number Infobip gave this account; a registered sender name like Zadatak goes in INFOBIP_SENDER).
+// Supabase Auth "Send SMS" hook: sends the phone verification code through Twilio (when TWILIO_ACCOUNT_SID is set) or Infobip.
+// Secrets: SEND_SMS_HOOK_SECRETS (from Auth → Hooks, "v1,whsec_…"); Twilio: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM;
+// Infobip: INFOBIP_API_KEY, optional INFOBIP_BASE_URL and INFOBIP_SENDER (default: the sender number Infobip gave this account).
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { Webhook } from 'npm:standardwebhooks@1.0.0'
 
@@ -32,16 +32,40 @@ Deno.serve(async (req) => {
   const otp = event.sms?.otp
   if (!to || !otp) return fail(400, 'Missing phone or code')
 
+  const text = `Zadatak kod: ${otp}\nUpiši ga u aplikaciju da potvrdiš broj. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}`
+  // zadnji red poruke je za automatsko upisivanje koda na Androidu (WebOTP)
+  return Deno.env.get('TWILIO_ACCOUNT_SID') ? sendTwilio(to, text) : sendInfobip(to, text)
+})
+
+// Twilio: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM (the Twilio phone number, or an MG… Messaging Service SID)
+async function sendTwilio(to: string, text: string) {
+  const sid = (Deno.env.get('TWILIO_ACCOUNT_SID') || '').trim()
+  const token = (Deno.env.get('TWILIO_AUTH_TOKEN') || '').trim()
+  const from = (Deno.env.get('TWILIO_FROM') || '').trim()
+  const form = new URLSearchParams({ To: `+${to}`, Body: text })
+  form.set(from.startsWith('MG') ? 'MessagingServiceSid' : 'From', from)
+  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+    method: 'POST',
+    headers: { Authorization: `Basic ${btoa(`${sid}:${token}`)}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form,
+    signal: AbortSignal.timeout(10000),
+  }).catch((error) => ({ ok: false, status: 0, text: async () => String(error) }) as Response)
+  if (!res.ok) {
+    const detail = await res.text()
+    console.error('Twilio send failed', { status: res.status, detail: detail.slice(0, 500) })
+    return fail(res.status === 400 ? 400 : 500, 'SMS could not be sent')
+  }
+  return json(200, {})
+}
+
+async function sendInfobip(to: string, text: string) {
   // the key may be pasted with "App " in front or a stray space
   const apiKey = (Deno.env.get('INFOBIP_API_KEY') || '').trim().replace(/^App\s+/i, '')
   const base = (Deno.env.get('INFOBIP_BASE_URL') || '55l1gx.api.infobip.com').replace(/^https?:\/\//, '').replace(/\/+$/, '')
   const res = await fetch(`https://${base}/sms/2/text/advanced`, {
     method: 'POST',
     headers: { Authorization: `App ${apiKey}`, 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', // zadnji red je za automatsko upisivanje koda na Androidu (WebOTP)
-        text: `Zadatak kod: ${otp}\nUpiši ga u aplikaciju da potvrdiš broj. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}` }],
-    }),
+    body: JSON.stringify({ messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', text }] }),
     signal: AbortSignal.timeout(10000),
   }).catch((error) => ({ ok: false, status: 0, text: async () => String(error) }) as Response)
 
@@ -58,4 +82,4 @@ Deno.serve(async (req) => {
     return fail(400, 'SMS could not be sent to this number')
   }
   return json(200, {})
-})
+}

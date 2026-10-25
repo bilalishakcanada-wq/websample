@@ -29,7 +29,6 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
   const [wait, setWait] = useState(0)
   const boxes = useRef([])
   const checking = useRef(false)
-  const numberRef = useRef(null)
   useBackToClose(true, onClose)
 
   useEffect(() => {
@@ -38,14 +37,7 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  useEffect(() => {
-    if (step === 'number') numberRef.current?.focus()
-  }, [step])
-
-  // na ekranu za kod, kad polja opet rade (novi kod ili pogrešan pokušaj), kursor je u prvom
-  useEffect(() => {
-    if (step === 'code' && !busy && digits.every((digit) => !digit)) boxes.current[0]?.focus()
-  }, [step, busy, digits])
+  // tastatura se otvara tek kad osoba sama dodirne polje: ništa se ne fokusira samo od sebe
 
   useEffect(() => {
     if (wait <= 0) return undefined
@@ -163,7 +155,6 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
             <label className="pv-number">
               <span className="pv-prefix" aria-hidden="true"><span className="pv-flag">🇧🇦</span>+387</span>
               <input
-                ref={numberRef}
                 value={number}
                 onChange={(event) => { setNumber(nationalPart(event.target.value)); setError('') }}
                 type="tel"

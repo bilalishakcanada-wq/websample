@@ -602,3 +602,5 @@
 .ap-city-list .ap-city-muni { color: var(--text-soft); font-weight: 500; }
 .ap-city-list button small { color: var(--text-soft); font-size: 0.74rem; font-weight: 500; }
 @media (max-width: 359px) { .ap-hero-art { display: none; } }
+.ap-account .acc-group .st-group-title { margin-top: 22px; }
+.ap-account .acc-logout { margin-top: 26px; }

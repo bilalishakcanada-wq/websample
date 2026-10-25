@@ -10,11 +10,20 @@ const fail = (status: number, message: string) => json(status, { error: { http_c
 
 Deno.serve(async (req) => {
   const payload = await req.text()
-  const secret = (Deno.env.get('SEND_SMS_HOOK_SECRETS') || '').replace(/^v1,whsec_/, '')
-  let event: { user?: { phone?: string; phone_change?: string }; sms?: { otp?: string } }
-  try {
-    event = new Webhook(secret).verify(payload, Object.fromEntries(req.headers)) as typeof event
-  } catch {
+  // the dashboard value may hold several secrets ("v1,whsec_a|v1,whsec_b"); any one may sign
+  const secrets = (Deno.env.get('SEND_SMS_HOOK_SECRETS') || '').split('|')
+    .map((value) => value.trim().replace(/^v1,/, '').replace(/^whsec_/, '')).filter(Boolean)
+  const headers = Object.fromEntries(req.headers)
+  type HookEvent = { user?: { phone?: string; phone_change?: string }; sms?: { otp?: string } }
+  let event: HookEvent | null = null
+  for (const secret of secrets) {
+    try {
+      event = new Webhook(secret).verify(payload, headers) as HookEvent
+      break
+    } catch { /* try the next secret */ }
+  }
+  if (!event) {
+    console.error('Send SMS hook: signature check failed', { secrets: secrets.length, hasSignature: Boolean(headers['webhook-signature']) })
     return fail(401, 'Invalid hook signature')
   }
 
@@ -28,7 +37,8 @@ Deno.serve(async (req) => {
     method: 'POST',
     headers: { Authorization: `App ${Deno.env.get('INFOBIP_API_KEY')}`, 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
-      messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', text: `Tvoj Zadatak kod: ${otp}. Ne dijeli ga ni sa kim.` }],
+      messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', // zadnji red je za automatsko upisivanje koda na Androidu (WebOTP)
+        text: `Zadatak kod: ${otp}\nUpiši ga u aplikaciju da potvrdiš broj. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}` }],
     }),
     signal: AbortSignal.timeout(10000),
   }).catch((error) => ({ ok: false, status: 0, text: async () => String(error) }) as Response)

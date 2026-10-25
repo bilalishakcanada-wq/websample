@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ArrowLeft, Check, MessageSquareText, X } from 'lucide-react'
+import { ArrowLeft, Lock, MessageSquareText, Pencil, Phone, X } from 'lucide-react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { accountService } from '../services/accountService'
 import { digitsOnly, formatBosnianPhone } from '../utils/phone'
+import { haptic } from '../utils/native'
 import './PhoneVerify.css'
 
 const CODE_LENGTH = 6
@@ -76,9 +77,13 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
     setBusy(true)
     try {
       await accountService.verifyPhoneCode(toE164(number), code)
+      haptic('heavy')
       setStep('done')
       onVerified?.()
     } catch (requestError) {
+      // dvostruki trzaj za pogrešan kod
+      haptic('medium')
+      window.setTimeout(() => haptic('medium'), 160)
       setError(requestError.message)
       setDigits(Array(CODE_LENGTH).fill(''))
     } finally {
@@ -105,6 +110,16 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
       boxes.current[Math.max(firstEmpty, Math.min(start + incoming.length, CODE_LENGTH - 1))]?.focus()
     }
   }
+
+  // Chrome na Androidu sam pročita kod iz SMS-a (zadnji red poruke: "@domena #123456") i upiše ga
+  useEffect(() => {
+    if (step !== 'code' || !('OTPCredential' in window)) return undefined
+    const abort = new AbortController()
+    navigator.credentials.get({ otp: { transport: ['sms'] }, signal: abort.signal })
+      .then((otp) => { if (otp?.code) fill(0, otp.code) })
+      .catch(() => { /* zatvoreno ili odbijeno: upisuje se rukom */ })
+    return () => abort.abort()
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onKeyDown = (index) => (event) => {
     if (event.key === 'Backspace' && !digits[index] && index > 0) {
@@ -134,6 +149,7 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
   return createPortal(
     <div className="pv-backdrop" role="presentation" onClick={onClose}>
       <div className="pv-sheet" role="dialog" aria-modal="true" aria-labelledby="pv-title" onClick={(event) => event.stopPropagation()}>
+        <span className="pv-handle" aria-hidden="true" />
         {step === 'code'
           ? <button type="button" className="pv-corner pv-back" onClick={changeNumber} aria-label="Nazad na broj"><ArrowLeft size={18} /></button>
           : null}
@@ -143,9 +159,9 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
           <form className="pv-body" onSubmit={(event) => { event.preventDefault(); send() }}>
             <span className="pv-icon" aria-hidden="true"><MessageSquareText size={26} /></span>
             <h2 id="pv-title">Potvrdi broj telefona</h2>
-            <p>Poslaćemo ti SMS sa kodom od 6 cifara. Broj ostaje privatan.</p>
+            <p>Poslaćemo ti SMS sa kodom od 6 cifara.</p>
             <label className="pv-number">
-              <span className="pv-prefix" aria-hidden="true">+387</span>
+              <span className="pv-prefix" aria-hidden="true"><span className="pv-flag">🇧🇦</span>+387</span>
               <input
                 ref={numberRef}
                 value={number}
@@ -159,33 +175,41 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
               />
             </label>
             {error && <div className="pv-error" role="alert">{error}</div>}
-            <button type="submit" className="primary-button pv-main" disabled={busy || !digitsOnly(number)} data-testid="phone-verify-send">
+            <button type="submit" className="primary-button pv-main" disabled={busy || !digitsOnly(number)} data-testid="phone-verify-send"
+              // tastatura ostaje otvorena, pa se na telefonu odmah pređe na polja za kod
+              onMouseDown={(event) => event.preventDefault()}>
               {busy ? 'Šaljem…' : 'Pošalji kod'}
             </button>
+            <span className="pv-private"><Lock size={13} /> Broj ostaje privatan. Ne prikazujemo ga drugima.</span>
           </form>
         )}
 
         {step === 'code' && (
           <div className="pv-body">
-            <h2 id="pv-title">Upiši kod</h2>
-            <p>Poslali smo SMS na <strong>+387 {number}</strong>.<br />
-              <button type="button" className="pv-link" onClick={changeNumber}>Pogrešan broj?</button>
-            </p>
-            <div className={`pv-code${error ? ' is-wrong' : ''}`} role="group" aria-label="Kod iz SMS-a">
+            <span className="pv-icon" aria-hidden="true"><MessageSquareText size={26} /></span>
+            <h2 id="pv-title">Upiši kod iz SMS-a</h2>
+            <p>Poslali smo kod od 6 cifara na</p>
+            <button type="button" className="pv-number-chip" onClick={changeNumber} aria-label="Promijeni broj">
+              +387 {number} <Pencil size={14} />
+            </button>
+            <div className={`pv-code${error ? ' is-wrong' : ''}${busy ? ' is-busy' : ''}`} role="group" aria-label="Kod iz SMS-a">
               {digits.map((digit, index) => (
                 <input
                   // eslint-disable-next-line react/no-array-index-key
                   key={index}
                   ref={(element) => { boxes.current[index] = element }}
                   value={digit}
+                  className={digit ? 'is-filled' : ''}
                   onChange={onChange(index)}
                   onKeyDown={onKeyDown(index)}
                   onPaste={(event) => { event.preventDefault(); fill(index, event.clipboardData.getData('text')) }}
                   onFocus={(event) => event.target.select()}
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete={index === 0 ? 'one-time-code' : 'off'}
                   maxLength={index === 0 ? CODE_LENGTH : 2}
-                  disabled={busy}
+                  // readOnly, ne disabled: tastatura na telefonu se ne zatvara dok se kod provjerava
+                  readOnly={busy}
                   aria-label={`Cifra ${index + 1} od ${CODE_LENGTH}`}
                   data-testid={`phone-verify-digit-${index}`}
                 />
@@ -201,9 +225,13 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
 
         {step === 'done' && (
           <div className="pv-body">
-            <span className="pv-icon is-done" aria-hidden="true"><Check size={30} strokeWidth={3} /></span>
+            <span className="pv-done-mark" aria-hidden="true">
+              <span className="pv-done-ring" />
+              <svg viewBox="0 0 52 52"><path d="M14 27 l8 8 l16 -18" /></svg>
+            </span>
             <h2 id="pv-title">Broj je potvrđen</h2>
-            <p><strong>+387 {number}</strong> je sada verifikovan. Dobio/la si značku „Telefon verifikovan“.</p>
+            <p><strong>+387 {number}</strong> je sada verifikovan.</p>
+            <span className="pv-badge"><Phone size={15} strokeWidth={2.6} /> Telefon verifikovan</span>
             <button type="button" className="primary-button pv-main" onClick={onClose}>Gotovo</button>
           </div>
         )}

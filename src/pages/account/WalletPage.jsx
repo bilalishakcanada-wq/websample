@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, ChevronRight, Coins, CreditCard, Info, Landmark, Lock, ShieldCheck, Wallet } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, ChevronRight, CreditCard, Info, Landmark, Lock, ShieldCheck, Wallet } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
 import CountUp from '../../components/CountUp'
@@ -9,6 +9,11 @@ import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
 import MoneyOnTheWay from './MoneyOnTheWay'
 
+// the big balance: whole KM large, cents small, like a banking app
+const bigAmount = (value) => {
+  const [whole, cents] = Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(',')
+  return <>{whole}<span className="bal-cents">,{cents}</span></>
+}
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
 /** "Plaćanje → Balans": the balance, money on the way, and topping up or paying out. Every transaction is in Historija. */
@@ -84,27 +89,24 @@ function WalletPage() {
     <div className="account-section">
       <PaymentTabs />
 
-      <div className="wallet-card">
-        <div className="wallet-card-top">
-          <span className="wallet-card-label"><Wallet size={15} /> Stanje računa</span>
-          <span className="wallet-card-chip"><ShieldCheck size={13} /> Sigurno na platformi</span>
+      <section className="bal-card" aria-label="Stanje računa">
+        <div className="bal-top">
+          <span className="bal-label"><Wallet size={15} /> Stanje na Zadatku</span>
+          <span className="bal-chip"><ShieldCheck size={13} /> Zaštićeno</span>
         </div>
-        <strong className="wallet-card-balance"><CountUp value={wallet.balance} format={money} duration={900} /></strong>
-        <span className="wallet-card-sub">{payout ? <>Možeš isplatiti na račun: <strong>{money(payout.withdrawable)}</strong></> : 'trenutno stanje'}</span>
-        <Coins className="wallet-card-art" size={120} aria-hidden="true" />
-      </div>
-
-      <div className="wallet-stats">
-        <div><ArrowDownLeft size={16} /><span>Ušlo · zadnjih 30 dana</span><strong><CountUp value={wallet.credited_30d} format={money} /></strong></div>
-        <div><ArrowUpRight size={16} /><span>Izašlo · zadnjih 30 dana</span><strong><CountUp value={wallet.spent_30d} format={money} /></strong></div>
-      </div>
+        <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
+        <div className="bal-split">
+          <div><small>Za isplatu na račun</small><strong>{payout ? money(payout.withdrawable) : '—'}</strong></div>
+          <div><small><ArrowDownLeft size={13} /> Ušlo · 30 dana</small><strong>{Number(wallet.credited_30d) > 0 ? '+' : ''}{money(wallet.credited_30d)}</strong></div>
+          <div><small><ArrowUpRight size={13} /> Izašlo · 30 dana</small><strong>{Number(wallet.spent_30d) !== 0 ? '−' : ''}{money(Math.abs(Number(wallet.spent_30d || 0)))}</strong></div>
+        </div>
+        <div className="bal-actions">
+          <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
+          <button type="button" className={`bal-btn${panel === 'payout' ? ' is-open' : ''}`} onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)} aria-expanded={panel === 'payout'}><Landmark size={17} /> {payout?.open ? 'Isplata je u toku' : 'Isplati na račun'}</button>
+        </div>
+      </section>
 
       {notice && <div className="form-success">{notice}</div>}
-
-      <div className="wallet-cta">
-        <button type="button" className="primary-button" onClick={() => openPanel('topup')}><CreditCard size={16} /> Uplati karticom</button>
-        <button type="button" className="ghost-button" onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)}><ArrowUpRight size={16} /> Isplati na račun</button>
-      </div>
 
       {panel === 'topup' && (
         <form ref={panelRef} className="auth-form wallet-action" onSubmit={topUp}>

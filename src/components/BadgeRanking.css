@@ -1,14 +1,15 @@
-/* Badges: a flat round seal per badge (outline in the tier colour), the profile's top 5 as a plain list,
-   the vault as a quiet grid. No gradients, glow, sparkle or bouncing. */
+/* Badges: a medal per badge whose shape and metal give the tier (bronze coin, silver hexagon, gold rosette,
+   platinum star), the profile's top 5 as a row of medals with the chosen one explained, the vault as a grid
+   of cards, and one badge up close. Motion is short and plays once; reduced motion turns it off. */
 :root {
-  --tier-bronze: #8a4b22;
-  --tier-silver: #56627a;
-  --tier-gold: #1a4fd6;
-  --tier-gold-text: #1a43b8;
+  --tier-bronze: #9a5a2c;
+  --tier-silver: #5f6b80;
+  --tier-gold: #a87a0a;
+  --tier-gold-text: #8f6600;
   --tier-platinum: #0b1640;
 }
 
-/* ---------------------------------------------------------------- seal */
+/* ---------------------------------------------------------------- medal */
 .tier-medal {
   position: relative;
   display: inline-grid;
@@ -16,44 +17,152 @@
   flex: 0 0 auto;
   width: var(--medal-size);
   height: var(--medal-size);
-  border-radius: 50%;
-  border: 1.5px solid var(--tier-color);
-  background: #fff;
-  color: var(--tier-color);
+  color: var(--m-glyph);
+  --m-rim: #b77443;
+  --m-edge: #8a4b22;
+  --m-face: #fbefe4;
+  --m-line: #dfae86;
+  --m-glyph: #874822;
 }
-.tier-medal.tier-bronze { --tier-color: var(--tier-bronze); }
-.tier-medal.tier-silver { --tier-color: var(--tier-silver); }
-.tier-medal.tier-gold { --tier-color: var(--tier-gold); }
-.tier-medal.tier-platinum { --tier-color: var(--tier-platinum); }
-.tier-medal.is-locked { --tier-color: #a3abbd; border-style: dashed; background: #f6f7f9; }
+.tier-medal.tier-silver { --m-rim: #a3aec0; --m-edge: #6b778c; --m-face: #f4f6fa; --m-line: #c7cedb; --m-glyph: #4f5a6e; }
+.tier-medal.tier-gold { --m-rim: #dcaa2c; --m-edge: #a87a0a; --m-face: #fff8e1; --m-line: #edc962; --m-glyph: #8f6600; }
+.tier-medal.tier-platinum { --m-rim: #a9bbe3; --m-edge: #0b1640; --m-face: #14245f; --m-line: #5d7dd3; --m-glyph: #ffffff; }
+.tier-medal.is-locked { --m-rim: #e8ebf0; --m-edge: #c3c9d4; --m-face: #f7f8fa; --m-line: #dde1e8; --m-glyph: #9aa3b5; }
+.tier-medal-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tier-medal-art .m-rim { fill: var(--m-rim); stroke: var(--m-rim); stroke-linejoin: round; }
+.tier-medal-art .m-face { fill: var(--m-face); stroke: var(--m-edge); stroke-width: 1.4; }
+.tier-medal-art .m-line { fill: none; stroke: var(--m-line); stroke-width: 1; stroke-dasharray: 1.6 2.2; stroke-linecap: round; }
+.tier-medal.tier-bronze .m-line, .tier-medal.tier-silver .m-line { stroke-dasharray: none; }
+.tier-medal.is-locked .m-rim { stroke: var(--m-edge); stroke-width: 1; stroke-dasharray: 3 3; }
+.tier-medal-art .m-shine { fill: #fff; opacity: 0.55; transform-box: view-box; }
+.tier-medal-glyph { position: relative; display: grid; place-items: center; line-height: 0; }
 .tier-medal-lock {
   position: absolute;
-  right: -3px;
-  bottom: -3px;
+  right: -2px;
+  bottom: -2px;
   display: grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: clamp(16px, calc(var(--medal-size) * 0.36), 28px);
+  height: clamp(16px, calc(var(--medal-size) * 0.36), 28px);
   border-radius: 50%;
   background: #fff;
   color: #6b7489;
   border: 1px solid #d5dae3;
 }
 
-/* ---------------------------------------------------------------- top 5 on the profile */
-.badge-showcase { display: grid; gap: 8px; margin: 0; }
-.badge-showcase-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.badge-showcase-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid #edf0f4;
+/* light sweep: once when asked, again on hover over gold and platinum */
+.tier-medal .m-shine { transform: translateX(-10px); }
+.tier-medal.do-shine .m-shine { animation: medal-shine 1100ms 450ms cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+.tier-medal.tier-gold:hover .m-shine,
+.tier-medal.tier-platinum:hover .m-shine,
+.badge-shelf-item:hover .tier-gold .m-shine,
+.badge-shelf-item:hover .tier-platinum .m-shine,
+.vault-tile:hover .tier-gold .m-shine,
+.vault-tile:hover .tier-platinum .m-shine { animation: medal-shine 900ms cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+@keyframes medal-shine {
+  from { transform: translateX(-10px); }
+  to { transform: translateX(110px); }
 }
-.badge-showcase-item:last-child { border-bottom: 0; }
-.badge-showcase-text { display: grid; min-width: 0; line-height: 1.25; }
-.badge-showcase-text strong { font-size: 14px; font-weight: 600; color: #0b1640; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.badge-showcase-text small { font-size: 12.5px; color: #6b7489; }
+
+/* entrance: medals in a row pop in one after another */
+.medal-pop { animation: medal-pop 420ms calc(var(--i, 0) * 60ms) cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+@keyframes medal-pop {
+  from { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+  to { opacity: 1; transform: none; }
+}
+.medal-reveal { animation: medal-reveal 650ms cubic-bezier(0.22, 1.3, 0.5, 1) both; }
+@keyframes medal-reveal {
+  from { opacity: 0; transform: scale(0.4) rotate(-25deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* tier label: a small tinted tag */
+.badge-tier-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--tier-bronze);
+  background: #f8ebe0;
+}
+.badge-tier-tag.tier-silver { color: var(--tier-silver); background: #eef1f5; }
+.badge-tier-tag.tier-gold { color: var(--tier-gold-text); background: #fdf1cc; }
+.badge-tier-tag.tier-platinum { color: #fff; background: var(--tier-platinum); }
+
+/* progress towards a locked badge */
+.badge-progress { display: grid; gap: 4px; width: 100%; max-width: 128px; margin-top: 2px; }
+.badge-progress.is-wide { max-width: 100%; }
+.badge-progress small { font-size: 11.5px; color: #6b7489; }
+.badge-progress-bar { display: block; height: 4px; border-radius: 4px; background: #e6e9ef; overflow: hidden; }
+.badge-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1f5fff;
+  transform: scaleX(var(--fill, 0));
+  transform-origin: left;
+  animation: progress-fill 900ms 200ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes progress-fill { from { transform: scaleX(0); } }
+
+/* ---------------------------------------------------------------- top 5 on the profile */
+.badge-showcase { display: grid; gap: 12px; margin: 0; }
+.badge-shelf { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.badge-shelf > li { display: flex; }
+.badge-shelf-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 3px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 160ms ease-out, background-color 160ms ease-out;
+}
+.badge-shelf-item:hover { transform: translateY(-2px); }
+.badge-shelf-item.is-active { background: #f1f4f9; }
+.badge-shelf-item.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 2px;
+  background: #f6f8fb;
+  border-left: 1px solid #e3e7ee;
+  border-top: 1px solid #e3e7ee;
+  transform: rotate(45deg);
+  z-index: 1;
+}
+.badge-shelf-item:focus-visible, .badge-spotlight:focus-visible { outline: 2px solid #1f5fff; outline-offset: 2px; }
+.badge-spotlight {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  background: #f6f8fb;
+  color: #0b1640;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  animation: spotlight-in 220ms ease-out both;
+}
+.badge-spotlight:hover { border-color: #cfd6e2; }
+.badge-spotlight-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.badge-spotlight-head strong { font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.badge-spotlight-text { font-size: 13px; line-height: 1.45; color: #4a5470; }
+.badge-spotlight small { font-size: 12px; color: #7a8399; }
+@keyframes spotlight-in { from { opacity: 0; transform: translateY(4px); } }
+.badge-showcase.is-compact .badge-shelf { gap: 8px; }
 .badge-showcase-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .badge-showcase-foot small { color: #6b7489; font-size: 13px; }
 .badge-showcase-all {
@@ -72,33 +181,44 @@
 .badge-showcase-all:hover { text-decoration: underline; }
 
 /* ---------------------------------------------------------------- vault */
-.vault { display: grid; gap: 14px; }
-.vault-summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
-.vault-summary > strong { font-size: 15px; font-weight: 600; color: #0b1640; }
-.vault-tier-counts { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #5a6481; }
-.vault-tier-count { display: inline-flex; align-items: center; gap: 6px; }
-.vault-tier-count i { width: 8px; height: 8px; border-radius: 50%; }
-.vault-tier-count.tier-bronze i { background: var(--tier-bronze); }
-.vault-tier-count.tier-silver i { background: var(--tier-silver); }
-.vault-tier-count.tier-gold i { background: var(--tier-gold); }
-.vault-tier-count.tier-platinum i { background: var(--tier-platinum); }
+.vault { display: grid; gap: 18px; }
+.vault-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #f6f8fb;
+  border: 1px solid #e6eaf0;
+}
+.vault-score { display: grid; gap: 2px; min-width: 160px; flex: 1 1 160px; max-width: 260px; }
+.vault-score strong { font-size: 28px; font-weight: 700; line-height: 1.1; color: #0b1640; }
+.vault-score strong span { font-size: 16px; font-weight: 600; color: #8a93a6; }
+.vault-score small { font-size: 13px; color: #5a6481; }
+.vault-score .badge-progress-bar { margin-top: 8px; height: 6px; }
+.vault-tier-counts { display: flex; flex-wrap: wrap; gap: 14px 18px; margin: 0; padding: 0; list-style: none; }
+.vault-tier-count { display: flex; align-items: center; gap: 8px; }
+.vault-tier-count > span { display: grid; line-height: 1.15; font-size: 12px; color: #5a6481; }
+.vault-tier-count b { font-size: 16px; font-weight: 700; color: #0b1640; }
+.vault-tier-count.is-zero b { color: #a3abbd; }
 .vault-celebrate {
   margin: 0;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #d6e2ff;
   background: #f3f7ff;
   color: #1a3a8f;
   font-size: 14px;
 }
+.vault-section { display: grid; gap: 10px; }
+.vault-section h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; font-weight: 600; color: #0b1640; font-family: inherit; }
+.vault-section h3 span { padding: 0 7px; border-radius: 999px; background: #eef1f5; color: #5a6481; font-size: 12px; font-weight: 600; line-height: 1.6; }
 .vault-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 0;
-  border: 1px solid #e3e6ec;
-  border-radius: 12px;
-  background: #fff;
-  overflow: visible;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 10px;
 }
 .vault-tile {
   position: relative;
@@ -106,73 +226,51 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  min-height: 132px;
-  margin: 0 -1px -1px 0;
+  min-height: 150px;
   padding: 18px 10px 14px;
-  border: 0;
-  border-right: 1px solid #edf0f4;
-  border-bottom: 1px solid #edf0f4;
-  background: transparent;
+  border: 1px solid #e6eaf0;
+  border-radius: 14px;
+  background: #fff;
   color: #0b1640;
   font: inherit;
   text-align: center;
   cursor: pointer;
-  transition: background-color 120ms ease-out;
+  transition: transform 160ms ease-out, box-shadow 160ms ease-out, border-color 160ms ease-out;
 }
-.vault-tile:hover, .vault-tile.is-open { z-index: 6; background: #f7f8fa; }
-.vault-tile:focus-visible { outline: 2px solid #1f5fff; outline-offset: -2px; }
+.vault-tile.is-earned.tier-bronze { background: linear-gradient(#fdf6f0, #fff 60%); }
+.vault-tile.is-earned.tier-silver { background: linear-gradient(#f6f8fb, #fff 60%); }
+.vault-tile.is-earned.tier-gold { background: linear-gradient(#fffaea, #fff 60%); }
+.vault-tile.is-earned.tier-platinum { background: linear-gradient(#eef2fb, #fff 60%); }
+.vault-tile.is-locked { background: #fafbfc; border-style: dashed; }
+.vault-tile:hover { transform: translateY(-2px); border-color: #d3d9e3; box-shadow: 0 6px 16px rgba(11, 22, 64, 0.08); }
+.vault-tile:focus-visible { outline: 2px solid #1f5fff; outline-offset: 2px; }
+.vault-tile .tier-medal { margin-bottom: 4px; }
 .vault-tile strong { font-size: 13px; font-weight: 600; line-height: 1.3; }
 .vault-tile.is-locked strong { color: #6b7489; font-weight: 500; }
-.vault-tier { font-size: 12px; color: #6b7489; }
-.vault-tier.tier-bronze { color: var(--tier-bronze); }
+.vault-tier { font-size: 12px; font-weight: 600; color: var(--tier-bronze); }
 .vault-tier.tier-silver { color: var(--tier-silver); }
 .vault-tier.tier-gold { color: var(--tier-gold-text); }
 .vault-tier.tier-platinum { color: var(--tier-platinum); }
-.vault-tile.is-locked .vault-tier { color: #8a93a6; }
-.vault-tile.is-fresh strong::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: #1f5fff; vertical-align: middle; }
+.vault-tile.is-locked .vault-tier { color: #8a93a6; font-weight: 500; }
+.vault-tile.is-fresh { border-color: #9db8ff; animation: fresh-ring 1600ms 500ms ease-out 2; }
+@keyframes fresh-ring {
+  from { box-shadow: 0 0 0 0 rgba(31, 95, 255, 0.35); }
+  to { box-shadow: 0 0 0 12px rgba(31, 95, 255, 0); }
+}
 .vault-new {
   position: absolute;
   top: 8px;
   right: 8px;
-  color: #1f5fff;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #1f5fff;
+  color: #fff;
   font-size: 11px;
   font-weight: 600;
 }
-.vault-progress { display: grid; gap: 4px; width: 100%; max-width: 120px; margin-top: 2px; }
-.vault-progress-bar { display: block; height: 3px; border-radius: 2px; background: #e6e9ef; overflow: hidden; }
-.vault-progress-bar span { display: block; height: 100%; background: #1f5fff; }
-.vault-progress small { font-size: 11.5px; color: #6b7489; }
-
-/* explanation under the tile on hover / focus / tap */
-.vault-tip {
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 6px);
-  z-index: 5;
-  display: grid;
-  gap: 4px;
-  width: calc(100% + 24px);
-  max-width: 240px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #0b1640;
-  color: #fff;
-  font-size: 13px;
-  line-height: 1.4;
-  text-align: left;
-  box-shadow: 0 6px 16px rgba(11, 22, 64, 0.18);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -4px);
-  transition: opacity 120ms ease-out, transform 120ms ease-out;
-}
-.vault-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-bottom-color: #0b1640; }
-.vault-tip b { font-weight: 600; }
-.vault-tip em { color: #c3cadb; font-style: normal; font-size: 12px; }
-.vault-tile.is-open .vault-tip { opacity: 1; transform: translate(-50%, 0); }
 .vault-foot { margin: 0; font-size: 13px; }
-.vault-loading { border: 0; gap: 8px; }
-.vault-loading .vault-tile { min-height: 132px; border: 0; }
+.vault-loading { gap: 10px; }
+.vault-loading .vault-tile { min-height: 150px; border: 0; }
 
 /* window: bottom sheet on phones, centred on computers */
 .vault-backdrop {
@@ -187,23 +285,94 @@
   animation: vault-fade 160ms ease-out both;
 }
 .vault-panel {
-  width: min(760px, 100%);
-  max-height: min(86vh, 860px);
+  width: min(780px, 100%);
+  max-height: min(86vh, 880px);
   overflow-y: auto;
   padding: 20px 24px 24px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: #fff;
   box-shadow: 0 12px 40px rgba(11, 22, 64, 0.2);
+  animation: sheet-in 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
-.vault-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.vault-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .vault-panel-head h2 { margin: 0; font-size: 18px; font-weight: 700; font-family: inherit; }
 @keyframes vault-fade { from { opacity: 0; } }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
+
+/* ---------------------------------------------------------------- one badge up close */
+.badge-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(11, 22, 64, 0.5);
+  animation: vault-fade 160ms ease-out both;
+}
+.badge-detail {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: min(380px, 100%);
+  padding: 28px 24px 26px;
+  border-radius: 18px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(11, 22, 64, 0.25);
+  animation: sheet-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.badge-detail-stage {
+  display: grid;
+  place-items: center;
+  width: 168px;
+  height: 168px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f8ebe0 0%, rgba(248, 235, 224, 0) 70%);
+}
+.badge-detail.tier-silver .badge-detail-stage { background: radial-gradient(circle, #e9edf3 0%, rgba(233, 237, 243, 0) 70%); }
+.badge-detail.tier-gold .badge-detail-stage { background: radial-gradient(circle, #fcefc4 0%, rgba(252, 239, 196, 0) 70%); }
+.badge-detail.tier-platinum .badge-detail-stage { background: radial-gradient(circle, #dfe6f7 0%, rgba(223, 230, 247, 0) 70%); }
+.badge-detail.is-locked .badge-detail-stage { background: radial-gradient(circle, #f0f2f5 0%, rgba(240, 242, 245, 0) 70%); }
+.badge-detail.is-locked .badge-tier-tag { color: #6b7489; background: #eef1f5; }
+.badge-detail h2 { margin: 2px 0 0; font-size: 20px; font-weight: 700; line-height: 1.25; color: #0b1640; font-family: inherit; }
+.badge-detail p { margin: 0; font-size: 14.5px; line-height: 1.5; color: #4a5470; }
+.badge-detail p b { color: #0b1640; font-weight: 600; }
+.badge-detail .badge-progress { margin-top: 6px; }
+.badge-detail .badge-progress small { font-size: 12.5px; }
+.badge-detail-date { font-size: 13px; color: #7a8399; }
+.badge-detail-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f4f9;
+  color: #0b1640;
+  cursor: pointer;
+}
+.badge-detail-close:hover { background: #e6eaf1; }
+
 @media (max-width: 640px) {
-  .vault-backdrop { align-items: flex-end; padding: 0; }
-  .vault-panel { border-radius: 14px 14px 0 0; max-height: 88vh; padding: 18px 16px calc(18px + var(--safe-bottom)); }
-  .vault-grid { grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); }
-  .vault-tile { min-height: 124px; padding: 14px 6px 10px; }
+  .vault-backdrop, .badge-detail-backdrop { align-items: flex-end; padding: 0; }
+  .vault-panel { border-radius: 18px 18px 0 0; max-height: 88vh; padding: 18px 16px calc(18px + var(--safe-bottom, 0px)); }
+  .badge-detail { width: 100%; border-radius: 20px 20px 0 0; padding-bottom: calc(26px + var(--safe-bottom, 0px)); }
+  .vault-summary { padding: 14px; }
+  .vault-score { max-width: none; }
+  .vault-tier-counts { gap: 12px; width: 100%; justify-content: space-between; }
+  .vault-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .vault-tile { min-height: 140px; padding: 14px 6px 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .vault-backdrop { animation: none; }
+  .vault-backdrop, .vault-panel, .badge-detail-backdrop, .badge-detail, .badge-spotlight,
+  .medal-pop, .medal-reveal, .vault-tile.is-fresh, .badge-progress-bar span,
+  .tier-medal .m-shine { animation: none !important; }
+  .badge-shelf-item, .vault-tile { transition: none; }
 }

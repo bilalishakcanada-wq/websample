@@ -115,7 +115,7 @@ function BadgesPage() {
       <h3 className="account-sub">Značke identiteta</h3>
       <div className="badge-grid">
         <BadgeRow icon={ShieldCheck} title="Uvjerenje o nekažnjavanju" text="Umiri druge članove — priloži važeće uvjerenje o nekažnjavanju (MUP / sud)." id="police_check" state={stateFor('police_check', 'police_check')} onAdd={() => startUpload('police_check')} />
-        <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Načinima plaćanja." id="payment_verified" state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign(withBase('/account/nacini-placanja')) }} addLabel="Dodaj" />
+        <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Plaćanje → Račun za isplatu." id="payment_verified" state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign(withBase('/account/nacini-placanja')) }} addLabel="Dodaj" />
         <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom — dobijaš trenutne obavijesti o poslovima." id="mobile_verified" state={stateFor('mobile_verified', '__none__')} onAdd={() => setVerifyPhone(true)} />
         <BadgeRow icon={IdCard} title="Lična karta verifikovana" text="Slikaj ličnu kartu ili pasoš — tim provjerava da li se podaci slažu sa profilom." id="id_verified" state={stateFor('id_verified', 'identity')} onAdd={() => startUpload('identity')} />
       </div>

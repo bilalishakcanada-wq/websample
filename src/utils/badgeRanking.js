@@ -32,7 +32,7 @@ export const DEFAULT_RANK = {
   founder: { tier: 2, weight: 50, hint: 'Samo za prvih 100 članova Zadatka. Više se ne može dobiti.' },
   reliable: { tier: 2, weight: 45, hint: 'Neka bar 3 tvoje ponude budu prihvaćene i 80% prihvaćenih završi bez povlačenja.' },
   trusted_client: { tier: 2, weight: 45, hint: 'Kao klijent završi 5 poslova i ostavi bar 3 recenzije.' },
-  payment_verified: { tier: 2, weight: 40, hint: 'Dodaj IBAN za primanje uplata u Moj nalog → Načini plaćanja.' },
+  payment_verified: { tier: 2, weight: 40, hint: 'Dodaj IBAN za primanje uplata u Moj nalog → Plaćanje → Račun za isplatu.' },
   fast_responder: { tier: 2, weight: 35, hint: 'Odgovaraj na poruke u prosjeku za manje od 1 sat (bar 3 odgovora).' },
   rising_talent: { tier: 2, weight: 30, hint: 'U prvih 30 dana dobij 1–9 recenzija s prosjekom 4.5 ili više.' },
   mobile_verified: { tier: 1, weight: 15, hint: 'Potvrdi broj telefona SMS kodom u Postavke → Broj telefona.' },

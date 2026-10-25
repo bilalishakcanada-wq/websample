@@ -1,35 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, Info, Landmark, Lock, Receipt, RefreshCcw, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, ChevronRight, Coins, CreditCard, Info, Landmark, Lock, ShieldCheck, Wallet } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
-import { formatBosnianDate } from '../../utils/dateFormat'
 import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
+import PaymentTabs from './PaymentTabs'
+import MoneyOnTheWay from './MoneyOnTheWay'
 
-const KIND = {
-  admin_credit: ['Uplata — Zadatak tim', Gift],
-  bonus: ['Bonus', Sparkles],
-  promo: ['Promocija', Sparkles],
-  refund: ['Povrat', RefreshCcw],
-  admin_debit: ['Skidanje — Zadatak tim', Receipt],
-  fee: ['Naknada za posao', Receipt],
-  purchase: ['Uplata', Receipt],
-  payout: ['Isplata', ArrowUpRight],
-  escrow_hold: ['Osigurana uplata za posao', Lock],
-  escrow_refund: ['Povrat osigurane uplate', RefreshCcw],
-  job_income: ['Zarada od posla', Coins],
-  card_topup: ['Uplata karticom', CreditCard],
-  payout_hold: ['Isplata na račun', Landmark],
-  payout_return: ['Povrat isplate na balans', RefreshCcw],
-}
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
-/** The user's money on the platform: balance, what came in and out, and every transaction. */
+/** "Plaćanje → Balans": the balance, money on the way, and topping up or paying out. Every transaction is in Historija. */
 function WalletPage() {
   const [wallet, setWallet] = useState(null)
   const [error, setError] = useState('')
-  const [filter, setFilter] = useState('all')
+  const { user } = useAuth()
+  const [otwKey, setOtwKey] = useState(0)
   const [params, setParams] = useSearchParams()
   const [panel, setPanel] = useState(null) // 'topup' | 'payout' | null
   const [amount, setAmount] = useState('')
@@ -41,7 +28,7 @@ function WalletPage() {
   const load = () => Promise.all([
     accountService.myWallet().then(setWallet),
     accountService.payoutState().then(setPayout),
-  ]).catch((requestError) => setError(requestError.message))
+  ]).then(() => setOtwKey((key) => key + 1)).catch((requestError) => setError(requestError.message))
   useEffect(() => { load() }, [])
 
   // Povratak sa Monri stranice. Novac upisuje samo Monri callback, pa ovdje
@@ -90,18 +77,12 @@ function WalletPage() {
     } catch (requestError) { setActionError(requestError.message) } finally { setBusy(false) }
   }
 
-  const cancelOpenPayout = async () => {
-    try { await accountService.cancelPayout(payout.open.id); setNotice('Zahtjev za isplatu je otkazan, iznos je vraćen na balans.'); load() } catch (requestError) { setActionError(requestError.message) }
-  }
-
   if (error) return <div className="account-section"><div className="form-error">{error}</div></div>
   if (!wallet) return <div className="account-section"><SkeletonRows n={4} /></div>
 
-  const rows = (wallet.transactions || []).filter((row) => filter === 'all' || (filter === 'in' ? Number(row.amount) > 0 : Number(row.amount) < 0))
-
   return (
     <div className="account-section">
-      <div className="account-section-head"><h1>Balans</h1></div>
+      <PaymentTabs />
 
       <div className="wallet-card">
         <div className="wallet-card-top">
@@ -109,20 +90,13 @@ function WalletPage() {
           <span className="wallet-card-chip"><ShieldCheck size={13} /> Sigurno na platformi</span>
         </div>
         <strong className="wallet-card-balance"><CountUp value={wallet.balance} format={money} duration={900} /></strong>
-        <span className="wallet-card-sub">trenutno stanje · {wallet.count} {Number(wallet.count) === 1 ? 'transakcija' : 'transakcija'}</span>
+        <span className="wallet-card-sub">{payout ? <>Možeš isplatiti na račun: <strong>{money(payout.withdrawable)}</strong></> : 'trenutno stanje'}</span>
         <Coins className="wallet-card-art" size={120} aria-hidden="true" />
       </div>
 
       <div className="wallet-stats">
-        <div><ArrowDownLeft size={16} /><span>Uplaćeno ukupno</span><strong><CountUp value={wallet.credited_total} format={money} /></strong></div>
-        <div><ArrowUpRight size={16} /><span>Skinuto ukupno</span><strong><CountUp value={wallet.spent_total} format={money} /></strong></div>
-        <div><ArrowDownLeft size={16} /><span>Uplaćeno · 30 dana</span><strong><CountUp value={wallet.credited_30d} format={money} /></strong></div>
-        <div><ArrowUpRight size={16} /><span>Skinuto · 30 dana</span><strong><CountUp value={wallet.spent_30d} format={money} /></strong></div>
-      </div>
-
-      <div className="wallet-info">
-        <Info size={16} />
-        <span>Ovo je tvoj novac na Zadatku. Kad prihvatiš ponudu, cijena se rezerviše odavde i čuva dok ne potvrdiš da je posao završen; kad ti klijent oslobodi uplatu, zarada (bez naknade) sjeda ovdje. Na račun se isplaćuje zarada od poslova. <Link to="/nivoi">Kako rade naknade →</Link></span>
+        <div><ArrowDownLeft size={16} /><span>Ušlo · zadnjih 30 dana</span><strong><CountUp value={wallet.credited_30d} format={money} /></strong></div>
+        <div><ArrowUpRight size={16} /><span>Izašlo · zadnjih 30 dana</span><strong><CountUp value={wallet.spent_30d} format={money} /></strong></div>
       </div>
 
       {notice && <div className="form-success">{notice}</div>}
@@ -131,13 +105,6 @@ function WalletPage() {
         <button type="button" className="primary-button" onClick={() => openPanel('topup')}><CreditCard size={16} /> Uplati karticom</button>
         <button type="button" className="ghost-button" onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)}><ArrowUpRight size={16} /> Isplati na račun</button>
       </div>
-
-      {payout?.open && (
-        <div className="wallet-info">
-          <Landmark size={16} />
-          <span>Isplata od <strong>{money(payout.open.amount_km)}</strong> na račun •••• {String(payout.open.iban || '').slice(-4)} čeka obradu (poslano {formatBosnianDate(payout.open.created_at)}). <button type="button" className="adm-userlink" onClick={cancelOpenPayout}>Otkaži</button></span>
-        </div>
-      )}
 
       {panel === 'topup' && (
         <form ref={panelRef} className="auth-form wallet-action" onSubmit={topUp}>
@@ -178,37 +145,13 @@ function WalletPage() {
         </form>
       )}
 
-      <div className="wallet-list-head">
-        <h3 className="account-sub">Transakcije</h3>
-        <div className="admin-subtabs">
-          {[['all', 'Sve'], ['in', 'Uplate'], ['out', 'Skidanja']].map(([id, label]) => (
-            <button key={id} type="button" className={filter === id ? 'active' : ''} onClick={() => setFilter(id)}>{label}</button>
-          ))}
-        </div>
-      </div>
+      <MoneyOnTheWay key={otwKey} userId={user.id} onChanged={(text) => { setNotice(text); load() }} />
 
-      {rows.length === 0 && (
-        <div className="wallet-empty">
-          <Coins size={28} />
-          <strong>Još nema transakcija</strong>
-          <span>Svaka uplata, naknada ili isplata pojaviće se ovdje.</span>
-        </div>
-      )}
-      <div className="wallet-list">
-        {rows.map((row) => {
-          const [label, Icon] = KIND[row.kind] || ['Transakcija', Receipt]
-          const positive = Number(row.amount) > 0
-          return (
-            <div key={row.id} className="wallet-row">
-              <span className={`wallet-sign ${positive ? 'plus' : 'minus'}`}><Icon size={16} /></span>
-              <div>
-                <strong>{label}{row.note ? ` · ${row.note}` : ''}</strong>
-                <small>{formatBosnianDate(row.created_at)} · stanje nakon: {money(row.balance_after)}</small>
-              </div>
-              <b className={positive ? 'plus' : 'minus'}>{positive ? '+' : '−'}{money(Math.abs(Number(row.amount)))}</b>
-            </div>
-          )
-        })}
+      <Link to="/account/placanja" className="pay-more-link">Sve transakcije i plaćeni poslovi <ChevronRight size={16} /></Link>
+
+      <div className="wallet-info">
+        <Info size={16} />
+        <span>Kad prihvatiš ponudu, cijena se rezerviše sa balansa dok ne potvrdiš da je posao završen. Kad ti klijent potvrdi posao, zarada bez naknade stiže ovdje. Na račun možeš isplatiti samo zaradu od poslova. <Link to="/nivoi">Kako rade naknade</Link></span>
       </div>
     </div>
   )

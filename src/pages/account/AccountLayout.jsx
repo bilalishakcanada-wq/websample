@@ -19,9 +19,10 @@ export const useAccount = () => useContext(AccountContext)
 export const ACCOUNT_NAV = [
   { to: '/account', label: 'Početna', icon: Home, end: true },
   { to: '/account/ploca', label: 'Ploča izvođača', icon: Trophy, providerOnly: true, group: 'Posao i novac' },
-  { to: '/account/novcanik', label: 'Balans', icon: Wallet, group: 'Posao i novac' },
-  { to: '/account/placanja', label: 'Historija plaćanja', icon: History, group: 'Posao i novac' },
-  { to: '/account/nacini-placanja', label: 'Načini plaćanja', icon: CreditCard, group: 'Posao i novac' },
+  // one "Plaćanje" entry; its three tabs are separate routes so old links keep working
+  { to: '/account/novcanik', label: 'Plaćanje', icon: Wallet, group: 'Posao i novac', also: ['/account/placanja', '/account/nacini-placanja'] },
+  { to: '/account/placanja', label: 'Plaćanje', icon: History, hidden: true },
+  { to: '/account/nacini-placanja', label: 'Plaćanje', icon: CreditCard, hidden: true },
   { to: '/account/profil', label: 'Profil', icon: IdCard, group: 'Tvoj profil' },
   { to: '/account/vjestine', label: 'Vještine', icon: Wrench, providerOnly: true, group: 'Tvoj profil' },
   { to: '/account/znacke', label: 'Značke', icon: Award, group: 'Tvoj profil' },
@@ -31,7 +32,6 @@ export const ACCOUNT_NAV = [
   { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick, group: 'Postavke' },
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true, group: 'Postavke' },
   { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
-  { to: '/account/placanje', label: 'Opcije plaćanja', icon: CreditCard, hidden: true },
   { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
 ]
 
@@ -214,10 +214,10 @@ function AccountLayout() {
             <Link to={`/korisnik/${profile.user_id}`} className="account-side-public">Javni profil</Link>
             {avatarNotice && <small className="account-avatar-notice">{avatarNotice}</small>}
             <nav ref={navRef} className="account-nav" aria-label="Nalog">
-              {nav.map(({ to, label, icon: Icon, end, chevron, group }, index) => (
+              {nav.map(({ to, label, icon: Icon, end, chevron, group, also }, index) => (
                 <Fragment key={to}>
                   {group && group !== nav[index - 1]?.group && <span className="account-nav-group">{group}</span>}
-                  <NavLink to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
+                  <NavLink to={to} end={end} className={({ isActive }) => (isActive || also?.includes(pathname) ? 'active' : '')}>
                     <Icon size={16} /> <span>{label}</span>{chevron && <ChevronRight size={16} className="account-nav-chevron" />}
                   </NavLink>
                 </Fragment>

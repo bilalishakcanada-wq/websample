@@ -49,7 +49,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
       title: 'Postavke',
       rows: [
         ['/account/postavke', 'Postavke', 'Lokacija, obavijesti, telefon i lozinka', Settings],
-        ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
+        ['/account/novcanik', 'Plaćanje', 'Balans, historija i račun za isplatu', CreditCard],
         ['/account/informacije', 'Informacije o nalogu', null, UserRound],
         ['telefon', 'Broj telefona', profile.phone_verified_at ? formatBosnianPhone(profile.phone) : 'Potvrdi SMS kodom', Phone, () => { haptic('light'); setPhoneOpen(true) }],
         ['/account/postavke-obavijesti', 'Obavijesti', null, Bell],
@@ -144,7 +144,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
 // icon tile colours, like the Postavke page
 const TONE = {
   '/account/profil': 'blue', '/account/znacke': 'orange', '/account/vjestine': 'teal', '/account/portfolio': 'purple', '/account/ploca': 'green',
-  '/account/postavke': 'gray', '/account/placanje': 'green', '/account/informacije': 'blue', telefon: 'green', '/account/postavke-obavijesti': 'red',
+  '/account/postavke': 'gray', '/account/novcanik': 'green', '/account/informacije': 'blue', telefon: 'green', '/account/postavke-obavijesti': 'red',
   '/account/alarmi': 'orange', '/account/jednostavan-nacin': 'purple',
   '/pomoc': 'blue', '/kontakt': 'teal', '/pravila-zajednice': 'purple', '/pravila': 'gray', '/privatnost': 'gray', '/admin': 'red',
 }

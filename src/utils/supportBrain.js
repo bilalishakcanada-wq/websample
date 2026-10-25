@@ -90,14 +90,14 @@ function personalAnswer(needle, context) {
   if (BALANCE.test(needle) && context.balance != null) {
     const last = context.lastTransaction
     return reply(
-      `Tvoj balans je ${money(context.balance)}.${last ? ` Zadnja promjena: ${Number(last.amount) > 0 ? '+' : ''}${money(last.amount)}${last.note ? ` (${last.note})` : ''}.` : ''}\nSve uplate, naknade i isplate vidiš u Moj nalog → Balans (/account/novcanik).`,
+      `Tvoj balans je ${money(context.balance)}.${last ? ` Zadnja promjena: ${Number(last.amount) > 0 ? '+' : ''}${money(last.amount)}${last.note ? ` (${last.note})` : ''}.` : ''}\nSve uplate, naknade i isplate vidiš u Moj nalog → Plaćanje → Balans (/account/novcanik).`,
       ['Kako primam isplate?', 'Šta je balans na mom nalogu?'],
     )
   }
 
   if (PAYOUTS.test(needle) && context.payments?.length) {
     const lines = context.payments.slice(0, 4).map((pay) => `- ${pay.title || 'Posao'}: ${money(pay.amount)} — ${PAY_STATUS[pay.status] || pay.status}`)
-    return reply(`Ovo su tvoja zadnja plaćanja kroz Zadatak Pay:\n${lines.join('\n')}\nDetalji su u Moj nalog → Historija plaćanja (/account/placanja).`, ['Kad i kako dobijam novac za posao?', 'Kako radi plaćanje (Zadatak Pay)?'])
+    return reply(`Ovo su tvoja zadnja plaćanja kroz Zadatak Pay:\n${lines.join('\n')}\nDetalji su u Moj nalog → Plaćanje → Historija (/account/placanja).`, ['Kad i kako dobijam novac za posao?', 'Kako radi plaćanje (Zadatak Pay)?'])
   }
 
   if (BIDS.test(needle)) {

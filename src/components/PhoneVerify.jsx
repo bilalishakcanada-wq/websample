@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ArrowLeft, MessageSquareText, Phone, X } from 'lucide-react'
+import { ArrowLeft, Lock, MessageSquareText, Pencil, Phone, X } from 'lucide-react'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { accountService } from '../services/accountService'
 import { digitsOnly, formatBosnianPhone } from '../utils/phone'
@@ -149,6 +149,7 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
   return createPortal(
     <div className="pv-backdrop" role="presentation" onClick={onClose}>
       <div className="pv-sheet" role="dialog" aria-modal="true" aria-labelledby="pv-title" onClick={(event) => event.stopPropagation()}>
+        <span className="pv-handle" aria-hidden="true" />
         {step === 'code'
           ? <button type="button" className="pv-corner pv-back" onClick={changeNumber} aria-label="Nazad na broj"><ArrowLeft size={18} /></button>
           : null}
@@ -158,9 +159,9 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
           <form className="pv-body" onSubmit={(event) => { event.preventDefault(); send() }}>
             <span className="pv-icon" aria-hidden="true"><MessageSquareText size={26} /></span>
             <h2 id="pv-title">Potvrdi broj telefona</h2>
-            <p>Poslaćemo ti SMS sa kodom od 6 cifara. Broj ostaje privatan.</p>
+            <p>Poslaćemo ti SMS sa kodom od 6 cifara.</p>
             <label className="pv-number">
-              <span className="pv-prefix" aria-hidden="true">+387</span>
+              <span className="pv-prefix" aria-hidden="true"><span className="pv-flag">🇧🇦</span>+387</span>
               <input
                 ref={numberRef}
                 value={number}
@@ -179,22 +180,26 @@ function PhoneVerify({ initialPhone = '', onClose, onVerified }) {
               onMouseDown={(event) => event.preventDefault()}>
               {busy ? 'Šaljem…' : 'Pošalji kod'}
             </button>
+            <span className="pv-private"><Lock size={13} /> Broj ostaje privatan. Ne prikazujemo ga drugima.</span>
           </form>
         )}
 
         {step === 'code' && (
           <div className="pv-body">
-            <h2 id="pv-title">Upiši kod</h2>
-            <p>Poslali smo SMS na <strong>+387 {number}</strong>.<br />
-              <button type="button" className="pv-link" onClick={changeNumber}>Pogrešan broj?</button>
-            </p>
-            <div className={`pv-code${error ? ' is-wrong' : ''}`} role="group" aria-label="Kod iz SMS-a">
+            <span className="pv-icon" aria-hidden="true"><MessageSquareText size={26} /></span>
+            <h2 id="pv-title">Upiši kod iz SMS-a</h2>
+            <p>Poslali smo kod od 6 cifara na</p>
+            <button type="button" className="pv-number-chip" onClick={changeNumber} aria-label="Promijeni broj">
+              +387 {number} <Pencil size={14} />
+            </button>
+            <div className={`pv-code${error ? ' is-wrong' : ''}${busy ? ' is-busy' : ''}`} role="group" aria-label="Kod iz SMS-a">
               {digits.map((digit, index) => (
                 <input
                   // eslint-disable-next-line react/no-array-index-key
                   key={index}
                   ref={(element) => { boxes.current[index] = element }}
                   value={digit}
+                  className={digit ? 'is-filled' : ''}
                   onChange={onChange(index)}
                   onKeyDown={onKeyDown(index)}
                   onPaste={(event) => { event.preventDefault(); fill(index, event.clipboardData.getData('text')) }}

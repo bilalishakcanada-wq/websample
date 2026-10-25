@@ -29,20 +29,25 @@
 }
 /* the divider starts after the icon, like WhatsApp */
 .st-row + .st-row::before, .st-group > .st-history + .st-row::before {
-  content: ''; position: absolute; top: 0; left: 64px; right: 0; height: 1px; background: var(--stroke);
+  content: ''; position: absolute; top: 0; left: 66px; right: 0; height: 1px; background: var(--stroke);
 }
 a.st-row, button.st-row { cursor: pointer; transition: background 0.15s ease; }
 a.st-row:active, button.st-row:active, .st-profile:active { background: var(--surface-soft); }
 @media (hover: hover) { a.st-row:hover, button.st-row:hover { background: var(--surface-soft); } }
 
-.st-tile { display: grid; place-items: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; color: #fff; }
-.st-tile-blue { background: #1f5fff; }
-.st-tile-green { background: #19b37b; }
-.st-tile-teal { background: #0ea5a4; }
-.st-tile-orange { background: #f59e0b; }
-.st-tile-red { background: #ef4444; }
-.st-tile-purple { background: #8b5cf6; }
-.st-tile-gray { background: #64748b; }
+.st-tile {
+  position: relative; display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 11px; color: #fff;
+  background: linear-gradient(160deg, var(--tile-a), var(--tile-b));
+  box-shadow: 0 3px 8px -2px color-mix(in srgb, var(--tile-b) 55%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.st-tile svg { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12)); }
+.st-tile-blue { --tile-a: #4c82ff; --tile-b: #1f55e8; }
+.st-tile-green { --tile-a: #34d399; --tile-b: #10a36f; }
+.st-tile-teal { --tile-a: #2dd4bf; --tile-b: #0d9493; }
+.st-tile-orange { --tile-a: #fbbf24; --tile-b: #f08c0a; }
+.st-tile-red { --tile-a: #fb7185; --tile-b: #e5383b; }
+.st-tile-purple { --tile-a: #a78bfa; --tile-b: #7c4ff0; }
+.st-tile-gray { --tile-a: #94a3b8; --tile-b: #5b6b82; }
 
 .st-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
 .st-text strong { display: inline-flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; color: var(--text); }

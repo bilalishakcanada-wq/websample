@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     headers: { Authorization: `App ${Deno.env.get('INFOBIP_API_KEY')}`, 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
       messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', // zadnji red je za automatsko upisivanje koda na Androidu (WebOTP)
-        text: `Tvoj Zadatak kod: ${otp}. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}` }],
+        text: `Zadatak kod: ${otp}\nUpiši ga u aplikaciju da potvrdiš broj. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}` }],
     }),
     signal: AbortSignal.timeout(10000),
   }).catch((error) => ({ ok: false, status: 0, text: async () => String(error) }) as Response)

@@ -12660,13 +12660,26 @@ button { touch-action: manipulation; }
   .auth-legal { padding: 0 20px; }
 }
 
-/* ---------- search filters on phones: bottom sheets ---------- */
-.filter-sheet-backdrop, .filter-sheet-handle { display: none; }
+/* ---------- search filters on phones: bottom sheets (components/FilterSheet.jsx) ---------- */
+.filter-sheet-backdrop, .filter-sheet-head { display: none; }
 @media (max-width: 768px) {
-  .filter-sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 94; background: rgba(6, 21, 48, 0.45); animation: fade-in 0.2s ease both; }
-  .filter-popover { position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important; width: auto !important; max-width: none !important; max-height: 72dvh; overflow-y: auto; z-index: 95; padding: 8px 18px calc(18px + var(--safe-bottom)); border-radius: 26px 26px 0 0; border: none; box-shadow: 0 -20px 60px rgba(6, 21, 48, 0.35); animation: sheet-up 0.28s var(--ease-out) both; }
-  .filter-sheet-handle { display: block; width: 44px; height: 5px; margin: 6px auto 14px; border-radius: 999px; background: #d5dce8; }
-  .filter-popover .popover-option { min-height: 46px; }
+  .filter-sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 94; background: rgba(6, 21, 48, 0.5); touch-action: none; -webkit-tap-highlight-color: transparent; animation: fade-in 0.25s ease backwards; }
+  .filter-popover.filter-sheet { position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important; width: auto !important; max-width: none !important; max-height: 82dvh; display: flex; flex-direction: column; overflow: hidden; z-index: 95; padding: 0; border-radius: 24px 24px 0 0; border: none; box-shadow: 0 -18px 50px rgba(6, 21, 48, 0.28); animation: sheet-up 0.34s var(--ease-out) backwards; will-change: transform; }
+  .filter-sheet.is-closing { pointer-events: none; }
+  .filter-sheet-head { display: block; flex: none; padding: 8px 18px 10px; border-bottom: 1px solid var(--stroke); touch-action: none; cursor: grab; }
+  .filter-sheet-handle { width: 40px; height: 5px; margin: 0 auto 8px; border-radius: 999px; background: #cfd6e3; }
+  .filter-sheet-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .filter-sheet-title h2 { margin: 0; font-size: 1.08rem; color: var(--text); }
+  .filter-sheet-close { display: grid; place-items: center; width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 999px; border: none; background: rgba(10, 31, 99, 0.07); color: var(--text); }
+  .filter-sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 12px 18px calc(18px + var(--safe-bottom)); }
+  /* one scroll area per sheet: the lists inside grow instead of scrolling on their own */
+  .filter-sheet-body .popover-grid, .filter-sheet-body .popover-list { max-height: none; overflow: visible; }
+  .filter-sheet .popover-option { min-height: 46px; }
+  /* the "add to home screen" banner sits above everything and would cover the sheet's options */
+  body:has(.filter-sheet) .install-banner { display: none; }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .filter-sheet-backdrop, .filter-popover.filter-sheet { animation-duration: 0.01s; }
 }
 
 /* phones: search header is one compact line (the tab bar already gets you home) */

@@ -8,7 +8,7 @@ import TrustBadge, { LastSeen } from '../components/TrustBadge'
 import AvatarWithBadges from '../components/AvatarWithBadges'
 import BadgeShowcase from '../components/BadgeShowcase'
 import BackHome from '../components/BackHome'
-import { formatBosnianDate, formatBosnianMonthYear, reviewsLabel } from '../utils/dateFormat'
+import { formatBosnianDate, formatBosnianMonthYear, jobOutcomesLabel, reviewsLabel } from '../utils/dateFormat'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import ProfileView from '../app/ProfileView'
 import { useFullscreen } from '../app/useFullscreen'
@@ -168,9 +168,9 @@ function PublicProfilePage() {
                 <dd>{reviewCount > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pf-star" /></> : '—'}<small>{reviewLabel}</small></dd>
               </div>
               {isProvider ? (
-                <div title="Udio prihvaćenih poslova koji su završeni, bez otkazivanja od strane izvođača.">
+                <div title="Udio uspješnih poslova: završeni i isplaćeni, prema onima koje je izvođač prekinuo ili izgubio u sporu.">
                   <dt>Uspješnost</dt>
-                  <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}<small>{jobsDecided === 0 ? 'još nema završenih poslova' : `${trust?.completed_jobs || 0} ${trust?.completed_jobs === 1 ? 'završen posao' : 'završenih poslova'}`}</small></dd>
+                  <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}<small>{jobsDecided === 0 ? 'još nema završenih poslova' : jobOutcomesLabel(trust?.completed_jobs || 0, trust?.failed_jobs || 0)}</small></dd>
                 </div>
               ) : (
                 <div title="Udio objavljenih poslova sa prihvaćenom ponudom koji su dovršeni.">

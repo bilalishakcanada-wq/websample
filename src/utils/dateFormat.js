@@ -36,3 +36,14 @@ export const reviewsLabel = (n) => {
   const lastTwo = n % 100
   return `${n} ${last === 1 && lastTwo !== 11 ? 'recenzija' : last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14) ? 'recenzije' : 'recenzija'}`
 }
+
+const pluralBs = (n, one, few, many) => {
+  const last = n % 10
+  const lastTwo = n % 100
+  if (last === 1 && lastTwo !== 11) return one
+  return last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14) ? few : many
+}
+
+/** "8 uspješnih · 1 neuspješan" for a provider's decided jobs; a line may break only after the dot. */
+export const jobOutcomesLabel = (done = 0, failed = 0) =>
+  `${done}\u00a0${pluralBs(done, 'uspješan', 'uspješna', 'uspješnih')} · ${failed}\u00a0${pluralBs(failed, 'neuspješan', 'neuspješna', 'neuspješnih')}`

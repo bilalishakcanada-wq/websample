@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, BadgeCheck, MapPin, MoreHorizontal, Play, Star, UserRound } from 'lucide-react'
 import { LastSeen } from '../components/TrustBadge'
 import BadgeShowcase from '../components/BadgeShowcase'
-import { formatBosnianDate, formatBosnianMonthYear, reviewsLabel } from '../utils/dateFormat'
+import { formatBosnianDate, formatBosnianMonthYear, jobOutcomesLabel, reviewsLabel } from '../utils/dateFormat'
 import { useFullscreen } from './useFullscreen'
 import { useGoBack } from '../hooks/useGoBack'
 import { useQuoteRequestsEnabled } from '../hooks/queries'
@@ -69,7 +69,7 @@ function ProfileView({ bundle, user, onReport, onBlock, blocked = false }) {
           <div>
             <dt>Uspješnost</dt>
             <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}</dd>
-            <small>{trust?.completed_jobs > 0 ? `${trust.completed_jobs} ${trust.completed_jobs === 1 ? 'završen posao' : 'završenih poslova'}` : isNew ? 'nedavno se pridružio/la' : 'još nema završenih'}</small>
+            <small>{(trust?.completed_jobs || 0) + (trust?.failed_jobs || 0) > 0 ? jobOutcomesLabel(trust.completed_jobs || 0, trust.failed_jobs || 0) : isNew ? 'nedavno se pridružio/la' : 'još nema završenih'}</small>
           </div>
         ) : (
           <div>

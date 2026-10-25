@@ -32,10 +32,12 @@ Deno.serve(async (req) => {
   const otp = event.sms?.otp
   if (!to || !otp) return fail(400, 'Missing phone or code')
 
+  // the key may be pasted with "App " in front or a stray space
+  const apiKey = (Deno.env.get('INFOBIP_API_KEY') || '').trim().replace(/^App\s+/i, '')
   const base = (Deno.env.get('INFOBIP_BASE_URL') || '55l1gx.api.infobip.com').replace(/^https?:\/\//, '').replace(/\/+$/, '')
   const res = await fetch(`https://${base}/sms/2/text/advanced`, {
     method: 'POST',
-    headers: { Authorization: `App ${Deno.env.get('INFOBIP_API_KEY')}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { Authorization: `App ${apiKey}`, 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
       messages: [{ destinations: [{ to }], from: Deno.env.get('INFOBIP_SENDER') || '447491163443', // zadnji red je za automatsko upisivanje koda na Androidu (WebOTP)
         text: `Zadatak kod: ${otp}\nUpiši ga u aplikaciju da potvrdiš broj. Ne dijeli ga ni sa kim.\n\n@bilalishakcanada-wq.github.io #${otp}` }],

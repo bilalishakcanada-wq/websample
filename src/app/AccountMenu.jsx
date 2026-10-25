@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Award, Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, Phone, MousePointerClick, Settings, ShieldCheck, UserRound, Users, Wallet, Wrench } from 'lucide-react'
+import { Award, Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, Phone, MousePointerClick, Settings, ShieldCheck, Users, Wallet, Wrench } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
@@ -48,9 +48,8 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
     {
       title: 'Postavke',
       rows: [
-        ['/account/postavke', 'Postavke', 'Lokacija, obavijesti, telefon i lozinka', Settings],
+        ['/account/postavke', 'Postavke', 'Lokacija, obavijesti, telefon, lozinka i brisanje naloga', Settings],
         ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
-        ['/account/informacije', 'Informacije o nalogu', null, UserRound],
         ['telefon', 'Broj telefona', profile.phone_verified_at ? formatBosnianPhone(profile.phone) : 'Potvrdi SMS kodom', Phone, () => { haptic('light'); setPhoneOpen(true) }],
         ['/account/postavke-obavijesti', 'Obavijesti', null, Bell],
         ...(tasker ? [['/account/alarmi', 'Alarmi za poslove', 'Budi prvi koji sazna za nove poslove', BellRing]] : []),
@@ -144,7 +143,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
 // icon tile colours, like the Postavke page
 const TONE = {
   '/account/profil': 'blue', '/account/znacke': 'orange', '/account/vjestine': 'teal', '/account/portfolio': 'purple', '/account/ploca': 'green',
-  '/account/postavke': 'gray', '/account/placanje': 'green', '/account/informacije': 'blue', telefon: 'green', '/account/postavke-obavijesti': 'red',
+  '/account/postavke': 'gray', '/account/placanje': 'green', telefon: 'green', '/account/postavke-obavijesti': 'red',
   '/account/alarmi': 'orange', '/account/jednostavan-nacin': 'purple',
   '/pomoc': 'blue', '/kontakt': 'teal', '/pravila-zajednice': 'purple', '/pravila': 'gray', '/privatnost': 'gray', '/admin': 'red',
 }

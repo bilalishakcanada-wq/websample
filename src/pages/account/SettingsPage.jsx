@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { BadgeCheck, Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Phone, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
+import { BadgeCheck, Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Phone, Radio, Settings, ShieldCheck, Smartphone, Trash2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
@@ -15,6 +15,9 @@ import { backgroundLocationSupported } from '../../utils/location'
 import { toast } from '../../components/Toaster'
 import PhoneVerify from '../../components/PhoneVerify'
 import { formatBosnianPhone } from '../../utils/phone'
+import { confirmDialog } from '../../utils/dialog'
+import { withBase } from '../../utils/paths'
+import AccountSwitch from './AccountSwitch'
 import './SettingsPage.css'
 
 const EVENT_LABEL = { masked: 'Uklonjen kontakt iz teksta', removed: 'Uklonjena slika sa kontaktom', flagged: 'Označeno za pregled', suspended: 'Nalog suspendovan', lifted: 'Suspenzija ukinuta' }
@@ -52,7 +55,7 @@ const GEO_TEXT = {
 
 function SettingsPage() {
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const { user, logout, deleteAccount } = useAuth()
   const { profile, bundle, saveProfile, reload } = useAccount()
   const notif = useNotificationSwitches({ profile, saveProfile })
   const { notifyEmail, notifyPush, device, deviceOn } = notif
@@ -132,6 +135,12 @@ function SettingsPage() {
     try { await accountService.changePassword(password); setPassword(''); setMessage('Lozinka je promijenjena.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
   }
 
+  const removeAccount = async () => {
+    if (!(await confirmDialog({ title: 'Obrisati nalog?', text: 'Trajno briše tvoj nalog, oglase, poruke i sve lične podatke. Ovo se ne može poništiti.', confirmLabel: 'Obriši nalog', danger: true }))) return
+    setBusy('delete'); setError('')
+    try { await deleteAccount(); window.location.assign(withBase('/')) } catch (requestError) { setError(requestError.message); setBusy('') }
+  }
+
   const isOAuth = (user.app_metadata?.providers || []).some((provider) => provider !== 'email')
   useEffect(() => {
     const id = window.location.hash.replace('#', '')
@@ -156,14 +165,7 @@ function SettingsPage() {
       <div className="account-section-head"><h1>Postavke</h1></div>
       {verifyPhone && <PhoneVerify initialPhone={profile.phone || ''} onClose={() => setVerifyPhone(false)} onVerified={reload} />}
 
-      <Link to="/account/profil" className="st-profile">
-        <span className="st-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : <UserRound size={28} />}</span>
-        <span className="st-text">
-          <strong>{profile.full_name || 'Tvoj nalog'}</strong>
-          <span>{user.email}</span>
-        </span>
-        <ChevronRight size={20} className="st-chevron" />
-      </Link>
+      <AccountSwitch />
 
       <h2 className="st-group-title" id="lokacija">Lokacija</h2>
       <div className="st-group">
@@ -233,6 +235,8 @@ function SettingsPage() {
           </form>
         )}
         <Row as="button" type="button" icon={LogOut} tone="red" title={<span className="st-danger">Odjavi se</span>} sub="Sa ovog uređaja." onClick={async () => { await logout(); navigate('/') }} />
+        <Row as="button" type="button" icon={Trash2} tone="red" id="brisanje" testid="delete-account" disabled={busy === 'delete'} onClick={removeAccount}
+          title={<span className="st-danger">{busy === 'delete' ? 'Brišem…' : 'Obriši nalog'}</span>} sub="Trajno briše nalog, oglase, poruke i sve lične podatke." />
       </div>
 
       <h2 className="st-group-title" id="blokirani">Privatnost</h2>

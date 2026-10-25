@@ -55,7 +55,7 @@ const PUBLIC_ROUTES = ['/', '/search', '/kako-radi', '/cijene', '/o-nama', '/zar
   '/robot-nepostojeca-stranica']
 const ACCOUNT_ROUTES = ['/account', '/messages', '/moji-poslovi', '/objavi', '/account/ploca', '/account/placanja', '/account/nacini-placanja', '/account/novcanik',
   '/account/obavijesti', '/account/profil', '/account/vjestine', '/account/znacke', '/account/portfolio', '/account/verifikacija', '/account/postavke',
-  '/account/alarmi', '/account/informacije', '/account/placanje', '/account/postavke-obavijesti']
+  '/account/alarmi', '/account/placanje', '/account/postavke-obavijesti']
 const ADMIN_TABS = ['oversight', 'users', 'support', 'moderation', 'identity', 'reports', 'messages', 'verification', 'listings', 'badges', 'wallet', 'team', 'registry']
 const ROLES = {
   guest: { login: null, routes: PUBLIC_ROUTES },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Award, Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, MousePointerClick, ShieldCheck, UserRound, Users, Wallet, Wrench } from 'lucide-react'
+import { Award, Bell, BellRing, Camera, ChevronRight, CreditCard, FileText, HelpCircle, IdCard, Images, LayoutDashboard, Lock, LogOut, MessageSquare, Phone, MousePointerClick, ShieldCheck, UserRound, Users, Wallet, Wrench } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useAccount } from '../pages/account/AccountLayout'
 import { useMode } from './mode'
@@ -9,12 +9,14 @@ import { accountService } from '../services/accountService'
 import './app.css'
 import NotifBellLink from '../components/NotifBellLink'
 import { CropArt } from '../components/BosniaArt'
+import PhoneVerify from '../components/PhoneVerify'
 
 /** Phone account screen: who you are, which face of the app you use, and plain rows to everything else. */
 function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
   const navigate = useNavigate()
   const { logout, isStaff } = useAuth()
-  const { profile } = useAccount()
+  const { profile, reload } = useAccount()
+  const [phoneOpen, setPhoneOpen] = useState(false)
   const [mode, setMode] = useMode()
   const isProvider = profile.account_type === 'provider' || profile.account_type === 'both'
 
@@ -46,6 +48,7 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
       rows: [
         ['/account/placanje', 'Opcije plaćanja', null, CreditCard],
         ['/account/informacije', 'Informacije o nalogu', null, UserRound],
+        ['telefon', 'Broj telefona', profile.phone_verified_at ? 'Potvrđen' : 'Potvrdi SMS kodom', Phone, () => { haptic('light'); setPhoneOpen(true) }],
         ['/account/postavke-obavijesti', 'Obavijesti', null, Bell],
         ...(tasker ? [['/account/alarmi', 'Alarmi za poslove', 'Budi prvi koji sazna za nove poslove', BellRing]] : []),
         ['/account/jednostavan-nacin', 'Jednostavan način', 'Velika dugmad i prijava na posao u 2 dodira', MousePointerClick],
@@ -108,15 +111,19 @@ function AccountMenu({ onPickAvatar, uploadingAvatar, notice = null }) {
         <section key={group.title} className="ap-section">
           <span className="ap-label ap-eyebrow">{group.title}</span>
           <div className="ap-menu ap-menu-plain">
-            {group.rows.map(([to, label, sub, Icon]) => (
-              <Link key={to} to={to} className="ap-menu-row"><span className="acc-tile"><Icon size={18} /></span><span>{label}{sub && <small>{sub}</small>}</span><ChevronRight size={18} /></Link>
-            ))}
+            {group.rows.map(([to, label, sub, Icon, open]) => {
+              const inner = <><span className="acc-tile"><Icon size={18} /></span><span>{label}{sub && <small>{sub}</small>}</span><ChevronRight size={18} /></>
+              return open
+                ? <button key={to} type="button" className="ap-menu-row" onClick={open} data-testid="account-phone-row">{inner}</button>
+                : <Link key={to} to={to} className="ap-menu-row">{inner}</Link>
+            })}
           </div>
         </section>
       ))}
 
       <button type="button" className="ap-menu-row ap-menu-logout" onClick={async () => { await logout(); navigate('/') }}><LogOut size={18} /><span>Odjavi se</span></button>
       <p className="ap-version">Zadatak · beta</p>
+      {phoneOpen && <PhoneVerify initialPhone={profile.phone || ''} onClose={() => setPhoneOpen(false)} onVerified={reload} />}
     </div>
   )
 }

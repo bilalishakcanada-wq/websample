@@ -605,3 +605,12 @@
 @media (max-width: 359px) { .ap-hero-art { display: none; } }
 .ap-account .acc-group .st-group-title { margin-top: 22px; }
 .ap-account .acc-logout { margin-top: 26px; }
+
+/* offer cards: verified · rating · finished jobs, the same line on phone and computer */
+.trust-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 0.92rem; color: var(--text-soft); }
+.trust-line > span { display: inline-flex; align-items: center; gap: 4px; }
+.trust-line b { color: var(--text); font-weight: 800; }
+.trust-line-verified { color: #1d7a4f; font-weight: 700; }
+.trust-line-rating { color: #0b45ce; }
+.trust-line-rating b { color: inherit; }
+.trust-line-muted { color: var(--text-soft); font-weight: 500; }

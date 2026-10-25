@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, BadgeCheck, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, Star, UserRound } from 'lucide-react'
+import { ArrowLeft, Bookmark, Car, CalendarDays, Copy, ChevronRight, Clock, Coins, Flag, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, Star, UserRound } from 'lucide-react'
 import NextStep from '../components/NextStep'
 import JobProgress from '../components/JobProgress'
 import OfferReplies from '../components/OfferReplies'
@@ -16,6 +16,7 @@ import { haptic } from '../utils/native'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
 import { activePromotion } from '../services/promotionService'
 import { useBackToClose } from '../hooks/useBackToClose'
+import TrustLine from '../components/TrustLine'
 import './app.css'
 
 const money = (value, currency = 'BAM') => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`)
@@ -212,11 +213,8 @@ function JobDetail(props) {
                   <div className="jd-offer-head">
                     <Link to={`/korisnik/${bid.bidder_id}`} aria-label={`Profil: ${bid.bidder?.display_name || 'izvođač'}`}><Avatar url={bid.bidder?.avatar_url} size={56} /></Link>
                     <div className="jd-offer-who">
-                      <strong>{mine ? 'Ti' : bid.bidder?.display_name || 'Izvođač'} {m?.is_verified && <BadgeCheck size={16} className="jd-verified" />}</strong>
-                      {m && Number(m.review_count) > 0
-                        ? <span className="jd-rating"><b>{Number(m.avg_rating).toFixed(1)}</b> <Star size={14} fill="currentColor" /> ({m.review_count})</span>
-                        : <span className="jd-rating muted">Bez recenzija</span>}
-                      {m?.success_rate != null && <span><b>{Math.round(m.success_rate)}%</b> uspješnost</span>}
+                      <strong>{mine ? 'Ti' : bid.bidder?.display_name || 'Izvođač'}</strong>
+                      <TrustLine m={m} />
                     </div>
                     <em className="jd-offer-price">{money(bid.amount)}</em>
                   </div>

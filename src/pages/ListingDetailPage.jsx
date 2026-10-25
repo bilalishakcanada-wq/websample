@@ -54,6 +54,7 @@ import { listingRoute } from '../utils/dropoff'
 import { PromoBadge, PromoteCard } from '../components/Promotion'
 import { useRequiredPermissions } from '../components/RequiredPermissions'
 import { activePromotion } from '../services/promotionService'
+import TrustLine from '../components/TrustLine'
 
 const formatDate = formatBosnianDate
 const formatPrice = (value, currency = 'BAM') => value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} ${currency === 'BAM' ? 'KM' : currency}`
@@ -683,6 +684,7 @@ function ListingDetailPage() {
                         : <div className="poster-avatar"><UserRound size={18} /></div>}
                       <div>
                         <strong>{bid.bidder?.display_name || 'Korisnik Zadatka'}</strong>
+                        <TrustLine m={metrics[bid.bidder_id]} />
                         <p>{bid.message}</p>
                         <span className={`bid-status-label status-${bid.status}`}>{BID_STATUS_LABEL[bid.status]}</span>
                         {(isOwner || bid.bidder_id === user?.id) && <OfferReplies bid={bid} userId={user?.id} canWrite={bid.status === 'pending'} />}

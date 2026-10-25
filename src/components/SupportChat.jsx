@@ -9,6 +9,7 @@ import { HUMAN_LABEL, localAnswer, starterSuggestions } from '../utils/supportBr
 import { SUPPORT_IDLE_MS, currentSession, humanInSession, readReset, writeReset } from '../utils/supportSessions'
 import { SkeletonLines } from './Skeleton'
 import { useBackToClose } from '../hooks/useBackToClose'
+import { useSwitch } from '../hooks/useSwitches'
 
 const ARTICLES = HELP_ARTICLES.map(({ id, audience, q, a }) => ({ id, audience, q, a }))
 const GUIDE = SITE_GUIDE.map(({ path, title, where }) => ({ path, title, where }))
@@ -118,6 +119,7 @@ function SupportChat({ openRequested = false }) {
 
   const push = (row) => setMessages((list) => (list.some((item) => item.id === row.id) ? list : [...list, row]))
   const closeChat = () => setOpen(false)
+  const assistantSwitch = useSwitch('support_assistant')
   useBackToClose(open, closeChat)
 
   const handOff = async (summary) => {
@@ -129,9 +131,10 @@ function SupportChat({ openRequested = false }) {
    * local brain. Both end in a stored 'assistant' bubble; a hand-off pings the team.
    */
   const assistantReply = async (text, history, since) => {
+    // switched off by an admin (Prekidači): the local brain answers and hands off to the team as usual
     setTyping(true)
     try {
-      const ai = await supportService.askAssistant(text, ARTICLES, GUIDE, since)
+      const ai = assistantSwitch.on ? await supportService.askAssistant(text, ARTICLES, GUIDE, since) : { configured: false }
       if (ai.configured && ai.message) {
         push(ai.message)
         setSuggestions({ id: ai.message.id, list: ai.suggestions?.length ? ai.suggestions : ai.handoff ? [] : starterSuggestions(context).slice(0, 3) })

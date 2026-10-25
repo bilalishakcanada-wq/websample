@@ -59,6 +59,9 @@ export function useKeyboardFit(active = true) {
     const place = () => {
       const keyboardOpen = keyboardHeight(vv) > 120
       if (!keyboardOpen) { reset(); return }
+      // the newest message stays in view when the keyboard opens, unless the person scrolled up to read
+      const list = el.querySelector('[data-scroll-end]')
+      const atEnd = !list || list.scrollHeight - list.scrollTop - list.clientHeight < 120
       el.classList.add('is-keyboard')
       el.style.position = 'fixed'
       el.style.top = `${Math.round(vv.offsetTop)}px`
@@ -66,7 +69,7 @@ export function useKeyboardFit(active = true) {
       el.style.width = `${Math.round(vv.width)}px`
       el.style.height = `${Math.round(vv.height)}px`
       el.style.zIndex = '50'
-      el.querySelector('[data-scroll-end]')?.scrollTo({ top: 1e9 })
+      if (atEnd) list?.scrollTo({ top: 1e9 })
     }
     vv.addEventListener('resize', place)
     vv.addEventListener('scroll', place)

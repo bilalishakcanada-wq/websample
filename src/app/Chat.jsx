@@ -1,7 +1,7 @@
 import { PrivateImage } from '../components/PrivateFile'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
+import { ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronRight, Flag, Heart, Archive, ArchiveRestore, ImagePlus, Lock, MoreHorizontal, Search, Send, Unlock, UserRound, X } from 'lucide-react'
 import { MailMascot } from './Mascots'
 import NotifBellLink from '../components/NotifBellLink'
 import { useFullscreen } from './useFullscreen'
@@ -25,7 +25,7 @@ function Chat(props) {
   const {
     user, inbox, visible, active, loading, query, setQuery, filter, setFilter, unreadTotal, openConversation, chatState,
     grouped, thread, lastOwnRead, listRef, inputRef, imageRef, draft, setDraft, onKeyDown, sendMessage, sendImage, uploading, sending,
-    error, notice, togglePref, reportConversation, toggleBlock, otherBlocked, timeOf, shortDate, retry, otherTyping,
+    error, notice, togglePref, reportConversation, toggleBlock, otherBlocked, timeOf, shortDate, retry, otherTyping, onThreadScroll, unseen, jumpToEnd,
   } = props
   useFullscreen(Boolean(active))
   const fitRef = useKeyboardFit(Boolean(active))
@@ -114,7 +114,7 @@ function Chat(props) {
         </Link>
       )}
 
-      <div className="ch-thread" ref={listRef} data-scroll-end>
+      <div className="ch-thread" ref={listRef} data-scroll-end onScroll={onThreadScroll}>
         <p className="ch-safety">{active.contacts_allowed ? <><Unlock size={13} /> Ponuda je prihvaćena — možete razmijeniti kontakt.</> : <><Lock size={13} /> Brojevi i kontakti se dijele tek kad ponuda bude prihvaćena.</>}</p>
         {thread.length === 0 && <p className="ch-intro">Ovo je početak razgovora sa <strong>{active.other_name}</strong>. Budi konkretan/na: šta, kada i gdje.</p>}
         {grouped.map((group) => (
@@ -135,6 +135,7 @@ function Chat(props) {
         ))}
         {lastOwnRead && <div className="ch-seen">Pročitano {timeOf(lastOwnRead.read_at)}</div>}
         {otherTyping && <div className="ch-typing" aria-label={`${active.other_name} kuca`}><i /><i /><i /></div>}
+        {unseen > 0 && <button type="button" className="ch-jump" onClick={jumpToEnd}><ChevronDown size={16} /> Nove poruke ({unseen})</button>}
       </div>
 
       {error && <div className="form-error ch-alert">{error}</div>}
@@ -144,8 +145,8 @@ function Chat(props) {
         <form className="ch-composer" onSubmit={sendMessage}>
           <input ref={imageRef} type="file" accept="image/*" hidden onChange={sendImage} />
           <button type="button" className="ch-attach" onClick={() => imageRef.current?.click()} aria-label="Pošalji sliku" disabled={uploading}><ImagePlus size={22} /></button>
-          <textarea data-testid="chat-input" ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} placeholder="Napiši poruku…" aria-label="Poruka" rows={1} maxLength={2000} enterKeyHint="send" />
-          <button data-testid="chat-send" type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
+          <textarea data-testid="chat-input" ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={onKeyDown} placeholder="Napiši poruku…" aria-label="Poruka" rows={1} maxLength={2000} />
+          <button data-testid="chat-send" type="submit" className="ch-send" aria-label="Pošalji" disabled={sending || !draft.trim()} onPointerDown={(event) => event.preventDefault()}><Send size={18} /></button>
         </form>
       ) : (
         <ChatStateNotice state={chatState} listingId={active.listing_id} onUnblock={toggleBlock} />

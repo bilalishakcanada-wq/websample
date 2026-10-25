@@ -8,6 +8,7 @@ import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
 import MoneyOnTheWay from './MoneyOnTheWay'
+import { useSwitch } from '../../hooks/useSwitches'
 
 // the big balance: whole KM large, cents small, like a banking app
 const bigAmount = (value) => {
@@ -62,8 +63,10 @@ function WalletPage() {
     if (node) window.requestAnimationFrame(() => node.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
   }, [])
 
+  const cardSwitch = useSwitch('card_topup')
   const topUp = async (event) => {
     event.preventDefault()
+    if (!cardSwitch.on) { setActionError(cardSwitch.message || 'Uplata karticom je privremeno isključena.'); return }
     setBusy(true)
     setActionError('')
     try { await accountService.startCardTopup(amount) } catch (requestError) { setActionError(requestError.message); setBusy(false) }

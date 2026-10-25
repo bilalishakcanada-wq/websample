@@ -614,3 +614,6 @@
 .trust-line-rating { color: #0b45ce; }
 .trust-line-rating b { color: inherit; }
 .trust-line-muted { color: var(--text-soft); font-weight: 500; }
+
+/* chat: "Nove poruke" while reading older messages; sits at the bottom edge of the thread */
+.ch-jump, .chat-jump { position: sticky; bottom: 8px; z-index: 2; display: flex; align-items: center; gap: 4px; margin: 8px auto 0; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; font-size: 0.92rem; box-shadow: 0 6px 18px rgba(10, 31, 99, 0.25); cursor: pointer; }

@@ -1,5 +1,4 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useBackToClose } from '../hooks/useBackToClose'
 import { personaliseRanked, rankListings } from '../utils/ranking'
 import { readInterests, recordInterest } from '../utils/interests'
@@ -15,6 +14,7 @@ import {
   Map as MapIcon, Search as SearchIcon, Users, X, LocateFixed, Home,
 } from 'lucide-react'
 import BackHome from '../components/BackHome'
+import FilterSheet from '../components/FilterSheet'
 // maplibre is ~0.8 MB: only fetched when the map is actually on screen
 const TaskMap = lazy(() => import('../components/TaskMap'))
 import { serviceCategories } from '../data/categories'
@@ -76,24 +76,18 @@ function PosterAvatar({ person }) {
   )
 }
 
-function FilterMenu({ id, label, active, open, onToggle, children, width }) {
-  // phones: the popover becomes a bottom sheet rendered on <body> (the sticky, blurred
-  // filter bar would otherwise trap a position: fixed panel inside itself)
+function FilterMenu({ id, label, title, active, open, onToggle, children, width }) {
+  // phones: a bottom sheet on <body> (the sticky, blurred filter bar would otherwise trap a
+  // position: fixed panel inside itself)
   const isPhone = useMediaQuery('(max-width: 768px)')
-  const panel = open && (
-    <div className="filter-popover" style={!isPhone && width ? { width } : undefined} role="dialog" data-menu={id}>
-      <div className="filter-sheet-handle" aria-hidden="true" />
-      {children}
-    </div>
-  )
   return (
     <div className={`filter-menu ${open ? 'open' : ''}`} data-menu={id}>
       <button type="button" className={`filter-pill ${active ? 'active' : ''}`} onClick={() => onToggle(id)} aria-expanded={open}>
         {label} <ChevronDown size={14} />
       </button>
-      {open && isPhone
-        ? createPortal(<><div className="filter-sheet-backdrop" onClick={() => onToggle(id)} aria-hidden="true" />{panel}</>, document.body)
-        : panel}
+      {isPhone
+        ? <FilterSheet open={open} title={title} menuId={id} onClose={() => { if (open) onToggle(id) }}>{children}</FilterSheet>
+        : open && <div className="filter-popover" style={width ? { width } : undefined} role="dialog" data-menu={id}>{children}</div>}
     </div>
   )
 }
@@ -235,7 +229,8 @@ function SearchPage() {
   useEffect(() => {
     if (!openMenu) return undefined
     const close = (event) => {
-      const insideSheet = event.target instanceof Element && event.target.closest('.filter-popover')
+      // phones: the sheet's dimmed backdrop closes it on its own, after the tap, so the tap can't reach a job
+      const insideSheet = event.target instanceof Element && event.target.closest('.filter-popover, .filter-sheet-backdrop')
       if (filterBarRef.current && !filterBarRef.current.contains(event.target) && !insideSheet) setOpenMenu('')
     }
     const onKey = (event) => event.key === 'Escape' && setOpenMenu('')
@@ -398,7 +393,7 @@ function SearchPage() {
           {filters.query && <button type="button" aria-label="Obriši" onClick={() => update({ query: '' })}><X size={14} /></button>}
         </label>
 
-        <FilterMenu id="category" label={filters.category || 'Kategorija'} active={Boolean(filters.category)} open={openMenu === 'category'} onToggle={toggleMenu} width={520}>
+        <FilterMenu id="category" title="Kategorija" label={filters.category || 'Kategorija'} active={Boolean(filters.category)} open={openMenu === 'category'} onToggle={toggleMenu} width={520}>
           <div className="popover-grid">
             <button type="button" className={`popover-option ${!filters.category ? 'active' : ''}`} onClick={() => { update({ category: '' }); setOpenMenu('') }}>Sve kategorije</button>
             {serviceCategories.map(({ id, name, icon: Icon }) => (
@@ -409,7 +404,7 @@ function SearchPage() {
           </div>
         </FilterMenu>
 
-        <FilterMenu id="location" label={locationLabel} active={Boolean(filters.city)} open={openMenu === 'location'} onToggle={toggleMenu} width={360}>
+        <FilterMenu id="location" title="Lokacija" label={locationLabel} active={Boolean(filters.city)} open={openMenu === 'location'} onToggle={toggleMenu} width={360}>
           <label className="popover-search">
             <MapPin size={15} />
             <input placeholder="Naselje, grad ili ulica i broj..." value={citySearch} onChange={(event) => setCitySearch(event.target.value)} autoFocus />
@@ -458,7 +453,7 @@ function SearchPage() {
           )}
         </FilterMenu>
 
-        <FilterMenu id="price" label={priceLabel} active={filters.minPrice !== '' || filters.maxPrice !== ''} open={openMenu === 'price'} onToggle={toggleMenu} width={320}>
+        <FilterMenu id="price" title="Cijena" label={priceLabel} active={filters.minPrice !== '' || filters.maxPrice !== ''} open={openMenu === 'price'} onToggle={toggleMenu} width={320}>
           <div className="radius-options">
             {PRICE_PRESETS.map((preset) => (
               <button key={preset.label} type="button" className={`radius-chip ${String(filters.minPrice) === String(preset.min) && String(filters.maxPrice) === String(preset.max) ? 'active' : ''}`} onClick={() => update({ minPrice: preset.min, maxPrice: preset.max })}>{preset.label}</button>
@@ -471,13 +466,13 @@ function SearchPage() {
           </div>
         </FilterMenu>
 
-        <FilterMenu id="other" label="Ostali filteri" active={filters.remoteOnly || filters.hasBudget || filters.noOffers} open={openMenu === 'other'} onToggle={toggleMenu} width={280}>
+        <FilterMenu id="other" title="Ostali filteri" label="Ostali filteri" active={filters.remoteOnly || filters.hasBudget || filters.noOffers} open={openMenu === 'other'} onToggle={toggleMenu} width={280}>
           <label className="popover-check"><input type="checkbox" checked={filters.remoteOnly} onChange={(event) => update({ remoteOnly: event.target.checked })} /><Laptop size={15} /> Samo online poslovi</label>
           <label className="popover-check"><input type="checkbox" checked={filters.hasBudget} onChange={(event) => update({ hasBudget: event.target.checked })} /><Banknote size={15} /> Samo sa navedenim budžetom</label>
           <label className="popover-check"><input type="checkbox" checked={filters.noOffers} onChange={(event) => update({ noOffers: event.target.checked })} /><Users size={15} /> Još bez ponuda</label>
         </FilterMenu>
 
-        <FilterMenu id="sort" label={<><ArrowUpDown size={14} /> {sortLabel}</>} active={filters.sort !== 'newest'} open={openMenu === 'sort'} onToggle={toggleMenu} width={240}>
+        <FilterMenu id="sort" title="Sortiraj" label={<><ArrowUpDown size={14} /> {sortLabel}</>} active={filters.sort !== 'newest'} open={openMenu === 'sort'} onToggle={toggleMenu} width={240}>
           <div className="popover-list">
             {SORT_OPTIONS.filter((option) => !option.needsCity || filters.city).map((option) => (
               <button key={option.value} type="button" className={`popover-option ${filters.sort === option.value ? 'active' : ''}`} onClick={() => { update({ sort: option.value }); setOpenMenu('') }}>

@@ -90,7 +90,7 @@ function WalletPage() {
     <div className="account-section">
       <PaymentTabs />
 
-      <section className="bal-card has-photo" aria-label="Stanje računa">
+      <section className="bal-card has-ill" aria-label="Stanje računa">
         <BalanceArt />
         <div className="bal-top">
           <span className="bal-label"><Wallet size={15} /> Stanje na Zadatku</span>

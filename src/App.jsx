@@ -135,9 +135,19 @@ function EmailConfirmGate({ children }) {
   return <Suspense fallback={<RouteFallback />}><ConfirmEmailScreen /></Suspense>
 }
 
+const SuspendedScreen = lazy(lazyImport(() => import('./components/SuspendedScreen')))
+
+/** A suspended account sees only the countdown: no header, pages, tabs or live updates until the ban ends. */
+function SuspensionGate({ children }) {
+  const { suspension } = useAuth()
+  if (!suspension) return children
+  return <Suspense fallback={<RouteFallback />}><SuspendedScreen /></Suspense>
+}
+
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <SuspensionGate>
       <ScrollToTop />
       <SmoothScroll />
       <ViewTransitions />
@@ -216,6 +226,7 @@ function App() {
       <NavigationBar />
       <Toaster />
       <DialogHost />
+      </SuspensionGate>
     </BrowserRouter>
   )
 }

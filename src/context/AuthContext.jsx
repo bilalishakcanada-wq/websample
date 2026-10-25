@@ -7,6 +7,8 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { queryClient } from '../lib/queryClient'
 
 const AuthContext = createContext(null)
+const BAN_KEY = 'zadatak-suspension'
+const NO_BAN = { id: null, until: null, reason: '' }
 
 const hasStoredSession = () => {
   try { return Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')) } catch { return true }
@@ -30,6 +32,12 @@ export function AuthProvider({ children }) {
   const [checked, setChecked] = useState({ id: null, pending: false, sent: false })
   const userId = user?.id ?? null
   const emailCheck = useMemo(() => (checked.id === userId ? { pending: checked.pending, sent: checked.sent } : { pending: false, sent: false }), [checked, userId])
+  // a running ban from the Zadatak team: { id, until (ms, null = permanent), reason }; the server refuses everything else
+  // meanwhile. Kept on the device too, so reopening the app shows the countdown at once instead of pages that can't load
+  const [ban, setBan] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(BAN_KEY)) || NO_BAN } catch { return NO_BAN }
+  })
+  const suspension = useMemo(() => (ban.id && ban.id === userId ? ban : null), [ban, userId])
 
   const refreshAdminStatus = async (currentUser) => {
     if (!currentUser) {
@@ -105,6 +113,28 @@ export function AuthProvider({ children }) {
     return () => { active = false }
   }, [userId])
 
+  const refreshSuspension = useCallback(async () => {
+    if (!userId) return
+    const { data, error: rpcError } = await supabase.rpc('my_suspension')
+    if (rpcError) return
+    const until = data?.until ? new Date(data.until).getTime() : null
+    const reason = data?.reason || ''
+    const next = data ? { id: userId, until, reason } : NO_BAN
+    try { if (data) localStorage.setItem(BAN_KEY, JSON.stringify(next)); else localStorage.removeItem(BAN_KEY) } catch { /* ignore */ }
+    setBan((prev) => (prev.id === next.id && prev.until === next.until && prev.reason === next.reason ? prev : next))
+  }, [userId])
+
+  // checked on sign-in, on every return to the app and every few minutes, so a new ban shows up without a reload
+  useEffect(() => {
+    if (!userId) return undefined
+    refreshSuspension()
+    const check = () => { if (document.visibilityState === 'visible') refreshSuspension() }
+    const timer = window.setInterval(check, 5 * 60 * 1000)
+    document.addEventListener('visibilitychange', check)
+    window.addEventListener('focus', check)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', check); window.removeEventListener('focus', check) }
+  }, [userId, refreshSuspension])
+
   const refreshEmailCheck = useCallback(async () => {
     if (!userId) return { pending: false, sent: false }
     const status = await authService.emailConfirmationStatus()
@@ -160,8 +190,8 @@ export function AuthProvider({ children }) {
   const isAdmin = staffRole === 'admin'
   const isModerator = staffRole === 'moderator'
   const value = useMemo(
-    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
-    [user, isAdmin, isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck],
+    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
+    [user, isAdmin, isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

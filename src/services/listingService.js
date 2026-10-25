@@ -104,7 +104,7 @@ export const listingService = {
 
     if (error) {
       console.error('Supabase latest listings fetch failed', { message: error.message, code: error.code })
-      return []
+      throw error
     }
     return data || []
   },

@@ -22,7 +22,7 @@ function NotificationBell() {
   useEffect(() => {
     if (!user) return undefined
     let active = true
-    notificationService.listMine().then((rows) => active && setItems(rows))
+    notificationService.listMine().then((rows) => active && setItems(rows), () => {})
     const unsubscribe = notificationService.subscribe(user.id, async (row) => {
       setItems((current) => [row, ...current].slice(0, 30))
       // the header mounts two bells (desktop + phone): only one of them announces
@@ -42,7 +42,7 @@ function NotificationBell() {
       }
     })
     // read on another screen (the Obavijesti page, the other bell): the count here follows
-    const refresh = () => notificationService.listMine().then((rows) => active && setItems(rows))
+    const refresh = () => notificationService.listMine().then((rows) => active && setItems(rows), () => {})
     window.addEventListener('zadatak:notifications-read', refresh)
     return () => { active = false; unsubscribe(); window.removeEventListener('zadatak:notifications-read', refresh) }
   }, [user])

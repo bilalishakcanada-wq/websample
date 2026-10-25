@@ -21,6 +21,7 @@ import { SkeletonRows } from '../components/Skeleton'
 import { promptDialog } from '../utils/dialog'
 import { useBlocks } from '../hooks/useBlocks'
 import { canGoBackInApp } from '../utils/backNav'
+import LoadFailed from '../components/LoadFailed'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -348,7 +349,8 @@ function MessagesPage() {
             </div>
             <div className="chat-list">
               {loading && <SkeletonRows n={4} />}
-              {!loading && visible.length === 0 && (
+              {!loading && inboxQuery.isError && inbox.length === 0 && <LoadFailed title="Poruke se nisu učitale" onRetry={loadInbox} />}
+              {!loading && !(inboxQuery.isError && inbox.length === 0) && visible.length === 0 && (
                 <div className="chat-list-empty">
                   <MailMascot className="chat-list-mascot" />
                   <p>{inbox.length === 0 ? 'Još nema poruka. Razgovor se otvara čim neka ponuda bude prihvaćena.' : 'Nema poruka za ovaj filter.'}</p>

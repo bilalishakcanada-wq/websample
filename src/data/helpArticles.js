@@ -63,7 +63,7 @@ export const HELP_ARTICLES = [
   { id: 'member-id', audience: 'rules', q: 'Šta je moj privatni ID (PB-XXXX-XXXX)?', keywords: ['privatni id', 'pb-', 'member id', 'identifik'],
     a: 'Svaki nalog dobija jedinstveni privatni ID. Vidiš ga samo ti (Profil) i naš tim — koristi ga kad pišeš podršci da te odmah pronađemo. Nikad ga ne dijeli javno.' },
   { id: 'delete', audience: 'rules', q: 'Kako brišem nalog?', keywords: ['obriš', 'brisanje', 'izbriš', 'ukloni nalog', 'deaktiv'],
-    a: '„Moj nalog → Profil → Obriši moj nalog“. Brisanje je trajno: uklanja oglase, ponude, poruke i slike. Privatni ID ostaje u registru radi sigurnosti platforme.' },
+    a: '„Moj nalog → Postavke → Obriši nalog“. Brisanje je trajno: uklanja oglase, ponude, poruke i slike. Privatni ID ostaje u registru radi sigurnosti platforme.' },
   { id: 'notifications', audience: 'rules', q: 'Kako podešavam obavijesti?', keywords: ['obavijest', 'notifik', 'email obavijest', 'push'],
     a: '„Moj nalog → Postavke“ — uključi ili isključi email i push obavijesti. Zvono u vrhu stranice pokazuje sve nove događaje (ponude, poruke, značke, odgovore podrške).' },
 ]

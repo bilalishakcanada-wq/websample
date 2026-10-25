@@ -101,3 +101,12 @@ html.has-system-accent .st-switch.is-on { background: var(--system-accent, var(-
   .st-row-form { flex-wrap: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) { .st-switch, .st-switch span { transition: none; } }
+
+/* Profil | Postavke: the same switch on both pages (AccountSwitch.jsx) */
+.acc-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 4px 0 16px; padding: 4px; border-radius: 14px; background: #e6ebf5; }
+.acc-switch a {
+  display: grid; place-items: center; min-height: 44px; border-radius: 10px; color: #5a6481; font-weight: 700; text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.acc-switch a.active { background: #0a1f63; color: #fff; }
+@media (hover: hover) { .acc-switch a:not(.active):hover { background: rgba(255, 255, 255, 0.6); } }

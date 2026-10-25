@@ -43,7 +43,6 @@ const BadgesPage = lazy(lazyImport(() => import('./pages/account/BadgesPage')))
 const PortfolioPage = lazy(lazyImport(() => import('./pages/account/PortfolioPage')))
 const TierDashboardPage = lazy(lazyImport(() => import('./pages/account/TierDashboardPage')))
 const TaskAlertsPage = lazy(lazyImport(() => import('./pages/account/TaskAlertsPage')))
-const AccountInfoPage = lazy(lazyImport(() => import('./pages/account/AccountInfoPage')))
 const PaymentHistoryPage = lazy(lazyImport(() => import('./pages/account/PaymentHistoryPage')))
 const PaymentMethodsPage = lazy(lazyImport(() => import('./pages/account/PaymentMethodsPage')))
 const WalletPage = lazy(lazyImport(() => import('./pages/account/WalletPage')))
@@ -195,7 +194,7 @@ function App() {
           <Route path="postavke" element={<SettingsPage />} />
           <Route path="jednostavan-nacin" element={<SimpleModePage />} />
           <Route path="alarmi" element={<TaskAlertsPage />} />
-          <Route path="informacije" element={<AccountInfoPage />} />
+          <Route path="informacije" element={<Navigate to="/account/postavke" replace />} />
           <Route path="placanje" element={<Navigate to="/account/novcanik" replace />} />
           <Route path="postavke-obavijesti" element={<NotificationPrefsPage />} />
         </Route>

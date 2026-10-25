@@ -7,7 +7,7 @@ function PrivacyPage() {
       eyebrow="Pravna obavještenja"
       title="Politika privatnosti"
       lead="Koje podatke čuvamo, zašto, ko ih još vidi, koliko dugo ih držimo i kako ih brišeš."
-      cta={{ eyebrow: 'Tvoji podaci', text: 'Nalog i sve lične podatke brišeš sam, u postavkama profila.', to: '/account/profil', label: 'Postavke profila' }}
+      cta={{ eyebrow: 'Tvoji podaci', text: 'Nalog i sve lične podatke brišeš sam, u Postavkama.', to: '/account/postavke#brisanje', label: 'Postavke' }}
     >
         <section className="info-section reveal">
           <p className="muted-text">Zadnja izmjena: 18. oktobar 2026.</p>
@@ -90,7 +90,7 @@ function PrivacyPage() {
         <section className="info-section reveal" id="brisanje-naloga">
           <h2>6. Brisanje naloga</h2>
           <ul className="rules-list">
-            <li>Prijavi se na sajtu ili u aplikaciji, otvori <Link to="/account/profil">Moj nalog → Profil</Link> i na dnu klikni „Obriši nalog“.</li>
+            <li>Prijavi se na sajtu ili u aplikaciji, otvori <Link to="/account/postavke#brisanje">Moj nalog → Postavke</Link> i u dijelu „Račun“ klikni „Obriši nalog“.</li>
             <li>Ako imaš posao s osiguranom uplatom u toku, prvo ga završi ili otkaži, da niko ne ostane bez novca.</li>
             <li>Ako se ne možeš prijaviti ili si već obrisao/la aplikaciju, piši nam preko stranice <Link to="/kontakt">Kontakt</Link> (tema „Nalog“) s emailom naloga i obrisat ćemo ga u roku od 30 dana.</li>
           </ul>

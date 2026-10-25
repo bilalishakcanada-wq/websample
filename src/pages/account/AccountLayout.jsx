@@ -31,7 +31,6 @@ export const ACCOUNT_NAV = [
   { to: '/account/alarmi', label: 'Alarmi za poslove', icon: Bell, providerOnly: true, group: 'Postavke' },
   { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick, group: 'Postavke' },
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true, group: 'Postavke' },
-  { to: '/account/informacije', label: 'Informacije o nalogu', icon: IdCard, hidden: true },
   { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
 ]
 

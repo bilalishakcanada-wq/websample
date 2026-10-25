@@ -405,7 +405,6 @@
 .ap-menu-plain .ap-menu-row > svg:last-child { color: #b7c0cf; }
 .ap-menu-row span small { display: block; margin-top: 2px; font-size: 0.82rem; font-weight: 500; color: var(--text-soft); }
 .ap-menu-plain .ap-menu-row:active { background: transparent; opacity: 0.6; }
-.ap-menu-plain button.ap-menu-row { width: 100%; border: 0; font: inherit; font-weight: 600; font-size: 1.02rem; cursor: pointer; }
 .ap-account .ap-menu-logout { margin-top: 26px; border: none; padding-left: 2px; justify-content: start; color: var(--primary); }
 .ap-account .ap-menu-logout > svg:first-child { color: var(--primary); }
 .ap-account .ap-section { margin-top: 0; }
@@ -603,3 +602,5 @@
 .ap-city-list .ap-city-muni { color: var(--text-soft); font-weight: 500; }
 .ap-city-list button small { color: var(--text-soft); font-size: 0.74rem; font-weight: 500; }
 @media (max-width: 359px) { .ap-hero-art { display: none; } }
+.ap-account .acc-group .st-group-title { margin-top: 22px; }
+.ap-account .acc-logout { margin-top: 26px; }

@@ -77,6 +77,8 @@ html.has-system-accent .st-switch.is-on { background: var(--system-accent, var(-
   display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 36px; padding: 0 14px; border-radius: 999px;
   background: var(--accent); color: #fff; font-weight: 800; font-size: 0.88rem; border: 0; cursor: pointer;
 }
+.st-verified { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; color: #0f7a54; font-weight: 700; white-space: nowrap; }
+.st-change { display: inline-flex; align-items: center; gap: 2px; flex-shrink: 0; color: var(--text-soft); font-size: 0.88rem; font-weight: 700; }
 .st-action:disabled { opacity: 0.55; cursor: default; }
 
 .st-row-form { flex-wrap: wrap; }

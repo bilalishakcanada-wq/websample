@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Phone, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
+import { BadgeCheck, Ban, BellRing, ChevronRight, KeyRound, ListChecks, LocateFixed, LogOut, Mail, MapPin, Navigation, Phone, Radio, Settings, ShieldCheck, Smartphone, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useAccount } from './AccountLayout'
 import { accountService } from '../../services/accountService'
@@ -211,11 +211,14 @@ function SettingsPage() {
       <h2 className="st-group-title">Račun</h2>
       <div className="st-group">
         <Row icon={Mail} tone="blue" title="Email" sub={user.email} />
-        <Row icon={Phone} tone="green" title="Broj telefona" testid="phone-verify-row" id="telefon"
-          sub={profile.phone ? formatBosnianPhone(profile.phone) : 'Nije dodan. Potvrdi ga SMS kodom.'}>
+        <Row as="button" type="button" icon={Phone} tone="green" testid="phone-verify-row" id="telefon" onClick={() => setVerifyPhone(true)}
+          title="Broj telefona"
+          sub={profile.phone_verified_at
+            ? <>{formatBosnianPhone(profile.phone)} <span className="st-verified"><BadgeCheck size={14} /> Potvrđen SMS kodom</span></>
+            : profile.phone ? `${formatBosnianPhone(profile.phone)} · još nije potvrđen` : 'Dodaj broj i potvrdi ga SMS kodom.'}>
           {profile.phone_verified_at
-            ? <span className="st-pill st-pill-ok">Potvrđen</span>
-            : <button type="button" className="st-action" onClick={() => setVerifyPhone(true)} data-testid="phone-verify-open">Potvrdi</button>}
+            ? <span className="st-change">Promijeni <ChevronRight size={18} className="st-chevron" /></span>
+            : <span className="st-action" data-testid="phone-verify-open">Potvrdi</span>}
         </Row>
         {isOAuth ? (
           <Row icon={KeyRound} tone="gray" title="Lozinka" sub="Prijavljuješ se preko Google naloga, lozinka se mijenja kod Googlea." />

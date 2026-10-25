@@ -1,9 +1,0 @@
-/* The balance card's work scene: twinkling stars, the street lamp's glow and the coin on its way (the coin moves with SVG animateMotion). */
-@keyframes ws-tw { 50% { opacity: .2; } }
-@keyframes ws-glow { 50% { opacity: .55; } }
-.bal-art .ws-tw { animation: ws-tw 3.2s ease-in-out infinite; }
-.bal-art .ws-glow { animation: ws-glow 2.8s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) {
-  .bal-art .ws-tw, .bal-art .ws-glow { animation: none; }
-  .bal-art .ws-coin animateMotion { display: none; }
-}

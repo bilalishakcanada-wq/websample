@@ -1,15 +1,31 @@
 import { useEffect, useState } from 'react'
-import '../../art/workScene.css'
+import { withBase } from '../../utils/paths'
 
-/** Top of the balance card: workers on the job and a client whose payment is on its way to one of them. */
+// Real photos of the work people pay for on Zadatak; the card shows one and changes it every two minutes.
+const PHOTOS = [
+  ['/images/categories/electrician.webp', 'Električar', '62% 30%'],
+  ['/images/categories/home.webp', 'Majstor za sve', '50% 50%'],
+  ['/images/categories/cleaning.webp', 'Čišćenje', '40% 35%'],
+  ['/images/categories/construction.webp', 'Gradnja', '55% 40%'],
+  ['/images/jobs/elektrika.webp', 'Elektroinstalacije', '60% 40%'],
+]
+const EVERY = 2 * 60 * 1000
+
+/** Photo side of the balance card, with a slow crossfade to the next photo. */
 function BalanceArt() {
-  const [svg, setSvg] = useState(null)
+  const [index, setIndex] = useState(() => Math.floor(Date.now() / EVERY) % PHOTOS.length)
   useEffect(() => {
-    let live = true
-    import('../../art/workScene').then(({ workScene }) => { if (live) setSvg(workScene()) })
-    return () => { live = false }
+    const timer = window.setInterval(() => { if (!document.hidden) setIndex((i) => (i + 1) % PHOTOS.length) }, EVERY)
+    return () => window.clearInterval(timer)
   }, [])
-  return <div className="bal-art" aria-hidden="true" dangerouslySetInnerHTML={svg ? { __html: svg } : undefined} />
+  return (
+    <div className="bal-photo" aria-hidden="true">
+      {PHOTOS.map(([src, label, position], i) => (
+        <img key={src} src={withBase(src)} alt="" loading={i === index ? 'eager' : 'lazy'} decoding="async" className={i === index ? 'is-on' : ''} style={{ objectPosition: position }} />
+      ))}
+      <span className="bal-photo-tag" key={index}>{PHOTOS[index][1]}</span>
+    </div>
+  )
 }
 
 export default BalanceArt

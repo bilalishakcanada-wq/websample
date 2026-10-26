@@ -57,7 +57,7 @@ prijaviti bez potvrđenog maila.
 ## 3. Obavijesti mailom
 
 Obavijesti (objavljen oglas, nova ponuda, dogovoren i završen posao, nova poruka i ostale
-obavijesti) idu preko Resenda s adrese `info@zadatak.com`. Okidač `on_notification_email` na
+obavijesti) idu preko Resenda s adrese `info@zadatak.ba`. Okidač `on_notification_email` na
 `notifications` stavlja mail u red `zadatak_private.transactional_email_outbox`, a funkcija
 `send-transactional-email` ga šalje. Svaki mail dobije nasumično jedan od tri izgleda (A/B/C).
 

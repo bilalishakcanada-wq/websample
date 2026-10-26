@@ -47,7 +47,7 @@ async function sendEmail(title: string, text: string) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'Zadatak <onboarding@resend.dev>', to: [ADMIN_EMAIL], subject: title, text }),
+    body: JSON.stringify({ from: 'Zadatak <info@zadatak.ba>', to: [ADMIN_EMAIL], subject: title, text }),
   })
   return res.ok ? 'sent' : `error ${res.status}`
 }

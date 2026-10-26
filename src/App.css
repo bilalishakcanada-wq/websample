@@ -11296,8 +11296,9 @@ body:has(.profile-cta-bar) .support-chat {
 
 .pay-list li {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 12px 14px;
   border-radius: var(--r-md);
   border: 1px solid var(--stroke);
@@ -11305,7 +11306,8 @@ body:has(.profile-cta-bar) .support-chat {
 }
 
 .pay-list li > div:first-of-type {
-  flex: 1;
+  /* with large text the amount moves under the details instead of drawing over them */
+  flex: 1 1 180px;
   min-width: 0;
   display: grid;
 }
@@ -11327,6 +11329,7 @@ body:has(.profile-cta-bar) .support-chat {
 .pay-icon.paid { background: var(--surface-soft); color: var(--text-soft); }
 
 .pay-amount {
+  margin-left: auto;
   text-align: right;
   display: grid;
 }

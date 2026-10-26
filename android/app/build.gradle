@@ -45,8 +45,11 @@ android {
         }
         release {
             if (releaseKeystore.exists()) signingConfig signingConfigs.release
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // smaller, faster-installing Play build; Capacitor ships the keep rules for its plugins
+            // (consumer proguard), proguard-rules.pro keeps our own native code
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

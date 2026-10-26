@@ -6,15 +6,16 @@
 .suspended-logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; }
 .suspended-card {
   width: min(100%, 440px); display: grid; justify-items: center; gap: 12px; padding: 28px 22px; text-align: center;
-  background: var(--surface); border: 1px solid var(--stroke); border-radius: 24px; box-shadow: var(--shadow);
+  background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-lg); box-shadow: var(--shadow);
 }
-.suspended-icon { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 22px; background: #fdecec; color: #c62828; }
+.suspended-icon { display: grid; place-items: center; width: 68px; height: 68px; border-radius: var(--r-lg); background: var(--danger-soft); color: var(--red-600); }
 .suspended-card h1 { margin: 4px 0 0; font-size: 1.45rem; line-height: 1.2; }
-.suspended-reason { margin: 0; padding: 10px 14px; width: 100%; border-radius: 14px; background: var(--surface-alt); color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
+.suspended-reason { margin: 0; padding: 10px 14px; width: 100%; border-radius: var(--r-md); background: var(--surface-alt); color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
 .suspended-note { margin: 4px 0 0; color: var(--text-soft); }
 .suspended-timer { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; }
-.suspended-unit { display: grid; gap: 2px; padding: 12px 4px; border-radius: 16px; background: var(--surface-alt); }
+.suspended-unit { display: grid; gap: 2px; padding: 12px 4px; border-radius: var(--r-md); background: var(--surface-alt); }
 .suspended-unit strong { font-size: clamp(1.5rem, 7vw, 2rem); line-height: 1; font-variant-numeric: tabular-nums; color: var(--primary); }
 .suspended-unit small { color: var(--text-soft); font-size: 0.78rem; font-weight: 700; }
 .suspended-end { margin: 0; color: var(--text-soft); font-size: 0.9rem; }
 .suspended-logout { margin-top: 6px; min-height: 44px; width: 100%; }
+.update-icon { background: var(--surface-alt); color: var(--primary); }

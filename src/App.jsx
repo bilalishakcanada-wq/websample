@@ -85,6 +85,8 @@ import DialogHost from './components/DialogHost'
 import ViewTransitions from './components/ViewTransitions'
 import NativeBack from './components/NativeBack'
 import { RealtimeSync } from './hooks/useRealtimeSync'
+import { useSwitch } from './hooks/useSwitches'
+import UpdateGate from './components/UpdateGate'
 
 // the support chat lives only on the help pages, so its code (and the help articles) load only there
 const SupportChat = lazy(lazyImport(() => import('./components/SupportChat')))
@@ -117,6 +119,9 @@ function PostRoute() {
   const [params] = useSearchParams()
   // anyone can write a new job and sign up at the end; changing or copying an existing one needs the account
   const needsAccount = params.has('edit') || params.has('copy')
+  const postSwitch = useSwitch('post_job')
+  // an admin paused new jobs (Prekidači): editing an existing one still works
+  if (!postSwitch.on && !params.has('edit')) return <main className="page-state"><h1>Objava je pauzirana</h1><p>{postSwitch.message || 'Objava poslova je privremeno pauzirana. Pokušaj za nekoliko minuta.'}</p></main>
   return isPhone ? <PostFlow /> : needsAccount ? <ProtectedRoute><PostTaskPage /></ProtectedRoute> : <PostTaskPage />
 }
 
@@ -145,6 +150,7 @@ function SuspensionGate({ children }) {
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+      <UpdateGate>
       <SuspensionGate>
       <ScrollToTop />
       <SmoothScroll />
@@ -225,6 +231,7 @@ function App() {
       <Toaster />
       <DialogHost />
       </SuspensionGate>
+      </UpdateGate>
     </BrowserRouter>
   )
 }

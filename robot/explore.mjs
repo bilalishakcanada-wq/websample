@@ -9,7 +9,7 @@
 //
 //   ROBOT_BASE_URL=http://localhost:4175 node robot/explore.mjs
 //
-// Options (env): ROBOT_PROFILES=desktop,phone,small (also: app)  ROBOT_ROLES=guest,newbie,client,provider (also: admin)
+// Options (env): ROBOT_PROFILES=desktop,phone,small,bigtext (also: app)  ROBOT_ROLES=guest,newbie,client,provider (also: admin)
 //   ROBOT_MAX_PAGES=30 (per profile and role)  ROBOT_CLICKS=0 (1 = also press every button)  ROBOT_FORMS=0 (1 = fill forms with odd input)
 //   ROBOT_VITALS=0 (1 = also time page loads)  ROBOT_PARALLEL=4  ROBOT_OUT=robot-report  ROBOT_CHROMIUM=/path/to/chrome  ROBOT_FAIL_ON=error|warn|never
 // Report: robot-report/report.md (+ report.json and screenshots).
@@ -18,13 +18,13 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { ACCOUNTS } from './accounts.mjs'
 import { pageChecks, layoutChecks, clickables } from './checks.mjs'
-import { PROFILES, appShellStub } from './profiles.mjs'
+import { PROFILES, appShellStub, textScaleStub } from './profiles.mjs'
 
 const BASE = (process.env.ROBOT_BASE_URL || 'http://localhost:4175').replace(/\/+$/, '')
 const BASE_PATH = new URL(BASE).pathname.replace(/\/+$/, '')
 const ORIGIN = new URL(BASE).origin
 const OUT = path.resolve(process.env.ROBOT_OUT || 'robot-report')
-const PROFILE_NAMES = (process.env.ROBOT_PROFILES || 'desktop,phone,small').split(',').map((s) => s.trim()).filter(Boolean)
+const PROFILE_NAMES = (process.env.ROBOT_PROFILES || 'desktop,phone,small,bigtext').split(',').map((s) => s.trim()).filter(Boolean)
 const ROLE_NAMES = (process.env.ROBOT_ROLES || 'guest,newbie,client,provider').split(',').map((s) => s.trim()).filter(Boolean)
 const MAX_PAGES = Number(process.env.ROBOT_MAX_PAGES || 30)
 const CLICKS = process.env.ROBOT_CLICKS === '1'
@@ -406,6 +406,7 @@ async function crawl(browser, profileName, roleName, state) {
   const context = await browser.newContext({ ...profile.context, locale: 'bs-BA', reducedMotion: 'reduce', storageState: state || undefined, serviceWorkers: 'block', geolocation: { latitude: 43.8563, longitude: 18.4131 } })
   if (VITALS) await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
+  if (profile.textScale) await context.addInitScript(textScaleStub, profile.textScale)
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {})

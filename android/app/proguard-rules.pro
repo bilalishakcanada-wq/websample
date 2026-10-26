@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Zadatak: the app's own native code (ZadatakNativePlugin, MainActivity) is called from the web side
+-keep class ba.poso.app.** { *; }
+# readable line numbers in crash reports (Play Console, Sentry)
+-keepattributes SourceFile,LineNumberTable,*Annotation*,Signature,InnerClasses,EnclosingMethod
+-renamesourcefileattribute SourceFile
+# push notifications (Firebase) and the splash/biometric AndroidX libraries keep their own rules
+-dontwarn org.apache.cordova.**

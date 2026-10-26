@@ -118,6 +118,13 @@ export function pageChecks(opts) {
       push('clipped-text', 'warn', 'Button text is cut off', describe(el))
     }
   }
+  // letters cut off at the bottom: a box of fixed height that the text grew out of (big system font size)
+  for (const el of document.querySelectorAll('span, a, button, label, strong, small, p, h1, h2, h3')) {
+    if (!visible(el) || !el.childNodes.length || ![...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) continue
+    const style = getComputedStyle(el)
+    if (style.overflowY === 'visible' || style.webkitLineClamp !== 'none' && style.webkitLineClamp) continue
+    if (el.scrollHeight > el.clientHeight + 2 && el.clientHeight > 0) push('clipped-text', 'warn', 'Text is cut off at the bottom', describe(el))
+  }
 
   // 9. text too faint to read against its background (WCAG AA: 4.5:1, or 3:1 for large text)
   const rgba = (c) => {

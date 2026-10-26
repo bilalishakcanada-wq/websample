@@ -1,6 +1,7 @@
 # Robot za testiranje Zadatka
 
-Robot otvara sajt kao kupac: na računaru, na telefonu i na malom Android telefonu (360 px), kao gost,
+Robot otvara sajt kao kupac: na računaru, na telefonu, na malom Android telefonu (360 px) i na telefonu
+sa povećanim slovima (130 %, kako ih mnogi stariji ljudi imaju), kao gost,
 novi korisnik, klijent i izvođač. Na svakoj glavnoj stranici traži ono na čemu se kupac spotakne:
 
 - dugmad, linkove i polja koja nešto prekriva (pritisak bi pao na to drugo)
@@ -32,7 +33,7 @@ node robot/explore.mjs                # izvještaj: robot-report/report.md
 Test nalozi (lozinka `Test12345!`): `klijent@test.zadatak`, `izvodjac@test.zadatak`, `admin@test.zadatak`,
 `novi@test.zadatak`. `bash robot/local-db/reset.sh` vraća ih u početno stanje.
 
-Podešavanja (env): `ROBOT_BASE_URL`, `ROBOT_PROFILES=desktop,phone,small` (ima i `app`),
+Podešavanja (env): `ROBOT_BASE_URL`, `ROBOT_PROFILES=desktop,phone,small,bigtext` (ima i `app`),
 `ROBOT_ROLES=guest,newbie,client,provider` (ima i `admin`), `ROBOT_MAX_PAGES=30`, `ROBOT_CLICKS=1` (pritisne i
 svako dugme), `ROBOT_FORMS=1` (popuni forme čudnim unosom), `ROBOT_VITALS=1` (mjeri brzinu), `ROBOT_PARALLEL=4`,
 `ROBOT_FAIL_ON=error|warn|never`, `ROBOT_CHROMIUM=/putanja/do/chrome`, `ROBOT_TRACE=1`.

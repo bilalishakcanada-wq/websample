@@ -90,8 +90,8 @@
   margin-top: 56px;
   padding: 56px;
   border: 1px solid var(--stroke);
-  border-radius: 28px;
-  background: #fff;
+  border-radius: var(--r-lg);
+  background: var(--surface);
 }
 
 .how-steps {
@@ -140,7 +140,7 @@
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  border: 2px solid #c9d5ee;
+  border: 2px solid var(--blue-200);
   border-radius: 50%;
   color: var(--text-soft);
   font-family: var(--font-display);
@@ -170,7 +170,7 @@
 .how-steps-list li.active .how-steps-num {
   border-color: var(--accent);
   background: var(--accent);
-  color: #fff;
+  color: var(--surface);
 }
 
 .how-steps-list li.active strong { color: var(--primary-strong); }
@@ -208,9 +208,9 @@
   align-items: center;
   gap: 8px;
   padding: 14px 22px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--accent);
-  color: #fff;
+  color: var(--surface);
   font-weight: 700;
   text-decoration: none;
 }
@@ -226,8 +226,8 @@
   align-items: flex-end;
   height: 500px;
   overflow: hidden;
-  border-radius: 24px;
-  background: #0a1f63;
+  border-radius: var(--r-lg);
+  background: var(--primary);
 }
 
 .how-steps-phone::before {
@@ -248,7 +248,7 @@
   height: 456px;
   padding: 10px 10px 0;
   border-radius: 42px 42px 0 0;
-  background: #071647;
+  background: var(--primary-strong);
   box-shadow: 0 0 0 2px #1b4a8a;
 }
 
@@ -260,8 +260,8 @@
   left: 50%;
   width: 84px;
   height: 22px;
-  border-radius: 999px;
-  background: #071647;
+  border-radius: var(--r-pill);
+  background: var(--primary-strong);
   transform: translateX(-50%);
 }
 
@@ -273,7 +273,7 @@
   padding: 58px 20px 22px;
   overflow: hidden;
   border-radius: 33px 33px 0 0;
-  background: #fff;
+  background: var(--surface);
   color: var(--primary-strong);
 }
 
@@ -289,8 +289,8 @@
   flex: 0 1 90px;
   height: 4px;
   overflow: hidden;
-  border-radius: 999px;
-  background: #e6eaf1;
+  border-radius: var(--r-pill);
+  background: var(--line);
 }
 
 .hs-post-progress span {
@@ -298,7 +298,7 @@
   width: 16%;
   height: 100%;
   border-radius: inherit;
-  background: #19b37b;
+  background: var(--success);
 }
 
 .hs-post-cancel { margin-left: auto; color: var(--text-soft); font-size: 0.82rem; font-weight: 600; }
@@ -319,7 +319,7 @@
   height: 44px;
   padding: 0 14px;
   border: 2px solid var(--primary-strong);
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   font-size: 0.92rem;
 }
 
@@ -343,15 +343,15 @@
   place-items: center;
   height: 44px;
   margin-top: auto;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--primary-strong);
-  color: #fff;
+  color: var(--surface);
   font-weight: 700;
   font-size: 0.9rem;
 }
 
 /* step 2: offers arrive as notifications over the job */
-.hs-offers { background: #f3f6fc; }
+.hs-offers { background: var(--gray-50); }
 .hs-offers-head { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
 
 .hs-offers-job {
@@ -359,9 +359,9 @@
   gap: 4px;
   margin-top: 16px;
   padding: 14px;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 1px 0 #e3e9f4;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--line);
 }
 
 .hs-offers-job strong { font-size: 0.98rem; }
@@ -376,7 +376,7 @@
   gap: 10px;
   align-items: flex-start;
   padding: 11px 12px;
-  border-radius: 16px;
+  border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 10px 30px rgba(7, 22, 71, 0.18);
 }
@@ -394,8 +394,8 @@
   width: 52px;
   height: 52px;
   margin-top: 8px;
-  border-radius: 16px;
-  background: #e8efff;
+  border-radius: var(--r-md);
+  background: var(--surface-alt);
   color: var(--accent);
 }
 
@@ -426,15 +426,15 @@
   place-items: center;
   width: 20px;
   height: 20px;
-  border: 2px solid #c9d5ee;
+  border: 2px solid var(--blue-200);
   border-radius: 50%;
-  color: #fff;
+  color: var(--surface);
 }
 
 .hs-pay-track li.done { color: var(--primary-strong); }
-.hs-pay-track li.done > span { border-color: #19b37b; background: #19b37b; }
+.hs-pay-track li.done > span { border-color: var(--success); background: var(--success); }
 .hs-pay-track li.now { color: var(--primary-strong); }
-.hs-pay-track li.now > span { border-color: var(--accent); box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 10px var(--accent); }
+.hs-pay-track li.now > span { border-color: var(--accent); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 10px var(--accent); }
 
 /* every screen plays its little moment when it comes up; without motion it simply shows the end of it */
 @media (prefers-reduced-motion: no-preference) {
@@ -455,14 +455,14 @@
 @keyframes hs-in { from { opacity: 0; transform: translateY(12px); } }
 @keyframes hs-type { from { max-width: 0; } to { max-width: 1em; } }
 @keyframes hs-caret { 50% { opacity: 0; } }
-@keyframes hs-ready { from { background: #e6eaf1; color: #9aa6bd; } }
+@keyframes hs-ready { from { background: var(--line); color: var(--muted); } }
 @keyframes hs-grow { from { width: 4%; } }
 @keyframes hs-drop { from { opacity: 0; transform: translateY(-40px) scale(0.96); } }
 @keyframes hs-rise { from { opacity: 0; transform: translateY(8px); } }
-@keyframes hs-pulse { 50% { box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 10px var(--accent), 0 0 0 6px rgba(31, 95, 255, 0.18); } }
+@keyframes hs-pulse { 50% { box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 10px var(--accent), 0 0 0 6px rgba(31, 95, 255, 0.18); } }
 
 @media (max-width: 900px) {
-  .how-it-works { padding: 28px 20px; border-radius: 22px; }
+  .how-it-works { padding: 28px 20px; border-radius: var(--r-lg); }
   .how-steps { grid-template-columns: 1fr; gap: 32px; }
   .how-steps-phone { height: 440px; }
 }

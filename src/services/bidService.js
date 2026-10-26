@@ -42,7 +42,7 @@ export const bidService = {
       .limit(limit)
     if (error) {
       console.error('Supabase my bids fetch failed', { message: error.message, code: error.code })
-      return []
+      throw error
     }
     return data || []
   },

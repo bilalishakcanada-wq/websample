@@ -7,6 +7,7 @@ import { useMode } from './mode'
 import { serviceCategories } from '../data/categories'
 import { useMyBids, useMyListings } from '../hooks/queries'
 import { useJobFeed } from '../hooks/useFeed'
+import LoadFailed from '../components/LoadFailed'
 import { useSimpleMode } from '../hooks/useSimpleMode'
 import '../components/SimpleOfferSheet.css'
 import { LocationNudge } from '../components/RequiredPermissions'
@@ -156,11 +157,12 @@ function PosterHome({ firstName }) {
 function TaskerHome({ user, firstName }) {
   const artIndex = useShuffle(HEADER_ART.length, 8000)
   const navigate = useNavigate()
-  const { feed, loading, personalised } = useJobFeed({ userId: user.id, limit: 8 })
+  const { feed, loading, personalised, failed, retry } = useJobFeed({ userId: user.id, limit: 8 })
   const bidsQuery = useMyBids(user.id, 3)
   // jednostavan način: svaka kartica posla dobija veliko dugme "Želim ovaj posao" (2 dodira do poslane prijave)
   const simple = useSimpleMode(user.id)
   const bids = bidsQuery.isPending ? null : (bidsQuery.data || [])
+  const bidsFailed = bidsQuery.isError && !bidsQuery.data
   // what sits below the job list comes in after it, so the list filling in can't push it down or out of sight
   const ready = !loading && bids !== null
   const homeRef = useRef(null)
@@ -188,7 +190,8 @@ function TaskerHome({ user, firstName }) {
           <h2 className="ap-h2">{personalised ? 'Poslovi za tebe' : 'Novi poslovi'}</h2>
           <p className="ap-p">{personalised ? 'Prema tvojim vještinama, gradu i onome što pregledaš' : 'Svježe i s malo ponuda na vrhu'}</p>
           {loading && feed.length === 0 && <div className="ap-list">{[1, 2, 3].map((i) => <SkeletonApJob key={i} />)}</div>}
-          {!loading && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
+          {!loading && failed && <LoadFailed title="Poslovi se nisu učitali" onRetry={retry} />}
+          {!loading && !failed && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
             {feed.map((job) => {
               const card = (
@@ -216,7 +219,8 @@ function TaskerHome({ user, firstName }) {
         {ready && (
           <section className="ap-section">
             <h2 className="ap-h2">Moje ponude</h2>
-            {bids.length === 0 && <div className="ap-empty"><strong>Još nisi poslao/la ponudu</strong><span>Otvori posao i klikni „Pošalji ponudu“.</span></div>}
+            {bidsFailed && <LoadFailed title="Ponude se nisu učitale" onRetry={() => bidsQuery.refetch()} />}
+            {!bidsFailed && bids.length === 0 && <div className="ap-empty"><strong>Još nisi poslao/la ponudu</strong><span>Otvori posao i klikni „Pošalji ponudu“.</span></div>}
             {bids.length > 0 && (
               <div className="ap-list">
                 {bids.map((bid) => {

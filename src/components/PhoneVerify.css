@@ -12,9 +12,9 @@
   position: relative;
   width: min(400px, 100%);
   padding: 30px 24px 26px;
-  border-radius: 18px;
-  background: #fff;
-  color: var(--brand-ink, #08164a);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--brand-ink, var(--primary-strong));
   box-shadow: 0 16px 48px rgba(11, 22, 64, 0.25);
   animation: pv-in 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
@@ -29,8 +29,8 @@
   height: 36px;
   border: 0;
   border-radius: 50%;
-  background: var(--brand-sky, #e8f0ff);
-  color: var(--brand-ink, #08164a);
+  background: var(--brand-sky, var(--surface-alt));
+  color: var(--brand-ink, var(--primary-strong));
   cursor: pointer;
 }
 .pv-close { right: 12px; }
@@ -38,49 +38,49 @@
 
 .pv-body { display: grid; justify-items: center; gap: 12px; text-align: center; }
 .pv-body h2 { margin: 4px 0 0; font-size: 1.3rem; }
-.pv-body p { margin: 0; color: var(--brand-soft, #4b5a85); line-height: 1.5; }
-.pv-body p strong { color: var(--brand-ink, #08164a); white-space: nowrap; }
+.pv-body p { margin: 0; color: var(--brand-soft, var(--text-soft)); line-height: 1.5; }
+.pv-body p strong { color: var(--brand-ink, var(--primary-strong)); white-space: nowrap; }
 
 .pv-icon {
   display: grid;
   place-items: center;
   width: 60px;
   height: 60px;
-  border-radius: 18px;
+  border-radius: var(--r-md);
   background: linear-gradient(160deg, #4c82ff, #1f55e8);
-  color: #fff;
+  color: var(--surface);
   box-shadow: 0 8px 18px -6px rgba(31, 85, 232, 0.55), 0 0 0 8px rgba(31, 95, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
-.pv-icon.is-done { background: #19b37b; color: #fff; }
+.pv-icon.is-done { background: var(--success); color: var(--surface); }
 
 .pv-number {
   display: flex;
   align-items: stretch;
   width: 100%;
   margin-top: 6px;
-  border: 2px solid #e2e8f5;
-  border-radius: 14px;
+  border: 2px solid var(--surface-alt);
+  border-radius: var(--r-md);
   overflow: hidden;
-  background: #f7f9fe;
+  background: var(--gray-50);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
-.pv-number:focus-within { border-color: var(--brand-blue, #1f5fff); background: #fff; box-shadow: 0 0 0 4px rgba(31, 95, 255, 0.12); }
+.pv-number:focus-within { border-color: var(--brand-blue, var(--accent)); background: var(--surface); box-shadow: 0 0 0 4px rgba(31, 95, 255, 0.12); }
 .pv-prefix {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 12px 0 14px;
-  border-right: 1px solid #e2e8f5;
+  border-right: 1px solid var(--surface-alt);
   font-weight: 800;
   font-size: 1.1rem;
 }
 .pv-flag { font-size: 1.2rem; line-height: 1; }
-.pv-private { display: inline-flex; align-items: center; gap: 6px; color: var(--brand-soft, #4b5a85); font-size: 0.82rem; }
+.pv-private { display: inline-flex; align-items: center; gap: 6px; color: var(--brand-soft, var(--text-soft)); font-size: 0.82rem; }
 .pv-number-chip {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: -4px; padding: 7px 14px; border: 0; border-radius: 999px;
-  background: var(--brand-sky, #e8f0ff); color: var(--brand-ink, #08164a); font: inherit; font-weight: 800; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; margin-top: -4px; padding: 7px 14px; border: 0; border-radius: var(--r-pill);
+  background: var(--brand-sky, var(--surface-alt)); color: var(--brand-ink, var(--primary-strong)); font: inherit; font-weight: 800; cursor: pointer;
 }
-.pv-number-chip svg { color: var(--brand-blue, #1f5fff); }
+.pv-number-chip svg { color: var(--brand-blue, var(--accent)); }
 .pv-handle { display: none; }
 .pv-number input {
   flex: 1;
@@ -102,21 +102,21 @@
   width: min(54px, calc((100% - 40px) / 6));
   height: 62px;
   padding: 0;
-  border: 2px solid #e2e8f5;
-  border-radius: 14px;
-  background: #f7f9fe;
+  border: 2px solid var(--surface-alt);
+  border-radius: var(--r-md);
+  background: var(--gray-50);
   text-align: center;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, transform 0.15s ease;
   font-size: 1.65rem;
   font-weight: 800;
   color: inherit;
-  caret-color: var(--brand-blue, #1f5fff);
+  caret-color: var(--brand-blue, var(--accent));
 }
-.pv-code input:focus { outline: none; border-color: var(--brand-blue, #1f5fff); background: #fff; box-shadow: 0 0 0 4px rgba(31, 95, 255, 0.12); }
-.pv-code input.is-filled { border-color: #b9ccff; background: #fff; animation: pv-tick 160ms ease-out; }
+.pv-code input:focus { outline: none; border-color: var(--brand-blue, var(--accent)); background: var(--surface); box-shadow: 0 0 0 4px rgba(31, 95, 255, 0.12); }
+.pv-code input.is-filled { border-color: var(--blue-200); background: var(--surface); animation: pv-tick 160ms ease-out; }
 @keyframes pv-tick { 50% { transform: scale(1.06); } }
 .pv-code input:disabled { opacity: 0.6; }
-.pv-code.is-wrong input { border-color: #ef4444; animation: pv-shake 320ms ease; }
+.pv-code.is-wrong input { border-color: var(--danger); animation: pv-shake 320ms ease; }
 @keyframes pv-shake {
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
@@ -132,14 +132,14 @@
   width: 76px;
   height: 76px;
   border-radius: 50%;
-  background: #19b37b;
+  background: var(--success);
   animation: pv-pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 .pv-done-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid #19b37b;
+  border: 3px solid var(--success);
   animation: pv-ring 900ms ease-out 200ms both;
 }
 .pv-done-mark svg { width: 46px; height: 46px; }
@@ -158,9 +158,9 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  border-radius: 999px;
-  background: #e3f7ee;
-  color: #0f7a52;
+  border-radius: var(--r-pill);
+  background: var(--success-soft);
+  color: var(--success-strong);
   font-weight: 800;
   font-size: 0.92rem;
   animation: pv-pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) 560ms both;
@@ -169,13 +169,13 @@
 @keyframes pv-ring { from { opacity: 0.8; transform: scale(1); } to { opacity: 0; transform: scale(1.6); } }
 @keyframes pv-draw { to { stroke-dashoffset: 0; } }
 
-.pv-error { color: #b91c1c; font-weight: 700; font-size: 0.92rem; }
-.pv-status { color: var(--brand-soft, #4b5a85); font-size: 0.92rem; }
+.pv-error { color: var(--red-600); font-weight: 700; font-size: 0.92rem; }
+.pv-status { color: var(--brand-soft, var(--text-soft)); font-size: 0.92rem; }
 .pv-link {
   padding: 6px 4px;
   border: 0;
   background: none;
-  color: var(--brand-blue, #1f5fff);
+  color: var(--brand-blue, var(--accent));
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -184,7 +184,7 @@
 
 /* telefon: cijeli ekran, kao WhatsAppova potvrda broja; plavi sjaj gore, sadržaj odmah ispod */
 @media (max-width: 640px) {
-  .pv-backdrop { padding: 0; align-items: stretch; background: #fff; }
+  .pv-backdrop { padding: 0; align-items: stretch; background: var(--surface); }
   .pv-sheet {
     width: 100%; min-height: 100%; overflow-y: auto; border-radius: 0; box-shadow: none;
     padding: calc(76px + var(--safe-top, env(safe-area-inset-top, 0px))) 22px calc(28px + var(--safe-bottom, 0px));
@@ -192,17 +192,17 @@
     animation: pv-page 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
   }
   .pv-handle { display: none; }
-  .pv-corner { top: calc(14px + var(--safe-top, env(safe-area-inset-top, 0px))); width: 42px; height: 42px; background: #fff; box-shadow: 0 2px 10px rgba(11, 22, 64, 0.1); }
+  .pv-corner { top: calc(14px + var(--safe-top, env(safe-area-inset-top, 0px))); width: 42px; height: 42px; background: var(--surface); box-shadow: 0 2px 10px rgba(11, 22, 64, 0.1); }
   .pv-close { right: 16px; }
   .pv-back { left: 16px; }
   .pv-body { gap: 14px; }
   .pv-body h2 { font-size: 1.6rem; letter-spacing: -0.01em; }
   .pv-body p { font-size: 1.02rem; }
-  .pv-icon { width: 76px; height: 76px; border-radius: 24px; margin-bottom: 6px; }
+  .pv-icon { width: 76px; height: 76px; border-radius: var(--r-lg); margin-bottom: 6px; }
   .pv-icon svg { width: 34px; height: 34px; }
   .pv-number { margin-top: 14px; }
   .pv-number input { padding: 16px 14px; font-size: 1.25rem; }
-  .pv-main { min-height: 54px; margin-top: 10px; border-radius: 14px; font-size: 1.05rem; }
+  .pv-main { min-height: 54px; margin-top: 10px; border-radius: var(--r-md); font-size: 1.05rem; }
   .pv-code { margin-top: 14px; }
   .pv-done-mark { width: 96px; height: 96px; margin-bottom: 6px; }
   .pv-done-mark svg { width: 56px; height: 56px; }

@@ -13,7 +13,7 @@ export const notificationService = {
       .limit(limit)
     if (error) {
       console.error('Supabase notifications fetch failed', { message: error.message, code: error.code })
-      return []
+      throw error
     }
     return data || []
   },

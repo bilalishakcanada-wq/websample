@@ -8,12 +8,14 @@ import { notificationService } from '../../services/notificationService'
 import { NOTIF_CATEGORIES, groupByDay, notificationCategory } from '../../utils/notificationCategory'
 import NotificationCard from '../../components/NotificationCard'
 import { SkeletonNotifRow } from '../../components/Skeleton'
+import LoadFailed from '../../components/LoadFailed'
 
 function NotificationsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const query = useNotifications(user?.id, 50)
-  const items = query.isPending ? null : (query.data || [])
+  const failed = query.isError && !query.data
+  const items = query.isPending ? null : failed ? undefined : (query.data || [])
   const [params, setParams] = useSearchParams()
   const filter = NOTIF_CATEGORIES.some((c) => c.key === params.get('vrsta')) ? params.get('vrsta') : 'all'
   // rows that were unread when they reached this screen keep their "new" look for this visit,
@@ -53,7 +55,7 @@ function NotificationsPage() {
   return (
     <div className="account-section">
       <div className="account-section-head"><h1>Obavijesti</h1></div>
-      {items?.length !== 0 && (
+      {!failed && items?.length !== 0 && (
         <div className="notif-filters" role="tablist" aria-label="Vrsta obavijesti">
           {NOTIF_CATEGORIES.map((category) => (
             <button key={category.key} type="button" role="tab" aria-selected={filter === category.key} className={`notif-pill${filter === category.key ? ' is-active' : ''}`} onClick={() => pick(category.key)}>
@@ -63,6 +65,7 @@ function NotificationsPage() {
           ))}
         </div>
       )}
+      {failed && <LoadFailed title="Obavijesti se nisu učitale" onRetry={() => query.refetch()} />}
       {items === null && <ul className="notif-list">{[1, 2, 3, 4].map((i) => <SkeletonNotifRow key={i} />)}</ul>}
       {items?.length === 0 && (
         <div className="account-empty">

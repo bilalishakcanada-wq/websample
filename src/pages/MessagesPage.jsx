@@ -1,12 +1,12 @@
 import { PrivateImage } from '../components/PrivateFile'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import PushPrompt from '../components/PushPrompt'
 import { MailMascot } from '../app/Mascots'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { keys, useInbox, useThread } from '../hooks/queries'
 import {
-  Archive, ArchiveRestore, ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
+  Archive, ArchiveRestore, ArrowLeft, Ban, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronRight, Flag, Heart, ImagePlus, Lock, MessagesSquare, Search, Send, ShieldCheck, Unlock, UserRound, X,
 } from 'lucide-react'
 import ChatStateNotice from '../components/ChatStateNotice'
 import { jobStatus } from '../utils/jobStatus'
@@ -21,6 +21,8 @@ import { SkeletonRows } from '../components/Skeleton'
 import { promptDialog } from '../utils/dialog'
 import { useBlocks } from '../hooks/useBlocks'
 import { canGoBackInApp } from '../utils/backNav'
+import LoadFailed from '../components/LoadFailed'
+import { useSwitch } from '../hooks/useSwitches'
 
 const FILTERS = [
   ['inbox', 'Inbox'],
@@ -60,6 +62,12 @@ function Avatar({ src, name, size = 44 }) {
 
 const EMPTY = []
 
+// one unsent draft per conversation, kept on this device across restarts (like WhatsApp)
+const draftsKey = (userId) => `zadatak-chat-drafts-${userId}`
+const readDrafts = (userId) => { try { return JSON.parse(localStorage.getItem(draftsKey(userId)) || '{}') || {} } catch { return {} } }
+const writeDrafts = (userId, drafts) => { try { localStorage.setItem(draftsKey(userId), JSON.stringify(drafts)) } catch { /* storage blocked */ } }
+const growsByItself = typeof CSS !== 'undefined' && CSS.supports?.('field-sizing', 'content')
+
 function MessagesPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -77,7 +85,12 @@ function MessagesPage() {
   const threadQuery = useThread(activeId)
   const thread = threadQuery.data || EMPTY
   const setThread = (next) => queryClient.setQueryData(keys.thread(activeId), (current) => (typeof next === 'function' ? next(current || []) : next))
-  const [draft, setDraft] = useState('')
+  const draftsRef = useRef(null)
+  if (draftsRef.current === null) draftsRef.current = readDrafts(user.id)
+  const [draft, setDraft] = useState(() => draftsRef.current[activeId] || '')
+  // switching conversations brings back what was typed for that person, never the other one's text
+  const [draftFor, setDraftFor] = useState(activeId)
+  if (draftFor !== activeId) { setDraftFor(activeId); setDraft(draftsRef.current[activeId] || '') }
   const loading = inboxQuery.isPending
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -87,6 +100,7 @@ function MessagesPage() {
   const imageRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const isPhone = useMediaQuery('(max-width: 768px)')
+  const touchKeyboard = useMediaQuery('(pointer: coarse)')
 
   const loadInbox = () => inboxQuery.refetch().then((result) => { if (result.error) setError(result.error.message); else setError('') })
   useEffect(() => { if (inboxQuery.error) setError(inboxQuery.error.message) }, [inboxQuery.error])
@@ -149,10 +163,68 @@ function MessagesPage() {
   const lastFromOther = thread.length > 0 && thread[thread.length - 1].sender_id !== user.id ? thread[thread.length - 1].id : ''
   useEffect(() => { if (lastFromOther) setOtherTyping(false) }, [lastFromOther])
   useEffect(() => { if (draft.trim()) typingRef.current?.ping() }, [draft])
-
   useEffect(() => {
+    if (!activeId) return
+    const drafts = draftsRef.current
+    if ((drafts[activeId] || '') === draft) return
+    if (draft) drafts[activeId] = draft
+    else delete drafts[activeId]
+    writeDrafts(user.id, drafts)
+  }, [draft, activeId, user.id])
+  // the box grows with the text up to its max height (iOS has no field-sizing yet)
+  useLayoutEffect(() => {
+    const el = inputRef.current
+    if (growsByItself || !el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight + 2, 120)}px`
+  }, [draft, activeId])
+
+  // Scrolling like WhatsApp: a conversation opens at its newest message; a new message scrolls into view
+  // only when the person is already at the bottom (or sent it), otherwise a "Nove poruke" button appears,
+  // so reading older messages is never interrupted
+  const nearBottomRef = useRef(true)
+  const scrolledForRef = useRef('')
+  const [unseen, setUnseen] = useState(0)
+  const lastId = thread.length ? thread[thread.length - 1].id : ''
+  const onThreadScroll = () => {
+    const el = listRef.current
+    if (!el) return
+    nearBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+    if (nearBottomRef.current) setUnseen(0)
+  }
+  const jumpToEnd = () => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
-  }, [thread, otherTyping])
+    nearBottomRef.current = true
+    setUnseen(0)
+  }
+  useLayoutEffect(() => {
+    const el = listRef.current
+    if (!el || !activeId) return
+    if (scrolledForRef.current !== activeId) {
+      if (!lastId) return
+      scrolledForRef.current = activeId
+      el.scrollTop = el.scrollHeight
+      nearBottomRef.current = true
+      setUnseen(0)
+      return
+    }
+    const last = thread[thread.length - 1]
+    if (!last) return
+    if (nearBottomRef.current || last.sender_id === user.id) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    else setUnseen((n) => n + 1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastId, activeId])
+  useEffect(() => {
+    if (otherTyping && nearBottomRef.current) listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
+  }, [otherTyping])
+  // a photo that finishes loading makes its bubble taller: stay at the bottom if that is where the person was
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return undefined
+    const onLoad = (event) => { if (event.target.tagName === 'IMG' && nearBottomRef.current) el.scrollTop = el.scrollHeight }
+    el.addEventListener('load', onLoad, true)
+    return () => el.removeEventListener('load', onLoad, true)
+  }, [activeId, isPhone])
 
   const openConversation = (id) => {
     const fromInbox = Boolean(location.state?.fromInbox)
@@ -250,10 +322,12 @@ function MessagesPage() {
     }
   }
 
+  const imagesSwitch = useSwitch('chat_images')
   const sendImage = async (event) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file || !active) return
+    if (!imagesSwitch.on) { setError(imagesSwitch.message || 'Slanje slika je privremeno isključeno.'); return }
     setError('')
     setUploading(true)
     try {
@@ -269,6 +343,8 @@ function MessagesPage() {
 
   const onKeyDown = (event) => {
     // a held Enter repeats keydown: only the first press sends; Enter that confirms an IME composition doesn't send
+    // on a phone Enter makes a new line and the send button sends, like WhatsApp
+    if (touchKeyboard) return
     if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); if (!event.repeat) sendMessage() }
   }
 
@@ -317,7 +393,7 @@ function MessagesPage() {
         unreadTotal={unreadTotal} openConversation={openConversation} grouped={grouped} thread={thread} lastOwnRead={lastOwnRead}
         listRef={listRef} inputRef={inputRef} imageRef={imageRef} draft={draft} setDraft={setDraft} onKeyDown={onKeyDown} sendMessage={sendMessage} sendImage={sendImage} sending={sending}
         uploading={uploading} error={error} notice={notice} togglePref={togglePref} reportConversation={reportConversation} toggleBlock={toggleBlock} otherBlocked={otherBlocked} timeOf={timeOf} shortDate={shortDate}
-        retry={() => loadInbox()} chatState={chatState} otherTyping={otherTyping}
+        retry={() => loadInbox()} chatState={chatState} otherTyping={otherTyping} onThreadScroll={onThreadScroll} unseen={unseen} jumpToEnd={jumpToEnd}
       />
     )
   }
@@ -348,7 +424,8 @@ function MessagesPage() {
             </div>
             <div className="chat-list">
               {loading && <SkeletonRows n={4} />}
-              {!loading && visible.length === 0 && (
+              {!loading && inboxQuery.isError && inbox.length === 0 && <LoadFailed title="Poruke se nisu učitale" onRetry={loadInbox} />}
+              {!loading && !(inboxQuery.isError && inbox.length === 0) && visible.length === 0 && (
                 <div className="chat-list-empty">
                   <MailMascot className="chat-list-mascot" />
                   <p>{inbox.length === 0 ? 'Još nema poruka. Razgovor se otvara čim neka ponuda bude prihvaćena.' : 'Nema poruka za ovaj filter.'}</p>
@@ -424,7 +501,7 @@ function MessagesPage() {
                   </Link>
                 )}
 
-                <div className="chat-thread" ref={listRef}>
+                <div className="chat-thread" ref={listRef} onScroll={onThreadScroll}>
                   {thread.length === 0 && (
                     <div className="chat-thread-intro">
                       <UserRound size={22} />
@@ -453,6 +530,7 @@ function MessagesPage() {
                   ))}
                   {lastOwnRead && <div className="chat-seen-note">Pročitano {timeOf(lastOwnRead.read_at)}</div>}
                   {otherTyping && <div className="chat-typing" aria-label={`${active.other_name} kuca`}><i /><i /><i /></div>}
+                  {unseen > 0 && <button type="button" className="chat-jump" onClick={jumpToEnd}><ChevronDown size={16} /> Nove poruke ({unseen})</button>}
                 </div>
 
                 {error && <div className="form-error chat-alert">{error}</div>}
@@ -473,9 +551,9 @@ function MessagesPage() {
                       rows={1}
                       maxLength={2000}
                     />
-                    <button data-testid="chat-send" type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()}><Send size={18} /></button>
+                    <button data-testid="chat-send" type="submit" className="chat-send" aria-label="Pošalji" disabled={sending || !draft.trim()} onPointerDown={(event) => event.preventDefault()}><Send size={18} /></button>
                   </form>
-                  <p className="chat-composer-hint"><ShieldCheck size={12} /> Enter šalje, Shift+Enter novi red. Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
+                  <p className="chat-composer-hint"><ShieldCheck size={12} /> {touchKeyboard ? '' : 'Enter šalje, Shift+Enter novi red. '}Poruke se automatski provjeravaju (Pravilo #1 i zabranjen sadržaj).</p>
                   </>
                 ) : (
                   <ChatStateNotice state={chatState} listingId={active.listing_id} onUnblock={toggleBlock} />

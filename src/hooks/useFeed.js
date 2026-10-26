@@ -79,7 +79,7 @@ export function useJobFeed({ userId = null, limit = 8, poolSize = 40 } = {}) {
 
   // the heading is decided up front too, so it doesn't change length (and push the list) when the reads land
   const personalised = Boolean(userId) && (!settled || Boolean(taste || matches.data?.length))
-  return { feed, loading: !settled, personalised }
+  return { feed, loading: !settled, personalised, failed: pool.isError && !pool.data, retry: () => pool.refetch() }
 }
 
 export function useProviderFeed({ userId = null, limit = 6 } = {}) {

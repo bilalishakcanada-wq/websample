@@ -1,4 +1,4 @@
-// Notification mails sent through send-transactional-email (Resend, info@zadatak.com).
+// Notification mails sent through send-transactional-email (Resend, info@zadatak.ba).
 // The look comes from emailLayouts.js, the same three Bosnian looks (A/B/C) as the
 // Supabase Auth templates; each mail picks one at random.
 import { escapeHtml, pickVariant, renderEmail } from './emailLayouts.js'
@@ -19,7 +19,7 @@ export function emailSiteUrl(value: string): URL {
   return url
 }
 
-const SECURITY = 'Zadatak nikada ne traži vašu lozinku ni sigurnosni link. Trebate pomoć? Pišite nam na <a href="mailto:info@zadatak.com" style="color:#1F5BFF">info@zadatak.com</a>.'
+const SECURITY = 'Zadatak nikada ne traži vašu lozinku ni sigurnosni link. Trebate pomoć? Pišite nam na <a href="mailto:info@zadatak.ba" style="color:#1F5BFF">info@zadatak.ba</a>.'
 const KICKERS: Record<BrandedEmailEvent, string> = {
   WELCOME_CONFIRM: 'Dobrodošli', PASSWORD_RESET: 'Sigurnost računa', JOB_PUBLISHED: 'Oglas objavljen',
   NEW_BID_RECEIVED: 'Nova ponuda', JOB_ACCEPTED: 'Posao dogovoren', JOB_COMPLETED: 'Posao završen',
@@ -44,7 +44,7 @@ function layout(content: Content, authTemplate = false, variant: EmailVariant = 
     footerNote: e(footer),
   })
   return { subject: clean(content.subject, 180), html,
-    text: [content.heading, content.detail, ...content.paragraphs, `${content.action}: ${content.actionUrl}`, footer, 'Trebate pomoć? Pišite na info@zadatak.com. Nikada ne šaljite lozinku niti sigurnosni link.', 'Zadatak.ba'].filter(Boolean).join('\n\n') }
+    text: [content.heading, content.detail, ...content.paragraphs, `${content.action}: ${content.actionUrl}`, footer, 'Trebate pomoć? Pišite na info@zadatak.ba. Nikada ne šaljite lozinku niti sigurnosni link.', 'Zadatak.ba'].filter(Boolean).join('\n\n') }
 }
 
 function contentFor(type: BrandedEmailEvent, data: EmailData): Content {

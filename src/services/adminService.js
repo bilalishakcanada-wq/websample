@@ -95,6 +95,13 @@ export const adminService = {
     return data || []
   },
 
+  /** Client–worker pairs that may have moved off the platform (supabase/security/12_off_platform_pairs.sql). */
+  async suspiciousPairs(limit = 50) {
+    const { data, error } = await supabase.rpc('admin_suspicious_pairs', { p_limit: limit })
+    if (error) throw new Error(staffErrorMessage(error))
+    return data || []
+  },
+
   async listStaff() {
     const { data, error } = await supabase.rpc('admin_list_staff')
     if (error) {

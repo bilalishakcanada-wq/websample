@@ -32,7 +32,7 @@ for f in identity/bids_require_verified security/05_marketplace_scam_guards paym
          algorithms/03_matching algorithms/04_embeddings providers/01_simple_mode communication/03_email_confirmation \
          communication/04_user_blocks reach/01_device_location_and_travel_requests \
          airtasker-lokacija/01_bez_dosega airtasker-lokacija/02_odakle_dokle airtasker-lokacija/03_obavijesti_po_udaljenosti \
-         identity/assign_require_verified security/10_suspension_lockout security/11_phone_verification_guard \
+         identity/assign_require_verified security/10_suspension_lockout security/11_phone_verification_guard security/12_off_platform_pairs \
          stability/01_feature_switches; do
   [ -f "$REPO/supabase/$f.sql" ] || continue
   # the live mail outbox isn't in this copy: a stand-in of the same shape lets the email-confirmation SQL apply

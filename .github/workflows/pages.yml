@@ -118,6 +118,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: e2e
+    outputs:
+      build: ${{ steps.spa.outputs.build }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -136,7 +138,10 @@ jobs:
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
         run: npm run build
       - name: SPA fallback + no Jekyll
-        run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+        id: spa
+        run: |
+          cp dist/index.html dist/404.html && touch dist/.nojekyll
+          echo "build=$(node -p "require('./dist/version.json').build")" >> "$GITHUB_OUTPUT"
       # every public page (the legal ones Google Play checks too) already has its own <page>.html from
       # `npm run build` (scripts/static-pages.mjs), so it answers 200 instead of the fallback's 404
       # GitHub's CDN keeps index.html for ~10 minutes: someone who loads a stale copy right after a
@@ -160,3 +165,45 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           force_orphan: true
+
+  # After the deploy the robot looks at the live site as a guest (no logins, no presses, nothing written):
+  # covered or overlapping buttons, things cut off on phones, crashes and failed requests. The report
+  # (screenshots with the problem outlined in red) is attached to the run as "robot-live-report".
+  live-check:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+    env:
+      SITE: https://bilalishakcanada-wq.github.io/websample
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Wait until the new build is live
+        run: |
+          for i in $(seq 1 60); do
+            live=$(curl -fsS "$SITE/version.json?t=$(date +%s)" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).build" 2>/dev/null || true)
+            [ "$live" = "${{ needs.build.outputs.build }}" ] && echo "live: $live" && exit 0
+            sleep 10
+          done
+          echo "::warning::The new build did not show up within 10 minutes; checking whatever is live."
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Robot looks at the live site as a guest
+        run: node robot/explore.mjs
+        env:
+          ROBOT_BASE_URL: ${{ env.SITE }}
+          ROBOT_ROLES: guest
+      - name: Report
+        if: always()
+        run: |
+          if [ -f robot-report/report.md ]; then { head -c 60000 robot-report/report.md >> "$GITHUB_STEP_SUMMARY"; head -c 8000 robot-report/report.md; }; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robot-live-report
+          path: robot-report/
+          retention-days: 14

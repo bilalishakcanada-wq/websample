@@ -198,6 +198,8 @@ const contentSecurityPolicy = () => {
         const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => sha(m[1]))
         const handlers = [...html.matchAll(/\son[a-z]+="([^"]*)"/g)].map((m) => sha(decode(m[1])))
         const turnstile = 'https://challenges.cloudflare.com'
+        // error reports go straight to Sentry's ingest host named in the DSN
+        const sentry = (() => { try { return new URL(env.VITE_SENTRY_DSN || process.env.VITE_SENTRY_DSN || '').origin } catch { return '' } })()
         const policy = [
           "default-src 'self'",
           `script-src 'self' ${[...new Set(scripts)].join(' ')}${handlers.length ? ` 'unsafe-hashes' ${[...new Set(handlers)].join(' ')}` : ''} ${turnstile}`,
@@ -207,7 +209,7 @@ const contentSecurityPolicy = () => {
           `img-src 'self' data: blob: https: ${supabase}`.trim(),
           `media-src 'self' data: blob: https: ${supabase}`.trim(),
           "font-src 'self' data:",
-          `connect-src 'self' ${supabase} ${realtime} https://tiles.openfreemap.org https://ipwho.is ${turnstile} data: blob:`.replace(/\s+/g, ' '),
+          `connect-src 'self' ${supabase} ${realtime} https://tiles.openfreemap.org https://ipwho.is ${turnstile} ${sentry} data: blob:`.replace(/\s+/g, ' '),
           "worker-src 'self' blob:",
           `frame-src 'self' ${turnstile}`,
           "manifest-src 'self'",
@@ -249,7 +251,8 @@ export default defineConfig({
   // the desktop app may assign a port via PORT when 5173 is already taken
   server: { port: Number(process.env.PORT) || 5173 },
   build: {
-    target: 'es2022',
+    // the same oldest phones as the CSS below: Android 11 WebViews still run Chrome 90, which can't parse newer syntax
+    target: ['es2020', 'safari14', 'chrome87', 'firefox90', 'edge88'],
     cssCodeSplit: true,
     cssMinify: 'lightningcss',
     // the oldest phones the site supports: keeps the vh fallbacks above in the minified CSS

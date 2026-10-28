@@ -104,7 +104,12 @@ export function lazyImport(factory) {
     try { alreadyTried = sessionStorage.getItem(RELOAD_FLAG) === '1' } catch { /* ignore */ }
     if (chunkGone && !alreadyTried) {
       try { sessionStorage.setItem(RELOAD_FLAG, '1') } catch { /* ignore */ }
-      window.location.reload()
+      // a plain reload can get the old index.html again from the HTTP cache (GitHub Pages keeps it
+      // 10 min), which points at the same missing chunks: ask for the new build by its id instead
+      fetch(`${import.meta.env.BASE_URL}version.json`, { cache: 'no-store' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => (data?.build ? reloadFresh(data.build) : window.location.reload()))
+        .catch(() => window.location.reload())
       return new Promise(() => {}) // keep Suspense pending while the page reloads
     }
     throw error

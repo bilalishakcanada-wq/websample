@@ -8,7 +8,7 @@ import { SkeletonList } from '../../components/Skeleton'
 
 const FEED_KINDS = [
   ['', 'Sve'], ['message', 'Poruke'], ['listing', 'Oglasi'], ['bid', 'Ponude'], ['review', 'Recenzije'],
-  ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'], ['login', 'Prijave na nalog'], ['errors', 'Greške aplikacije'],
+  ['profile', 'Nalozi'], ['moderation', 'Pravilo #1'], ['report', 'Prijave'], ['login', 'Prijave na nalog'], ['pairs', 'Sumnjivi parovi'], ['errors', 'Greške aplikacije'],
 ]
 const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '★', profile: '👤', moderation: '🛡️', report: '🚩', login: '🔑' }
 
@@ -40,6 +40,56 @@ function ClientErrors({ openUser }) {
   ))
 }
 
+// 1 posao, 2–4 posla, 5+ poslova (11–14 are always poslova)
+const jobsWord = (n, one, few, many) => (n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many)
+
+const pairReasons = (row) => [
+  row.quick_cancels > 0 && `posao otkazan u roku od 48 h poslije uplate (${row.quick_cancels}×)`,
+  row.later_unhired > 0 && `poslije zajedničkog posla klijent zatvorio ${row.later_unhired} ${jobsWord(row.later_unhired, 'sličan posao', 'slična posla', 'sličnih poslova')} bez ikoga`,
+  row.contact_attempts > 0 && `pokušaj slanja kontakta u porukama (${row.contact_attempts}×)`,
+].filter(Boolean)
+
+/** Client–worker pairs that may have continued off the platform: a lead to check, not proof. */
+function SuspiciousPairs({ openUser }) {
+  const [rows, setRows] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    adminService.suspiciousPairs().then(setRows).catch((requestError) => setError(requestError.message))
+  }, [])
+  if (error) return <div className="form-error">{error}</div>
+  if (rows === null) return <SkeletonList n={4} h={96} />
+  if (rows.length === 0) return <p className="muted-text">Nema sumnjivih parova. Klijenti i izvođači rade preko Zadatka.</p>
+  const person = (id, name, memberId) => (
+    <>
+      <button type="button" className="adm-userlink" onClick={() => openUser(id)}>{name || 'Nepoznat'}</button>
+      {memberId && <span className="uid-chip">{memberId}</span>}
+    </>
+  )
+  return (
+    <>
+      <p className="muted-text">Parovi klijent i izvođač koji su se možda dogovorili van Zadatka. Ovo je trag za provjeru, ne dokaz: otvori oba dosijea prije odluke.</p>
+      {rows.map((row) => (
+        <div key={`${row.client_id}-${row.provider_id}`} className="admin-row">
+          <div className="admin-feed-main">
+            <span className="admin-feed-kind">🔗</span>
+            <div>
+              <strong>Klijent {person(row.client_id, row.client_name, row.client_member_id)} · izvođač {person(row.provider_id, row.provider_name, row.provider_member_id)}</strong>
+              <p className="muted-text">
+                {row.jobs_together} {jobsWord(row.jobs_together, 'posao', 'posla', 'poslova')} zajedno, {row.completed_together} završeno · zadnji {formatBosnianDate(row.last_job_at)}
+              </p>
+              <ul className="admin-snippet">{pairReasons(row).map((reason) => <li key={reason}>{reason}</li>)}</ul>
+            </div>
+          </div>
+          <div className="admin-row-actions">
+            <button type="button" className="ghost-button" onClick={() => openUser(row.client_id)}>Dosije klijenta</button>
+            <button type="button" className="ghost-button" onClick={() => openUser(row.provider_id)}>Dosije izvođača</button>
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
+
 function OversightTab() {
   const { openUser } = useStaff()
   const [kind, setKind] = useState('')
@@ -54,7 +104,7 @@ function OversightTab() {
   useEffect(() => { kindRef.current = kind }, [kind])
 
   const load = (nextKind = kindRef.current) => {
-    if (nextKind === 'errors') return // its own loader (ClientErrors)
+    if (nextKind === 'errors' || nextKind === 'pairs') return // their own loaders (ClientErrors, SuspiciousPairs)
     setLoading(true)
     adminService.activityFeed({ kind: nextKind || null, limit: 150 }).then(setRows).catch((requestError) => setError(requestError.message)).finally(() => setLoading(false))
   }
@@ -96,7 +146,8 @@ function OversightTab() {
       </div>
       {error && <div className="form-error">{error}</div>}
       {kind === 'errors' && <ClientErrors openUser={openUser} />}
-      {kind !== 'errors' && (loading && rows.length === 0 ? <SkeletonList n={4} h={96} /> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
+      {kind === 'pairs' && <SuspiciousPairs openUser={openUser} />}
+      {kind !== 'errors' && kind !== 'pairs' && (loading && rows.length === 0 ? <SkeletonList n={4} h={96} /> : rows.length === 0 ? <p className="muted-text">Nema aktivnosti.</p> : rows.map((row) => (
         <div key={`${row.kind}-${row.id}`} className={`admin-row feed-${row.kind}`}>
           <div className="admin-feed-main">
             <span className="admin-feed-kind">{KIND_ICON[row.kind] || '•'}</span>

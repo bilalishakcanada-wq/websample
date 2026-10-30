@@ -19,8 +19,8 @@ const KIND = {
   payout_return: ['Povrat isplate na balans', RefreshCcw],
 }
 
-/** One move on the balance (my_wallet().transactions), used on Balans and in Historija. */
-function LedgerRow({ row }) {
+/** One move on the balance (my_wallet().transactions), used on Balans (short: date only) and in Historija. */
+function LedgerRow({ row, short = false }) {
   const [label, Icon] = KIND[row.kind] || ['Transakcija', Receipt]
   const positive = Number(row.amount) > 0
   return (
@@ -28,7 +28,7 @@ function LedgerRow({ row }) {
       <span className={`wallet-sign ${positive ? 'plus' : 'minus'}`}><Icon size={16} /></span>
       <div>
         <strong>{label}{row.note ? ` · ${row.note}` : ''}</strong>
-        <small>{formatBosnianDate(row.created_at)} · stanje nakon: {money(row.balance_after)}</small>
+        <small>{formatBosnianDate(row.created_at)}{short ? '' : ` · stanje nakon: ${money(row.balance_after)}`}</small>
       </div>
       <b className={positive ? 'plus' : 'minus'}>{positive ? '+' : '−'}{money(Math.abs(Number(row.amount)))}</b>
     </div>

@@ -97,7 +97,10 @@ function WalletPage() {
       <PaymentTabs />
 
       <section className="bal-card" aria-label="Stanje računa">
-        <span className="bal-label">Dostupno</span>
+        <div className="bal-top">
+          <span className="bal-label">Dostupno</span>
+          {totals.reserved > 0 && <span className="bal-total">Ukupno s rezervisanim {money(Number(wallet.balance || 0) + totals.reserved)}</span>}
+        </div>
         <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
         <div className="bal-actions">
           <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
@@ -107,7 +110,7 @@ function WalletPage() {
 
       <dl className="bal-stats">
         <div><span className="bal-stat-icon is-held"><Lock size={18} /></span><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>
-        <div><span className="bal-stat-icon is-coming"><Clock size={18} /></span><dt>Stiže na balans</dt><dd>{money(totals.incoming)}</dd></div>
+        <div><span className="bal-stat-icon is-coming"><Clock size={18} /></span><dt>Stiže na balans</dt><dd className={totals.incoming > 0 ? 'is-plus' : ''}>{totals.incoming > 0 ? '+' : ''}{money(totals.incoming)}</dd></div>
         <div><span className="bal-stat-icon is-out"><Landmark size={18} /></span><dt>Može se isplatiti</dt><dd>{payout ? money(payout.withdrawable) : '-'}</dd></div>
       </dl>
 
@@ -167,7 +170,7 @@ function WalletPage() {
               <span>Uplate, rezervacije, zarade i isplate pojaviće se ovdje.</span>
             </div>
           )
-          : <div className="wallet-list">{recent.map((row) => <LedgerRow key={row.id} row={row} />)}</div>}
+          : <div className="wallet-list">{recent.map((row) => <LedgerRow key={row.id} row={row} short />)}</div>}
       </section>
 
       <div className="wallet-info">

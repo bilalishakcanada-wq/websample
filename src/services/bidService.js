@@ -5,14 +5,8 @@ export const bidService = {
   async listForListing(listingId) {
     if (!/^[0-9a-f-]{36}$/i.test(listingId)) return []
 
-    const { data, error } = await supabase
-      .from('bids')
-      .select('id, listing_id, bidder_id, amount, message, status, created_at, bidder:public_profiles!bids_bidder_id_fkey(display_name, avatar_url)')
-      .eq('listing_id', listingId)
-      .order('created_at', { ascending: false })
-
-    if (!error) return data || []
-
+    // public_profiles is a view over public_profile_cards, so PostgREST can't join it by the bids FK:
+    // fetch the offers, then the bidders' names in a second query
     const { data: bids, error: plainError } = await supabase
       .from('bids')
       .select('id, listing_id, bidder_id, amount, message, status, created_at')

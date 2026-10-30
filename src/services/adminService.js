@@ -84,6 +84,13 @@ export const adminService = {
     return data
   },
 
+  /** New accounts and first-week activation per week (supabase/analytics/01_signups_activation.sql). */
+  async growth(weeks = 8) {
+    const { data, error } = await supabase.rpc('admin_growth', { p_weeks: weeks })
+    if (error) throw new Error(staffErrorMessage(error))
+    return data || []
+  },
+
   /** Crash reports from the app (beta): newest first. */
   async clientErrors(limit = 40) {
     const { data, error } = await supabase

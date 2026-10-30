@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import CountUp from '../components/CountUp'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
-  Award, BellRing, Coins, Power, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, UsersRound, Users,
+  Award, BellRing, Coins, Power, TrendingUp, IdCard, LifeBuoy, MessageSquare, Radar, ScanEye, Search, ShieldAlert, ShieldCheck, Tag, UsersRound, Users,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { adminService } from '../services/adminService'
@@ -16,6 +16,7 @@ import TeamTab from './admin/TeamTab'
 import BadgesTab from './admin/BadgesTab'
 import WalletTab from './admin/WalletTab'
 import SwitchesTab from './admin/SwitchesTab'
+import GrowthTab from './admin/GrowthTab'
 import { ListingsTab, ModerationTab, RegistryTab, ReportsTab, SupportTab, VerificationTab } from './admin/SimpleTabs'
 
 const TABS = [
@@ -30,6 +31,7 @@ const TABS = [
   { id: 'verification', label: 'Verifikacija', icon: ShieldCheck, hint: 'Dokumenti i licence', counter: 'verifications_pending', adminOnly: true },
   { id: 'listings', label: 'Oglasi', icon: Tag, hint: 'Svi oglasi', adminOnly: true },
   { id: 'badges', label: 'Značke', icon: Award, hint: 'Katalog i dodjela', adminOnly: true },
+  { id: 'growth', label: 'Rast', icon: TrendingUp, hint: 'Novi nalozi i aktivacija po sedmicama', adminOnly: true },
   { id: 'wallet', label: 'Balans', icon: Coins, hint: 'Stanja računa i transakcije', adminOnly: true },
   { id: 'switches', label: 'Prekidači', icon: Power, hint: 'Isključi funkciju bez nove verzije', adminOnly: true },
   { id: 'team', label: 'Tim', icon: UsersRound, hint: 'Admini, moderatori, dnevnik', adminOnly: true },
@@ -154,6 +156,7 @@ function AdminPage({ mode = 'admin' }) {
             {isAdminMode && tab === 'verification' && <VerificationTab />}
             {isAdminMode && tab === 'listings' && <ListingsTab />}
             {isAdminMode && tab === 'badges' && <BadgesTab />}
+            {isAdminMode && tab === 'growth' && <GrowthTab />}
             {isAdminMode && tab === 'wallet' && <WalletTab />}
             {isAdminMode && tab === 'switches' && <SwitchesTab />}
             {isAdminMode && tab === 'team' && <TeamTab />}

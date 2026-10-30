@@ -12574,8 +12574,8 @@ body:has(.profile-cta-bar) .support-chat {
 .wallet-kpi { display: grid; gap: 4px; padding: 16px; border-radius: var(--r-md); background: var(--surface-soft); color: var(--primary); }
 .wallet-kpi strong { font-family: var(--font-display); font-stretch: 92%; font-size: 1.6rem; line-height: 1; color: var(--primary-strong); }
 .wallet-kpi span { font-size: 0.76rem; font-weight: 700; color: var(--text-soft); }
-.wallet-kpi.main { background: linear-gradient(135deg, #0a1f63, #1b4a8a); color: var(--accent); }
-.wallet-kpi.main strong { color: var(--accent); }
+.wallet-kpi.main { background: linear-gradient(135deg, #0a1f63, #1b4a8a); color: #ffffff; }
+.wallet-kpi.main strong { color: #ffffff; }
 .wallet-kpi.main span { color: rgba(255, 255, 255, 0.72); }
 .wallet-top-amount { font-family: var(--font-display); font-stretch: 95%; color: var(--primary-strong); }
 .credits-now { margin-left: auto; font-family: var(--font-display); font-stretch: 95%; font-size: 1.1rem; color: var(--primary-strong); }
@@ -13606,3 +13606,23 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .filter-search:focus-within,
 .city-picker-search:focus-within,
 .help-hero-search:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* Admin → Rast: weekly signups and activation */
+.wallet-kpis.growth-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.growth-table { display: grid; font-size: 0.9rem; }
+.growth-row { display: grid; grid-template-columns: 1fr 1fr 1.4fr 1fr 1fr; gap: 8px; padding: 9px 4px; border-bottom: 1px solid var(--stroke); }
+.growth-row:last-child { border-bottom: none; }
+.growth-head { font-size: 0.74rem; font-weight: 800; color: var(--text-soft); }
+@media (max-width: 560px) {
+  .wallet-kpis.growth-kpis { grid-template-columns: 1fr; }
+  .growth-row { grid-template-columns: 1fr 1fr 1.4fr; }
+  .growth-row > :nth-child(n + 4) { display: none; }
+}
+
+/* Admin → Podrška: messages from the Kontakt page */
+.contact-inbox { margin-top: 14px; }
+.contact-inbox-item { display: grid; gap: 6px; margin-top: 8px; padding: 12px 0 0; border-top: 1px solid var(--stroke); }
+.contact-inbox-item p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.contact-inbox-item.is-open strong::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--primary); vertical-align: middle; }
+.contact-inbox-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.contact-inbox-head a { overflow-wrap: anywhere; }
+.contact-inbox-item .ghost-button { justify-self: start; }

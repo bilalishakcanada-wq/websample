@@ -20,6 +20,29 @@ export const contactService = {
     }
   },
 
+  /** Admin: messages sent through the Kontakt page, newest first. */
+  async listForAdmin(limit = 50) {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('id, user_id, name, email, topic, message, status, created_at')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (error) {
+      console.error('Supabase contact list failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+    return data || []
+  },
+
+  /** Admin: mark a Kontakt message as handled (or open again). */
+  async setStatus(id, status) {
+    const { error } = await supabase.from('contact_messages').update({ status }).eq('id', id)
+    if (error) {
+      console.error('Supabase contact update failed', { message: error.message, code: error.code })
+      throw publicError()
+    }
+  },
+
   async categoryPriceStats() {
     const { data, error } = await supabase.rpc('category_price_stats')
     if (error) {

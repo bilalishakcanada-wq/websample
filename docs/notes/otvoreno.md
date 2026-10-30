@@ -4,6 +4,7 @@ Stanje na 30.10.2026. Briši stavku kad je gotova. Nazad: [[README]]
 
 ## Čeka na sd
 
+- **Supabase > Authentication > Attack Protection:** uključiti zaštitu od procurjelih lozinki. (30.10.)
 - **Supabase Pro (25 USD mjesečno).** Besplatni plan nema rezervne kopije baze, a u bazi je novac korisnika.
   Supabase > Billing > Upgrade to Pro. (Traženo 28.10.)
 - **zadatak.ba na Cloudflare.** Na GitHubu dodati tajne `CLOUDFLARE_API_TOKEN` i `CLOUDFLARE_ACCOUNT_ID`;

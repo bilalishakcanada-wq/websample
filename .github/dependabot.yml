@@ -1,0 +1,15 @@
+# Provjera zavisnosti: Dependabot otvara PR samo kad paket ima poznat sigurnosni propust
+# (open-pull-requests-limit: 0 isključuje obične nadogradnje verzija).
+# Radi kad je uključeno: GitHub > Settings > Code security > Dependabot security updates.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

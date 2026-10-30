@@ -58,7 +58,11 @@ jobs:
           PID=$(adb shell pidof ba.zadatak.app | tr -d '\r')
           adb forward tcp:9222 localabstract:webview_devtools_remote_$PID
           curl -s http://127.0.0.1:9222/json/version
+          adb logcat -c
           node check.mjs || true
+          adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -3
+          adb shell pidof ba.zadatak.app || echo "app process gone"
+          adb logcat -d | grep -iE "AndroidRuntime|FATAL|ActivityTaskManager: START|ActivityManager: (Process|Kill)|ba\.zadatak|Capacitor|cr_|chromium" | grep -v "OpenGL\|EGL" | head -80
           adb exec-out screencap -p > screens/prijava.png
           EOF
       - name: Enable KVM

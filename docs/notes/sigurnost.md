@@ -2,10 +2,10 @@
 
 Provjereno na kodu, git historiji i živoj bazi (kao gost i kao običan prijavljen korisnik, sve u transakciji koja se vraća). Nazad: [[README]]
 
-## Popravljeno u PR-u (baza čeka odobrenje sd)
+## Popravljeno (PR #105, na živoj bazi od 30.10., provjereno)
 
 `supabase/security/13_lock_roles_and_records.sql`:
-- **Bilo ko prijavljen mogao je sebi dati ulogu ADMIN** (politika `user_roles_manage_own`). Dokazano: poslije upisa `is_admin()` vraća true i nalog vidi sve profile. Sada uloge mijenja samo `admin_set_role()`.
+- **Bilo ko prijavljen mogao je sebi dati ulogu ADMIN** (politika `user_roles_manage_own`). Dokazano: poslije upisa `is_admin()` vraća true i nalog vidi sve profile. Sada uloge mijenja samo `admin_set_role()`. Na bazi i dalje samo 3 uloge (1 admin, 2 moderatora), nema lažnih potvrda telefona, plaćanja ni razgovora bez posla.
 - Korisnik mogao sam označiti broj telefona kao potvrđen (okidač iz `11_phone_verification_guard.sql` nije bio na bazi).
 - Korisnik mogao sam otvoriti razgovor s bilo kim, bez posla, i pisati mu; ili zamijeniti drugog učesnika. Sada razgovore otvara samo prihvatanje ponude.
 - Prijavilac mogao sam zatvoriti ili obrisati svoju prijavu.

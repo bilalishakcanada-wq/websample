@@ -16,6 +16,8 @@ Ostalo u PR-u: `npm audit fix` (express, multer, body-parser, proxy-addr, qs), `
 
 ## Već uredu
 
+- Oba moderatora dodao je admin nalog sd preko Admin > Osoblje (zapis u `staff_actions`, 17.09. i 12.10.).
+
 - Ključevi: u repou i historiji (svih 84 grana) samo javni anon ključ. Service role i ostale tajne samo u Supabase/GitHub tajnama.
 - RLS uključen na svim tabelama. Gost vidi samo objavljene poslove, javne kartice profila (bez emaila i telefona), recenzije i pitanja.
 - Tuđi profili, poruke, isplate, transakcije: prijavljen korisnik vidi 0 redova. Balans, status naloga, identitet, ponude, provizije, prekidači, značke: zaštićeni okidačima i politikama (provjereno).
@@ -27,7 +29,6 @@ Ostalo u PR-u: `npm audit fix` (express, multer, body-parser, proxy-addr, qs), `
 ## Nađeno, nije popravljeno (čeka odluku sd)
 
 - Stari beta Android ključ (`android/app/beta.keystore`, lozinka "android") je u git historiji (27.09.). Više se ne koristi (trenutni beta ključ je drugi, Play ključ je drugi). Brisanje iz historije prepisuje historiju; preporuka: ne treba.
-- Jedan od dva moderatora (dodan 17.09., ime izgleda kao nasumična slova) treba provjeriti u Admin > Osoblje: da li je namjerno dodan.
 - Supabase panel: uključiti "Prevent use of leaked passwords"; Turnstile CAPTCHA nije uključen (treba Cloudflare site i secret key, koraci u `docs/SIGURNOST.md`).
-- `zod` (koristi ga sajt) ima propust koji se popravlja tek verzijom 4; utiče samo na pregledač korisnika koji ga sam izazove.
+- `zod` ima propust (popravka tek u verziji 4). Koristi ga samo Express server u `server/`, koji ne radi na produkciji; sajt ga nema u buildu.
 - IBAN u `payout_accounts` nije posebno šifrovan (baza je šifrovana na disku, RLS: samo vlasnik).

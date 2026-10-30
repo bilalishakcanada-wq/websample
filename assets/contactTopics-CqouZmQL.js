@@ -1,0 +1,1 @@
+var e=[{value:`account`,label:`Nalog i prijava`},{value:`listing`,label:`Oglas ili ponuda`},{value:`payment`,label:`Plaćanje i pretplata`},{value:`report`,label:`Prijava zloupotrebe`},{value:`business`,label:`Saradnja / firme`},{value:`other`,label:`Nešto drugo`}];export{e as t};

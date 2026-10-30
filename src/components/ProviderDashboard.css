@@ -33,7 +33,7 @@
 .pd-card-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 14px; }
 .pd-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--btn-sm); padding: 8px 14px; border-radius: var(--r-pill); border: 1px solid var(--stroke); background: var(--surface); color: var(--text); font-weight: 800; font-size: 0.85rem; text-decoration: none; }
 .pd-btn.is-primary { border-color: var(--primary-strong); background: var(--primary-strong); color: white; }
-.pd-empty { display: grid; justify-items: center; gap: 6px; padding: 26px 16px; border: 1px dashed var(--stroke); border-radius: var(--r-md); text-align: center; color: var(--text-soft); }
+.pd-empty { display: grid; justify-items: center; gap: 6px; padding: 28px 4px; text-align: center; color: var(--text-soft); }
 .pd-empty strong { color: var(--text); }
 .pd-lost summary { cursor: pointer; padding: 8px 2px; font-weight: 800; color: var(--text-soft); }
 .pd-lost .pd-card { opacity: 0.75; }

@@ -699,9 +699,6 @@ button {
   gap: 10px;
   padding: 40px 24px;
   text-align: center;
-  background: var(--surface);
-  border: 1px dashed var(--stroke);
-  border-radius: var(--r-lg);
   color: var(--text-soft);
 }
 
@@ -1466,12 +1463,9 @@ button {
   font-size: 1.4rem;
 }
 
-.dashboard-empty {
+.empty-state.dashboard-empty {
   min-height: 0;
-  padding: 40px 20px;
-  border: 1px dashed var(--stroke);
-  border-radius: var(--r-lg);
-  background: var(--surface);
+  padding: 32px 4px;
 }
 
 .dashboard-empty h3 {
@@ -11173,9 +11167,7 @@ body:has(.profile-cta-bar) .support-chat {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px;
-  border-radius: var(--r-md);
-  background: var(--surface-soft);
+  padding: 18px 0;
   color: var(--text-soft);
 }
 
@@ -11476,6 +11468,12 @@ body:has(.profile-cta-bar) .support-chat {
 
 .account-empty-art.notif-art svg,
 .empty-state-art { width: min(56vw, 200px); height: auto; }
+
+/* empty states: the illustration stands on the page background, without its round backdrop and dots */
+.ap-empty-art .mascot-stage,
+.account-empty-art .mascot-stage,
+.empty-state-art .mascot-stage,
+.chat-list-mascot .mascot-stage { display: none; }
 
 .account-empty-actions {
   display: flex;
@@ -12407,7 +12405,7 @@ body:has(.profile-cta-bar) .support-chat {
 .help-popular-card span { flex: 1; }
 .help-popular-card svg:first-child { color: var(--primary); }
 .help-popular-card:hover { border-color: var(--primary); }
-.help-empty { text-align: center; padding: 30px; border-radius: var(--r-md); background: var(--surface); }
+.help-empty { text-align: center; padding: 30px 4px; }
 .help-empty .primary-button { display: inline-flex; gap: 8px; margin-top: 10px; }
 .help-contact { display: grid; gap: 20px; padding-top: 24px; border-top: 1px solid var(--stroke); }
 .help-contact-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -12472,7 +12470,7 @@ body:has(.profile-cta-bar) .support-chat {
 .wallet-sign { width: 38px; height: 38px; border-radius: var(--r-sm); display: grid; place-items: center; font-weight: 900; font-size: 1.1rem; background: var(--surface-soft); }
 .wallet-sign.plus { background: var(--success-soft); }
 .wallet-sign.minus { background: var(--danger-soft); }
-.wallet-empty { display: grid; justify-items: center; gap: 4px; padding: 30px; border-radius: var(--r-md); background: var(--surface-soft); text-align: center; color: var(--text-soft); }
+.wallet-empty { display: grid; justify-items: center; gap: 4px; padding: 30px 4px; text-align: center; color: var(--text-soft); }
 .wallet-empty strong { color: var(--text); }
 .wallet-hero { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: linear-gradient(135deg, #0a1f63, #1b4a8a); color: white; border: none; }
 .wallet-hero small { display: block; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7); }

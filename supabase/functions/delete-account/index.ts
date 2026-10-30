@@ -1,7 +1,7 @@
 // Deploy: supabase functions deploy delete-account --no-verify-jwt
 // (the function checks the user's token itself; the gateway must let the CORS preflight through)
 // Requires project secrets SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, and for the code
-// mail RESEND_API_KEY + RESEND_FROM (optional SITE_URL). SQL: supabase/security/13_account_closure.sql.
+// mail RESEND_API_KEY + RESEND_FROM (optional SITE_URL). SQL: supabase/security/14_account_closure.sql.
 //
 // Closing an account takes a code from the account's email and a reason (sd, 30.10.2026.):
 //   { action: 'send_code', mode: 'delete' | 'deactivate' }            -> mails a 6-digit code, valid 15 minutes

@@ -4,7 +4,7 @@ Stanje na 30.10.2026. Briši stavku kad je gotova. Nazad: [[README]]
 
 ## Čeka na sd
 
-- **Zatvaranje naloga na živo.** Prije spajanja PR-a: primijeniti `supabase/security/13_account_closure.sql` na živu bazu i objaviti funkciju `delete-account`. Redoslijed je bitan: stara živa funkcija briše nalog na svaki poziv, pa nova stranica ne smije izaći prije nove funkcije. Čeka "da" od sd. (30.10.)
+- **Supabase > Authentication > Attack Protection:** uključiti zaštitu od procurjelih lozinki. (30.10.)
 - **Supabase Pro (25 USD mjesečno).** Besplatni plan nema rezervne kopije baze, a u bazi je novac korisnika.
   Supabase > Billing > Upgrade to Pro. (Traženo 28.10.)
 - **zadatak.ba na Cloudflare.** Na GitHubu dodati tajne `CLOUDFLARE_API_TOKEN` i `CLOUDFLARE_ACCOUNT_ID`;

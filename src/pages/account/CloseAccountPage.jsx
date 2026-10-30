@@ -16,7 +16,7 @@ const MODES = [
   },
 ]
 
-// the same keys as account_closure_reasons.reason (supabase/security/13_account_closure.sql)
+// the same keys as account_closure_reasons.reason (supabase/security/14_account_closure.sql)
 const REASONS = [
   ['complicated', 'Aplikacija mi je komplikovana'],
   ['no_jobs', 'Nema dovoljno poslova za mene'],

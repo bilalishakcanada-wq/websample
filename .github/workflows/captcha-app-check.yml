@@ -16,23 +16,32 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download android-beta -p zadatak-beta.apk -R "${{ github.repository }}"
-      - run: npm i --no-save playwright-core@1.48.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Script
         run: |
           cat > check.mjs <<'EOF'
-          import { chromium } from 'playwright-core'
-          const b = await chromium.connectOverCDP('http://127.0.0.1:9222')
-          const page = b.contexts()[0].pages()[0]
-          console.log('app page:', page.url())
-          await page.evaluate(() => { history.pushState({}, '', '/websample/login'); dispatchEvent(new PopStateEvent('popstate')) })
-          await page.waitForTimeout(25000)
-          console.log('now at:', page.url())
-          for (const f of page.frames()) console.log('frame:', f.url().slice(0, 100))
-          const token = await page.evaluate(() => document.querySelector('[name="cf-turnstile-response"]')?.value?.length ?? -1)
-          console.log('turnstile token length:', token)
-          for (const f of page.frames().filter((f) => /challenges\.cloudflare/.test(f.url()))) {
-            console.log('widget text:', (await f.evaluate(() => document.body?.innerText || '').catch((e) => 'n/a ' + e.message)).replace(/\s+/g, ' ').slice(0, 200))
-          }
+          // raw DevTools protocol: the app's WebView does not support Playwright's browser-level commands
+          const list = await (await fetch('http://127.0.0.1:9222/json')).json()
+          console.log(list.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))
+          const target = list.find((t) => t.type === 'page')
+          const ws = new WebSocket(target.webSocketDebuggerUrl)
+          await new Promise((r) => ws.addEventListener('open', r))
+          let id = 0
+          const pending = new Map()
+          ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id) } })
+          const send = (method, params = {}) => new Promise((r) => { pending.set(++id, r); ws.send(JSON.stringify({ id, method, params })) })
+          const run = async (expression) => (await send('Runtime.evaluate', { expression, returnByValue: true })).result?.result?.value
+          console.log('app page:', await run('location.href'))
+          await run("location.href = '/websample/login'")
+          await new Promise((r) => setTimeout(r, 30000))
+          console.log('now at:', await run('location.href'))
+          console.log('iframes:', await run("[...document.querySelectorAll('iframe')].map((f) => f.src.slice(0, 80)).join(' | ')"))
+          console.log('turnstile token length:', await run("document.querySelector('[name=\"cf-turnstile-response\"]')?.value?.length ?? -1"))
+          console.log('login button disabled:', await run("[...document.querySelectorAll('button[type=submit]')].map((b) => b.disabled).join(',')"))
+          const after = await (await fetch('http://127.0.0.1:9222/json')).json()
+          console.log(after.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))
           process.exit(0)
           EOF
           cat > run.sh <<'EOF'

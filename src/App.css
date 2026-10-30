@@ -13571,19 +13571,35 @@ svg.brand-mark-svg { display: block; flex-shrink: 0; background: none !important
 .support-human-status { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 700; color: var(--green-600); }
 .support-chat-form textarea { flex: 1; resize: none; border: 1px solid var(--stroke); background: var(--gray-50); border-radius: var(--r-sm); padding: 0.6rem 0.85rem; color: var(--text); min-height: 40px; max-height: 110px; font: inherit; font-size: 0.9rem; line-height: 1.35; field-sizing: content; }
 
-/* cookie / storage choice: bottom card, above the phone tab bar; the three buttons look the same */
-.cookie-consent { position: fixed; left: 12px; right: 12px; bottom: calc(16px + var(--safe-bottom)); z-index: 160; display: grid; gap: 12px; max-width: 560px; margin: 0 auto; padding: 18px; border-radius: var(--r-md); background: var(--surface); color: var(--text); border: 1px solid var(--stroke); box-shadow: 0 18px 40px rgba(7, 22, 71, 0.22); max-height: calc(100dvh - 32px - var(--safe-bottom)); overflow-y: auto; }
-.cookie-consent h2 { margin: 0; font-size: 1.05rem; }
-.cookie-consent p { margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--text-soft); }
-.cookie-consent a { color: var(--accent-strong); text-decoration: underline; }
-.cookie-consent-options { display: grid; gap: 10px; }
-.cookie-consent-option { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; font-size: 0.88rem; line-height: 1.45; color: var(--text-soft); cursor: pointer; }
-.cookie-consent-option input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent-strong); }
-.cookie-consent-option input:disabled { cursor: not-allowed; }
-.cookie-consent-option strong { display: block; color: var(--text); }
-.cookie-consent-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.cookie-consent-actions .secondary-button { min-height: 44px; padding: 0.55rem 0.4rem; font-size: 0.88rem; line-height: 1.2; white-space: normal; }
-@media (max-width: 768px) { .cookie-consent { bottom: calc(var(--tabbar-space) + 10px); max-height: calc(100dvh - var(--tabbar-space) - 80px); } }
+/* cookie / storage choice: one card at the bottom, above the phone tab bar; the two choices look the same */
+.cookie-consent { position: fixed; left: 12px; right: 12px; bottom: calc(16px + var(--safe-bottom)); z-index: 160; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px 18px; max-width: 980px; margin: 0 auto; padding: 18px 20px; border-radius: var(--r-md); background: var(--surface); color: var(--text); border: 1px solid var(--stroke); border-top: 4px solid var(--primary-strong); box-shadow: 0 24px 60px rgba(7, 22, 71, 0.24); max-height: calc(100dvh - 32px - var(--safe-bottom)); overflow-y: auto; }
+.cookie-consent.is-settings { align-items: start; }
+.cookie-consent-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-sm); background: var(--surface-soft); color: var(--primary-strong); }
+.cookie-consent-body { display: grid; gap: 4px; min-width: 0; }
+.cookie-consent h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--text); }
+.cookie-consent p { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--text-soft); }
+.cookie-consent p a { color: var(--primary-strong); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.cookie-consent-options { display: grid; margin-top: 10px; border-top: 1px solid var(--stroke); }
+.cookie-consent-option { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--stroke); font-size: 0.86rem; line-height: 1.45; color: var(--text-soft); cursor: pointer; }
+.cookie-consent-option:has(input:disabled) { cursor: default; }
+.cookie-consent-option strong { display: block; font-size: 0.92rem; color: var(--text); }
+.cookie-switch { appearance: none; flex-shrink: 0; position: relative; width: 44px; height: 26px; min-height: 26px; margin: 0; border-radius: 13px; background: #8a94a6; cursor: pointer; transition: background 0.2s ease; }
+.cookie-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25); transition: transform 0.2s ease; }
+.cookie-switch:checked { background: var(--accent); }
+.cookie-switch:checked::after { transform: translateX(18px); }
+.cookie-consent .cookie-switch:checked:disabled { background: var(--accent); opacity: 0.5; cursor: default; }
+.cookie-consent-actions { display: flex; align-items: center; gap: 10px; }
+.cookie-consent.is-settings .cookie-consent-actions { grid-column: 2 / -1; justify-content: flex-end; }
+.cookie-consent-button { min-height: 44px; padding: 0 18px; border-radius: var(--r-sm); background: var(--primary); color: white; font-size: 0.9rem; font-weight: 800; white-space: nowrap; }
+.cookie-consent-button:hover { background: var(--primary-strong); }
+.cookie-consent-link { min-height: 44px; padding: 0 6px; background: none; color: var(--primary-strong); font-size: 0.9rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 768px) {
+  .cookie-consent { bottom: calc(var(--tabbar-space) + 10px); max-height: calc(100dvh - var(--tabbar-space) - 80px); grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 12px; padding: 16px; }
+  .cookie-consent-icon { width: 38px; height: 38px; }
+  .cookie-consent-actions, .cookie-consent.is-settings .cookie-consent-actions { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+  .cookie-consent-link { grid-column: 1 / -1; grid-row: 2; min-height: 36px; }
+  .cookie-consent-button { padding: 0 10px; }
+}
 
 /* search boxes whose input has no border of its own: the box shows where the keyboard is */
 .search-field:focus-within,

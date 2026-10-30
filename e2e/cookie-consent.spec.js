@@ -18,7 +18,7 @@ test('telefon: baner za kolačiće se vidi, ne prekriva meni i pamti izbor', asy
   const page = await context.newPage()
   await page.goto('/')
 
-  const banner = page.getByRole('dialog', { name: 'Kolačići i memorija preglednika' })
+  const banner = page.getByRole('dialog', { name: 'Kolačići na Zadatku' })
   await expect(banner).toBeVisible()
   for (const name of ['Postavke', 'Samo neophodno', 'Prihvati sve']) {
     expect(await tappable(banner.getByRole('button', { name, exact: true })), `"${name}" se može pritisnuti`).toBe(true)
@@ -43,13 +43,14 @@ test('telefon: baner za kolačiće se vidi, ne prekriva meni i pamti izbor', asy
   await banner.getByRole('button', { name: 'Samo neophodno', exact: true }).click()
   await expect(banner).toHaveCount(0)
   await page.reload()
-  await expect(page.getByRole('dialog', { name: 'Kolačići i memorija preglednika' })).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Kolačići na Zadatku' })).toHaveCount(0)
   expect(JSON.parse(await page.evaluate(() => localStorage.getItem('zadatak-consent'))).errors).toBe(false)
 
   // the cookie policy page reopens the settings
   await page.goto('/kolacici')
   await page.getByRole('button', { name: 'Promijeni svoj izbor' }).click()
   await expect(banner).toBeVisible()
+  await expect(banner.getByRole('button', { name: 'Prihvati sve', exact: true })).toHaveCount(0)
   await banner.getByRole('checkbox', { name: /Izvještaji o greškama/ }).check()
   await banner.getByRole('button', { name: 'Sačuvaj izbor' }).click()
   await expect(banner).toHaveCount(0)

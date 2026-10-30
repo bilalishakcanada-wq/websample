@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronRight, CreditCard, Info, Landmark, Lock } from 'lucide-react'
+import { ChevronRight, CreditCard, Info, Landmark, Lock, ArrowLeftRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
 import CountUp from '../../components/CountUp'
@@ -159,7 +159,13 @@ function WalletPage() {
           {recent.length > 0 && <Link to="/account/placanja" className="bal-all">Sve transakcije <ChevronRight size={16} /></Link>}
         </div>
         {recent.length === 0
-          ? <p className="bal-none">Još nema transakcija. Svaka uplata, rezervacija, zarada ili isplata pojaviće se ovdje.</p>
+          ? (
+            <div className="bal-none">
+              <span className="bal-none-icon"><ArrowLeftRight size={20} /></span>
+              <strong>Još nema transakcija</strong>
+              <span>Uplate, rezervacije, zarade i isplate pojaviće se ovdje.</span>
+            </div>
+          )
           : <div className="wallet-list">{recent.map((row) => <LedgerRow key={row.id} row={row} />)}</div>}
       </section>
 

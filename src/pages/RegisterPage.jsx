@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Briefcase, Hammer, Repeat } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { Turnstile } from '@marsidev/react-turnstile'
+import { useCaptcha } from '../hooks/useCaptcha'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import CheckEmail from '../components/CheckEmail'
@@ -36,7 +36,7 @@ function RegisterPage() {
   const [trades, setTrades] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState('')
+  const captcha = useCaptcha()
   // Google Play (UGC policy): the terms are accepted explicitly before anyone posts or messages
   const [accepted, setAccepted] = useState(false)
   const offersServices = accountType === 'provider' || accountType === 'both'
@@ -81,7 +81,7 @@ function RegisterPage() {
     try {
       const result = await register({
         ...form,
-        captchaToken,
+        captchaToken: captcha.token,
         accountType,
         trades: offersServices ? trades : [],
       })
@@ -89,6 +89,7 @@ function RegisterPage() {
       else setWaiting({ email: form.email.trim().toLowerCase(), password: form.password })
     } catch (err) {
       setError(err.message)
+      captcha.reset()
     } finally {
       setLoading(false)
     }
@@ -161,7 +162,7 @@ function RegisterPage() {
           <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} required />
           <span>Imam 18 ili više godina i prihvatam <Link to="/pravila">Pravila i uslove</Link>, <Link to="/pravila-zajednice">Pravila zajednice</Link> i <Link to="/privatnost">Politiku privatnosti</Link>.</span>
         </label>
-        {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
+        {captcha.widget}
         {error && <div className="form-error">{error}{error === EMAIL_DOWN && <> <Link to="/kontakt?tema=account">Otvori Kontakt</Link></>}</div>}
         <button data-testid="register-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Registracija...' : 'Nastavi'}

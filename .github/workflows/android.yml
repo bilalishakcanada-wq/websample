@@ -67,6 +67,8 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           VITE_SUPABASE_URL: https://kshzsnceukbpwpgpicsh.supabase.co
           VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzaHpzbmNldWticHdwZ3BpY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzODc1NjAsImV4cCI6MjEwNDk2MzU2MH0.ujTU0htJr76rnP5-3B_qLxTZsT1hXQBh4TXNIwnf_x0
+          # Cloudflare Turnstile site key (public, like the anon key); the secret key lives only in Supabase
+          VITE_TURNSTILE_SITE_KEY: 0x4AAAAAAFtMx4gQ2tFLrGj_
         run: npm run build
       - run: npx cap sync android
       # phone notifications (Firebase Cloud Messaging): android/app/google-services.json, committed or from this

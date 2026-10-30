@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Turnstile } from '@marsidev/react-turnstile'
 import OAuthButtons from '../components/OAuthButtons'
 import AuthLayout from '../components/AuthLayout'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import PasswordField from '../components/PasswordField'
 import { authService } from '../services/authService'
 import { forgetReturn, rememberReturn, safeNext } from '../utils/afterAuth'
+import { useCaptcha } from '../hooks/useCaptcha'
 
-/** "Didn't get the mail?", sends the signup confirmation again, with a short cooldown. */
-function ResendConfirmation({ email }) {
+/** "Didn't get the mail?", sends the signup confirmation again, with a short cooldown. Uses the page's captcha. */
+function ResendConfirmation({ email, captcha }) {
   const [state, setState] = useState({ busy: false, sent: false, error: '' })
   if (!email) return null
   const resend = async () => {
     setState({ busy: true, sent: false, error: '' })
     try {
-      await authService.resendConfirmation(email)
+      await authService.resendConfirmation(email, captcha.token)
       setState({ busy: false, sent: true, error: '' })
     } catch (err) {
       setState({ busy: false, sent: false, error: err.message })
     }
+    captcha.reset()
   }
   return (
     <div className="resend-confirmation">
@@ -40,7 +41,7 @@ function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState('')
+  const captcha = useCaptcha()
   const [unconfirmed, setUnconfirmed] = useState(false)
   const pendingEmail = location.state?.email || ''
   const verificationPending = searchParams.get('verification') === 'pending'
@@ -68,12 +69,13 @@ function LoginPage() {
     setUnconfirmed(false)
 
     try {
-      await login({ ...form, captchaToken })
+      await login({ ...form, captchaToken: captcha.token })
       forgetReturn()
       navigate(destination)
     } catch (err) {
       setError(err.message)
       setUnconfirmed(err.code === 'email_not_confirmed')
+      captcha.reset()
     } finally {
       setLoading(false)
     }
@@ -84,7 +86,7 @@ function LoginPage() {
       {verificationPending && (
         <div className="form-success">
           Nalog je napravljen! Poslali smo ti mail{pendingEmail ? <> na <strong>{pendingEmail}</strong></> : ''}. Klikni dugme <strong>Potvrdi email</strong> u njemu i odmah si prijavljen/a. Ne vidiš ga? Pogledaj i spam.
-          <ResendConfirmation email={pendingEmail} />
+          <ResendConfirmation email={pendingEmail} captcha={captcha} />
         </div>
       )}
       {oauthFailed && (
@@ -98,8 +100,8 @@ function LoginPage() {
           <label htmlFor="email">Email adresa</label>
         </div>
         <PasswordField name="password" label="Lozinka" value={form.password} onChange={handleChange} />
-        {import.meta.env.VITE_TURNSTILE_SITE_KEY && <Turnstile siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} />}
-        {error && <div className="form-error">{error}{unconfirmed && <ResendConfirmation email={form.email.trim().toLowerCase()} />}</div>}
+        {captcha.widget}
+        {error && <div className="form-error">{error}{unconfirmed && <ResendConfirmation email={form.email.trim().toLowerCase()} captcha={captcha} />}</div>}
         <button data-testid="login-submit" type="submit" className="primary-button auth-submit" disabled={loading}>
           {loading ? 'Prijava...' : 'Nastavi'}
         </button>

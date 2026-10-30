@@ -1,0 +1,67 @@
+# One-off check: does the CAPTCHA (Turnstile) on the login page work inside the Android app?
+# Installs the current beta APK on an emulator, opens /login in the app's WebView and reports the widget state.
+name: CAPTCHA in the Android app
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/captcha-app-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Download the beta APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download android-beta -p zadatak-beta.apk -R "${{ github.repository }}"
+      - run: npm i --no-save playwright-core@1.48.2
+      - name: Script
+        run: |
+          cat > check.mjs <<'EOF'
+          import { chromium } from 'playwright-core'
+          const b = await chromium.connectOverCDP('http://127.0.0.1:9222')
+          const page = b.contexts()[0].pages()[0]
+          console.log('app page:', page.url())
+          await page.evaluate(() => { history.pushState({}, '', '/websample/login'); dispatchEvent(new PopStateEvent('popstate')) })
+          await page.waitForTimeout(25000)
+          console.log('now at:', page.url())
+          for (const f of page.frames()) console.log('frame:', f.url().slice(0, 100))
+          const token = await page.evaluate(() => document.querySelector('[name="cf-turnstile-response"]')?.value?.length ?? -1)
+          console.log('turnstile token length:', token)
+          for (const f of page.frames().filter((f) => /challenges\.cloudflare/.test(f.url()))) {
+            console.log('widget text:', (await f.evaluate(() => document.body?.innerText || '').catch((e) => 'n/a ' + e.message)).replace(/\s+/g, ' ').slice(0, 200))
+          }
+          process.exit(0)
+          EOF
+          cat > run.sh <<'EOF'
+          set -x
+          mkdir -p screens
+          adb install -r zadatak-beta.apk
+          adb shell input keyevent KEYCODE_WAKEUP; adb shell wm dismiss-keyguard
+          adb shell am start -n ba.zadatak.app/ba.poso.app.MainActivity
+          sleep 40
+          PID=$(adb shell pidof ba.zadatak.app | tr -d '\r')
+          adb forward tcp:9222 localabstract:webview_devtools_remote_$PID
+          curl -s http://127.0.0.1:9222/json/version
+          node check.mjs || true
+          adb exec-out screencap -p > screens/prijava.png
+          EOF
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash run.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: captcha-app-screens
+          path: screens/*

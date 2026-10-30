@@ -1,21 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronRight, CreditCard, Info, Landmark, Lock, ArrowLeftRight, Clock } from 'lucide-react'
+import { ArrowLeftRight, ChevronRight, Clock, Info, Landmark, Lock } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
-import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
 import MoneyOnTheWay, { pendingItems, pendingTotals } from './MoneyOnTheWay'
 import LedgerRow from './LedgerRow'
+import BalanceHero from './BalanceHero'
 import { useSwitch } from '../../hooks/useSwitches'
 
-// the big balance: whole KM large, cents small, like a banking app
-const bigAmount = (value) => {
-  const [whole, cents] = Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(',')
-  return <>{whole}<span className="bal-cents">,{cents}</span></>
-}
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
 /** "Plaćanje → Balans": what is available, what is held or on the way, the latest transactions, and topping up or paying out. */
@@ -96,17 +91,7 @@ function WalletPage() {
     <div className="account-section">
       <PaymentTabs />
 
-      <section className="bal-card" aria-label="Stanje računa">
-        <div className="bal-top">
-          <span className="bal-label">Dostupno</span>
-          {totals.reserved > 0 && <span className="bal-total">Ukupno s rezervisanim {money(Number(wallet.balance || 0) + totals.reserved)}</span>}
-        </div>
-        <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
-        <div className="bal-actions">
-          <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
-          <button type="button" className={`bal-btn${panel === 'payout' ? ' is-open' : ''}`} onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)} aria-expanded={panel === 'payout'}><Landmark size={17} /> {payout?.open ? 'Isplata je u toku' : 'Isplati na račun'}</button>
-        </div>
-      </section>
+      <BalanceHero wallet={wallet} totals={totals} payout={payout} panel={panel} openPanel={openPanel} />
 
       <dl className="bal-stats">
         <div><span className="bal-stat-icon is-held"><Lock size={18} /></span><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>

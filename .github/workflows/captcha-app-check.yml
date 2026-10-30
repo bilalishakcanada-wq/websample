@@ -25,8 +25,16 @@ jobs:
           // raw DevTools protocol: the app's WebView does not support Playwright's browser-level commands
           const list = await (await fetch('http://127.0.0.1:9222/json')).json()
           console.log(list.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))
-          const target = list.find((t) => t.type === 'page')
-          const ws = new WebSocket(target.webSocketDebuggerUrl)
+          let target, ws
+          for (const t of list.filter((t) => t.type === 'page')) {
+            const probe = new WebSocket(t.webSocketDebuggerUrl)
+            await new Promise((r) => probe.addEventListener('open', r))
+            const vis = await new Promise((r) => { probe.addEventListener('message', (e) => r(JSON.parse(e.data).result?.result?.value)); probe.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: 'document.visibilityState', returnByValue: true } })) })
+            console.log('target', t.id, vis)
+            probe.close()
+            if (vis === 'visible' || !target) target = t
+          }
+          ws = new WebSocket(target.webSocketDebuggerUrl)
           await new Promise((r) => ws.addEventListener('open', r))
           let id = 0
           const pending = new Map()
@@ -34,11 +42,12 @@ jobs:
           const send = (method, params = {}) => new Promise((r) => { pending.set(++id, r); ws.send(JSON.stringify({ id, method, params })) })
           const run = async (expression) => (await send('Runtime.evaluate', { expression, returnByValue: true })).result?.result?.value
           console.log('app page:', await run('location.href'))
-          await run("location.href = '/websample/login'")
+          console.log('navigate:', JSON.stringify((await send('Page.navigate', { url: 'https://bilalishakcanada-wq.github.io/websample/login' })).result))
           await new Promise((r) => setTimeout(r, 30000))
           console.log('now at:', await run('location.href'))
           console.log('iframes:', await run("[...document.querySelectorAll('iframe')].map((f) => f.src.slice(0, 80)).join(' | ')"))
           console.log('turnstile token length:', await run("document.querySelector('[name=\"cf-turnstile-response\"]')?.value?.length ?? -1"))
+          console.log('page text:', (await run('document.body.innerText'))?.replace(/\s+/g, ' ').slice(0, 300))
           console.log('login button disabled:', await run("[...document.querySelectorAll('button[type=submit]')].map((b) => b.disabled).join(',')"))
           const after = await (await fetch('http://127.0.0.1:9222/json')).json()
           console.log(after.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))

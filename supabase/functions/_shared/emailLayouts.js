@@ -72,7 +72,7 @@ function note(m) {
   if (!m.note) return ''
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0"><tr>
       <td style="background:${PALE};border:1px solid #DCE6FF;border-radius:14px;padding:14px 16px;font:400 13px/20px ${FONT};color:${BODY}">
-        <span style="font-weight:700;color:${NAVY}">&#128274; Sigurnost:</span> ${m.note}</td></tr></table>`
+        <span style="font-weight:700;color:${NAVY}">Sigurnost:</span> ${m.note}</td></tr></table>`
 }
 
 function fallback(m) {

@@ -19,9 +19,10 @@ const HAIR = { dark: '#2b1d14', brown: '#6b4423', black: '#141414', gold: '#1b4f
 
 /* ---------- building blocks ---------- */
 
-/** Soft round backdrop + a few confetti dots so the scene has a stage. */
+/** Soft round backdrop + a few confetti dots so the scene has a stage. Empty states hide it (.mascot-stage)
+    so the figure stands directly on the page background. */
 const Stage = ({ color = CREAM, dots = [] }) => (
-  <g>
+  <g className="mascot-stage">
     <circle cx="150" cy="158" r="118" fill={color} />
     {dots.map(([x, y, r, fill], i) => <circle key={i} cx={x} cy={y} r={r} fill={fill} />)}
   </g>

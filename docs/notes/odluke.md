@@ -2,6 +2,7 @@
 
 Najnovije gore. Svaka odluka ima datum i izvor (PR ili razgovor). Nazad: [[README]]
 
+- **30.10.2026.** Balans bez ilustracije: kartica Dostupno, ispod Rezervisano za poslove, Stiže na balans, Može se isplatiti; zatim Na putu i 5 posljednjih transakcija (sd tražio "normalan prikaz balansa").
 - **30.10.2026.** Pravila dizajna i uslovi za pokretanje, vidi [[pravila]].
 - **28.10.2026.** Robot poslije svake objave sam pregleda živi sajt kao gost (PR #99).
 - **28.10.2026.** Admin: Nadzor > Sumnjivi parovi, za klijente i izvođače koji se možda dogovaraju van Zadatka (PR #99).

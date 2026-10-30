@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Clock, Hourglass, Landmark, Lock, PauseCircle, Wallet } from 'lucide-react'
 import { accountService } from '../../services/accountService'
@@ -55,43 +55,44 @@ function payoutItem(row) {
   return { ...base, done: 1, paused: true, rejected: true, eta: 'Odbijeno, iznos je vraćen na tvoj balans', hint: row.note || '' }
 }
 
-/**
- * "Na putu": money that is not settled yet, with the step it is on and when it arrives.
- * Hidden when nothing is pending, so a new account never sees an empty box.
- */
-function MoneyOnTheWay({ userId, onChanged }) {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-  const load = () => accountService.moneyOnTheWay(userId).then((result) => setData({ ...result, now: Date.now() }))
-  useEffect(() => { load() }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (!data) return null
+/** Everything not settled yet, one row per job payment or bank payout. */
+export function pendingItems(data, userId) {
+  if (!data) return []
   const { now } = data
-  const items = [
+  return [
     ...data.payouts
       .filter((row) => row.status === 'requested' || ((row.status === 'paid' || row.status === 'rejected') && now - new Date(row.reviewed_at || row.created_at).getTime() < RECENT_MS))
       .map(payoutItem),
     ...data.jobs.map((row) => jobItem(row, userId)),
   ]
-  if (items.length === 0) return null
+}
 
-  const incoming = items.filter((item) => item.incoming && item.done < 3 && !item.rejected).reduce((sum, item) => sum + Number(item.amount || 0), 0)
-  const reserved = items.filter((item) => !item.incoming).reduce((sum, item) => sum + Number(item.amount || 0), 0)
+/** For the balance card: job money held from the balance, and earnings not on the balance yet. */
+export function pendingTotals(data, userId) {
+  const jobs = data?.jobs || []
+  const sum = (rows, pick) => rows.reduce((total, row) => total + Number(pick(row) || 0), 0)
+  return {
+    reserved: sum(jobs.filter((row) => row.client_id === userId), (row) => row.amount),
+    incoming: sum(jobs.filter((row) => row.provider_id === userId), (row) => row.net_amount ?? row.amount),
+  }
+}
+
+/**
+ * "Na putu": money that is not settled yet, with the step it is on and when it arrives.
+ * Hidden when nothing is pending, so a new account never sees an empty box.
+ */
+function MoneyOnTheWay({ items, onCancelled }) {
+  const [error, setError] = useState('')
+  if (items.length === 0) return null
 
   const cancel = async (id) => {
     setError('')
-    try { await accountService.cancelPayout(id); await load(); onChanged?.('Zahtjev za isplatu je otkazan, iznos je vraćen na balans.') } catch (requestError) { setError(requestError.message) }
+    try { await accountService.cancelPayout(id); onCancelled?.('Zahtjev za isplatu je otkazan, iznos je vraćen na balans.') } catch (requestError) { setError(requestError.message) }
   }
 
   return (
     <section className="otw" aria-label="Novac na putu">
-      <div className="otw-head">
-        <h3 className="account-sub"><Hourglass size={17} /> Na putu</h3>
-        <div className="otw-totals">
-          {incoming > 0 && <span>Stiže ti <strong>{money(incoming)}</strong></span>}
-          {reserved > 0 && <span>Rezervisano <strong>{money(reserved)}</strong></span>}
-        </div>
-      </div>
+      <h2 className="account-sub"><Hourglass size={17} /> Na putu</h2>
       {error && <div className="form-error">{error}</div>}
       <ul className="otw-list">
         {items.map((item) => {

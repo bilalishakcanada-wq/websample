@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, ChevronRight, CreditCard, Info, Landmark, Lock, ShieldCheck, Wallet } from 'lucide-react'
+import { ChevronRight, CreditCard, Info, Landmark, Lock } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
 import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
-import MoneyOnTheWay from './MoneyOnTheWay'
+import MoneyOnTheWay, { pendingItems, pendingTotals } from './MoneyOnTheWay'
+import LedgerRow from './LedgerRow'
 import { useSwitch } from '../../hooks/useSwitches'
-import BalanceArt from './BalanceArt'
 
 // the big balance: whole KM large, cents small, like a banking app
 const bigAmount = (value) => {
@@ -18,12 +18,12 @@ const bigAmount = (value) => {
 }
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
-/** "Plaćanje → Balans": the balance, money on the way, and topping up or paying out. Every transaction is in Historija. */
+/** "Plaćanje → Balans": what is available, what is held or on the way, the latest transactions, and topping up or paying out. */
 function WalletPage() {
   const [wallet, setWallet] = useState(null)
   const [error, setError] = useState('')
   const { user } = useAuth()
-  const [otwKey, setOtwKey] = useState(0)
+  const [pending, setPending] = useState(null)
   const [params, setParams] = useSearchParams()
   const [panel, setPanel] = useState(null) // 'topup' | 'payout' | null
   const [amount, setAmount] = useState('')
@@ -35,7 +35,8 @@ function WalletPage() {
   const load = () => Promise.all([
     accountService.myWallet().then(setWallet),
     accountService.payoutState().then(setPayout),
-  ]).then(() => setOtwKey((key) => key + 1)).catch((requestError) => setError(requestError.message))
+    accountService.moneyOnTheWay(user.id).then((result) => setPending({ ...result, now: Date.now() })),
+  ]).catch((requestError) => setError(requestError.message))
   useEffect(() => { load() }, [])
 
   // Povratak sa Monri stranice. Novac upisuje samo Monri callback, pa ovdje
@@ -45,21 +46,21 @@ function WalletPage() {
     const order = params.get('narudzba')
     if (!result || !order) return
     setParams({}, { replace: true })
-    if (result !== 'ok') { setNotice('Plaćanje je otkazano — ništa nije naplaćeno.'); return }
+    if (result !== 'ok') { setNotice('Plaćanje je otkazano, ništa nije naplaćeno.'); return }
     setNotice('Provjeravamo uplatu…')
     let tries = 0
     const timer = setInterval(async () => {
       tries += 1
       const row = await accountService.cardPaymentStatus(order)
       if (row?.status === 'approved') { clearInterval(timer); setNotice(`Uplata od ${money(row.amount_km)} je stigla na balans.`); load() }
-      else if (row?.status === 'declined') { clearInterval(timer); setNotice('Banka je odbila plaćanje — ništa nije naplaćeno.') }
+      else if (row?.status === 'declined') { clearInterval(timer); setNotice('Banka je odbila plaćanje, ništa nije naplaćeno.') }
       else if (tries >= 15) { clearInterval(timer); setNotice('Uplata se još obrađuje. Balans će se ažurirati čim banka potvrdi.') }
     }, 2000)
     return () => clearInterval(timer)
   }, [])
 
   const openPanel = (name) => { setPanel(panel === name ? null : name); setAmount(''); setActionError('') }
-  // na telefonu panel zna pasti ispod trake s tabovima — pomjeri ga u vidno polje
+  // na telefonu panel zna pasti ispod trake s tabovima, pomjeri ga u vidno polje
   const panelRef = useCallback((node) => {
     if (node) window.requestAnimationFrame(() => node.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
   }, [])
@@ -88,23 +89,21 @@ function WalletPage() {
 
   if (error) return <div className="account-section"><div className="form-error">{error}</div></div>
   if (!wallet) return <div className="account-section"><SkeletonRows n={4} /></div>
+  const totals = pendingTotals(pending, user.id)
+  const recent = (wallet.transactions || []).slice(0, 5)
 
   return (
     <div className="account-section">
       <PaymentTabs />
 
-      <section className="bal-card has-ill" aria-label="Stanje računa">
-        <BalanceArt />
-        <div className="bal-top">
-          <span className="bal-label"><Wallet size={15} /> Stanje na Zadatku</span>
-          <span className="bal-chip"><ShieldCheck size={13} /> Zaštićeno</span>
-        </div>
+      <section className="bal-card" aria-label="Stanje računa">
+        <span className="bal-label">Dostupno</span>
         <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
-        <div className="bal-split">
-          <div><small>Za isplatu na račun</small><strong>{payout ? money(payout.withdrawable) : '—'}</strong></div>
-          <div><small><ArrowDownLeft size={13} /> Ušlo · 30 dana</small><strong>{Number(wallet.credited_30d) > 0 ? '+' : ''}{money(wallet.credited_30d)}</strong></div>
-          <div><small><ArrowUpRight size={13} /> Izašlo · 30 dana</small><strong>{Number(wallet.spent_30d) !== 0 ? '−' : ''}{money(Math.abs(Number(wallet.spent_30d || 0)))}</strong></div>
-        </div>
+        <dl className="bal-split">
+          <div><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>
+          <div><dt>Stiže na balans</dt><dd>{money(totals.incoming)}</dd></div>
+          <div><dt>Može se isplatiti</dt><dd>{payout ? money(payout.withdrawable) : '-'}</dd></div>
+        </dl>
         <div className="bal-actions">
           <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
           <button type="button" className={`bal-btn${panel === 'payout' ? ' is-open' : ''}`} onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)} aria-expanded={panel === 'payout'}><Landmark size={17} /> {payout?.open ? 'Isplata je u toku' : 'Isplati na račun'}</button>
@@ -152,9 +151,17 @@ function WalletPage() {
         </form>
       )}
 
-      <MoneyOnTheWay key={otwKey} userId={user.id} onChanged={(text) => { setNotice(text); load() }} />
+      <MoneyOnTheWay items={pendingItems(pending, user.id)} onCancelled={(text) => { setNotice(text); load() }} />
 
-      <Link to="/account/placanja" className="pay-more-link">Sve transakcije i plaćeni poslovi <ChevronRight size={16} /></Link>
+      <section className="bal-recent" aria-label="Posljednje transakcije">
+        <div className="wallet-list-head">
+          <h2 className="account-sub">Posljednje transakcije</h2>
+          {recent.length > 0 && <Link to="/account/placanja" className="bal-all">Sve transakcije <ChevronRight size={16} /></Link>}
+        </div>
+        {recent.length === 0
+          ? <p className="bal-none">Još nema transakcija. Svaka uplata, rezervacija, zarada ili isplata pojaviće se ovdje.</p>
+          : <div className="wallet-list">{recent.map((row) => <LedgerRow key={row.id} row={row} />)}</div>}
+      </section>
 
       <div className="wallet-info">
         <Info size={16} />

@@ -1,30 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { WalletMascot } from '../../app/Mascots'
-import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Gift, Landmark, Lock, Receipt, RefreshCcw, Sparkles } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Coins } from 'lucide-react'
 import { accountService } from '../../services/accountService'
 import { formatBosnianDate } from '../../utils/dateFormat'
 import { SkeletonList } from '../../components/Skeleton'
 import PaymentTabs from './PaymentTabs'
+import LedgerRow from './LedgerRow'
 
 const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
-const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
-const KIND = {
-  admin_credit: ['Uplata — Zadatak tim', Gift],
-  bonus: ['Bonus', Sparkles],
-  promo: ['Promocija', Sparkles],
-  refund: ['Povrat', RefreshCcw],
-  admin_debit: ['Skidanje — Zadatak tim', Receipt],
-  fee: ['Naknada za posao', Receipt],
-  purchase: ['Uplata', Receipt],
-  payout: ['Isplata', ArrowUpRight],
-  escrow_hold: ['Rezervisano za posao', Lock],
-  escrow_refund: ['Povrat rezervisanog iznosa', RefreshCcw],
-  job_income: ['Zarada od posla', Coins],
-  card_topup: ['Uplata karticom', CreditCard],
-  payout_hold: ['Isplata na račun', Landmark],
-  payout_return: ['Povrat isplate na balans', RefreshCcw],
-}
 const STATUS = { funded: ['Rezervisano', 'funded'], requested: ['Čeka potvrdu klijenta', 'requested'], released: ['Isplaćeno', 'released'], refunded: ['Vraćeno', 'refunded'], disputed: ['Spor', 'disputed'] }
 
 /** "Plaćanje → Historija": every job paid through Zadatak Pay, or every move on the balance. */
@@ -71,20 +55,7 @@ function PaymentHistoryPage() {
       )}
       {view === 'ledger' && ledger !== null && ledger.length > 0 && (
         <div className="wallet-list">
-          {ledger.map((row) => {
-            const [label, Icon] = KIND[row.kind] || ['Transakcija', Receipt]
-            const positive = Number(row.amount) > 0
-            return (
-              <div key={row.id} className="wallet-row">
-                <span className={`wallet-sign ${positive ? 'plus' : 'minus'}`}><Icon size={16} /></span>
-                <div>
-                  <strong>{label}{row.note ? ` · ${row.note}` : ''}</strong>
-                  <small>{formatBosnianDate(row.created_at)} · stanje nakon: {money(row.balance_after)}</small>
-                </div>
-                <b className={positive ? 'plus' : 'minus'}>{positive ? '+' : '−'}{money(Math.abs(Number(row.amount)))}</b>
-              </div>
-            )
-          })}
+          {ledger.map((row) => <LedgerRow key={row.id} row={row} />)}
         </div>
       )}
 

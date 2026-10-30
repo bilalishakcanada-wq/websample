@@ -14,6 +14,8 @@ const SITE_URL = (Deno.env.get('SITE_URL') || 'https://bilalishakcanada-wq.githu
 const CONTACT = Deno.env.get('VAPID_CONTACT') || 'https://bilalishakcanada-wq.github.io/websample/'
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
+// older SQL notification texts carry long dashes and emoji; pushes go out in the site's plain style
+const plain = (text: string) => text.replace(/\s*—\s*/g, ', ').replace(/\s*\p{Extended_Pictographic}\uFE0F?/gu, '').trim()
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
 type Payload = { notification_id?: string; user_id: string; type?: string; title: string; message?: string; link?: string }
@@ -52,8 +54,8 @@ Deno.serve(async (req) => {
   const server = await appServer()
   const url = payload.link ? `${SITE_URL}${payload.link.startsWith('/') ? payload.link : `/${payload.link}`}` : `${SITE_URL}/account/obavijesti`
   const body = JSON.stringify({
-    title: payload.title,
-    body: payload.message || '',
+    title: plain(payload.title),
+    body: plain(payload.message || ''),
     url,
     tag: payload.type || 'zadatak',
     id: payload.notification_id || null,

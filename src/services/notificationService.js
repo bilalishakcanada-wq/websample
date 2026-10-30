@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { PUSH_PREF_CHANGED } from '../utils/push'
+import { plainNotice } from '../utils/plainText'
 
 const pushPref = { userId: null, value: null }
 if (typeof window !== 'undefined') window.addEventListener(PUSH_PREF_CHANGED, () => { pushPref.value = null })
@@ -15,7 +16,7 @@ export const notificationService = {
       console.error('Supabase notifications fetch failed', { message: error.message, code: error.code })
       throw error
     }
-    return data || []
+    return (data || []).map(plainNotice)
   },
 
   async markRead(ids) {
@@ -49,7 +50,7 @@ export const notificationService = {
   subscribe(userId, onInsert) {
     const channel = supabase
       .channel(`notifications-${userId}-${Math.random().toString(36).slice(2, 8)}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => onInsert(payload.new))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => onInsert(plainNotice(payload.new)))
       .subscribe()
     return () => supabase.removeChannel(channel)
   },

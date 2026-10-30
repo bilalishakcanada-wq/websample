@@ -32,7 +32,7 @@ export async function publishListing({ user, form, photos = { files: [], removed
   const street = findStreetAddress(form.title, form.description)
   if (street) throw new Error(streetAddressMessage(street, 'naslov ni opis'))
   const schedule = scheduleFromForm(form)
-  if (schedule.due_date && schedule.due_date < todayBa()) throw new Error('Datum je već prošao — odaberi današnji ili neki kasniji dan.')
+  if (schedule.due_date && schedule.due_date < todayBa()) throw new Error('Datum je već prošao, odaberi današnji ili neki kasniji dan.')
 
   const payload = {
     user_id: user.id,

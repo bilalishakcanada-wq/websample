@@ -3,7 +3,7 @@ import { Check, Plus, X } from 'lucide-react'
 import { MAX_REQUIREMENTS, REQUIREMENT_MAX_LENGTH, TIME_OF_DAY } from '../utils/schedule'
 import './TaskExtras.css'
 
-/** "U koje doba dana?" — optional, several can be picked (empty = any time). */
+/** "U koje doba dana?", optional, several can be picked (empty = any time). */
 export function TimeOfDayPicker({ value = [], onChange }) {
   const toggle = (id) => onChange(value.includes(id) ? value.filter((item) => item !== id) : [...value, id])
   return (

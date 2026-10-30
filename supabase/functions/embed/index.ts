@@ -1,4 +1,4 @@
-// Zadatak — vectors for jobs and providers.
+// Zadatak, vectors for jobs and providers.
 //
 // Called every minute by pg_cron (public.embedding_kick, x-sweep-key) while public.embedding_queue has
 // work. Takes a batch, turns each text (title + category + description, or trades + specialties + bio)

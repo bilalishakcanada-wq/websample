@@ -1,10 +1,10 @@
-// Zadatak — email layouts shared by the auth templates (scripts/build-email-templates.mjs)
+// Zadatak, email layouts shared by the auth templates (scripts/build-email-templates.mjs)
 // and the notification mails (supabase/functions/_shared/brandedEmail.ts).
 //
 // Three looks, each with its own Bosnian illustration (public/email/*.png):
-//   A  "Mostar noću"     — dark-blue header and footer, Stari most at night
-//   B  "Bosanska sofra"  — light card, coffee, ćevapi and burek on a ćilim
-//   C  "Baščaršija"      — big headline, Sebilj with pigeons
+//   A  "Mostar noću"    , dark-blue header and footer, Stari most at night
+//   B  "Bosanska sofra" , light card, coffee, ćevapi and burek on a ćilim
+//   C  "Baščaršija"     , big headline, Sebilj with pigeons
 // Every mail picks one at random. Table layout and inline styles only, because
 // Gmail, Outlook and phone mail apps drop <style> blocks and modern CSS.
 // Values are inserted as they are: callers escape user text (escapeHtml below).

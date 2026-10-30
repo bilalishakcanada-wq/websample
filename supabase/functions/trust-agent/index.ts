@@ -1,10 +1,10 @@
-// Zadatak — AI trust agent.
+// Zadatak. AI trust agent.
 //
 // Reads everything the platform knows about an account (profile, listings,
 // bids, messages, reviews, Rule #1 events, reports) and writes a trust
 // assessment that only admins can see: score, risk level, signals and a
 // recommended action. It never bans on its own unless the admin turns on
-// moderation_settings.ai_auto_suspend — by default it flags for a human.
+// moderation_settings.ai_auto_suspend, by default it flags for a human.
 //
 // Ways in: the 30-minute sweep (x-sweep-key) or a staff member (Authorization JWT)
 // asking for one user: { "user_id": "..." }.
@@ -33,7 +33,7 @@ Other abuse to look for: fake or copied profiles, fake reviews (review rings, se
 bid spam, price manipulation, scams (asking for advance payment, moving off-platform), harassment, prohibited services, identity mismatch
 (name vs. bio vs. trades), and accounts created to evade a suspension.
 
-Be fair: a new account with little activity is "low risk / low trust" — not suspicious. Do not punish people for being new.
+Be fair: a new account with little activity is "low risk / low trust", not suspicious. Do not punish people for being new.
 Answer in JSON only:
 {"trust_score": 0-100, "risk_level": "low"|"medium"|"high", "summary": "2-3 sentences in Bosnian for the admin",
  "signals": ["short bullet in Bosnian", ...], "recommended_action": "none"|"watch"|"review"|"suspend", "confidence": 0.0-1.0}`
@@ -97,7 +97,7 @@ async function processUser(userId: string, autoSuspend: boolean) {
       source_table: 'profiles',
       fields: [],
       kinds: ['ai_assessment'],
-      snippet: `AI: ${result.risk_level} rizik, povjerenje ${result.trust_score}/100 — ${result.summary}`.slice(0, 240),
+      snippet: `AI: ${result.risk_level} rizik, povjerenje ${result.trust_score}/100, ${result.summary}`.slice(0, 240),
       action: 'flagged',
     })
   }

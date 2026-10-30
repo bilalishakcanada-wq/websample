@@ -5,7 +5,7 @@ import './JobConditions.css'
 
 /**
  * "Uslovi i pogodnosti" u formi za objavu (računar i telefon).
- * value = { requires: [...kodovi značaka], perks: [...] } — isti oblik ide u listings.conditions.
+ * value = { requires: [...kodovi značaka], perks: [...] }, isti oblik ide u listings.conditions.
  */
 export function ConditionsBuilder({ value = {}, onChange, category }) {
   const requires = value.requires || []
@@ -37,7 +37,7 @@ export function ConditionsBuilder({ value = {}, onChange, category }) {
           <span className="jc-chip is-fixed"><IdCard size={15} aria-hidden="true" /> <span>Lična karta verifikovana</span></span>
           {REQUIREMENTS.map((item) => chip('requires', requires, item, full))}
         </div>
-        {full && <small className="jc-note">Najviše {MAX_REQUIRED_BADGES} značaka — što više uslova, to manje ponuda.</small>}
+        {full && <small className="jc-note">Najviše {MAX_REQUIRED_BADGES} značaka. Što više uslova, to manje ponuda.</small>}
       </div>
       <div className="jc-group">
         <strong className="jc-group-title"><Gift size={16} /> Ja obezbjeđujem</strong>
@@ -70,7 +70,7 @@ export function ConditionsCard({ conditions, travelAllowance, held, identityOk, 
           <Title>Traženi uslovi</Title>
           <p className="muted-text">
             {isOwner ? 'Ponude šalju samo izvođači koji imaju ove značke.'
-              : checking ? (missing.length ? 'Za ponudu ti nedostaje značka označena crveno.' : 'Ispunjavaš sve uslove — možeš poslati ponudu.')
+              : checking ? (missing.length ? 'Za ponudu ti nedostaje značka označena crveno.' : 'Ispunjavaš sve uslove, možeš poslati ponudu.')
                 : 'Ponudu mogu poslati samo izvođači koji imaju ove značke.'}
           </p>
           <ul className="jc-list">

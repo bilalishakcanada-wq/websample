@@ -9,7 +9,7 @@ import './styles/finish.css'
 import './styles/redesign.css'
 import './styles/flow.css'
 import './styles/craft.css'
-// Every other page loads on demand — the phone downloads only what it opens.
+// Every other page loads on demand, the phone downloads only what it opens.
 const DashboardPage = lazy(lazyImport(() => import('./pages/DashboardPage')))
 // sign-in screens pull the illustrations (Mascots) with them; signed-in people never need them in the entry
 const LoginPage = lazy(lazyImport(() => import('./pages/LoginPage')))

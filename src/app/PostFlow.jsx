@@ -53,7 +53,7 @@ const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY) } catch { /*
 const formatDate = shortDate
 
 /**
- * Phone "Objavi posao" — one question per screen, like the app people already know:
+ * Phone "Objavi posao", one question per screen, like the app people already know:
  * title → time → where → description → photos → budget → review. Guests can go all the
  * way to the review and are asked to sign in only when they tap "Objavi".
  */
@@ -362,11 +362,11 @@ function PostFlow() {
       {key === 'budget' && (
         <section className="ap-body ap-body-budget" key="budget">
           <h1 className="ap-title">Unesi budžet</h1>
-          <p className="ap-sub">Ne brini — konačnu cijenu uvijek možeš dogovoriti kasnije.</p>
+          <p className="ap-sub">Ne brini, konačnu cijenu uvijek možeš dogovoriti kasnije.</p>
           <div className="ap-amount"><span>{form.price ? Number(form.price).toLocaleString('bs-BA') : '0'}</span> KM</div>
           {priceStats
             ? <p className="ap-price-hint">Slični poslovi: obično <strong>{priceStats.median.toLocaleString('bs-BA')} KM</strong> ({priceStats.min}–{priceStats.max} KM)</p>
-            : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“ — izvođači predlažu cijenu.</p>}
+            : <p className="ap-price-hint">Bez iznosa objavljuješ „Po dogovoru“, izvođači predlažu cijenu.</p>}
           <div className="ap-keypad" role="group" aria-label="Iznos">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k, i) => (
               k === '' ? <span key={`sp-${i}`} />

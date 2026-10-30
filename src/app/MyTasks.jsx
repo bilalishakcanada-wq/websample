@@ -25,7 +25,7 @@ const JOB_FILTERS = [['all', 'Svi poslovi'], ['published', 'Objavljeni'], ['assi
 const EMPTY = []
 const money = (value) => (value == null ? 'Po dogovoru' : `${Number(value).toLocaleString('bs-BA')} KM`)
 
-/** "Moji poslovi": jobs I posted and offers I sent — cards like the browse list, with a status filter. */
+/** "Moji poslovi": jobs I posted and offers I sent, cards like the browse list, with a status filter. */
 function MyTasks() {
   const { user } = useAuth()
   const [mode] = useMode()

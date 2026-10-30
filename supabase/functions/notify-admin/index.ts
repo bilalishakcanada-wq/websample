@@ -1,11 +1,11 @@
-// Zadatak — external admin notifications.
+// Zadatak, external admin notifications.
 //
 // Called by database triggers (x-sweep-key) when a user writes to support
 // or the moderation engine suspends / flags an account. Delivers to whatever
 // is configured:
 //   TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID  -> Telegram message
 //   RESEND_API_KEY + ADMIN_EMAIL           -> email via Resend
-// Without any of these it just reports "skipped" — in-app notifications
+// Without any of these it just reports "skipped", in-app notifications
 // (the bell in the header) work regardless.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -26,10 +26,10 @@ type Payload = { kind: 'support' | 'moderation'; user_id?: string; name?: string
 function render(p: Payload) {
   const who = `${p.name || 'Korisnik'}${p.member_id ? ` (${p.member_id})` : ''}`
   if (p.kind === 'support') {
-    return { title: `🆘 Nova poruka podrške — ${who}`, text: `${p.message || ''}\n\nOdgovori: ${SITE_URL}/admin` }
+    return { title: `🆘 Nova poruka podrške, ${who}`, text: `${p.message || ''}\n\nOdgovori: ${SITE_URL}/admin` }
   }
   const label = p.action === 'suspended' ? '⛔ Nalog suspendovan' : '🤖 AI označio nalog'
-  return { title: `${label} — ${who}`, text: `${p.message || ''}\n\nPregled: ${SITE_URL}/admin` }
+  return { title: `${label}, ${who}`, text: `${p.message || ''}\n\nPregled: ${SITE_URL}/admin` }
 }
 
 async function sendTelegram(title: string, text: string) {

@@ -4,9 +4,9 @@ import InfoLayout from '../components/InfoLayout'
 import { mockServiceCategories } from '../data/mockData'
 
 const CLIENT_STEPS = [
-  { icon: ClipboardList, title: 'Opiši šta ti treba', text: 'Naslov, kratak opis, grad i okvirni budžet. Drži jednostavno i jasno — to privlači najbolje izvođače. Objava je besplatna i traje manje od dvije minute.' },
+  { icon: ClipboardList, title: 'Opiši šta ti treba', text: 'Naslov, kratak opis, grad i okvirni budžet. Drži jednostavno i jasno, to privlači najbolje izvođače. Objava je besplatna i traje manje od dvije minute.' },
   { icon: Wallet, title: 'Postavi budžet', text: 'Ne brini, budžet možeš mijenjati i dogovarati kroz ponude. Ako ne znaš koliko košta, pogledaj vodiče za cijene iz stvarnih oglasa.' },
-  { icon: MessageCircle, title: 'Primi ponude, izaberi najboljeg', text: 'Pogledaj profile, ocjene, nivo povjerenja i portfolio. Prihvati ponudu — tek tada se otvaraju kontakti i poruke.' },
+  { icon: MessageCircle, title: 'Primi ponude, izaberi najboljeg', text: 'Pogledaj profile, ocjene, nivo povjerenja i portfolio. Prihvati ponudu, tek tada se otvaraju kontakti i poruke.' },
   { icon: Star, title: 'Ocijeni i zahvali', text: 'Kad je posao gotov, ostavi recenziju. Tako sljedeći klijent zna kome može vjerovati, a dobar majstor raste.' },
 ]
 
@@ -22,7 +22,7 @@ function HowItWorksPage() {
     <InfoLayout
       eyebrow="Kako radi"
       title="Objavi posao. Primi ponude. Riješeno."
-      lead="Najjednostavniji način da ljudi i firme u BiH prepuste posao nekom ko ga zna — i da majstori nađu klijente bez posrednika."
+      lead="Najjednostavniji način da ljudi i firme u BiH prepuste posao nekom ko ga zna, i da majstori nađu klijente bez posrednika."
       cta={{ eyebrow: 'Počni odmah', text: 'Objavi prvi posao besplatno ili napravi profil izvođača.', to: '/objavi', label: 'Objavi posao' }}
       wide
     >
@@ -58,11 +58,11 @@ function HowItWorksPage() {
       </section>
 
       <section className="info-section reveal">
-        <div className="info-section-head"><ShieldCheck size={22} /><div><h2>Pokriveni ste</h2><p>Bilo da objavljuješ ili radiš posao — platforma stoji iza tebe.</p></div></div>
+        <div className="info-section-head"><ShieldCheck size={22} /><div><h2>Pokriveni ste</h2><p>Bilo da objavljuješ ili radiš posao, platforma stoji iza tebe.</p></div></div>
         <div className="info-grid">
           <div className="info-card"><Star size={20} /><strong>Ocjene i recenzije</strong><p>Recenziju može ostaviti samo klijent kome je posao odrađen. Vidiš portfolio, značke, nivo povjerenja i udio prihvaćenih ponuda.</p></div>
           <div className="info-card"><MessageCircle size={20} /><strong>Komunikacija</strong><p>Od objave do završetka, sve ide kroz Zadatak. Prihvati ponudu i privatno se dogovori o detaljima.</p></div>
-          <div className="info-card"><ShieldCheck size={20} /><strong>Zaštićeni kontakti</strong><p>Broj i email se ne mogu razmijeniti dok ponuda nije prihvaćena — nema neželjenih poziva ni prodaje podataka.</p></div>
+          <div className="info-card"><ShieldCheck size={20} /><strong>Zaštićeni kontakti</strong><p>Broj i email se ne mogu razmijeniti dok ponuda nije prihvaćena, nema neželjenih poziva ni prodaje podataka.</p></div>
           <div className="info-card"><CheckCircle2 size={20} /><strong>Verifikovana struka</strong><p>Majstor šalje dokaz o struci; na profilu jasno piše da li je provjeren i za šta.</p></div>
         </div>
       </section>

@@ -8,7 +8,7 @@ export const SITE_PAGES = [
   { path: '/za-biznis', title: 'Zadatak za firme', short: 'Radna snaga na zahtjev, bez zapošljavanja.', group: 'otkrij', related: ['/kako-radi', '/cijene', '/kontakt'] },
   { path: '/zaradi', title: 'Zaradi novac', short: 'Postani izvođač i pronađi poslove u svom gradu.', group: 'otkrij', related: ['/principi-izvodjaca', '/kako-radi', '/vodici'] },
   { path: '/search', title: 'Pretraži poslove', short: 'Svi otvoreni poslovi na listi i mapi.', group: 'otkrij', app: true },
-  { path: '/vodici', title: 'Vodiči za cijene', short: 'Koliko košta posao — iz stvarnih oglasa.', group: 'otkrij', related: ['/kako-radi', '/search', '/cijene'] },
+  { path: '/vodici', title: 'Vodiči za cijene', short: 'Koliko košta posao, iz stvarnih oglasa.', group: 'otkrij', related: ['/kako-radi', '/search', '/cijene'] },
   { path: '/pomoc', title: 'Često postavljena pitanja', short: 'Odgovori na najčešća pitanja i live chat.', group: 'otkrij', related: ['/kako-radi', '/kontakt', '/pravila'] },
   { path: '/aplikacija', title: 'Aplikacija za telefon', short: 'Zadatak na Androidu i iPhoneu.', group: 'otkrij', related: ['/kako-radi', '/pomoc', '/zaradi'] },
   { path: '/cijene', title: 'Planovi i cijene', short: 'Šta je besplatno, a šta donose planovi.', group: 'otkrij', related: ['/kako-radi', '/za-biznis', '/pomoc'] },
@@ -20,7 +20,7 @@ export const SITE_PAGES = [
   { path: '/pravila', title: 'Uslovi korištenja', short: 'Pravila i uslovi korištenja platforme.', group: 'kompanija', related: ['/privatnost', '/pravila-zajednice', '/pomoc'] },
   { path: '/privatnost', title: 'Politika privatnosti', short: 'Koje podatke čuvamo i zašto.', group: 'kompanija', related: ['/pravila', '/kolacici', '/kontakt'] },
   { path: '/kolacici', title: 'Politika kolačića', short: 'Šta Zadatak čuva u pregledniku i kako to mijenjaš.', group: 'kompanija', related: ['/privatnost', '/pravila', '/kontakt'] },
-  { path: '/kontakt', title: 'Kontakt', short: 'Piši nam — odgovaramo u roku 24 sata.', group: 'kompanija', related: ['/pomoc', '/o-nama', '/za-biznis'] },
+  { path: '/kontakt', title: 'Kontakt', short: 'Piši nam, odgovor stiže na tvoj email.', group: 'kompanija', related: ['/pomoc', '/o-nama', '/za-biznis'] },
 
   // ---- Postojeći korisnici (app pages, no "related" block needed)
   { path: '/objavi', title: 'Objavi posao', short: 'Opiši šta ti treba i primi ponude.', group: 'korisnici', app: true },

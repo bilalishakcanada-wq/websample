@@ -6,7 +6,7 @@ let counter = 0
 
 /**
  * Fire-and-forget notification: toast('Posao objavljen', { kind: 'success' }).
- * Works from anywhere (services, pages) — no context needed.
+ * Works from anywhere (services, pages), no context needed.
  */
 export function toast(message, { kind = 'info', duration = 3200 } = {}) {
   if (typeof window === 'undefined') return
@@ -42,7 +42,7 @@ function Toaster() {
       schedule(item.id, item.duration)
     }
     // connectivity changes are the one toast the app raises on its own
-    const onOffline = () => toast('Nema interneta — provjeri vezu.', { kind: 'error', duration: 6000 })
+    const onOffline = () => toast('Nema interneta, provjeri vezu.', { kind: 'error', duration: 6000 })
     const onOnline = () => toast('Ponovo si online.', { kind: 'success', duration: 2000 })
     window.addEventListener(EVENT, onToast)
     window.addEventListener('offline', onOffline)

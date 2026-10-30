@@ -137,7 +137,7 @@ function OversightTab() {
   return (
     <div className="admin-table">
       <div className="admin-live-row">
-        <span className="admin-live-dot" /> Uživo — svaka nova poruka, oglas, ponuda, recenzija, nalog i kršenje pravila pojavljuje se ovdje čim nastane.{live > 0 && ` (${live} novih od otvaranja)`}
+        <span className="admin-live-dot" /> Uživo: svaka nova poruka, oglas, ponuda, recenzija, nalog i kršenje pravila pojavljuje se ovdje čim nastane.{live > 0 && ` (${live} novih od otvaranja)`}
       </div>
       <div className="admin-subtabs">
         {FEED_KINDS.map(([value, label]) => (

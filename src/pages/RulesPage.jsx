@@ -6,7 +6,7 @@ function RulesPage() {
     <InfoLayout
       eyebrow="Pravna obavještenja"
       title="Uslovi korištenja"
-      lead="Pravila po kojima radi Zadatak. Kratko, jasno i bez sitnih slova — ako nešto nije jasno, piši nam."
+      lead="Pravila po kojima radi Zadatak. Kratko, jasno i bez sitnih slova. Ako nešto nije jasno, piši nam."
       cta={{ eyebrow: 'Pitanje?', text: 'Nejasan ti je neki uslov? Objasnit ćemo.', to: '/kontakt?tema=account', label: 'Kontakt' }}
     >
         <section className="info-section reveal">

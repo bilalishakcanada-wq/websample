@@ -215,7 +215,7 @@ function ProfileSettingsPage() {
           <dl className="pp-stats">
             <div>
               <dt>Ocjena</dt>
-              <dd>{reviews > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pp-star" /></> : '—'}</dd>
+              <dd>{reviews > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pp-star" /></> : '-'}</dd>
               <small>{reviews > 0 ? reviewsLabel(reviews) : 'još bez recenzija'}</small>
             </div>
             <div>
@@ -225,7 +225,7 @@ function ProfileSettingsPage() {
             </div>
             <div>
               <dt>Član od</dt>
-              <dd className="pp-since">{formatBosnianMonthYear(profile.created_at) || '—'}</dd>
+              <dd className="pp-since">{formatBosnianMonthYear(profile.created_at) || '-'}</dd>
             </div>
           </dl>
         </section>
@@ -267,7 +267,7 @@ function ProfileSettingsPage() {
                     <input value={form.lastName} onChange={set('lastName')} required autoComplete="family-name" />
                   </label>
                 </div>
-                <small className={!nameOk || !nameScan.clean ? 'is-error' : 'pp-hint'}>{!nameOk ? 'Pravo ime i prezime, samo slova.' : !nameScan.clean ? contactInfoMessage(nameScan, 'ime') : `Drugi te vide kao ${shownName || '—'}`}</small>
+                <small className={!nameOk || !nameScan.clean ? 'is-error' : 'pp-hint'}>{!nameOk ? 'Pravo ime i prezime, samo slova.' : !nameScan.clean ? contactInfoMessage(nameScan, 'ime') : `Drugi te vide kao ${shownName || '-'}`}</small>
                 <div className="pp-field">
                   <CityField id="acc-city" value={form.city} onChange={(city) => setForm((current) => ({ ...current, city }))} onAddress={(next) => { setExact(next); setExactTouched(true) }} label="Mjesto ili adresa" />
                   {(knowsPlace(form.city) || exact) && (

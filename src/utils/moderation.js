@@ -20,7 +20,7 @@ export const findProhibitedTerm = (...texts) => {
 }
 
 // ---------------------------------------------------------------------------
-// Rule #1 — no contact details or outside channels anywhere on the platform.
+// Rule #1, no contact details or outside channels anywhere on the platform.
 // Mirrors public.moderation_scan() in the database; the server is the authority,
 // this only gives people instant feedback before they hit "Sačuvaj".
 // ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ export const CONTACT_KIND_LABEL = {
   prohibited: 'zabranjen sadržaj (oružje, droga, falsifikati…)',
 }
 
-/** Scan one or more texts. Returns { clean, kinds } — kinds are the rule names that matched. */
+/** Scan one or more texts. Returns { clean, kinds }, kinds are the rule names that matched. */
 export const scanContactInfo = (...texts) => {
   const text = texts.filter(Boolean).join('\n')
   if (!text.trim()) return { clean: true, kinds: [] }
@@ -83,7 +83,7 @@ export const contactInfoMessage = (scan, context = 'tekst') => {
   if (!scan || scan.clean) return null
   const what = scan.kinds.map((kind) => CONTACT_KIND_LABEL[kind] || kind)
   const list = what.length === 1 ? what[0] : `${what.slice(0, -1).join(', ')} i ${what[what.length - 1]}`
-  return `Pravilo #1: izgleda da ${context} sadrži ${list}. Kontakti i društvene mreže nisu dozvoljeni na Zadatku — sva komunikacija ide kroz platformu. Ukloni to pa pokušaj ponovo.`
+  return `Pravilo #1: izgleda da ${context} sadrži ${list}. Kontakti i društvene mreže nisu dozvoljeni na Zadatku, sva komunikacija ide kroz platformu. Ukloni to pa pokušaj ponovo.`
 }
 
 /** Chat-specific check: contacts only before acceptance, illegal content always. */
@@ -116,4 +116,4 @@ export const streetAddressMessage = (found, context = 'opis') =>
     ? 'Pošalji je u porukama nakon prihvaćene ponude.'
     : 'Dodaj je kod „Mjesto“ i vidjet će je samo izvođač kojeg izabereš.'}`
 
-export const RULE_ONE_TEXT = 'Pravilo #1: bez brojeva telefona, emaila, linkova i društvenih mreža — u tekstu i na slikama. Kontakt se razmjenjuje tek nakon prihvaćene ponude, kroz poruke.'
+export const RULE_ONE_TEXT = 'Pravilo #1: bez brojeva telefona, emaila, linkova i društvenih mreža, u tekstu i na slikama. Kontakt se razmjenjuje tek nakon prihvaćene ponude, kroz poruke.'

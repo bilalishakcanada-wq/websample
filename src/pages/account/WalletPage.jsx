@@ -45,21 +45,21 @@ function WalletPage() {
     const order = params.get('narudzba')
     if (!result || !order) return
     setParams({}, { replace: true })
-    if (result !== 'ok') { setNotice('Plaćanje je otkazano — ništa nije naplaćeno.'); return }
+    if (result !== 'ok') { setNotice('Plaćanje je otkazano, ništa nije naplaćeno.'); return }
     setNotice('Provjeravamo uplatu…')
     let tries = 0
     const timer = setInterval(async () => {
       tries += 1
       const row = await accountService.cardPaymentStatus(order)
       if (row?.status === 'approved') { clearInterval(timer); setNotice(`Uplata od ${money(row.amount_km)} je stigla na balans.`); load() }
-      else if (row?.status === 'declined') { clearInterval(timer); setNotice('Banka je odbila plaćanje — ništa nije naplaćeno.') }
+      else if (row?.status === 'declined') { clearInterval(timer); setNotice('Banka je odbila plaćanje, ništa nije naplaćeno.') }
       else if (tries >= 15) { clearInterval(timer); setNotice('Uplata se još obrađuje. Balans će se ažurirati čim banka potvrdi.') }
     }, 2000)
     return () => clearInterval(timer)
   }, [])
 
   const openPanel = (name) => { setPanel(panel === name ? null : name); setAmount(''); setActionError('') }
-  // na telefonu panel zna pasti ispod trake s tabovima — pomjeri ga u vidno polje
+  // na telefonu panel zna pasti ispod trake s tabovima, pomjeri ga u vidno polje
   const panelRef = useCallback((node) => {
     if (node) window.requestAnimationFrame(() => node.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
   }, [])
@@ -101,7 +101,7 @@ function WalletPage() {
         </div>
         <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
         <div className="bal-split">
-          <div><small>Za isplatu na račun</small><strong>{payout ? money(payout.withdrawable) : '—'}</strong></div>
+          <div><small>Za isplatu na račun</small><strong>{payout ? money(payout.withdrawable) : '-'}</strong></div>
           <div><small><ArrowDownLeft size={13} /> Ušlo · 30 dana</small><strong>{Number(wallet.credited_30d) > 0 ? '+' : ''}{money(wallet.credited_30d)}</strong></div>
           <div><small><ArrowUpRight size={13} /> Izašlo · 30 dana</small><strong>{Number(wallet.spent_30d) !== 0 ? '−' : ''}{money(Math.abs(Number(wallet.spent_30d || 0)))}</strong></div>
         </div>

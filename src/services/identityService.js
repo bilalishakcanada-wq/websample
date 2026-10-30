@@ -4,13 +4,13 @@ import { publicError } from '../utils/validation'
 /**
  * Verifikacija identiteta: JMBG + dokument -> ručna provjera tima.
  *
- * Slike idu u PRIVATNI bucket 'identity'. Korisnik ih ne može pročitati nazad —
+ * Slike idu u PRIVATNI bucket 'identity'. Korisnik ih ne može pročitati nazad,
  * jednom poslanu ličnu kartu vidi samo tim. Sam JMBG se u bazi čuva šifrovan i
  * nikad se ne vraća klijentu.
  */
 /**
  * Gruba oznaka uređaja: platforma, jezik, rezolucija, vremenska zona.
- * Nije praćenje po webu — ne izlazi iz Zadatka i služi samo da se vidi kad isti
+ * Nije praćenje po webu, ne izlazi iz Zadatka i služi samo da se vidi kad isti
  * uređaj šalje više različitih identiteta.
  */
 function deviceFingerprint() {
@@ -45,7 +45,7 @@ const call = async (fn, args) => {
 }
 
 export const identityService = {
-  /** Moje stanje verifikacije — čita se pri otvaranju stranice. */
+  /** Moje stanje verifikacije, čita se pri otvaranju stranice. */
   async mine() {
     const { data, error } = await supabase
       .from('identity_verifications')
@@ -74,9 +74,9 @@ export const identityService = {
   /**
    * Može li prijavljeni korisnik slati ponude, i ako ne, u kojoj je fazi:
    * 'ok' | 'needed' (nije poslao) | 'pending' (tim provjerava) | 'rejected'.
-   * Pita istu funkciju kao baza (identity_verified, stroga — bez prelaznog roka;
+   * Pita istu funkciju kao baza (identity_verified, stroga, bez prelaznog roka;
    * dok ta migracija nije primijenjena, identity_ok). Ako upit ne uspije, vraća
-   * 'ok' — baza svejedno ima zadnju riječ, a korisnik ne ostane zaključan greškom.
+   * 'ok', baza svejedno ima zadnju riječ, a korisnik ne ostane zaključan greškom.
    */
   async offerGate() {
     try {
@@ -96,10 +96,10 @@ export const identityService = {
 
   /**
    * Smije li prijavljeni korisnik objaviti posao: 'ok' | 'needed' | 'pending' | 'rejected'.
-   * Pita can_post_job() — istu funkciju koju baza provjerava pri objavi (stroga, bez
+   * Pita can_post_job(), istu funkciju koju baza provjerava pri objavi (stroga, bez
    * prelaznog roka; supabase/identity/jobs_require_verified.sql). Dok ta datoteka nije
    * primijenjena, pita identity_ok() koju baza tada koristi, pa forma nikad ne zaključa
-   * nekoga koga bi baza pustila. Ako upit ne uspije, vraća 'ok' — baza ima zadnju riječ.
+   * nekoga koga bi baza pustila. Ako upit ne uspije, vraća 'ok', baza ima zadnju riječ.
    */
   async postGate() {
     try {
@@ -138,7 +138,7 @@ export const identityService = {
       p_phash: phash || null, p_quality: quality || null, p_device: deviceFingerprint(),
     }),
 
-  /** Bodovi rizika i razlozi — moderator ih vidi uz predmet. */
+  /** Bodovi rizika i razlozi, moderator ih vidi uz predmet. */
   risk: (caseId) => call('identity_risk', { p_case: caseId }),
 
   // --- za tim ---------------------------------------------------------------
@@ -154,12 +154,12 @@ export const identityService = {
     return data || []
   },
   claimNext: () => call('identity_claim_next', { p_minutes: 15 }),
-  /** Otkriva broj i slike — svaki poziv ostaje zapisan u staff_actions. */
+  /** Otkriva broj i slike, svaki poziv ostaje zapisan u staff_actions. */
   reveal: (caseId) => call('identity_reveal', { p_case: caseId }),
   decide: (caseId, approve, reason = null) =>
     call('identity_decide', { p_case: caseId, p_approve: approve, p_reason: reason }),
 
-  /** Potpisani link za sliku dokumenta — vrijedi 60 sekundi. */
+  /** Potpisani link za sliku dokumenta, vrijedi 60 sekundi. */
   async signedDoc(path) {
     if (!path) return null
     const { data, error } = await supabase.storage.from('identity').createSignedUrl(path, 60)

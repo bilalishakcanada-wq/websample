@@ -25,7 +25,7 @@ function InstallPrompt() {
     if (dismissed || isStandalone() || isNativeApp()) return undefined // already an app
     const onPrompt = (event) => { event.preventDefault(); setDeferred(event); setShow(true) }
     window.addEventListener('beforeinstallprompt', onPrompt)
-    // iOS never fires the event — show the hint after a short while on the first visit
+    // iOS never fires the event, show the hint after a short while on the first visit
     const timer = isIos() ? window.setTimeout(() => setShow(true), 12000) : null
     return () => { window.removeEventListener('beforeinstallprompt', onPrompt); if (timer) window.clearTimeout(timer) }
   }, [])
@@ -51,7 +51,7 @@ function InstallPrompt() {
       <div>
         <strong>Zadatak kao aplikacija</strong>
         {deferred
-          ? <span>Brže otvaranje, cijeli ekran, obavijesti — bez app storea.</span>
+          ? <span>Brže otvaranje, cijeli ekran, obavijesti, bez app storea.</span>
           : <span>Klikni <Share size={13} /> <b>Podijeli</b> pa <b>„Dodaj na početni ekran“</b>.</span>}
       </div>
       {deferred && <button type="button" className="primary-button small-button" onClick={install}><Download size={15} /> Instaliraj</button>}

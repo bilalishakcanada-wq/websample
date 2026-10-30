@@ -17,7 +17,7 @@ export const publicError = () => new Error('Zahtjev nije moguće obraditi. Poku�
 const POZNATE_GRESKE = [
   {
     test: /VERIFIKACIJA_POTREBNA|identity_required/i,
-    poruka: 'Prije ovoga treba potvrditi identitet — provjera traje obično do 24 sata.',
+    poruka: 'Prije ovoga treba potvrditi identitet, provjera traje obično do 24 sata.',
     akcija: { tekst: 'Potvrdi identitet', href: '/account/verifikacija' },
   },
   { test: /IZVODJAC_NIJE_VERIFIKOVAN/i, poruka: 'Ovaj izvođač još nije potvrdio identitet, pa mu posao ne možeš dodijeliti. Izaberi drugu ponudu ili sačekaj da se verifikuje.' },
@@ -26,17 +26,17 @@ const POZNATE_GRESKE = [
     poruka: 'Klijent za ovaj posao traži značku koju još nemaš. Osvoji je pa pošalji ponudu.',
     akcija: { tekst: 'Osvoji značku', href: '/account/znacke' },
   },
-  { test: /USLOVI_ZAKLJUCANI/i, poruka: 'Izvođač je već izabran — uslovi posla se više ne mogu mijenjati.' },
+  { test: /USLOVI_ZAKLJUCANI/i, poruka: 'Izvođač je već izabran, uslovi posla se više ne mogu mijenjati.' },
   { test: /SUSPENDED|is_suspended/i, poruka: 'Nalog je privremeno suspendovan, pa ova radnja nije moguća.' },
   { test: /CHAT_JOS_NIJE_OTVOREN/i, poruka: 'Dopisivanje počinje kada klijent prihvati ponudu i osigura uplatu.' },
-  { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren — prepiska ostaje samo za čitanje.' },
+  { test: /CHAT_JE_ZAKLJUCAN/i, poruka: 'Posao je namiren, prepiska ostaje samo za čitanje.' },
   { test: /PREVISE_ODGOVORA/i, poruka: 'Previše poruka ispod ove ponude. Dogovorite ostalo kad klijent prihvati ponudu.' },
   { test: /KORISNIK_BLOKIRAN|user_blocked/i, poruka: 'Ovo nije moguće: jedno od vas je blokiralo drugo.' },
   { test: /NISI_UCESNIK_RAZGOVORA/i, poruka: 'Nemaš pristup ovom razgovoru.' },
   { test: /PONUDA_NA_SVOJ_OGLAS/i, poruka: 'Ne možeš slati ponudu na vlastiti posao.' },
   { test: /PONUDA_ZAKLJUCANA/i, poruka: 'Iznos i opis ponude može mijenjati samo izvođač koji ju je poslao.' },
   { test: /BID_STATUS_FORBIDDEN/i, poruka: 'Ponuda se prihvata dugmetom „Prihvati i plati“, uz osiguranu uplatu.' },
-  { test: /ROK_U_PROSLOSTI/i, poruka: 'Datum je već prošao — odaberi današnji ili neki kasniji dan.' },
+  { test: /ROK_U_PROSLOSTI/i, poruka: 'Datum je već prošao, odaberi današnji ili neki kasniji dan.' },
   { test: /POSAO_ISTEKAO/i, poruka: 'Rok za ovaj posao je prošao. Vlasnik ga mora objaviti ponovo s novim datumom.' },
   { test: /POSAO_ZATVOREN/i, poruka: 'Ovaj posao više ne prima ponude.' },
   // "Zatraži ponudu" (private quote requests)
@@ -63,7 +63,7 @@ const POZNATE_GRESKE = [
     // "PREDALEKO: udaljen/a si 56 km, a za ovaj posao ponude mogu slati izvođači do 15 km"
     poruka: (tekst) => {
       const detalj = (tekst.match(/PREDALEKO:\s*([^.\n]+)/) || [])[1]
-      return `Predaleko si za ovaj posao${detalj ? ` — ${detalj.trim()}` : ''}. Jedino što možeš je zamoliti klijenta da ti plati prevoz (gorivo ili taksi).`
+      return `Predaleko si za ovaj posao${detalj ? `, ${detalj.trim()}` : ''}. Jedino što možeš je zamoliti klijenta da ti plati prevoz (gorivo ili taksi).`
     },
   },
   {
@@ -76,7 +76,7 @@ const POZNATE_GRESKE = [
   },
   {
     test: /GRAD_POTREBAN/i,
-    poruka: 'Dozvoli lokaciju ili dodaj svoj grad u profil — po tome vidimo koliko si daleko od posla.',
+    poruka: 'Dozvoli lokaciju ili dodaj svoj grad u profil, po tome vidimo koliko si daleko od posla.',
     akcija: { tekst: 'Dodaj grad', href: '/account/profil' },
   },
 ]

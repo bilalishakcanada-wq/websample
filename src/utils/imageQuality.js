@@ -1,5 +1,5 @@
 /**
- * Provjera kvaliteta slike dokumenta — u pregledniku, prije slanja.
+ * Provjera kvaliteta slike dokumenta, u pregledniku, prije slanja.
  *
  * Zašto ovdje a ne na serveru: korisnik dobije odgovor odmah ("slika je mutna")
  * umjesto da čeka 24 sata pa bude odbijen. Moderator time dobija samo slike koje
@@ -10,10 +10,10 @@
 
 const MAX_STRANA = 1600   // veće se smanjuje prije analize i slanja
 
-/** Učita sliku u canvas, uz smanjivanje — velike slike inače gutaju memoriju na telefonu. */
+/** Učita sliku u canvas, uz smanjivanje, velike slike inače gutaju memoriju na telefonu. */
 async function uCanvas(file, maxStrana = MAX_STRANA) {
   const bitmap = await createImageBitmap(file)
-  // dimenzije se moraju pročitati PRIJE close() — poslije zatvaranja bitmap je
+  // dimenzije se moraju pročitati PRIJE close(), poslije zatvaranja bitmap je
   // odspojen i width/height postanu 0 (zbog toga je svaka slika ispadala "premala")
   const izvorna = { w: bitmap.width, h: bitmap.height }
   const omjer = Math.min(1, maxStrana / Math.max(izvorna.w, izvorna.h))
@@ -72,7 +72,7 @@ function svjetlo(ctx, w, h) {
  * Klasični dHash poredi samo vodoravno susjedne piksele, pa slika sa čisto
  * vodoravnom strukturom (npr. redovi teksta preko cijele širine) ispadne bez
  * ijednog postavljenog bita. Zato se uzima 9x9 i računa 32 bita vodoravno +
- * 32 bita uspravno — svaka slika sa ikakvom strukturom daje signal.
+ * 32 bita uspravno, svaka slika sa ikakvom strukturom daje signal.
  *
  * Ista fotografija (i blago prerađena) daje isti ili vrlo blizak otisak, pa se
  * hvata ista lična karta poslana s dva naloga.
@@ -96,14 +96,14 @@ function otisak(file, ctx0) {
   }
 
   // Otisak bez informacije (jednolična slika) bi lažno izgledao isto kao svaka
-  // druga jednolična slika — takav se NE koristi.
+  // druga jednolična slika, takav se NE koristi.
   const jedinica = [...bitovi].filter((b) => b === '1').length
   if (Math.min(jedinica, 64 - jedinica) < 6) return null
 
   return bitovi.match(/.{8}/g).map((b) => parseInt(b, 2).toString(16).padStart(2, '0')).join('')
 }
 
-/** Smanjena slika za slanje — manje podataka putuje i manje se čuva. */
+/** Smanjena slika za slanje, manje podataka putuje i manje se čuva. */
 async function uBlob(canvas, kvalitet = 0.86) {
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', kvalitet))
 }
@@ -132,21 +132,21 @@ export async function provjeriDokument(file) {
   const upozorenja = []
 
   if (izvorna.w < 640 || izvorna.h < 400) {
-    problemi.push('Slika je premala — dokument mora biti bar 640×400 piksela.')
+    problemi.push('Slika je premala, dokument mora biti bar 640×400 piksela.')
   }
 
   const s = ostrina(ctx, w, h)
   if (s < 55) problemi.push('Slika je mutna. Očisti objektiv, drži telefon mirno i slikaj ponovo.')
-  else if (s < 110) upozorenja.push('Slika je na granici oštrine — provjeri da se sva slova vide.')
+  else if (s < 110) upozorenja.push('Slika je na granici oštrine, provjeri da se sva slova vide.')
 
   const sv = svjetlo(ctx, w, h)
   if (sv.prosjek < 45) problemi.push('Slika je pretamna. Slikaj uz jače svjetlo.')
   if (sv.prosjek > 225) problemi.push('Slika je presvijetla. Skloni izvor svjetla ili isključi blic.')
   if (sv.prepaljeno > 0.06) problemi.push('Odsjaj prekriva dio dokumenta. Slikaj pod drugim uglom, bez blica.')
-  if (sv.tamno > 0.55) upozorenja.push('Veliki dio slike je taman — provjeri da je cijeli dokument u kadru.')
+  if (sv.tamno > 0.55) upozorenja.push('Veliki dio slike je taman, provjeri da je cijeli dokument u kadru.')
 
   const omjer = Math.max(w, h) / Math.min(w, h)
-  if (omjer > 2.6) upozorenja.push('Neuobičajen oblik slike — provjeri da nije odsječen dio dokumenta.')
+  if (omjer > 2.6) upozorenja.push('Neuobičajen oblik slike, provjeri da nije odsječen dio dokumenta.')
 
   const fp = otisak(file, ctx)
   const blob = await uBlob(canvas)

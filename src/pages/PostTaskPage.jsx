@@ -237,7 +237,7 @@ function PostTaskPage() {
         {step === 0 && (
           <section className="wizard-panel">
             <h1>Počnimo od osnovnog</h1>
-            <p className="muted-text">U par riječi — šta vam treba da se uradi?</p>
+            <p className="muted-text">U par riječi, šta vam treba da se uradi?</p>
             <label className="wizard-field">
               <span>Naslov posla</span>
               <input
@@ -324,7 +324,7 @@ function PostTaskPage() {
                 <option value="">Odaberi kategoriju</option>
                 {serviceCategories.map((category) => <option key={category.id} value={category.name}>{category.name}</option>)}
               </select>
-              {guessed && form.category && <small className="wizard-hint">Predloženo prema naslovu — promijeni ako ne odgovara.</small>}
+              {guessed && form.category && <small className="wizard-hint">Predloženo prema naslovu, promijeni ako ne odgovara.</small>}
             </label>
             <label className="wizard-field">
               <span>Opis posla</span>
@@ -375,7 +375,7 @@ function PostTaskPage() {
         {step === 3 && (
           <section className="wizard-panel">
             <h1>Pokaži šta treba uraditi</h1>
-            <p className="muted-text">Slika govori više od opisa — izvođači daju tačnije ponude kad vide problem. Opciono, ali preporučujemo.</p>
+            <p className="muted-text">Slika govori više od opisa, izvođači daju tačnije ponude kad vide problem. Opciono, ali preporučujemo.</p>
             <ImagePicker existing={existingImages} files={photos.files} removed={photos.removed} onChange={setPhotos} />
             <p className="wizard-hint"><ShieldCheck size={14} /> Slike sa brojem telefona, e-mailom ili društvenim mrežama automatski se uklanjaju (Pravilo #1).</p>
           </section>
@@ -384,7 +384,7 @@ function PostTaskPage() {
         {step === 4 && (
           <section className="wizard-panel">
             <h1>Koliki je vaš budžet?</h1>
-            <p className="muted-text">Ne brinite — iznos možete dogovoriti i naknadno sa izvođačem.</p>
+            <p className="muted-text">Ne brinite, iznos možete dogovoriti i naknadno sa izvođačem.</p>
             <label className="wizard-field wizard-budget">
               <span>Budžet u KM</span>
               <div className="wizard-budget-input">
@@ -413,8 +413,8 @@ function PostTaskPage() {
 
             <div className="wizard-summary">
               <h3>Pregled oglasa</h3>
-              <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '—'}</strong></div>
-              <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '—'}</strong></div>
+              <div className="wizard-summary-row"><span>Naslov</span><strong>{form.title || '-'}</strong></div>
+              <div className="wizard-summary-row"><span>Kategorija</span><strong>{form.category || '-'}</strong></div>
               <div className="wizard-summary-row"><span>Lokacija</span><strong>{formWhereLabel(form)}</strong></div>
               <div className="wizard-summary-row"><span>Kada</span><strong>{formScheduleLabel(form)}</strong></div>
               {conditionsOn && hasConditions(form.conditions) && <div className="wizard-summary-row"><span>Značke i pogodnosti</span><strong>{conditionsSummary(form.conditions)}</strong></div>}

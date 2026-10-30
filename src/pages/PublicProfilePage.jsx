@@ -26,7 +26,7 @@ const TIER_HINT = {
   top: 'Verifikovan, 10+ recenzija sa prosjekom 4.8+. Najviši nivo povjerenja.',
   trusted: 'Verifikovan i dokazano pouzdan kroz recenzije.',
   verified: 'Identitet i struka provjereni od strane Zadatak tima.',
-  new: 'Novi korisnik — još nema dovoljno istorije za ocjenu.',
+  new: 'Novi korisnik, još nema dovoljno istorije za ocjenu.',
   unverified: 'Struka još nije provjerena. Traži recenzije i portfolio prije dogovora.',
 }
 
@@ -123,7 +123,7 @@ function PublicProfilePage() {
     if (!reason) return
     try {
       await reportService.createReport({ reporterId: user.id, targetType: 'profile', targetId: userId, reason })
-      setNotice('Hvala — prijava je poslana našem timu.')
+      setNotice('Hvala, prijava je poslana našem timu.')
     } catch (requestError) {
       setNotice(requestError.message)
     }
@@ -165,17 +165,17 @@ function PublicProfilePage() {
             <dl className="pf-stats">
               <div>
                 <dt>Ocjena</dt>
-                <dd>{reviewCount > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pf-star" /></> : '—'}<small>{reviewLabel}</small></dd>
+                <dd>{reviewCount > 0 ? <>{Number(trust.avg_rating).toFixed(1)} <Star size={15} fill="currentColor" className="pf-star" /></> : '-'}<small>{reviewLabel}</small></dd>
               </div>
               {isProvider ? (
                 <div title="Udio uspješnih poslova: završeni i isplaćeni, prema onima koje je izvođač prekinuo ili izgubio u sporu.">
                   <dt>Uspješnost</dt>
-                  <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}<small>{jobsDecided === 0 ? 'još nema završenih poslova' : jobOutcomesLabel(trust?.completed_jobs || 0, trust?.failed_jobs || 0)}</small></dd>
+                  <dd>{trust?.success_rate == null ? '-' : `${Math.round(trust.success_rate)}%`}<small>{jobsDecided === 0 ? 'još nema završenih poslova' : jobOutcomesLabel(trust?.completed_jobs || 0, trust?.failed_jobs || 0)}</small></dd>
                 </div>
               ) : (
                 <div title="Udio objavljenih poslova sa prihvaćenom ponudom koji su dovršeni.">
                   <dt>Dovršeni poslovi</dt>
-                  <dd>{trust?.client_completion_rate == null ? '—' : `${Math.round(trust.client_completion_rate)}%`}<small>{trust?.jobs_posted || 0} objavljenih</small></dd>
+                  <dd>{trust?.client_completion_rate == null ? '-' : `${Math.round(trust.client_completion_rate)}%`}<small>{trust?.jobs_posted || 0} objavljenih</small></dd>
                 </div>
               )}
             </dl>

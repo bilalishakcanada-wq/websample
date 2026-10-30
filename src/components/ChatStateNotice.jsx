@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 /**
  * Stoji umjesto polja za pisanje kad dopisivanje nije dozvoljeno.
- * Poruka objašnjava ZAŠTO i nudi sljedeći korak — inače korisnik misli da je kvar.
+ * Poruka objašnjava ZAŠTO i nudi sljedeći korak, inače korisnik misli da je kvar.
  */
 function ChatStateNotice({ state, listingId, onUnblock }) {
   if (state === 'blocked') {
@@ -35,7 +35,7 @@ function ChatStateNotice({ state, listingId, onUnblock }) {
       <div className="ch-state-notice" role="status">
         <MessageSquareOff size={18} />
         <div>
-          <strong>Posao je završen — prepiska je zaključana</strong>
+          <strong>Posao je završen, prepiska je zaključana</strong>
           <p>Poruke ostaju sačuvane i vidljive. Ako imaš primjedbu, otvori spor na stranici posla.</p>
           {listingId && <Link to={`/listings/${listingId}`} className="ghost-button">Otvori posao</Link>}
         </div>

@@ -22,11 +22,11 @@ function TiersInfoPage() {
       </section>
       <section className="info-section reveal">
         <h2>Kako prelazim na viši nivo?</h2>
-        <p>Računa se tvoja zarada u zadnjih 30 dana — zbir dogovorenih cijena poslova koje je klijent označio kao završene. Svaki novi završen posao ulazi u zbir i važi narednih 30 dana.</p>
+        <p>Računa se tvoja zarada u zadnjih 30 dana, zbir dogovorenih cijena poslova koje je klijent označio kao završene. Svaki novi završen posao ulazi u zbir i važi narednih 30 dana.</p>
       </section>
       <section className="info-section reveal">
         <h2>Mogu li pasti na niži nivo?</h2>
-        <p>Da. Nivo prati zadnjih 30 dana, pa pad aktivnosti spušta nivo. Otkazivanja za koja si ti odgovoran/na smanjuju uspješnost i mogu te zadržati na nižem nivou — pouzdanost shvatamo ozbiljno.</p>
+        <p>Da. Nivo prati zadnjih 30 dana, pa pad aktivnosti spušta nivo. Otkazivanja za koja si ti odgovoran/na smanjuju uspješnost i mogu te zadržati na nižem nivou, pouzdanost shvatamo ozbiljno.</p>
       </section>
       <section className="info-section reveal">
         <h2>Naknade i uslovi po nivou</h2>

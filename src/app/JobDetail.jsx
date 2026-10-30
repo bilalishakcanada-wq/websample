@@ -46,7 +46,7 @@ function JobDetail(props) {
   const band = expired
     ? isOwner ? ['Rok je prošao', 'Posao ne prima ponude. Izaberi novi datum i objavi ga ponovo.'] : ['Rok je prošao', 'Ovaj posao više ne prima ponude.']
     : isOwner
-    ? listing.status === 'completed' ? ['Posao je završen', 'Hvala — ostavi recenziju izvođaču.']
+    ? listing.status === 'completed' ? ['Posao je završen', 'Hvala, ostavi recenziju izvođaču.']
       : listing.status === 'cancelled' ? ['Posao je otkazan', 'Možeš ga objaviti ponovo kad želiš.']
         : acceptedBid ? ['Izvođač odabran', payment ? 'Uplata je osigurana na Zadatku.' : 'Dogovorite detalje u porukama.']
           : bids.length > 0 ? ['Dobio/la si ponude', 'Pogledaj ih i izaberi izvođača.']
@@ -59,7 +59,7 @@ function JobDetail(props) {
         ? `Dogovorena cijena: ${money(payment.amount)}` : `Tvoja ponuda: ${money(myBid.amount)}`, BID_LABEL[myBid.status] === 'Nova ponuda' ? 'Čeka odgovor klijenta.' : BID_LABEL[myBid.status]]
       : open && isPrivate ? ['Klijent traži ponudu od tebe', 'Pošalji cijenu ili odbij zahtjev ispod.']
       : open && simple ? ['Ovaj posao je slobodan', 'Dodirni plavo dugme ispod da se prijaviš.']
-      : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi — klijent čeka.']
+      : open ? ['Pošalji ponudu sada', bids.length > 0 ? `${bids.length} ${bids.length === 1 ? 'izvođač je već poslao' : 'izvođača je već poslalo'} ponudu.` : 'Budi prvi, klijent čeka.']
         : [listing.status === 'completed' ? 'Posao je završen' : listing.status === 'cancelled' ? 'Posao je otkazan' : 'Izvođač je odabran', 'Ovaj posao više ne prima ponude.']
 
   const ask = async (event) => {
@@ -109,7 +109,7 @@ function JobDetail(props) {
             <Avatar url={poster?.avatar_url} size={44} />
             <div>
               <strong>{poster?.display_name || 'Korisnik Zadatka'}</strong>
-              <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '—'}.`}</span>
+              <span>{poster?.created_at && Date.now() - new Date(poster.created_at) < 30 * 864e5 ? 'Novi član' : `Član od ${poster?.created_at ? new Date(poster.created_at).getFullYear() : '-'}.`}</span>
             </div>
             <ChevronRight size={18} />
           </Link>
@@ -203,7 +203,7 @@ function JobDetail(props) {
         {tab === 'ponude' && (
           <div className="jd-offers">
             {bids.length === 0 && (
-              <p className="jd-empty">{isOwner ? 'Još nema ponuda. Izvođači obično odgovore u roku sat vremena.' : 'Još nema ponuda — možeš biti prvi.'}</p>
+              <p className="jd-empty">{isOwner ? 'Još nema ponuda.' : 'Još nema ponuda, možeš biti prvi.'}</p>
             )}
             {bids.map((bid) => {
               const m = metrics[bid.bidder_id]
@@ -236,7 +236,7 @@ function JobDetail(props) {
 
         {tab === 'pitanja' && (
           <div className="jd-questions">
-            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.')}</p>}
+            {questions.length === 0 && <p className="jd-empty">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno, odgovor vide svi.')}</p>}
             {questions.map((item) => {
               const fromOwner = item.user_id === listing.user_id
               return (
@@ -261,7 +261,7 @@ function JobDetail(props) {
           </div>
         )}
 
-        {user && listing.status === 'completed' && myReview && <p className="jd-review-done">Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</p>}
+        {user && listing.status === 'completed' && myReview && <p className="jd-review-done">Hvala, tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</p>}
         {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
           <form className="jd-review" id="recenzija" onSubmit={submitReview}>
             <h3>Ostavi recenziju</h3>

@@ -9,7 +9,7 @@ import { locationService } from '../services/locationService'
  * Where: any town, village or town quarter in BiH. Start typing ("Ote…") and pick "Otes, Ilidža";
  * the same name in another municipality ("Otes, Kakanj") is its own row, so nobody picks the wrong one.
  * Nothing is rendered up front: only the 8 best matches for what was typed (or the popular towns).
- * onChange(label, place) — label is what gets saved ("Otes, Ilidža"); place has lat/lng when known.
+ * onChange(label, place), label is what gets saved ("Otes, Ilidža"); place has lat/lng when known.
  * With onAddress, a street can be typed too ("Butmir, Ilirska 1"): picking it saves its settlement through
  * onChange and the exact point through onAddress({ address, lat, lng, accuracy, source: 'typed' }).
  */
@@ -90,7 +90,7 @@ function LocationTypeahead({ value, onChange, onAddress, id = 'city', label = 'M
       )}
       {open && (places.length > 0 || addresses.length > 0 || typed.length >= 2) && (
         <ul className="city-field-list" id={listId} role="listbox">
-          {!typed && <li className="city-field-hint">Popularni gradovi — ili upiši naselje</li>}
+          {!typed && <li className="city-field-hint">Popularni gradovi, ili upiši naselje</li>}
           {places.map((place, index) => (
             <li key={place.label} id={`${id}-opt-${index}`} role="option" aria-selected={index === highlight}>
               <button type="button" className={index === highlight ? 'active' : ''} onMouseEnter={() => setHighlight(index)} onClick={() => pick(place)}>

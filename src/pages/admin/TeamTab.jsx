@@ -87,7 +87,7 @@ function TeamTab() {
               <Avatar src={row.avatar_url} size={36} />
               <div className="team-member-main">
                 <div className="team-member-title"><strong>{row.full_name}</strong> <span className="uid-chip">{row.member_id}</span></div>
-                <span className="muted-text">{row.email} · {row.city || '—'} · registrovan {formatBosnianDate(row.created_at)}</span>
+                <span className="muted-text">{row.email} · {row.city || '-'} · registrovan {formatBosnianDate(row.created_at)}</span>
               </div>
               <div className="admin-row-actions">
                 <button type="button" className="primary-button small-button" onClick={() => setRole(row.user_id, 'MODERATOR', true, row.full_name)}>Dodaj kao moderatora</button>

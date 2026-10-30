@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { publicError } from '../utils/validation'
 
-// Saved jobs ("Sačuvano") — private bookmarks, table saved_listings (supabase/airtasker/03).
+// Saved jobs ("Sačuvano"), private bookmarks, table saved_listings (supabase/airtasker/03).
 // Before that migration is applied the table doesn't exist: reads return nothing and saving
 // says it isn't available yet, instead of breaking the page.
 const isMissingTable = (error) => error?.code === '42P01' || error?.code === 'PGRST205' || /saved_listings/.test(error?.message || '')

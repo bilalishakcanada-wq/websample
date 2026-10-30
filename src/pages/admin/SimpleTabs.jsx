@@ -26,7 +26,7 @@ export function RegistryTab() {
 
   return (
     <div className="admin-table">
-      <p className="muted-text">Svaki nalog dobija privatni ID pri registraciji. Registar čuva ID, vlasnika i datum — i nakon brisanja naloga — pa se svaki događaj može vezati za tačan nalog.</p>
+      <p className="muted-text">Svaki nalog dobija privatni ID pri registraciji. Registar čuva ID, vlasnika i datum, i nakon brisanja naloga, pa se svaki događaj može vezati za tačan nalog.</p>
       <form className="admin-search" onSubmit={(event) => { event.preventDefault(); search(term) }}>
         <Search size={16} />
         <input value={term} onChange={(event) => setTerm(event.target.value)} placeholder="PB-XXXX-XXXX, email, ime ili user id" aria-label="Nađi člana" />
@@ -127,7 +127,7 @@ export function ModerationTab() {
           </div>
         </div>
       ))}
-      {view === 'events' && events.length === 0 && <p className="muted-text">Nema događaja — niko još nije prekršio Pravilo #1.</p>}
+      {view === 'events' && events.length === 0 && <p className="muted-text">Nema događaja, niko još nije prekršio Pravilo #1.</p>}
 
       {view === 'queue' && queue.map((item) => (
         <div key={item.id} className="admin-row">

@@ -14,7 +14,7 @@ const normalize = (text) => (text || '')
 
 const tokens = (text) => normalize(text).split(/[^a-z0-9]+/).filter((t) => t.length > 1)
 
-/** 0..1 — how much of the query appears in the listing (title counts double). */
+/** 0..1, how much of the query appears in the listing (title counts double). */
 export function textRelevance(query, listing) {
   const terms = tokens(query)
   if (terms.length === 0) return 0.5 // no query: neutral
@@ -104,7 +104,7 @@ export const FEED_WEIGHTS = { interest: 2.2, server: 1.5, seen: 1.4 }
 /**
  * Re-order so the same category never runs more than `maxRun` in a row (the "don't show five
  * cleaning jobs back to back" rule every social feed uses). Greedy: take the best item whose
- * category isn't over the run; if none qualifies, take the best anyway — nothing is dropped.
+ * category isn't over the run; if none qualifies, take the best anyway, nothing is dropped.
  */
 export function diversify(items, { key = (item) => item.category, maxRun = 2 } = {}) {
   const rest = [...items]

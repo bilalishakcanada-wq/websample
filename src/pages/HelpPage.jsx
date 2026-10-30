@@ -4,7 +4,7 @@ import { ArrowRight, BookOpen, Bug, ChevronDown, Mail, MessageCircle, Search, Sh
 import ContactForm from '../components/ContactForm'
 import { HELP_ARTICLES, HELP_AUDIENCES, searchHelp } from '../data/helpArticles'
 
-/** Isometric-ish navy/gold blocks for the help hero — drawn in code, no stock art. */
+/** Isometric-ish navy/gold blocks for the help hero, drawn in code, no stock art. */
 function HelpArt({ side }) {
   const tiles = side === 'left'
     ? [[20, 120, 90, '#1f5fff'], [110, 70, 70, '#1b4a8a'], [70, 200, 110, '#123c78'], [180, 150, 60, '#5f8df7'], [0, 20, 60, '#123c78']]
@@ -51,7 +51,7 @@ function HelpPage() {
           <h1>Kako ti možemo pomoći?</h1>
           <label className="help-hero-search">
             <Search size={20} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Postavi pitanje — npr. kako dobijam značke, koliko je naknada…" autoFocus />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Postavi pitanje, npr. kako dobijam značke, koliko je naknada…" autoFocus />
             {query && <button type="button" onClick={() => setQuery('')} aria-label="Obriši">×</button>}
           </label>
         </div>
@@ -83,7 +83,7 @@ function HelpPage() {
         {grouped.length === 0 && (
           <section className="help-section help-empty">
             <h2>Nema odgovora za „{query}“</h2>
-            <p className="muted-text">Pitaj nas direktno — asistent odgovara odmah, a tim preuzima sve što on ne zna.</p>
+            <p className="muted-text">Pitaj nas direktno, asistent odgovara odmah, a tim preuzima sve što on ne zna.</p>
             <button type="button" className="primary-button" onClick={openSupport}><MessageCircle size={16} /> Otvori razgovor</button>
           </section>
         )}
@@ -109,7 +109,7 @@ function HelpPage() {
             <button type="button" className="help-contact-card" onClick={openSupport}>
               <span className="help-contact-icon"><MessageCircle size={22} /></span>
               <strong>Razgovaraj s nama</strong>
-              <span>Asistent odgovara odmah · tim obično u roku od par sati</span>
+              <span>Asistent odgovara odmah, a tim preuzima ono što on ne zna</span>
             </button>
             <a className="help-contact-card" href="#poruka">
               <span className="help-contact-icon"><Mail size={22} /></span>
@@ -124,7 +124,7 @@ function HelpPage() {
             <Link className="help-contact-card help-contact-bug" to={`/pomoc?chat=1&msg=${encodeURIComponent('Prijava greške (beta): šta sam radio/la → šta se desilo → šta sam očekivao/la. Telefon/preglednik: ')}`}>
               <span className="help-contact-icon"><Bug size={22} /></span>
               <strong>Prijavi grešku</strong>
-              <span>Beta verzija — svaka prijava nam pomaže</span>
+              <span>Beta verzija, svaka prijava nam pomaže</span>
             </Link>
           </div>
           <div className="contact-card" id="poruka">

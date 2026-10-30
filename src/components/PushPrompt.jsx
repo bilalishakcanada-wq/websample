@@ -10,7 +10,7 @@ const DISMISS_KEY = 'zadatak-push-prompt-dismissed'
  * Soft "turn on notifications" card. Shows once per device to signed-in users
  * whose browser can do push and who have not decided yet.
  */
-function PushPrompt({ compact = false, reason = 'Saznaj odmah kad stigne ponuda ili poruka — i kad aplikacija nije otvorena.' }) {
+function PushPrompt({ compact = false, reason = 'Saznaj odmah kad stigne ponuda ili poruka, i kad aplikacija nije otvorena.' }) {
   const { user } = useAuth()
   const [visible, setVisible] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -36,7 +36,7 @@ function PushPrompt({ compact = false, reason = 'Saznaj odmah kad stigne ponuda 
     try {
       const result = await enablePush()
       if (result === 'granted') { toast('Obavijesti su uključene na ovom uređaju.', { kind: 'success' }); setVisible(false) }
-      else if (result === 'denied') { toast('Obavijesti su blokirane — dozvoli ih za Zadatak u postavkama telefona ili preglednika.', { kind: 'error' }); setVisible(false) }
+      else if (result === 'denied') { toast('Obavijesti su blokirane, dozvoli ih za Zadatak u postavkama telefona ili preglednika.', { kind: 'error' }); setVisible(false) }
     } catch (error) {
       toast(error.message || 'Nije uspjelo uključivanje obavijesti.', { kind: 'error' })
     } finally {

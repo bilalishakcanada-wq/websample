@@ -4,7 +4,7 @@ import { AlertTriangle } from 'lucide-react'
 /**
  * Greška koja nudi izlaz. Kad baza odbije radnju iz razloga koji korisnik može
  * riješiti (npr. nije potvrdio identitet), poruka nosi i link na mjesto gdje se
- * to rješava — inače korisnik samo vidi da „ne radi" i ode.
+ * to rješava, inače korisnik samo vidi da „ne radi" i ode.
  */
 function ActionError({ error }) {
   if (!error) return null

@@ -10,4 +10,4 @@ try {
     if (ls.getItem(next) === null) ls.setItem(next, ls.getItem(key))
     ls.removeItem(key)
   }
-} catch { /* storage blocked (private mode) — nothing to move */ }
+} catch { /* storage blocked (private mode), nothing to move */ }

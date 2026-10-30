@@ -362,7 +362,7 @@ export function EmptyBoxMascot(props) {
   )
 }
 
-/** Success: task published — confetti and a thumbs-up. */
+/** Success: task published, confetti and a thumbs-up. */
 export function DoneMascot(props) {
   return (
     <Svg {...props}>

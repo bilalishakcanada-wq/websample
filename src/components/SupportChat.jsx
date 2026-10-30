@@ -227,7 +227,7 @@ function SupportChat({ openRequested = false }) {
 
           {!user ? (
             <div className="support-chat-guest">
-              <p>Prijavi se da razgovaraš sa podrškom — ili pogledaj <Link to="/pomoc" onClick={closeChat}>Centar za pomoć</Link>.</p>
+              <p>Prijavi se da razgovaraš sa podrškom, ili pogledaj <Link to="/pomoc" onClick={closeChat}>Centar za pomoć</Link>.</p>
               <Link to="/login" className="primary-button small-button" onClick={closeChat}>Prijavi se</Link>
             </div>
           ) : (
@@ -254,7 +254,7 @@ function SupportChat({ openRequested = false }) {
                 {!loading && (
                   <div className="support-bubble from-admin support-bubble-assistant">
                     <small>Zadatak asistent</small>
-                    Zdravo{firstName ? `, ${firstName}` : ''}! Ja sam Zadatak asistent. Pitaj me bilo šta o platformi, tvojim poslovima, ponudama ili balansu — odgovaram odmah. Ako želiš osobu, klikni „{HUMAN_LABEL}“.
+                    Zdravo{firstName ? `, ${firstName}` : ''}! Ja sam Zadatak asistent. Pitaj me bilo šta o platformi, tvojim poslovima, ponudama ili balansu, odgovaram odmah. Ako želiš osobu, klikni „{HUMAN_LABEL}“.
                   </div>
                 )}
                 {shown.map((item) => <Bubble key={item.id} item={item} onNavigate={closeChat} />)}
@@ -271,7 +271,7 @@ function SupportChat({ openRequested = false }) {
 
               <div className="support-chat-foot">
                 {humanActive ? (
-                  <span className="support-human-status"><UserRound size={13} /> Pravi pomoćnik je obaviješten — odgovor stiže ovdje i na email.</span>
+                  <span className="support-human-status"><UserRound size={13} /> Pravi pomoćnik je obaviješten, odgovor stiže ovdje i na email.</span>
                 ) : (
                   <button type="button" className="support-human-button" onClick={requestHuman} disabled={sending}>
                     <UserRound size={15} /> {HUMAN_LABEL}

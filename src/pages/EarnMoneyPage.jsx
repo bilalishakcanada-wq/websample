@@ -8,11 +8,11 @@ import EarnArt from '../components/EarnArt'
 const formatKM = (value) => String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
 const FAQS = [
-  { q: 'Koje vrste poslova mogu raditi?', a: 'Sve — kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Zadatku je traži.' },
-  { q: 'Kako se naplaćujem?', a: 'Dogovaraš cijenu direktno sa klijentom kroz ponudu (bid). Naplata unutar platforme dolazi uskoro — trenutno se plaćanje dogovara sa klijentom.' },
+  { q: 'Koje vrste poslova mogu raditi?', a: 'Sve: kućni poslovi, IT, dizajn, selidbe, čišćenje, časovi i još mnogo toga. Ako imaš vještinu, neko na Zadatku je traži.' },
+  { q: 'Kako se naplaćujem?', a: 'Dogovaraš cijenu direktno sa klijentom kroz ponudu (bid). Naplata unutar platforme dolazi uskoro, trenutno se plaćanje dogovara sa klijentom.' },
   { q: 'Da li moram platiti da se pridružim?', a: 'Ne. Registracija i pregledanje poslova su potpuno besplatni. Plan pretplate je opcionalan za dodatnu vidljivost.' },
   { q: 'Kako dobijam obavještenja o novim poslovima?', a: 'Aplikaciju možeš instalirati na telefon (Zadatak radi kao PWA) i dobijati obavještenja čim se objavi posao u tvojoj kategoriji.' },
-  { q: 'Kako izgraditi povjerenje kod klijenata?', a: 'Dodaj portfolio sa slikama prošlih radova, zatraži verifikaciju, i sakupljaj recenzije nakon svakog posla — sve se prikazuje na tvom javnom profilu.' },
+  { q: 'Kako izgraditi povjerenje kod klijenata?', a: 'Dodaj portfolio sa slikama prošlih radova, zatraži verifikaciju, i sakupljaj recenzije nakon svakog posla, sve se prikazuje na tvom javnom profilu.' },
 ]
 
 function EarnMoneyPage() {
@@ -70,9 +70,9 @@ function EarnMoneyPage() {
           <div className="earn-example-copy">
             <span className="eyebrow small-eyebrow">Primjer iz prakse</span>
             <h2>Koliko možeš zaraditi?</h2>
-            <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Zadatku — ne izmišljene brojke.</p>
+            <p className="muted-text">Izaberi struku i koliko poslova sedmično želiš. Cijene su prosjeci stvarnih oglasa na Zadatku, ne izmišljene brojke.</p>
             <ul className="check-list">
-              <li>Ti šalješ ponudu sa svojom cijenom — klijent bira.</li>
+              <li>Ti šalješ ponudu sa svojom cijenom, klijent bira.</li>
               <li>Nema provizije na dogovorenu cijenu.</li>
               <li>Kontakt i dogovor idu kroz poruke tek kad klijent prihvati ponudu.</li>
             </ul>
@@ -81,7 +81,7 @@ function EarnMoneyPage() {
             <label>
               Struka
               <select value={calcCategory} onChange={(event) => setCalcCategory(event.target.value)}>
-                {stats.map((row) => <option key={row.category} value={row.category}>{row.category} — ~{Math.round(Number(row.avg_price))} KM po poslu</option>)}
+                {stats.map((row) => <option key={row.category} value={row.category}>{row.category}, ~{Math.round(Number(row.avg_price))} KM po poslu</option>)}
               </select>
             </label>
             <label>
@@ -90,7 +90,7 @@ function EarnMoneyPage() {
             </label>
             <div className="earn-calc-result">
               <span>Procjena mjesečno</span>
-              <strong>{selectedAvg ? formatKM(Math.round(selectedAvg * jobsPerWeek * 4.3 / 10) * 10) : '—'} KM</strong>
+              <strong>{selectedAvg ? formatKM(Math.round(selectedAvg * jobsPerWeek * 4.3 / 10) * 10) : '-'} KM</strong>
               <small>{selectedAvg ? `${jobsPerWeek} × ~${selectedAvg} KM × 4,3 sedmice` : 'Još nema oglasa u ovoj kategoriji'}</small>
             </div>
           </div>

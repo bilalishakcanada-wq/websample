@@ -223,5 +223,5 @@ export const LICENCES = [
   { type: 'gas', label: 'Plinska licenca', text: 'Pokaži da smiješ raditi na plinskim instalacijama.' },
   { type: 'hvac', label: 'Klimatizacija i grijanje', text: 'Licenca za klimatizaciju, ventilaciju i grijanje.' },
   { type: 'construction', label: 'Građevinska licenca', text: 'Licenca ili uvjerenje za građevinske radove.' },
-  { type: 'driver', label: 'Vozačka dozvola', text: 'Za prevoz, dostavu i selidbe — kategorija B ili viša.' },
+  { type: 'driver', label: 'Vozačka dozvola', text: 'Za prevoz, dostavu i selidbe, kategorija B ili viša.' },
 ]

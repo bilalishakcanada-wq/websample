@@ -43,10 +43,10 @@ const WORK_LABEL = {
 
 /**
  * One row per job I offered on (my newest offer counts), sorted into the three tabs:
- *   active   — offer waiting for the client, or rejected on a job that is still open (send a new price)
- *   ongoing  — offer accepted: escrow funded / work in progress / waiting for release or a dispute
- *   done     — paid out, refunded/cancelled, or finished outside Zadatak Pay
- *   lost     — offers that did not win (shown folded under "done")
+ *   active  , offer waiting for the client, or rejected on a job that is still open (send a new price)
+ *   ongoing , offer accepted: escrow funded / work in progress / waiting for release or a dispute
+ *   done    , paid out, refunded/cancelled, or finished outside Zadatak Pay
+ *   lost    , offers that did not win (shown folded under "done")
  */
 export function groupProviderBoard(bids = [], payments = []) {
   const paymentByListing = new Map()

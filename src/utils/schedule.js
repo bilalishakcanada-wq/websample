@@ -24,7 +24,7 @@ export const todayBa = () => {
   }
 }
 
-/** "sub, 5. okt" — short, without relying on the browser's Bosnian locale data. */
+/** "sub, 5. okt", short, without relying on the browser's Bosnian locale data. */
 export const shortDate = (iso) => {
   if (!iso) return ''
   const d = new Date(`${iso}T12:00:00`)

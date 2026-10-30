@@ -4,7 +4,7 @@ import { notificationService } from '../services/notificationService'
 import { keys } from './queryKeys'
 import { clearDeliveredNotifications } from '../utils/push'
 
-/** Number of unread notifications for the signed-in user — cached, live (new one in, or some marked read). */
+/** Number of unread notifications for the signed-in user, cached, live (new one in, or some marked read). */
 export function useUnreadNotifications(userId) {
   const queryClient = useQueryClient()
   const { data } = useQuery({

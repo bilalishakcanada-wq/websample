@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef } from 'react'
 // Four-point sparkle, centred on the origin (viewBox -10 -10 20 20).
 const STAR_PATH = 'M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10Z'
 
-// [x%, y%, size px] — two trails that "fly" out of the illustrations, like
+// [x%, y%, size px], two trails that "fly" out of the illustrations, like
 // the stars on the BiH flag.
 const STARS = [
   [3, 38, 14], [6, 46, 8], [9, 41, 18], [12, 50, 10], [15, 44, 7], [18, 55, 12], [8, 60, 9], [14, 66, 16],

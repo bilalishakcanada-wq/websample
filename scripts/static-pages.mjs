@@ -17,7 +17,7 @@ const siteUrl = (process.env.SITE_URL || (sameBase ? fromSitemap : '')).replace(
 
 const HOME = {
   path: '/',
-  title: `${BRAND} — Objavi posao, izaberi najboljeg. Riješeno.`,
+  title: `${BRAND} · Objavi posao, izaberi najboljeg. Riješeno.`,
   description: 'Objavi posao besplatno i primi ponude provjerenih majstora i izvođača u svom gradu, širom Bosne i Hercegovine.',
 }
 // the info pages from the site map, plus the job search (it lists real jobs to anyone)

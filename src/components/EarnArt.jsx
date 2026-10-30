@@ -79,10 +79,10 @@ function EarnArt() {
         {/* hammer in belt */}
         <rect x="128" y="196" width="8" height="54" rx="4" fill="#c88a3b" />
         <rect x="118" y="188" width="28" height="14" rx="4" fill="#6b7280" />
-        {/* left arm — resting */}
+        {/* left arm, resting */}
         <rect x="4" y="150" width="30" height="96" rx="15" fill={NAVY} />
         <circle cx="19" cy="248" r="15" fill={SKIN} />
-        {/* right arm — thumbs up */}
+        {/* right arm, thumbs up */}
         <rect x="128" y="120" width="30" height="80" rx="15" fill={NAVY} transform="rotate(-38 143 160)" />
         <g transform="translate(176 92)">
           <rect x="-14" y="0" width="30" height="30" rx="10" fill={SKIN} />

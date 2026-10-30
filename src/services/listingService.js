@@ -185,7 +185,7 @@ export const listingService = {
   /**
    * Ranked search, computed in Postgres (search_listings): text relevance with typo tolerance,
    * distance from the searcher, freshness, competition, completeness, the poster's track record
-   * and — when signed in — the searcher's trades. One round trip, paged, ~tens of ms.
+   * and, when signed in, the searcher's trades. One round trip, paged, ~tens of ms.
    */
   async search({
     query = '', category = '', lat = null, lng = null, radiusKm = 0, includeRemote = true,
@@ -409,7 +409,7 @@ export const listingService = {
 
     const { error } = await supabase.from('listings').delete().eq('id', id)
     if (error) {
-      if (String(error.message || '').includes('PAYMENT_IN_PROGRESS')) throw new Error('Ovaj posao ima osiguranu uplatu — prvo je oslobodi ili otkaži na stranici posla, pa ga onda obriši.')
+      if (String(error.message || '').includes('PAYMENT_IN_PROGRESS')) throw new Error('Ovaj posao ima osiguranu uplatu, prvo je oslobodi ili otkaži na stranici posla, pa ga onda obriši.')
       throw publicError()
     }
   },

@@ -41,7 +41,7 @@ function Stanje({ predmet }) {
         <Clock size={20} />
         <div>
           <strong>Provjera je u toku</strong>
-          <p>Poslano {formatBosnianDate(predmet.submitted_at)} Naš tim provjerava podatke — obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
+          <p>Poslano {formatBosnianDate(predmet.submitted_at)} Naš tim provjerava podatke, obično u roku 24 sata. Javljamo ti obavijest čim završi.</p>
         </div>
       </div>
     )
@@ -53,7 +53,7 @@ function Stanje({ predmet }) {
         <div>
           <strong>Verifikacija nije prošla</strong>
           <p>{predmet.reject_reason || 'Podaci se nisu poklopili.'}</p>
-          <p className="muted-text">Možeš poslati ponovo — najčešće pomaže jasnija slika dokumenta, bez odsjaja i sa vidljivim uglovima.</p>
+          <p className="muted-text">Možeš poslati ponovo, najčešće pomaže jasnija slika dokumenta, bez odsjaja i sa vidljivim uglovima.</p>
         </div>
       </div>
     )
@@ -65,7 +65,7 @@ function VerificationPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [params] = useSearchParams()
-  // Samo interna putanja (ne "//drugi-sajt") — ovamo se dolazi sa dugmeta za ponudu.
+  // Samo interna putanja (ne "//drugi-sajt"), ovamo se dolazi sa dugmeta za ponudu.
   const next = /^\/(?!\/)/.test(params.get('next') || '') ? params.get('next') : null
   const [predmet, setPredmet] = useState(undefined)   // undefined = učitavanje
   const [ime, setIme] = useState('')
@@ -146,7 +146,7 @@ function VerificationPage() {
     <div className="account-section verif-page">
       <div className="account-section-head">
         <h1>Potvrda identiteta</h1>
-        <p className="muted-text">Zadatak drži pravi novac. Zato prije objave posla ili slanja ponude provjeravamo ko je ko — to štiti i tebe i drugu stranu.</p>
+        <p className="muted-text">Zadatak drži pravi novac. Zato prije objave posla ili slanja ponude provjeravamo ko je ko, to štiti i tebe i drugu stranu.</p>
         {!zakljucano && <p className="muted-text">Do potvrde možeš sve pregledati, ali ne i objavljivati poslove ni slati ponude. Traje par minuta: ime, JMBG i slika dokumenta.</p>}
       </div>
 
@@ -216,7 +216,7 @@ function VerificationPage() {
 
           <p className="verif-privacy">
             <ShieldCheck size={15} />
-            Slike idu u zatvoreni prostor koji ni ti ne možeš pročitati nazad — vidi ih samo tim koji provjerava. Ne objavljuju se nigdje na profilu.
+            Slike idu u zatvoreni prostor koji ni ti ne možeš pročitati nazad, vidi ih samo tim koji provjerava. Ne objavljuju se nigdje na profilu.
           </p>
 
           {greska && <div className="form-error">{greska}</div>}

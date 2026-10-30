@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { publicError } from '../utils/validation'
 
-// Blocked users — table user_blocks (supabase/communication/04_user_blocks.sql). Google Play's
+// Blocked users, table user_blocks (supabase/communication/04_user_blocks.sql). Google Play's
 // user-generated-content policy asks for blocking next to reporting. The database refuses
 // messages, offers and listing questions between blocked users; this list only drives the UI.
 // Before the migration is applied the table doesn't exist: the list is empty and blocking says so.

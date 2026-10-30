@@ -1,10 +1,10 @@
-// Zadatak — AI image moderation for Rule #1 (no contact details on the platform).
+// Zadatak: AI image moderation for Rule #1 (no contact details on the platform).
 //
 // Two ways in:
-//   1. A signed-in user right after uploading (Authorization: Bearer <jwt>) —
+//   1. A signed-in user right after uploading (Authorization: Bearer <jwt>),
 //      only their own queued images are processed, so they get instant feedback.
 //   2. The 5-minute database sweep (x-sweep-key header, value stored in
-//      public.moderation_settings) — processes everyone's queue.
+//      public.moderation_settings), processes everyone's queue.
 //
 // Needs the ANTHROPIC_API_KEY secret. Without it images stay queued as
 // "unconfigured" and are visible to admins.

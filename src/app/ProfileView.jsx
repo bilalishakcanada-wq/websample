@@ -62,19 +62,19 @@ function ProfileView({ bundle, user, onReport, onBlock, blocked = false }) {
       <dl className="pv-stats">
         <div>
           <dt>Ocjena</dt>
-          <dd>{reviewCount > 0 ? <>{Number(trust?.avg_rating || 0).toFixed(1)} <Star size={14} fill="currentColor" className="pf-star" /></> : '—'}</dd>
+          <dd>{reviewCount > 0 ? <>{Number(trust?.avg_rating || 0).toFixed(1)} <Star size={14} fill="currentColor" className="pf-star" /></> : '-'}</dd>
           <small>{reviewsLabel(reviewCount)}</small>
         </div>
         {isProvider ? (
           <div>
             <dt>Uspješnost</dt>
-            <dd>{trust?.success_rate == null ? '—' : `${Math.round(trust.success_rate)}%`}</dd>
+            <dd>{trust?.success_rate == null ? '-' : `${Math.round(trust.success_rate)}%`}</dd>
             <small>{(trust?.completed_jobs || 0) + (trust?.failed_jobs || 0) > 0 ? jobOutcomesLabel(trust.completed_jobs || 0, trust.failed_jobs || 0) : isNew ? 'nedavno se pridružio/la' : 'još nema završenih'}</small>
           </div>
         ) : (
           <div>
             <dt>Dovršeni poslovi</dt>
-            <dd>{trust?.client_completion_rate == null ? '—' : `${Math.round(trust.client_completion_rate)}%`}</dd>
+            <dd>{trust?.client_completion_rate == null ? '-' : `${Math.round(trust.client_completion_rate)}%`}</dd>
             <small>{trust?.jobs_posted || 0} objavljenih</small>
           </div>
         )}

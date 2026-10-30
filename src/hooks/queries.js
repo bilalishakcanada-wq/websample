@@ -12,7 +12,7 @@ import { keys } from './queryKeys'
 /**
  * Every server read goes through here, so screens share one cache: a list someone scrolled
  * a minute ago paints instantly (stale-while-revalidate), pages invalidate what they change,
- * and Realtime events only invalidate — the refetch is deduped by the cache.
+ * and Realtime events only invalidate, the refetch is deduped by the cache.
  */
 export { keys } from './queryKeys'
 

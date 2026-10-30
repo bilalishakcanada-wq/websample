@@ -28,7 +28,7 @@ export const messageService = {
     }).sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt))
   },
 
-  /** Inbox for the signed-in user: conversations with the other person, unread count, saved/archived flags — one call. */
+  /** Inbox for the signed-in user: conversations with the other person, unread count, saved/archived flags, one call. */
   async inbox() {
     const { data, error } = await supabase.rpc('my_inbox')
     if (error) {
@@ -55,7 +55,7 @@ export const messageService = {
     }
   },
 
-  /** Any message sent to me, in any conversation — used to keep the inbox live. */
+  /** Any message sent to me, in any conversation, used to keep the inbox live. */
   subscribeToMine(userId, onInsert) {
     const channel = supabase
       .channel(`inbox-${userId}-${Math.random().toString(36).slice(2, 8)}`)
@@ -110,14 +110,14 @@ export const messageService = {
     })
     const { data, error } = await supabase
       .from('messages')
-      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: '📷 Slika', attachment_url: fileRef, attachment_type: 'image' })
+      .insert({ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content: 'Slika', attachment_url: fileRef, attachment_type: 'image' })
       .select('id, sender_id, receiver_id, content, created_at, attachment_url, attachment_type')
       .single()
     if (error) { console.error('Supabase image message insert failed', { message: error.message, code: error.code }); throw prepoznajGresku(error) || publicError() }
     return data
   },
 
-  /** True once a bid is accepted in this conversation — contact details may then be shared. */
+  /** True once a bid is accepted in this conversation, contact details may then be shared. */
   async contactsAllowed(conversationId) {
     const { data, error } = await supabase.rpc('conversation_contacts_allowed', { p_conversation_id: conversationId })
     if (error) return false

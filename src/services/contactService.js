@@ -8,7 +8,7 @@ export const contactService = {
     const cleanMessage = sanitizeText(message).slice(0, 4000)
     if (cleanName.length < 2) throw new Error('Unesi ime.')
     if (!isValidEmail(cleanEmail)) throw new Error('Unesi ispravan email.')
-    if (cleanMessage.length < 10) throw new Error('Poruka je prekratka — napiši bar par rečenica.')
+    if (cleanMessage.length < 10) throw new Error('Poruka je prekratka, napiši bar par rečenica.')
 
     const { error } = await supabase
       .from('contact_messages')

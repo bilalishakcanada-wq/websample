@@ -26,7 +26,7 @@ export function useKeyboardAvoid() {
       }
       el.classList.add('is-keyboard')
       el.style.position = 'fixed'
-      el.style.bottom = 'auto' // the sticky rule sets bottom: 0 — with top as well the bar would stretch over the screen
+      el.style.bottom = 'auto' // the sticky rule sets bottom: 0, with top as well the bar would stretch over the screen
       el.style.left = '0'
       el.style.right = '0'
       el.style.zIndex = '40'
@@ -43,7 +43,7 @@ export function useKeyboardAvoid() {
 
 /**
  * Full-screen chat: while the keyboard is up, the whole screen (header, thread, composer) is fitted
- * to the visual viewport, so the header stays visible and the composer sits right above the keys —
+ * to the visual viewport, so the header stays visible and the composer sits right above the keys,
  * instead of iOS panning the page and cutting the top off.
  */
 export function useKeyboardFit(active = true) {

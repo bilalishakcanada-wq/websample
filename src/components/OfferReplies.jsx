@@ -9,7 +9,7 @@ import ActionError from './ActionError'
 /**
  * Privatni razgovor ispod jedne ponude (kao Airtaskerov "reply" na ponudu):
  * vide ga samo klijent i izvođač te ponude, a pišu dok ponuda čeka odluku.
- * Pravilo #1 važi i ovdje — bez kontakata dok ponuda nije prihvaćena.
+ * Pravilo #1 važi i ovdje, bez kontakata dok ponuda nije prihvaćena.
  * Ako tabela još ne postoji u bazi, komponenta ne prikazuje ništa.
  */
 function OfferReplies({ bid, userId, canWrite }) {

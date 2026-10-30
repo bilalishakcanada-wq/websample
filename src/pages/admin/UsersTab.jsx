@@ -50,7 +50,7 @@ function UsersTab({ openUserId, onOpenUser, onCloseUser, initialTerm = '' }) {
             <Avatar src={row.avatar_url} size={42} />
             <div className="adm-user-main">
               <strong>{row.full_name || row.email || 'Korisnik'} <span className="uid-chip">{row.member_id}</span> <RolePills roles={row.roles} /></strong>
-              <span className="muted-text">{row.email ? `${row.email} · ` : ''}{row.city || 'grad —'} · registrovan {formatBosnianDate(row.created_at)} · aktivan {relativeTime(row.last_seen_at)}</span>
+              <span className="muted-text">{row.email ? `${row.email} · ` : ''}{row.city || 'grad -'} · registrovan {formatBosnianDate(row.created_at)} · aktivan {relativeTime(row.last_seen_at)}</span>
             </div>
             <div className="adm-user-meta">
               <span title="oglasi / ponude">{row.listings} oglasa · {row.bids} ponuda</span>

@@ -32,11 +32,11 @@ const FILTERS = [
 ]
 
 const SAFETY_TIPS = [
-  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Zadatak poruke — tako je sve zabilježeno ako nešto krene po zlu.',
-  'Broj telefona i kontakt razmjenjujete tek kad je ponuda prihvaćena — do tada ih platforma automatski uklanja.',
+  'Komunikaciju sa drugim korisnicima vršite isključivo kroz Zadatak poruke, tako je sve zabilježeno ako nešto krene po zlu.',
+  'Broj telefona i kontakt razmjenjujete tek kad je ponuda prihvaćena, do tada ih platforma automatski uklanja.',
   'Nikad ne plaćajte unaprijed van platforme i ne dijelite brojeve kartica ni lične dokumente.',
-  'Oružje, droga, falsifikati i slično su zabranjeni — takve poruke se automatski uklanjaju, a nalog dobija opomenu.',
-  'Sumnjivo ponašanje prijavite zastavicom u razgovoru — tim pregleda svaku prijavu.',
+  'Oružje, droga, falsifikati i slično su zabranjeni, takve poruke se automatski uklanjaju, a nalog dobija opomenu.',
+  'Sumnjivo ponašanje prijavite zastavicom u razgovoru, tim pregleda svaku prijavu.',
 ]
 
 const timeOf = (value) => new Date(value).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' })
@@ -354,7 +354,7 @@ function MessagesPage() {
     if (!reason) return
     try {
       await reportService.createReport({ reporterId: user.id, targetType: 'conversation', targetId: active.id, reason })
-      setNotice('Hvala — prijava je poslana našem timu.')
+      setNotice('Hvala, prijava je poslana našem timu.')
     } catch (requestError) {
       setError(requestError.message)
     }

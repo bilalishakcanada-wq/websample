@@ -3,7 +3,7 @@ import { appConfig } from '../config/appConfig'
 
 const BRAND = appConfig.appName
 const STATIC = {
-  '/': `${BRAND} — Objavi posao, izaberi najboljeg. Riješeno.`,
+  '/': `${BRAND} · Objavi posao, izaberi najboljeg. Riješeno.`,
   '/search': 'Pretraži poslove',
   '/objavi': 'Objavi posao',
   '/start': 'Dobro došao/la',

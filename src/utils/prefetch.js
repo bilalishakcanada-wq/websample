@@ -1,6 +1,6 @@
 /**
  * Warms the code for the screens people open next, so tab switches feel instant
- * (the chunks are the same ones React.lazy loads — the browser just has them cached).
+ * (the chunks are the same ones React.lazy loads, the browser just has them cached).
  */
 const ROUTES = {
   '/search': () => import('../pages/SearchPage'),

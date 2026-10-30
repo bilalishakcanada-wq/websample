@@ -67,7 +67,7 @@ function RequiredSwitch() {
       <div>
         <strong>Obavezna verifikacija za sve: {obavezna ? 'UKLJUČENO' : 'ISKLJUČENO'}</strong>
         <p className="muted-text">{obavezna
-          ? 'Objava posla, slanje ponuda i dodjela posla traže ličnu kartu potvrđenu od tima — za klijente i za izvođače.'
+          ? 'Objava posla, slanje ponuda i dodjela posla traže ličnu kartu potvrđenu od tima, za klijente i za izvođače.'
           : 'Korisnici mogu objavljivati poslove, slati ponude i dodjeljivati poslove bez lične karte. Isplate i dalje traže identitet.'}</p>
       </div>
       <button type="button" className={obavezna ? 'secondary-button' : 'primary-button'} disabled={busy} onClick={promijeni}>
@@ -79,7 +79,7 @@ function RequiredSwitch() {
 
 /**
  * Red za provjeru identiteta. Broj i slike se ne prikazuju dok moderator
- * izričito ne klikne „Otvori podatke" — i svako otvaranje ostaje zapisano.
+ * izričito ne klikne „Otvori podatke", i svako otvaranje ostaje zapisano.
  */
 function IdentityTab() {
   const { isAdmin } = useStaff()
@@ -153,9 +153,9 @@ function IdentityTab() {
                   </span>
                 )}
                 <div className="idv-meta">
-                  <span>{predmet.birth_date ? formatBosnianDate(predmet.birth_date) : '—'}</span>
+                  <span>{predmet.birth_date ? formatBosnianDate(predmet.birth_date) : '-'}</span>
                   <span>{predmet.gender === 'M' ? 'muško' : 'žensko'}</span>
-                  <span>{{ licna_karta: 'Lična karta', pasos: 'Pasoš', vozacka: 'Vozačka' }[predmet.doc_type] || '—'}</span>
+                  <span>{{ licna_karta: 'Lična karta', pasos: 'Pasoš', vozacka: 'Vozačka' }[predmet.doc_type] || '-'}</span>
                   <span>poslano {formatBosnianDate(predmet.submitted_at)}</span>
                 </div>
                 {predmet.risk_flags?.length > 0 && (
@@ -179,7 +179,7 @@ function IdentityTab() {
                 <div className="idv-podaci">
                   <div><small>JMBG</small><strong className="idv-jmbg">{otvoren.podaci.jmbg}</strong></div>
                   <div><small>Ime u zahtjevu</small><strong>{otvoren.podaci.ime}</strong></div>
-                  <div><small>Broj dokumenta</small><strong>{otvoren.podaci.broj_dokumenta || '—'}</strong></div>
+                  <div><small>Broj dokumenta</small><strong>{otvoren.podaci.broj_dokumenta || '-'}</strong></div>
                 </div>
                 <div className="idv-slike">
                   <Dokument path={otvoren.podaci.slike?.lice} naslov="Prednja strana" />

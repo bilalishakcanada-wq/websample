@@ -10,7 +10,7 @@ function PrivacyPage() {
       cta={{ eyebrow: 'Tvoji podaci', text: 'Nalog i sve lične podatke brišeš sam, u Postavkama.', to: '/account/postavke#brisanje', label: 'Postavke' }}
     >
         <section className="info-section reveal">
-          <p className="muted-text">Zadnja izmjena: 18. oktobar 2026.</p>
+          <p className="muted-text">Zadnja izmjena: 30. oktobar 2026.</p>
           <p>
             Platformu Zadatak vodi Zadatak tim (u nastavku: „mi“). Odgovorni smo za podatke koje nam daješ dok koristiš
             Zadatak na sajtu i u aplikaciji za Android i iPhone. Za sve u vezi s tvojim podacima piši nam preko
@@ -21,14 +21,14 @@ function PrivacyPage() {
         <section className="info-section reveal">
           <h2>1. Koje podatke prikupljamo</h2>
           <ul className="rules-list">
-            <li><strong>Nalog:</strong> ime i prezime, email, telefon (ako ga upišeš), grad, vrsta naloga i struke. Lozinku čuvamo samo kao bcrypt heš, nikad u čitljivom obliku. Ako se prijaviš preko Googlea, Applea ili Facebooka, od njih dobijamo ime, email i sliku profila.</li>
+            <li><strong>Nalog:</strong> ime i prezime, email, telefon (ako ga upišeš), grad, vrsta naloga i struke. Lozinku čuvamo samo kao bcrypt heš, nikad u čitljivom obliku. Ako se prijaviš preko Googlea, Applea ili Facebooka, od njih dobijamo ime, email i sliku profila. Ako ih upišeš u postavkama profila: datum rođenja i JMBG ili JIB (neobavezno, samo za provjeru i isplate, nikad se ne prikazuje drugima).</li>
             <li><strong>Profil:</strong> profilna slika, opis, iskustvo, portfolio (slike i video), značke, licence i potvrde koje pošalješ.</li>
-            <li><strong>Provjera identiteta:</strong> slike lične karte ili pasoša koje pošalješ. Čuvaju se u zatvorenom spremištu i vidi ih samo tim koji radi provjeru.</li>
+            <li><strong>Provjera identiteta:</strong> ime i prezime, JMBG (iz njega se izračunaju datum rođenja, spol i regija), vrsta i broj dokumenta i slike lične karte ili pasoša koje pošalješ. JMBG čuvamo šifrovan. Slike se čuvaju u zatvorenom spremištu i vidi ih samo tim koji radi provjeru. Uz zahtjev bilježimo i grubu oznaku uređaja (vrsta uređaja, jezik, veličina ekrana, vremenska zona), samo da otkrijemo kad isti uređaj šalje više različitih identiteta.</li>
             <li><strong>Poslovi i komunikacija:</strong> oglasi (opis, slike, mjesto i adresa posla, budžet, rok), ponude, pitanja, poruke i slike u porukama, recenzije, prijave i sporovi.</li>
             <li><strong>Lokacija:</strong> mjesto posla koje upišeš. Kad izvođač uključi „Krećem“, njegova lokacija uživo dok ne stigne (vidi je samo klijent tog posla). Mjesto i vrijeme utisnuti na foto-dokaz urađenog posla. Lokaciju ne pratimo u pozadini.</li>
             <li><strong>Plaćanja:</strong> stanje Balansa, uplate, rezervisani iznosi, naknade i isplate. Za isplatu: ime vlasnika računa, banka i IBAN. Podatke s kartice prima direktno procesor plaćanja; mi ih ne vidimo.</li>
             <li><strong>Tehnički i sigurnosni podaci:</strong> IP adresa, vrsta uređaja i preglednika, vrijeme prijave, zapisi o radnjama važnim za sigurnost (pokušaji prijave, prijave sadržaja, upozorenja) i podaci za obavijesti na tvom uređaju.</li>
-            <li><strong>Na tvom uređaju:</strong> preglednik i aplikacija čuvaju prijavu i dio podataka da se Zadatak brže otvori. Ne koristimo reklamne kolačiće niti praćenje za oglašavanje.</li>
+            <li><strong>Na tvom uređaju:</strong> preglednik i aplikacija čuvaju prijavu i dio podataka da se Zadatak brže otvori. Ne koristimo reklamne kolačiće niti praćenje za oglašavanje. Detalji su u <Link to="/kolacici">Politici kolačića</Link>.</li>
           </ul>
         </section>
 
@@ -58,6 +58,7 @@ function PrivacyPage() {
                 <li>Procesor plaćanja karticama, kad se plaćanje karticom uključi.</li>
                 <li>Telegram i Resend: obavijesti timu o novim prijavama i zahtjevima.</li>
                 <li>Cloudflare: zaštita prijave od botova, ako je uključena.</li>
+                <li>Sentry: izvještaji o greškama na sajtu i u aplikaciji (opis greške, stranica, vrsta uređaja), samo ako to dozvoliš u postavkama kolačića.</li>
               </ul>
             </li>
             <li><strong>Nadležni organi:</strong> samo kad to zakon izričito traži.</li>

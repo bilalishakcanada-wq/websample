@@ -30,7 +30,7 @@ function ContactForm({ initialTopic = 'other' }) {
   }
 
   if (sent) {
-    return <div className="form-success">Hvala! Poruka je primljena — javljamo se na {form.email} u roku 24 sata.</div>
+    return <div className="form-success">Hvala! Poruka je primljena, odgovor stiže na {form.email}.</div>
   }
 
   return (

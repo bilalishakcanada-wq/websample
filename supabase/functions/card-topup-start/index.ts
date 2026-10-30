@@ -1,4 +1,4 @@
-// Zadatak — start a card top-up through Monri WebPay Form.
+// Zadatak, start a card top-up through Monri WebPay Form.
 //
 // The browser calls this with { amount } (KM). We open a card_payments row and
 // return the signed form fields; the browser POSTs them to Monri, where the
@@ -57,7 +57,7 @@ Deno.serve(withCors(async (req) => {
     return json({ error: 'SUSPENDED' }, 403)
   }
 
-  // no more than 5 unfinished attempts in 10 minutes — stops card testing through our form
+  // no more than 5 unfinished attempts in 10 minutes, stops card testing through our form
   const since = new Date(Date.now() - 10 * 60 * 1000).toISOString()
   const { count } = await admin.from('card_payments').select('id', { count: 'exact', head: true })
     .eq('user_id', user.id).gte('created_at', since)

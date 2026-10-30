@@ -4,7 +4,7 @@ import { badgeService } from '../services/badgeService'
 import { requirementLabel } from '../utils/jobConditions'
 import { keys } from './queryKeys'
 
-/** Tekst dugmeta za ponudu u svakoj fazi — isti na telefonu i računaru. */
+/** Tekst dugmeta za ponudu u svakoj fazi, isti na telefonu i računaru. */
 export const OFFER_CTA = {
   ok: 'Pošalji ponudu',
   needed: 'Potvrdi identitet za ponudu',
@@ -21,7 +21,7 @@ export function offerCta(gate, missing = []) {
 
 /**
  * Značke koje prijavljeni korisnik ima, i koje od traženih na ovom poslu mu fale.
- * credentials je null dok se učitava (i za gosta) — tada se ništa ne označava kao nedostaje.
+ * credentials je null dok se učitava (i za gosta), tada se ništa ne označava kao nedostaje.
  */
 export function useJobConditionCheck(userId, requires = []) {
   const { data: credentials } = useQuery({
@@ -40,7 +40,7 @@ export function useJobConditionCheck(userId, requires = []) {
  * Smije li prijavljeni korisnik poslati ponudu na ovaj posao:
  * 'ok' | 'needed' | 'pending' | 'rejected' (identitet)
  * | 'missing_badges' (klijent traži značku koju nema; `missing` iz useJobConditionCheck).
- * Identitet ima prednost. Gost i učitavanje vraćaju 'ok' — gost ide na prijavu.
+ * Identitet ima prednost. Gost i učitavanje vraćaju 'ok', gost ide na prijavu.
  */
 // udaljenost ne ograničava ponudu (kao Airtasker): svako može poslati ponudu na posao koji vidi
 export function useOfferGate(userId, _listingId, missing = []) {

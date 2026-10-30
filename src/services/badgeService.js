@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 export const badgeService = {
   /**
    * Kodovi značaka prijavljenog korisnika (user_credentials u bazi, job_conditions.sql).
-   * Dok funkcija nije u bazi, čita javne značke direktno — isti rezultat, bez 'id_verified'
+   * Dok funkcija nije u bazi, čita javne značke direktno, isti rezultat, bez 'id_verified'
    * iz JMBG toka (to sučelje ionako provjerava kroz kapiju identiteta).
    */
   async myCredentials(userId) {
@@ -37,7 +37,7 @@ export const badgeService = {
     return data
   },
 
-  /** Sve značke (javne): nivo, težina i uputa za rangiranje. Prije badges/01 SQL-a kolone ne postoje — `*` to podnosi. */
+  /** Sve značke (javne): nivo, težina i uputa za rangiranje. Prije badges/01 SQL-a kolone ne postoje, `*` to podnosi. */
   async catalog() {
     const { data, error } = await supabase.from('badges').select('*')
     if (error) {

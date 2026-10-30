@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { identityService } from '../services/identityService'
 import { keys } from './queryKeys'
 
-/** Tekst dugmeta za objavu dok identitet nije potvrđen — isti na telefonu i računaru. */
+/** Tekst dugmeta za objavu dok identitet nije potvrđen, isti na telefonu i računaru. */
 export const POST_CTA = {
   needed: 'Potvrdi identitet za objavu',
   pending: 'Identitet se provjerava',
@@ -15,7 +15,7 @@ export const postVerifyHref = (back = '/objavi') => `/account/verifikacija?next=
 /**
  * Smije li prijavljeni korisnik objaviti NOVI posao: 'ok' | 'needed' | 'pending' | 'rejected'.
  * Uređivanje već objavljenog posla ne traži ništa (enabled=false). Gost i učitavanje vraćaju
- * 'ok' — gost ide na prijavu, a baza svakako ima zadnju riječ.
+ * 'ok', gost ide na prijavu, a baza svakako ima zadnju riječ.
  */
 export function usePostGate(userId, enabled = true) {
   const { data } = useQuery({

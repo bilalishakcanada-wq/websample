@@ -1,4 +1,4 @@
-// Zadatak — vector for a search query ("trebam nekoga da mi okreči stan").
+// Zadatak, vector for a search query ("trebam nekoga da mi okreči stan").
 //
 // The search page calls this only when the plain search found few jobs, then passes the vector to
 // search_listings(p_embedding), which adds jobs that mean the same thing in other words.

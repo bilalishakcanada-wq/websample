@@ -43,7 +43,7 @@ function BoardCard({ row }) {
 }
 
 /**
- * „Ploča izvođača“: one place for every job a provider offered on, in three tabs —
+ * „Ploča izvođača“: one place for every job a provider offered on, in three tabs,
  * offers waiting for the client, won jobs with money held in escrow, and finished work
  * with what was earned. Shared by the phone ("Moji poslovi") and the desktop account home;
  * useRealtimeSync keeps it current while it is open.

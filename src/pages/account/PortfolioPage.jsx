@@ -44,8 +44,8 @@ function PortfolioPage() {
     <div className="account-section">
       <div className="account-section-head"><h1>Portfolio</h1></div>
       <h3 className="account-sub">Dodaj radove u portfolio</h3>
-      <p>Pokaži šta znaš — slike i video prethodnih radova vidljivi su na tvom javnom profilu. Posebno vrijedi za fotografe, dizajnere i majstore koji žele galeriju završenih poslova.</p>
-      <p className="muted-text">Možeš dodati najviše {MAX_ITEMS} radova. Formati: JPG, PNG, WEBP, MP4, WEBM, do 5 MB po slici. Zbog tvoje sigurnosti nemoj dodavati slike sa ličnim podacima, brojem telefona ili vizitkama — takve se automatski uklanjaju.</p>
+      <p>Pokaži šta znaš: slike i video prethodnih radova vidljivi su na tvom javnom profilu. Posebno vrijedi za fotografe, dizajnere i majstore koji žele galeriju završenih poslova.</p>
+      <p className="muted-text">Možeš dodati najviše {MAX_ITEMS} radova. Formati: JPG, PNG, WEBP, MP4, WEBM, do 5 MB po slici. Zbog tvoje sigurnosti nemoj dodavati slike sa ličnim podacima, brojem telefona ili vizitkama, takve se automatski uklanjaju.</p>
       <input ref={inputRef} type="file" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" hidden onChange={onFiles} />
       <button type="button" className="ghost-button badge-add" onClick={() => inputRef.current?.click()} disabled={uploading || items.length >= MAX_ITEMS}>
         {uploading ? 'Učitavam…' : 'Odaberi datoteke'}

@@ -107,7 +107,7 @@ test.describe('Foto dokaz: prije i poslije, sa lokacijom', () => {
     await client.getByTestId('workflow-dispute').click()
     await client.locator('#wf-claim').fill('Automatski test: posao nije urađen kako je dogovoreno.')
     await client.getByRole('button', { name: 'Prijavi problem' }).last().click()
-    await expect(client.getByTestId('workflow-state')).toHaveText('Spor — tim pregleda', { timeout: 20_000 })
+    await expect(client.getByTestId('workflow-state')).toHaveText('Spor, tim pregleda', { timeout: 20_000 })
     await expect(client.getByRole('button', { name: /Odobri i isplati/ })).toHaveCount(0)
   })
 })

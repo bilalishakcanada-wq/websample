@@ -33,7 +33,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
     try {
       await paymentService.acceptAndFund(bid.id, amount)
       haptic('medium')
-      toast(`Ponuda prihvaćena — ${money(amount)} je osigurano na Zadatku.`, { kind: 'success' })
+      toast(`Ponuda prihvaćena, ${money(amount)} je osigurano na Zadatku.`, { kind: 'success' })
       onDone?.()
       onClose()
     } catch (requestError) {
@@ -67,7 +67,7 @@ export function AcceptOfferSheet({ bid, providerName, onClose, onDone }) {
             <AlertTriangle size={16} />
             <div>
               <strong>Nedostaje {money(amount - balance)}</strong>
-              <span>Uplata karticom stiže uskoro — do tada uplatu dogovaraš s timom (obično u roku od sat vremena), a ponuda te čeka. <Link to={`/pomoc?chat=1&msg=${encodeURIComponent(`Želim uplatiti ${money(amount - balance)} na balans da prihvatim ponudu. Kako da uplatim?`)}`}>Zatraži uplatu →</Link></span>
+              <span>Uplata karticom stiže uskoro, do tada uplatu dogovaraš s timom, a ponuda te čeka. <Link to={`/pomoc?chat=1&msg=${encodeURIComponent(`Želim uplatiti ${money(amount - balance)} na balans da prihvatim ponudu. Kako da uplatim?`)}`}>Zatraži uplatu →</Link></span>
             </div>
           </div>
         )}
@@ -89,9 +89,9 @@ export function HowPaymentWorks() {
     <details className="pay-how">
       <summary><ShieldCheck size={14} /> Kako radi plaćanje na Zadatku?</summary>
       <ol>
-        <li><strong>Klijent prihvati ponudu</strong> — cijena se rezerviše sa njegovog balansa i čuva na Zadatku.</li>
+        <li><strong>Klijent prihvati ponudu</strong>: cijena se rezerviše sa njegovog balansa i čuva na Zadatku.</li>
         <li><strong>Izvođač uradi posao</strong> i klikne „Predaj rad“.</li>
-        <li><strong>Klijent odobri rad</strong> — novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou). Ako klijent ne odgovori za 72 sata, isplata ide automatski.</li>
+        <li><strong>Klijent odobri rad</strong>: novac odmah ide na balans izvođača, umanjen za naknadu platforme (9–15 % po nivou). Ako klijent ne odgovori za 72 sata, isplata ide automatski.</li>
         <li>Problem? <strong>„Prijavi problem“</strong> zamrzava novac dok Zadatak tim ne odluči. Otkazivanje prije početka vraća pun iznos.</li>
       </ol>
     </details>

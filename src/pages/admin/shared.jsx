@@ -25,7 +25,7 @@ export const VERIFICATION_LABEL = { identity: 'Lična karta / pasoš', police_ch
 export const LICENCE_LABEL = { electrician: 'električar', plumber: 'vodoinstalater', gas: 'plin', hvac: 'klimatizacija i grijanje', construction: 'građevina', driver: 'vozačka' }
 
 export const verificationTitle = (request) => {
-  if (request.kind === 'licence') return `Licenca: ${LICENCE_LABEL[request.licence_type] || request.licence_type || '—'}`
+  if (request.kind === 'licence') return `Licenca: ${LICENCE_LABEL[request.licence_type] || request.licence_type || '-'}`
   if (request.kind === 'trade' || !request.kind) return request.trade ? `Struka: ${request.trade}` : 'Struka nije navedena'
   return VERIFICATION_LABEL[request.kind] || request.kind
 }
@@ -43,7 +43,7 @@ export const geoLabel = (geo) => {
 }
 
 export const relativeTime = (value) => {
-  if (!value) return '—'
+  if (!value) return '-'
   const diff = Date.now() - new Date(value).getTime()
   const minutes = Math.round(diff / 60000)
   if (minutes < 1) return 'upravo sad'
@@ -68,7 +68,7 @@ export function StatusPill({ status, until }) {
     return <span className="pill pill-danger" title={until ? `do ${formatBosnianDate(until)}` : 'trajno'}><ShieldBan size={12} /> {until ? `Suspendovan do ${formatBosnianDate(until)}` : 'Trajno suspendovan'}</span>
   }
   if (status === 'active') return <span className="pill pill-ok">Aktivan</span>
-  return <span className="pill">{status || '—'}</span>
+  return <span className="pill">{status || '-'}</span>
 }
 
 export function RolePills({ roles = [] }) {
@@ -100,7 +100,7 @@ const PRESETS = [
   { label: '1 sat', hours: 1 }, { label: '6 sati', hours: 6 }, { label: '24 sata', hours: 24 }, { label: '3 dana', hours: 72 },
   { label: '7 dana', hours: 168 }, { label: '30 dana', hours: 720 }, { label: 'Trajno', hours: null },
 ]
-const REASONS = ['Pravilo #1 — dijeljenje kontakt podataka', 'Prevara ili sumnjivo ponašanje', 'Uvredljivo ponašanje', 'Lažni profil / lažne recenzije', 'Spam ponude', 'Zabranjen sadržaj']
+const REASONS = ['Pravilo #1: dijeljenje kontakt podataka', 'Prevara ili sumnjivo ponašanje', 'Uvredljivo ponašanje', 'Lažni profil / lažne recenzije', 'Spam ponude', 'Zabranjen sadržaj']
 
 /** Suspension dialog: presets, custom days + hours, and a reason. */
 export function SuspendDialog({ user, onClose, onDone }) {

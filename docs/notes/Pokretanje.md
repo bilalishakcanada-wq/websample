@@ -39,5 +39,4 @@ Povezano: [[../OBJAVA]] (računi i plaćanja koje radi vlasnik), [[../MAILOVI]].
 
 - Repo je bio iza žive verzije funkcije `notify-admin`; usklađeno 30.10. Prije svake objave funkcije uporedi s živom verzijom.
 - Tabela `public_profile_cards` postoji u bazi, ali ne u repou.
-- Naslovi stranica i dosta teksta u aplikaciji imaju crtice (—), što pravila zabranjuju.
 - Na GitHub Pages rute aplikacije (/login, /objavi...) vraćaju status 404 (stranica se ipak prikaže). Rješava se prelaskom na Cloudflare Pages s domenom.

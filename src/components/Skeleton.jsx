@@ -1,6 +1,6 @@
 /**
  * Skeleton placeholders: nobody ever looks at a blank white screen while data loads.
- * Every block shares one GPU-composited shimmer (a translated gradient overlay — no
+ * Every block shares one GPU-composited shimmer (a translated gradient overlay, no
  * background-position repaints), so a page full of them still runs at 60 fps.
  */
 export function Skeleton({ h = 16, w = '100%', r = 8, className = '', style }) {
@@ -67,7 +67,7 @@ export function SkeletonPage() {
 }
 
 /* ---- Shape-matched skeletons: they render inside the real card classes, so paddings, gaps and
-   line heights are the ones the content will have — the page does not move when data lands. ---- */
+   line heights are the ones the content will have, the page does not move when data lands. ---- */
 
 /** Search / browse card (title + price, three fact lines, status foot). */
 export function SkeletonTaskCard() {
@@ -143,7 +143,7 @@ export function SkeletonApJob() {
 
 /* ---- Phone route shells: the static chrome each tab screen always has (title bar, tabs, search, filter
    chips) drawn for real, with only the data rows shimmering. RouteFallback shows these while a screen's
-   code loads, and the screen then shows the very same rows while its data loads — one skeleton, no swap. ---- */
+   code loads, and the screen then shows the very same rows while its data loads, one skeleton, no swap. ---- */
 
 const IconBtnSkeleton = () => <span className="ap-icon-btn" aria-hidden="true" />
 

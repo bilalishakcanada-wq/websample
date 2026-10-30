@@ -10,7 +10,7 @@ function ContactPage() {
     <InfoLayout
       eyebrow="Kontakt"
       title="Tu smo kad zatreba"
-      lead="Pitanje o nalogu, problem s oglasom, prijava zloupotrebe ili ideja za saradnju — piši nam i javljamo se u roku 24 sata."
+      lead="Pitanje o nalogu, problem s oglasom, prijava zloupotrebe ili ideja za saradnju: piši nam i odgovor stiže na tvoj email."
       cta={{ eyebrow: 'Brži odgovor?', text: 'Većina pitanja je već odgovorena u centru za pomoć.', to: '/pomoc', label: 'Centar za pomoć' }}
     >
       <div className="contact-layout">
@@ -22,7 +22,7 @@ function ContactPage() {
         <aside className="contact-side">
           <div className="info-card">
             <Mail size={20} /><strong>Email</strong>
-            <p>Piši kroz formu na ovoj stranici — odgovor stiže na email koji upišeš.</p>
+            <p>Piši kroz formu na ovoj stranici, odgovor stiže na email koji upišeš.</p>
           </div>
           <button type="button" className="info-card info-card-button" onClick={() => navigate('/pomoc?chat=1')}>
             <MessageCircle size={20} /><strong>Live chat</strong>
@@ -34,7 +34,7 @@ function ContactPage() {
           </div>
           <div className="info-card">
             <ShieldAlert size={20} /><strong>Hitna prijava</strong>
-            <p>Prevara, uznemiravanje ili opasan sadržaj — izaberi temu "Prijava zloupotrebe" i takve poruke gledamo prve.</p>
+            <p>Prevara, uznemiravanje ili opasan sadržaj: izaberi temu "Prijava zloupotrebe" i takve poruke gledamo prve.</p>
           </div>
         </aside>
       </div>

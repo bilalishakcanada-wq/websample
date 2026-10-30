@@ -9,7 +9,7 @@ import PasswordField from '../components/PasswordField'
 import { authService } from '../services/authService'
 import { forgetReturn, rememberReturn, safeNext } from '../utils/afterAuth'
 
-/** "Didn't get the mail?" — sends the signup confirmation again, with a short cooldown. */
+/** "Didn't get the mail?", sends the signup confirmation again, with a short cooldown. */
 function ResendConfirmation({ email }) {
   const [state, setState] = useState({ busy: false, sent: false, error: '' })
   if (!email) return null
@@ -89,7 +89,7 @@ function LoginPage() {
       )}
       {oauthFailed && (
         <div className="form-error">
-          Google prijava nije uspjela. Pokušaj ponovo — ili se prijavi emailom i lozinkom.
+          Google prijava nije uspjela. Pokušaj ponovo, ili se prijavi emailom i lozinkom.
         </div>
       )}
       <form onSubmit={handleSubmit} className="auth-form">

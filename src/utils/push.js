@@ -108,7 +108,7 @@ export async function syncPush() {
   if (isNativePushApp()) return syncNativePush()
   const subscription = await currentSubscription()
   if (subscription && Notification.permission === 'granted') {
-    try { await save(subscription) } catch { /* offline or signed out — try next time */ }
+    try { await save(subscription) } catch { /* offline or signed out, try next time */ }
   }
 }
 

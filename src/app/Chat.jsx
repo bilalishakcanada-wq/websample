@@ -115,7 +115,7 @@ function Chat(props) {
       )}
 
       <div className="ch-thread" ref={listRef} data-scroll-end onScroll={onThreadScroll}>
-        <p className="ch-safety">{active.contacts_allowed ? <><Unlock size={13} /> Ponuda je prihvaćena — možete razmijeniti kontakt.</> : <><Lock size={13} /> Brojevi i kontakti se dijele tek kad ponuda bude prihvaćena.</>}</p>
+        <p className="ch-safety">{active.contacts_allowed ? <><Unlock size={13} /> Ponuda je prihvaćena, možete razmijeniti kontakt.</> : <><Lock size={13} /> Brojevi i kontakti se dijele tek kad ponuda bude prihvaćena.</>}</p>
         {thread.length === 0 && <p className="ch-intro">Ovo je početak razgovora sa <strong>{active.other_name}</strong>. Budi konkretan/na: šta, kada i gdje.</p>}
         {grouped.map((group) => (
           <div key={group.key} className="ch-day">

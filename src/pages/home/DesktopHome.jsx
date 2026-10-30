@@ -14,7 +14,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { ChatCircleIcon, ShieldCheckIcon, StarIcon } from '@phosphor-icons/react'
-import { mockProfessionals, mockServiceCategories } from '../../data/mockData'
+import { mockServiceCategories } from '../../data/mockData'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import HowSteps from './HowSteps'
 import TrustArt from '../../components/TrustArt'
@@ -72,7 +72,7 @@ function DesktopHome() {
         userId: top.user_id,
         name: top.display_name || 'Korisnik Zadatka',
         photo: top.avatar_url,
-        rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '—',
+        rating: top.avg_rating > 0 ? Number(top.avg_rating).toFixed(1) : '-',
         reviewLabel: top.review_count > 0 ? reviewsLabel(top.review_count) : 'Nova na platformi',
         jobsLabel: `${top.active_listings} ${top.active_listings === 1 ? 'aktivan oglas' : 'aktivnih oglasa'}`,
         city: top.city,
@@ -81,20 +81,7 @@ function DesktopHome() {
         quote: null,
       }
     }
-    const demo = mockProfessionals[0]
-    return {
-      isLive: false,
-      userId: null,
-      name: demo.name,
-      photo: demo.photo,
-      rating: demo.rating,
-      reviewLabel: `${demo.jobs} ocjena`,
-      jobsLabel: `${demo.jobs} završenih poslova`,
-      city: 'Sarajevo',
-      specialties: demo.role,
-      badges: [demo.badge, 'Verifikovan'],
-      quote: 'Brz, profesionalan i tačno onako kako smo se dogovorili. Preporučujem svima.',
-    }
+    return null
   }, [hasLiveProviders, providers])
 
   const sceneIndex = useShuffle(SCENES.length, 9000)
@@ -339,7 +326,7 @@ function DesktopHome() {
               <div className="trust-item">
                 <div className="trust-item-icon"><ShieldCheckIcon size={30} weight="duotone" /></div>
                 <div>
-                  <strong>Moderacija i podrška 7 dana sedmično</strong>
+                  <strong>Moderacija i podrška</strong>
                   <p>Naš tim i AI podrška prate platformu i tu su za svako pitanje ili prijavu problema.</p>
                 </div>
               </div>
@@ -347,108 +334,111 @@ function DesktopHome() {
           </div>
         </section>
 
-        <section className="featured-tasker reveal">
-          <div className="section-heading centered">
-            <div>
-              <span className="eyebrow small-eyebrow">Zajednica</span>
-              <h2>{featuredProvider.isLive ? 'Naši izvođači već grade svoj posao ovdje' : 'Pridružite se izvođačima koji zarađuju na Zadatku'}</h2>
+        {featuredProvider && (
+          <section className="featured-tasker reveal">
+            <div className="section-heading centered">
+              <div>
+                <span className="eyebrow small-eyebrow">Zajednica</span>
+                <h2>{featuredProvider.isLive ? 'Naši izvođači već grade svoj posao ovdje' : 'Pridružite se izvođačima koji zarađuju na Zadatku'}</h2>
+              </div>
             </div>
-          </div>
-          <div className="featured-tasker-card">
-            <div className="featured-tasker-photo-wrap">
-              {featuredProvider.photo
-                ? <img src={featuredProvider.photo} alt={featuredProvider.name} loading="lazy" />
-                : <div className="provider-photo-fallback featured-tasker-photo-fallback"><UserRound size={40} /></div>}
-              {featuredProvider.rating !== '—' && (
-                <div className="featured-tasker-rating-card">
-                  <Star size={18} fill="currentColor" />
-                  <div>
-                    <strong>{featuredProvider.rating}</strong>
-                    <span>{featuredProvider.reviewLabel}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="featured-tasker-info">
-              <h3>{featuredProvider.name}</h3>
-              <div className="featured-tasker-stats">
-                <div>
-                  <strong>{featuredProvider.jobsLabel}</strong>
-                  <span>Aktivnost</span>
-                </div>
-                {featuredProvider.city && (
-                  <div>
-                    <strong>{featuredProvider.city}</strong>
-                    <span>Lokacija</span>
+            <div className="featured-tasker-card">
+              <div className="featured-tasker-photo-wrap">
+                {featuredProvider.photo
+                  ? <img src={featuredProvider.photo} alt={featuredProvider.name} loading="lazy" />
+                  : <div className="provider-photo-fallback featured-tasker-photo-fallback"><UserRound size={40} /></div>}
+                {featuredProvider.rating !== '-' && (
+                  <div className="featured-tasker-rating-card">
+                    <Star size={18} fill="currentColor" />
+                    <div>
+                      <strong>{featuredProvider.rating}</strong>
+                      <span>{featuredProvider.reviewLabel}</span>
+                    </div>
                   </div>
                 )}
               </div>
-              {featuredProvider.specialties && (
-                <p className="featured-tasker-specialties"><b>Specijalnosti: </b>{featuredProvider.specialties}</p>
-              )}
-              <div className="featured-tasker-badges">
-                {featuredProvider.badges.map((badge) => (
-                  <span key={badge} className="badge-pill badge-verified">{badge}</span>
-                ))}
-              </div>
-              {featuredProvider.quote && <blockquote className="featured-tasker-quote">"{featuredProvider.quote}"</blockquote>}
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={() => featuredProvider.isLive ? navigate(`/korisnik/${featuredProvider.userId}`) : navigate('/register')}
-              >
-                {featuredProvider.isLive ? 'Pogledaj profil' : 'Postani izvođač'}
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section className="providers-section reveal" id="pruzatelji">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow small-eyebrow">Najbolji pružaoci</span>
-              <h2>Provjereni profesionalci koje preporučujemo</h2>
-            </div>
-            <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Svi stručnjaci <ArrowRight size={16} /></a>
-          </div>
-
-          <div className="provider-grid reveal-stagger reveal">
-            {providers.map((provider) => {
-              const isLive = !provider.isDemo
-              const key = isLive ? provider.user_id : provider.name
-              const name = isLive ? (provider.display_name || 'Korisnik Zadatka') : provider.name
-              const photo = isLive ? provider.avatar_url : provider.photo
-              const badgeLabel = isLive
-                ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? badgeCount(provider.badge_count) : 'Aktivan'))
-                : provider.badge
-              const rating = isLive ? provider.avg_rating : provider.rating
-              const jobsLabel = isLive ? `${provider.active_listings} aktivnih oglasa` : `${provider.jobs} završenih poslova`
-              const clickTarget = isLive ? () => navigate(`/korisnik/${provider.user_id}`) : () => navigate('/register')
-
-              return (
-                <div key={key} className="provider-card">
-                  <div className="provider-header">
-                    {photo
-                      ? <img className="provider-photo" src={photo} alt={name} loading="lazy" />
-                      : <div className="provider-photo provider-photo-fallback"><UserRound size={26} /></div>}
-                    <div className={`provider-badge ${isLive && provider.is_verified ? 'provider-badge-verified' : ''}`}>{badgeLabel}</div>
+              <div className="featured-tasker-info">
+                <h3>{featuredProvider.name}</h3>
+                <div className="featured-tasker-stats">
+                  <div>
+                    <strong>{featuredProvider.jobsLabel}</strong>
+                    <span>Aktivnost</span>
                   </div>
-                  <h3>{name}</h3>
-                  {!isLive && <p>{provider.role}</p>}
-                  {isLive && <p>{provider.city || 'Bosna i Hercegovina'}</p>}
-                  <div className="provider-stats">
-                    {(!isLive || provider.review_count > 0) && <span className="rating-inline"><Star size={14} fill="currentColor" /> {rating}</span>}
-                    <span>{jobsLabel}</span>
-                  </div>
-                  <button type="button" className="ghost-button full-width" onClick={clickTarget}>
-                    {isLive ? 'Pogledaj profil' : 'Zatraži ponudu'}
-                  </button>
+                  {featuredProvider.city && (
+                    <div>
+                      <strong>{featuredProvider.city}</strong>
+                      <span>Lokacija</span>
+                    </div>
+                  )}
                 </div>
-              )
-            })}
-          </div>
-          {!hasLiveProviders && <p className="muted-text provider-demo-note">Ovo su ilustrativni primjeri — pravi izvođači će se pojaviti ovdje čim objave svoje prve oglase.</p>}
-        </section>
+                {featuredProvider.specialties && (
+                  <p className="featured-tasker-specialties"><b>Specijalnosti: </b>{featuredProvider.specialties}</p>
+                )}
+                <div className="featured-tasker-badges">
+                  {featuredProvider.badges.map((badge) => (
+                    <span key={badge} className="badge-pill badge-verified">{badge}</span>
+                  ))}
+                </div>
+                {featuredProvider.quote && <blockquote className="featured-tasker-quote">"{featuredProvider.quote}"</blockquote>}
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => featuredProvider.isLive ? navigate(`/korisnik/${featuredProvider.userId}`) : navigate('/register')}
+                >
+                  {featuredProvider.isLive ? 'Pogledaj profil' : 'Postani izvođač'}
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {hasLiveProviders && (
+          <section className="providers-section reveal" id="pruzatelji">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow small-eyebrow">Najbolji pružaoci</span>
+                <h2>Provjereni profesionalci koje preporučujemo</h2>
+              </div>
+              <a href="#" onClick={(event) => { event.preventDefault(); navigate('/search') }}>Svi stručnjaci <ArrowRight size={16} /></a>
+            </div>
+
+            <div className="provider-grid reveal-stagger reveal">
+              {providers.map((provider) => {
+                const isLive = !provider.isDemo
+                const key = isLive ? provider.user_id : provider.name
+                const name = isLive ? (provider.display_name || 'Korisnik Zadatka') : provider.name
+                const photo = isLive ? provider.avatar_url : provider.photo
+                const badgeLabel = isLive
+                  ? (provider.is_verified ? 'Verifikovan' : (provider.badge_count > 0 ? badgeCount(provider.badge_count) : 'Aktivan'))
+                  : provider.badge
+                const rating = isLive ? provider.avg_rating : provider.rating
+                const jobsLabel = isLive ? `${provider.active_listings} aktivnih oglasa` : `${provider.jobs} završenih poslova`
+                const clickTarget = isLive ? () => navigate(`/korisnik/${provider.user_id}`) : () => navigate('/register')
+
+                return (
+                  <div key={key} className="provider-card">
+                    <div className="provider-header">
+                      {photo
+                        ? <img className="provider-photo" src={photo} alt={name} loading="lazy" />
+                        : <div className="provider-photo provider-photo-fallback"><UserRound size={26} /></div>}
+                      <div className={`provider-badge ${isLive && provider.is_verified ? 'provider-badge-verified' : ''}`}>{badgeLabel}</div>
+                    </div>
+                    <h3>{name}</h3>
+                    {!isLive && <p>{provider.role}</p>}
+                    {isLive && <p>{provider.city || 'Bosna i Hercegovina'}</p>}
+                    <div className="provider-stats">
+                      {(!isLive || provider.review_count > 0) && <span className="rating-inline"><Star size={14} fill="currentColor" /> {rating}</span>}
+                      <span>{jobsLabel}</span>
+                    </div>
+                    <button type="button" className="ghost-button full-width" onClick={clickTarget}>
+                      {isLive ? 'Pogledaj profil' : 'Zatraži ponudu'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="how-it-works reveal" id="kako-radi">
           <HowSteps />
@@ -458,7 +448,7 @@ function DesktopHome() {
           <div className="boss-band-copy">
             <span className="eyebrow small-eyebrow">Zarada</span>
             <h2>Budi svoj šef.</h2>
-            <p>Bilo da si majstor, dizajner ili IT stručnjak — pronađi svoj sljedeći posao na Zadatku.</p>
+            <p>Bilo da si majstor, dizajner ili IT stručnjak, pronađi svoj sljedeći posao na Zadatku.</p>
             <ul className="boss-checklist">
               <li><Check size={16} /> Besplatan pristup hiljadama poslova</li>
               <li><Check size={16} /> Bez pretplate za osnovno korištenje</li>
@@ -488,7 +478,7 @@ function DesktopHome() {
             <SpotlightCard className="fee-card" theme="light" spotlightColor="#1f5fff" intensity={0.5}>
               <span className="fee-card-eyebrow">Klijenti</span>
               <strong className="fee-card-big">0 KM</strong>
-              <p>Objava posla, primanje ponuda, poruke i recenzije — sve bez naknade i bez pretplate.</p>
+              <p>Objava posla, primanje ponuda, poruke i recenzije: sve bez naknade i bez pretplate.</p>
               <ul>
                 <li><Check size={15} /> Neograničen broj poslova</li>
                 <li><Check size={15} /> Cijenu biraš iz ponuda</li>
@@ -498,7 +488,7 @@ function DesktopHome() {
             <SpotlightCard className="fee-card featured" theme="light" spotlightColor="#1f5fff" intensity={0.6}>
               <span className="fee-card-eyebrow">Izvođači</span>
               <strong className="fee-card-big">9–15%</strong>
-              <p>Naknada platforme samo od plaćenog posla — nikad za slanje ponuda. Što više radiš, niža je: Bronza 15%, Srebro 13%, Zlato 11%, Platina 9%.</p>
+              <p>Naknada platforme samo od plaćenog posla, nikad za slanje ponuda. Što više radiš, niža je: Bronza 15%, Srebro 13%, Zlato 11%, Platina 9%.</p>
               <ul>
                 <li><Check size={15} /> Ponude i profil besplatni</li>
                 <li><Check size={15} /> Zarada sjeda na Balans</li>

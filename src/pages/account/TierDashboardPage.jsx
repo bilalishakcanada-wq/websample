@@ -5,7 +5,7 @@ import { accountService } from '../../services/accountService'
 
 const formatKM = (value) => `${String(Math.round(Number(value) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} KM`
 
-/** Medal illustration per tier — ribbon in our navy/gold, disc in the tier metal. */
+/** Medal illustration per tier, ribbon in our navy/gold, disc in the tier metal. */
 export function TierMedal({ code, size = 64, locked = false }) {
   const metal = { bronze: ['#c8792c', '#8a4d15'], silver: ['#d9dde3', '#8f97a3'], gold: ['#4278f5', '#0b3fb8'], platinum: ['#e9f1ff', '#7f9bbf'] }[code] || ['#ccc', '#999']
   return (
@@ -62,7 +62,7 @@ function TierDashboardPage() {
       <p>
         {next
           ? <>Nedostaje ti <strong>{formatKM(toNext)}</strong> do nivoa <strong>{next.label}</strong> i niže naknade.</>
-          : <>Na najvišem si nivou — najniža naknada na platformi.</>}
+          : <>Na najvišem si nivou, najniža naknada na platformi.</>}
         {' '}Završeno: {completed} {completed === 1 ? 'posao' : 'poslova'}{cancelled ? `, otkazano: ${cancelled}` : ''}.
       </p>
       <div className="tier-bar">

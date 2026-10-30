@@ -5,7 +5,7 @@ import { appConfig } from '../config/appConfig'
 import { parseInput, profileInputSchema } from '../utils/inputSchemas'
 import { contactInfoMessage, scanContactInfo } from '../utils/moderation'
 
-// First + last name, letters only — mirrors public.is_valid_full_name().
+// First + last name, letters only, mirrors public.is_valid_full_name().
 export const isValidFullName = (value) => /^\p{L}[\p{L}'’.-]*(\s+\p{L}[\p{L}'’.-]*)+$/u.test(String(value || '').trim()) && String(value || '').trim().length <= 120
 
 export const profileService = {
@@ -44,7 +44,7 @@ export const profileService = {
     return data
   },
 
-  /** The signed-in user's own profile, portfolio, verification, badges, trust and Rule #1 strikes — one call. */
+  /** The signed-in user's own profile, portfolio, verification, badges, trust and Rule #1 strikes, one call. */
   async getMyBundle() {
     const { data, error } = await supabase.rpc('my_profile_bundle')
     if (error) {
@@ -56,7 +56,7 @@ export const profileService = {
 
   /**
    * Ask the AI moderator to look at the images this user just uploaded.
-   * Resolves to { configured, results: [{ kind, status, reason }] }; never throws —
+   * Resolves to { configured, results: [{ kind, status, reason }] }; never throws,
    * the scheduled sweep will pick the image up if this call fails.
    */
   async checkMyMedia() {
@@ -116,7 +116,7 @@ export const profileService = {
       bio: profile.bio || '',
     })
     if (!isValidFullName(input.fullName)) {
-      throw new Error('Unesi pravo ime i prezime (npr. "Bilal Ishak") — samo slova, bez brojeva i nadimaka.')
+      throw new Error('Unesi pravo ime i prezime (npr. "Bilal Ishak"), samo slova, bez brojeva i nadimaka.')
     }
     const scan = scanContactInfo(input.fullName, input.bio)
     if (!scan.clean) throw new Error(contactInfoMessage(scan, 'profil'))
@@ -168,7 +168,7 @@ export const profileService = {
 
     if (error) {
       if (error.message?.includes('FULL_NAME_INVALID')) {
-        throw new Error('Unesi pravo ime i prezime (npr. "Bilal Ishak") — samo slova, bez brojeva i nadimaka.')
+        throw new Error('Unesi pravo ime i prezime (npr. "Bilal Ishak"), samo slova, bez brojeva i nadimaka.')
       }
       console.error('Supabase profile upsert failed', { message: error.message, code: error.code, details: error.details, hint: error.hint })
       throw publicError()

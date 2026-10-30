@@ -1,4 +1,4 @@
-// Zadatak — street address ⇄ point on the map, inside BiH.
+// Zadatak, street address ⇄ point on the map, inside BiH.
 //
 //   POST { q: "Ilirska 67", near?: { lat, lng } }  → { results: [{ label, street, place, lat, lng }] }
 //   POST { lat, lng }                              → { results: [one address for that point] }

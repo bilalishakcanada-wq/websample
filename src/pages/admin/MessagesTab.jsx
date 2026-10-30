@@ -5,7 +5,7 @@ import { useStaff } from './shared'
 import { withBase } from '../../utils/paths'
 import { SkeletonRows } from '../../components/Skeleton'
 
-/** Every conversation on the platform — admin only. */
+/** Every conversation on the platform, admin only. */
 function MessagesTab({ initialConversationId = '' }) {
   const { openUser } = useStaff()
   const [conversations, setConversations] = useState([])

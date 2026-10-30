@@ -154,7 +154,7 @@ function ProofCamera({ kind, title, onCapture, onClose }) {
           <LocateFixed size={15} />
           {fix ? `${fix.lat.toFixed(5)}, ${fix.lng.toFixed(5)} · ±${Math.round(fix.accuracy)} m` : (gpsError || 'Tražim lokaciju…')}
         </span>
-        {fix && fix.accuracy > GOOD_ACCURACY_M && <span className="proof-cam-warn">Lokacija je još netačna — sačekaj par sekundi.</span>}
+        {fix && fix.accuracy > GOOD_ACCURACY_M && <span className="proof-cam-warn">Lokacija je još netačna, sačekaj par sekundi.</span>}
         {error && <span className="proof-cam-warn">{error}</span>}
         {camState === 'live' && (
           <button type="button" className="proof-cam-shutter" onClick={shoot} disabled={!ready} aria-label="Slikaj" data-testid="proof-shutter">

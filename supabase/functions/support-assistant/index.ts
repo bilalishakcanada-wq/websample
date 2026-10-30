@@ -1,4 +1,4 @@
-// Zadatak — AI support assistant ("Zadatak asistent").
+// Zadatak: AI support assistant ("Zadatak asistent").
 //
 // The signed-in user sends a message (already stored in support_messages with
 // needs_human=false). The assistant answers from the help articles the client
@@ -11,7 +11,7 @@
 // payments and balance so it can answer "where is my money / my job" questions.
 // The reply carries up to 4 follow-up suggestions the chat shows as buttons.
 //
-// Needs the ANTHROPIC_API_KEY secret — without it the client falls back to its own
+// Needs the ANTHROPIC_API_KEY secret, without it the client falls back to its own
 // local assistant (src/utils/supportBrain.js) and the response says configured:false.
 // SUPPORT_MODEL overrides the model.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
@@ -37,28 +37,29 @@ const json = (body: unknown, status = 200) =>
 type Article = { id: string; audience: string; q: string; a: string }
 type GuideEntry = { path: string; title: string; where: string }
 
-const systemPrompt = (articles: Article[], guide: GuideEntry[], profile: Record<string, unknown> | null, account: Record<string, unknown>) => `Ti si "Zadatak asistent", digitalni asistent podrške platforme Zadatak — bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
+const systemPrompt = (articles: Article[], guide: GuideEntry[], profile: Record<string, unknown> | null, account: Record<string, unknown>) => `Ti si "Zadatak asistent", digitalni asistent podrške platforme Zadatak, bosanskog marketplacea za usluge (klijenti objavljuju poslove, izvođači/majstori šalju ponude).
 Pišeš isključivo na bosanskom, jednostavno, toplo i kratko (2–5 rečenica, bez markdown naslova; smiješ koristiti crtice za korake). Obraćaš se sa "ti".
 
-ZNANJE — odgovaraj SAMO na osnovu ovih članaka i činjenica. Ne izmišljaj funkcije, cijene ni rokove kojih ovdje nema:
+ZNANJE: odgovaraj SAMO na osnovu ovih članaka i činjenica. Ne izmišljaj funkcije, cijene ni rokove kojih ovdje nema:
 ${articles.map((a) => `- [${a.audience}] ${a.q}\n  ${a.a}`).join('\n')}
 
-GDJE JE ŠTA NA SAJTU I U APLIKACIJI — kad korisnik pita gdje ili kako nešto uradi, reci tačno gdje to nađe (meni i naziv) i dodaj putanju u zagradi, npr. (/account/novcanik). Pomozi sa svakom opcijom s ove liste:
+GDJE JE ŠTA NA SAJTU I U APLIKACIJI: kad korisnik pita gdje ili kako nešto uradi, reci tačno gdje to nađe (meni i naziv) i dodaj putanju u zagradi, npr. (/account/novcanik). Pomozi sa svakom opcijom s ove liste:
 ${guide.map((g) => `- ${g.title} (${g.path}): ${g.where}`).join('\n')}
 
 Činjenice o korisniku s kojim razgovaraš: ${profile ? JSON.stringify(profile) : 'nepoznato'}.
-Njegovi podaci na Zadatku (samo njegovi — koristi ih kad pita za svoj balans, poslove, ponude ili plaćanja; iznose piši u KM; link na posao je /listings/<id>): ${JSON.stringify(account)}.
+Njegovi podaci na Zadatku (samo njegovi, koristi ih kad pita za svoj balans, poslove, ponude ili plaćanja; iznose piši u KM; link na posao je /listings/<id>): ${JSON.stringify(account)}.
 
 KAKO RAZGOVARAŠ:
-- Pozdrav, zahvala, smijeh ili kratka poruka bez pitanja: odgovori ljubazno u jednoj rečenici i ponudi teme — to NIJE razlog za predaju.
+- Pozdrav, zahvala, smijeh ili kratka poruka bez pitanja: odgovori ljubazno u jednoj rečenici i ponudi teme, to NIJE razlog za predaju.
 - Ako korisnik kaže da ne razumije ili da mu nije pomoglo: objasni jednostavnije, korak po korak, i pitaj jedno konkretno potpitanje.
 - Ako pitanje nije jasno: postavi jedno kratko potpitanje umjesto nagađanja.
 - Uvijek predloži 2–4 kratka sljedeća pitanja (do 45 znakova) koja korisnik vjerovatno želi postaviti; kad je problem ozbiljan ili nisi siguran, jedan prijedlog neka bude "Razgovaraj sa pravim pomoćnikom".
 
-KADA PREDATI ČOVJEKU (handoff=true): korisnik traži osobu/tim/operatera/pravog pomoćnika; žalba na drugog korisnika, prevara, spor oko novca ili posla; suspenzija ili žalba na kaznu; brisanje/hakovan nalog; problem s plaćanjem/isplatom koji nije opisan u člancima; pitanje koje članci ne pokrivaju ni nakon jednog potpitanja; korisnik je ljut nakon tvog odgovora. Kod predaje: kratko reci da povezuješ s timom, šta si proslijedio i šta korisnik može odmah uraditi (npr. "Pripremi privatni ID PB-…, screenshot razgovora…"), i da tim odgovara ovdje i na email, obično u roku od par sati.
-NIKAD ne traži i ne daj brojeve telefona, emailove ni društvene mreže — to je Pravilo #1 platforme.
+KADA PREDATI ČOVJEKU (handoff=true): korisnik traži osobu/tim/operatera/pravog pomoćnika; žalba na drugog korisnika, prevara, spor oko novca ili posla; suspenzija ili žalba na kaznu; brisanje/hakovan nalog; problem s plaćanjem/isplatom koji nije opisan u člancima; pitanje koje članci ne pokrivaju ni nakon jednog potpitanja; korisnik je ljut nakon tvog odgovora. Kod predaje: kratko reci da povezuješ s timom, šta si proslijedio i šta korisnik može odmah uraditi (npr. "Pripremi privatni ID PB-…, screenshot razgovora…"), i da tim odgovara ovdje i na email.
+NIKAD ne traži i ne daj brojeve telefona, emailove ni društvene mreže, to je Pravilo #1 platforme.
+Piši običnim rečenicama: bez dugih crta (—) i bez emojija.
 
-Odgovori isključivo JSON-om: {"reply": "tekst za korisnika", "handoff": true|false, "summary": "jedna rečenica za tim (na bosanskom) — problem i šta treba uraditi", "suggestions": ["kratko pitanje", "..."]}`
+Odgovori isključivo JSON-om: {"reply": "tekst za korisnika", "handoff": true|false, "summary": "jedna rečenica za tim (na bosanskom), problem i šta treba uraditi", "suggestions": ["kratko pitanje", "..."]}`
 
 Deno.serve(withCors(async (req) => {
   const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
@@ -101,7 +102,7 @@ Deno.serve(withCors(async (req) => {
   const turns = ordered.slice(first)
     .map((row) => ({ role: row.sender === 'user' ? 'user' : 'assistant', content: `${row.sender === 'admin' ? '[Zadatak tim] ' : ''}${row.message}` }))
   if (turns.length === 0 || turns[turns.length - 1].role !== 'user' || turns[turns.length - 1].content !== message) turns.push({ role: 'user', content: message })
-  // Anthropic needs alternating roles — merge neighbours with the same role
+  // Anthropic needs alternating roles, merge neighbours with the same role
   const merged: Array<{ role: string; content: string }> = []
   for (const turn of turns) {
     const last = merged[merged.length - 1]
@@ -132,7 +133,7 @@ Deno.serve(withCors(async (req) => {
   try { parsed = JSON.parse((text.match(/\{[\s\S]*\}/) || ['{}'])[0]) } catch { parsed = {} }
 
   const handoff = Boolean(parsed.handoff)
-  const reply = String(parsed.reply || '').trim() || 'Povezujem te sa našim timom — javit će ti se ovdje i na email, obično u roku od par sati.'
+  const reply = String(parsed.reply || '').replace(/\s*—\s*/g, ', ').trim() || 'Povezujem te sa našim timom, javit će ti se ovdje i na email.'
   const summary = String(parsed.summary || message).slice(0, 300)
   const suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions.map((item) => String(item).trim().slice(0, 60)).filter(Boolean).slice(0, 4) : []
 

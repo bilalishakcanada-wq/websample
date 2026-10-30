@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 
 /**
- * The app has two faces: "poster" (Uradi posao — I need something done) and
- * "tasker" (Zaradi — I do jobs). The choice lives on the device; the profile's
+ * The app has two faces: "poster" (Uradi posao. I need something done) and
+ * "tasker" (Zaradi. I do jobs). The choice lives on the device; the profile's
  * account_type seeds it. Screens read it with useMode().
  */
 const KEY = 'zadatak-mode'

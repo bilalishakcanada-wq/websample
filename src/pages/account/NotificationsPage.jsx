@@ -70,7 +70,7 @@ function NotificationsPage() {
       {items?.length === 0 && (
         <div className="account-empty">
           <div className="account-empty-art notif-art"><MailMascot /></div>
-          <p>Ovdje ćemo te obavještavati o poslovima, ponudama, porukama i značkama.<br />Hajde — objavi posao ili pošalji ponudu!</p>
+          <p>Ovdje ćemo te obavještavati o poslovima, ponudama, porukama i značkama.<br />Hajde, objavi posao ili pošalji ponudu!</p>
           <div className="account-empty-actions">
             <Link to="/objavi" className="primary-button">Objavi posao</Link>
             <Link to="/search" className="ghost-button">Pregledaj poslove</Link>

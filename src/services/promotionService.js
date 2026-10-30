@@ -26,7 +26,7 @@ export const activePromotion = (listing) => {
 }
 
 export const promotionService = {
-  /** { plans: [{tier, label, price_km, days}], balance } — null while supabase/marketplace/01 is not on the database. */
+  /** { plans: [{tier, label, price_km, days}], balance }, null while supabase/marketplace/01 is not on the database. */
   async options() {
     const { data, error } = await supabase.rpc('promotion_options')
     if (error) return null

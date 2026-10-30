@@ -1,10 +1,10 @@
 /**
- * Interest profile — what this person actually looks at, the way social feeds learn.
+ * Interest profile, what this person actually looks at, the way social feeds learn.
  *
  * Every open, offer, category search or posted job adds weight to that category. Weights fade
  * with a 14-day half-life, so the feed follows what someone does now, not what they clicked
  * once last spring. Opened jobs are remembered for a few days so the feed can nudge them down
- * and show something new. Everything stays on this device (localStorage) — nothing is sent,
+ * and show something new. Everything stays on this device (localStorage), nothing is sent,
  * and the same code runs on desktop web, phone web and the Capacitor app.
  */
 const KEY = 'zadatak-interests-v1'
@@ -30,7 +30,7 @@ function load() {
 }
 
 function save(profile) {
-  try { window.localStorage.setItem(KEY, JSON.stringify(profile)) } catch { /* private mode / full — ranking just stays neutral */ }
+  try { window.localStorage.setItem(KEY, JSON.stringify(profile)) } catch { /* private mode / full, ranking just stays neutral */ }
 }
 
 const decayed = (entry, now) => (entry ? entry.w * Math.pow(0.5, (now - entry.t) / DAY / HALF_LIFE_DAYS) : 0)

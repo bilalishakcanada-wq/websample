@@ -11,7 +11,7 @@ import {
 } from '@phosphor-icons/react'
 
 // Icon names live in the badges table (badges.icon) so a badge can be added
-// from the admin panel without a code change — only names in this map render.
+// from the admin panel without a code change, only names in this map render.
 export const BADGE_ICONS = {
   award: Award,
   'badge-check': BadgeCheck,

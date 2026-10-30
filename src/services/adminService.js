@@ -8,7 +8,7 @@ const staffErrorMessage = (error) => {
   const text = error?.message || ''
   if (text.includes('FORBIDDEN_STAFF')) return 'Samo administrator može djelovati na nalog člana tima.'
   if (text.includes('SELF')) return 'Ne možeš to uraditi na vlastitom nalogu.'
-  if (text.includes('OWNER')) return 'Vlasnik platforme je zaštićen — ova radnja nije moguća.'
+  if (text.includes('OWNER')) return 'Vlasnik platforme je zaštićen, ova radnja nije moguća.'
   if (text.includes('FORBIDDEN')) return 'Nemaš ovlaštenje za ovu radnju.'
   return 'Radnja nije uspjela. Pokušaj ponovo.'
 }
@@ -245,7 +245,7 @@ export const adminService = {
         const row = { ip, country: geo.country, country_code: geo.country_code, region: geo.region, city: geo.city, isp: geo.connection?.isp || null, lat: geo.latitude, lng: geo.longitude }
         result[ip] = row
         await supabase.from('ip_geo').upsert(row)
-      } catch { /* offline or rate-limited — leave unknown */ }
+      } catch { /* offline or rate-limited, leave unknown */ }
     }))
     return result
   },

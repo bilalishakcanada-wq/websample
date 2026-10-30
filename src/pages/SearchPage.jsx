@@ -186,7 +186,7 @@ function SearchPage() {
     }
   }
 
-  // Everything — text relevance, distance, competition, the searcher's trades — is ranked in
+  // Everything, text relevance, distance, competition, the searcher's trades, is ranked in
   // Postgres (search_listings) in one round trip, cached by TanStack Query: revisiting a search
   // paints instantly and refreshes in the background; while a new filter loads, the previous
   // list stays on screen. If the RPC ever fails, the plain query + the client-side ranker below
@@ -461,7 +461,7 @@ function SearchPage() {
           </div>
           <div className="price-range">
             <label>Od<input type="number" min="0" placeholder="0" value={filters.minPrice} onChange={(event) => update({ minPrice: event.target.value })} /></label>
-            <span>—</span>
+            <span>-</span>
             <label>Do<input type="number" min="0" placeholder="∞" value={filters.maxPrice} onChange={(event) => update({ maxPrice: event.target.value })} /></label>
           </div>
         </FilterMenu>

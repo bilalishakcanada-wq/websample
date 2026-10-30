@@ -62,7 +62,7 @@ jobs:
           node check.mjs || true
           adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -3
           adb shell pidof ba.zadatak.app || echo "app process gone"
-          adb logcat -d | grep -iE "AndroidRuntime|FATAL|ActivityTaskManager: START|ActivityManager: (Process|Kill)|ba\.zadatak|Capacitor|cr_|chromium" | grep -v "OpenGL\|EGL" | head -80
+          adb logcat -d | grep -iE "AndroidRuntime|FATAL|libc|DEBUG  |ActivityManager|ActivityTaskManager|WindowManager: .*ba\.zadatak|render|crash|died|Kill|lowmemory|Capacitor/Console.*(error|turnstile)" | grep -v "OpenGL\|EGL\|%c%o" | tail -60
           adb exec-out screencap -p > screens/prijava.png
           EOF
       - name: Enable KVM

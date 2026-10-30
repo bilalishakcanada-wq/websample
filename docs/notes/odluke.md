@@ -2,7 +2,7 @@
 
 Najnovije gore. Svaka odluka ima datum i izvor (PR ili razgovor). Nazad: [[README]]
 
-- **30.10.2026.** Prazna stanja (nema poslova, poruka, plaćanja, rezultata...) stoje direktno na pozadini stranice: bez kutije, okvira i kruga iza ilustracije. Krug i tačkice ilustracije su `.mascot-stage`, sakriveni u praznim stanjima; uvodni ekrani ih zadržavaju (sd tražio, PR prazna stanja).
+- **30.10.2026.** Prazna stanja (nema poslova, poruka, plaćanja, rezultata...) stoje direktno na pozadini stranice: bez kutije, okvira i kruga iza ilustracije. Krug i tačkice ilustracije su `.mascot-stage`, sakriveni u praznim stanjima; uvodni ekrani ih zadržavaju (sd tražio, PR #106).
 - **30.10.2026.** Balans bez ilustracije. Gore bijeli panel: Dostupno, Ukupno na Zadatku i jedna traka (Dostupno, Rezervisano, Stiže); sd izabrao opciju C od tri dizajna. Ispod: Rezervisano za poslove, Stiže na balans, Može se isplatiti, pa Na putu i 5 posljednjih transakcija (PR #103).
 - **30.10.2026.** Baner za kolačiće s izborom (Postavke, Samo neophodno, Prihvati sve) i stranica `/kolacici`; Sentry radi samo uz pristanak. Bez izmišljenih izvođača i recenzija, bez dugih crta, emojija i pilula; svaki email obavijesti ima link "Isključi email obavijesti" (PR #101, funkcije objavljene).
 - **30.10.2026.** Pravila dizajna i uslovi za pokretanje, vidi [[pravila]].

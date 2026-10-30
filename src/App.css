@@ -45,7 +45,7 @@
   --r-sm: 12px;
   --r-md: 16px;
   --r-lg: 24px;
-  --r-pill: 999px;
+  --r-pill: var(--r-sm); /* no pill-shaped buttons: short things (dots, badges) still come out round */
   /* three button heights (all at least a finger wide) and one spacing step: everything is a multiple of 8px */
   --btn-sm: 40px;
   --btn-md: 48px;

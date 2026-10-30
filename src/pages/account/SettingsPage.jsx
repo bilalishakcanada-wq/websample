@@ -15,8 +15,6 @@ import { backgroundLocationSupported } from '../../utils/location'
 import { toast } from '../../components/Toaster'
 import PhoneVerify from '../../components/PhoneVerify'
 import { formatBosnianPhone } from '../../utils/phone'
-import { confirmDialog } from '../../utils/dialog'
-import { withBase } from '../../utils/paths'
 import AccountSwitch from './AccountSwitch'
 import './SettingsPage.css'
 
@@ -55,7 +53,7 @@ const GEO_TEXT = {
 
 function SettingsPage() {
   const navigate = useNavigate()
-  const { user, logout, deleteAccount } = useAuth()
+  const { user, logout } = useAuth()
   const { profile, bundle, saveProfile, reload } = useAccount()
   const notif = useNotificationSwitches({ profile, saveProfile })
   const { notifyEmail, notifyPush, device, deviceOn } = notif
@@ -133,12 +131,6 @@ function SettingsPage() {
     event.preventDefault()
     setBusy('pw'); setError(''); setMessage('')
     try { await accountService.changePassword(password); setPassword(''); setMessage('Lozinka je promijenjena.') } catch (requestError) { setError(requestError.message) } finally { setBusy('') }
-  }
-
-  const removeAccount = async () => {
-    if (!(await confirmDialog({ title: 'Obrisati nalog?', text: 'Trajno briše tvoj nalog, oglase, poruke i sve lične podatke. Ovo se ne može poništiti.', confirmLabel: 'Obriši nalog', danger: true }))) return
-    setBusy('delete'); setError('')
-    try { await deleteAccount(); window.location.assign(withBase('/')) } catch (requestError) { setError(requestError.message); setBusy('') }
   }
 
   const isOAuth = (user.app_metadata?.providers || []).some((provider) => provider !== 'email')
@@ -235,8 +227,10 @@ function SettingsPage() {
           </form>
         )}
         <Row as="button" type="button" icon={LogOut} tone="red" title={<span className="st-danger">Odjavi se</span>} sub="Sa ovog uređaja." onClick={async () => { await logout(); navigate('/') }} />
-        <Row as="button" type="button" icon={Trash2} tone="red" id="brisanje" testid="delete-account" disabled={busy === 'delete'} onClick={removeAccount}
-          title={<span className="st-danger">{busy === 'delete' ? 'Brišem…' : 'Obriši nalog'}</span>} sub="Trajno briše nalog, oglase, poruke i sve lične podatke." />
+        <Row as={Link} to="/account/zatvori-nalog" icon={Trash2} tone="red" id="brisanje" testid="delete-account"
+          title={<span className="st-danger">Deaktiviraj ili obriši nalog</span>} sub="Privremeno ili trajno. Potvrđuješ kodom s emaila.">
+          <ChevronRight size={18} className="st-chevron" />
+        </Row>
       </div>
 
       <h2 className="st-group-title" id="blokirani">Privatnost</h2>

@@ -2,6 +2,7 @@
 
 Najnovije gore. Svaka odluka ima datum i izvor (PR ili razgovor). Nazad: [[README]]
 
+- **30.10.2026.** Zatvaranje naloga (sd): Postavke > "Deaktiviraj ili obriši nalog" vodi na `/account/zatvori-nalog`. Izbor privremena deaktivacija ili trajno brisanje, obavezan razlog (lista, "Nešto drugo" traži tekst), pa 6-cifreni kod s emaila naloga (15 min, 5 pokušaja, novi kod nakon 60 s, najviše 5 na sat). Deaktivacija: profil se ne vidi, objavljeni poslovi se pauziraju, ponude na čekanju se povlače; nalog vidi samo ekran "Ponovo aktiviraj". Razlozi u tabeli `account_closure_reasons` (poslije brisanja bez veze s osobom), čita ih samo admin. Kod: `supabase/security/13_account_closure.sql`, funkcija `delete-account`.
 - **30.10.2026.** Balans bez ilustracije. Gore bijeli panel: Dostupno, Ukupno na Zadatku i jedna traka (Dostupno, Rezervisano, Stiže); sd izabrao opciju C od tri dizajna. Ispod: Rezervisano za poslove, Stiže na balans, Može se isplatiti, pa Na putu i 5 posljednjih transakcija (PR #103).
 - **30.10.2026.** Baner za kolačiće s izborom (Postavke, Samo neophodno, Prihvati sve) i stranica `/kolacici`; Sentry radi samo uz pristanak. Bez izmišljenih izvođača i recenzija, bez dugih crta, emojija i pilula; svaki email obavijesti ima link "Isključi email obavijesti" (PR #101, funkcije objavljene).
 - **30.10.2026.** Pravila dizajna i uslovi za pokretanje, vidi [[pravila]].

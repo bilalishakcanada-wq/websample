@@ -52,6 +52,7 @@ const VerificationPage = lazy(lazyImport(() => import('./pages/account/Verificat
 const SettingsPage = lazy(lazyImport(() => import('./pages/account/SettingsPage')))
 const SimpleModePage = lazy(lazyImport(() => import('./pages/account/SimpleModePage')))
 const NotificationPrefsPage = lazy(lazyImport(() => import('./pages/account/NotificationPrefsPage')))
+const CloseAccountPage = lazy(lazyImport(() => import('./pages/account/CloseAccountPage')))
 
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -142,11 +143,15 @@ function EmailConfirmGate({ children }) {
 
 const SuspendedScreen = lazy(lazyImport(() => import('./components/SuspendedScreen')))
 
-/** A suspended account sees only the countdown: no header, pages, tabs or live updates until the ban ends. */
+const DeactivatedScreen = lazy(lazyImport(() => import('./components/DeactivatedScreen')))
+
+/** A suspended account sees only the countdown: no header, pages, tabs or live updates until the ban ends.
+ *  A deactivated one sees only the way back (Postavke > Zatvori nalog). */
 function SuspensionGate({ children }) {
-  const { suspension } = useAuth()
-  if (!suspension) return children
-  return <Suspense fallback={<RouteFallback />}><SuspendedScreen /></Suspense>
+  const { suspension, deactivation } = useAuth()
+  if (suspension) return <Suspense fallback={<RouteFallback />}><SuspendedScreen /></Suspense>
+  if (deactivation) return <Suspense fallback={<RouteFallback />}><DeactivatedScreen /></Suspense>
+  return children
 }
 
 function App() {
@@ -205,6 +210,7 @@ function App() {
           <Route path="informacije" element={<Navigate to="/account/postavke" replace />} />
           <Route path="placanje" element={<Navigate to="/account/novcanik" replace />} />
           <Route path="postavke-obavijesti" element={<NotificationPrefsPage />} />
+          <Route path="zatvori-nalog" element={<CloseAccountPage />} />
         </Route>
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminPage mode="admin" /></ProtectedRoute>} />
         <Route path="/mod" element={<ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR']}><AdminPage mode="moderator" /></ProtectedRoute>} />

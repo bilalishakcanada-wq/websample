@@ -14,7 +14,7 @@ export const SITE_GUIDE = [
   { path: '/account/nacini-placanja', title: 'Račun za isplatu', where: 'Moj nalog → „Plaćanje“ → Račun za isplatu: bankovni račun (IBAN) za isplate.', keywords: ['iban', 'isplat', 'banka', 'račun za', 'nacin placanja', 'način plaćanja'] },
   { path: '/account/obavijesti', title: 'Obavijesti', where: 'Moj nalog → „Obavijesti“ (zvonce u zaglavlju).', keywords: ['obavijest', 'zvonce', 'notifik'] },
   { path: '/account/postavke-obavijesti', title: 'Postavke obavijesti', where: 'Moj nalog → Postavke → „Postavke obavijesti“: push, email i koje obavijesti primaš.', keywords: ['isključi obavij', 'iskljuci obavij', 'push', 'email obavij'] },
-  { path: '/account/postavke', title: 'Postavke', where: 'Moj nalog → „Postavke“: telefon, nova lozinka, brisanje naloga, email i push obavijesti, istorija opomena za Pravilo #1.', keywords: ['postavk', 'lozink', 'šifr', 'sifr', 'opomen'] },
+  { path: '/account/postavke', title: 'Postavke', where: 'Moj nalog → „Postavke“: telefon, nova lozinka, deaktivacija i brisanje naloga (kod s emaila), email i push obavijesti, istorija opomena za Pravilo #1.', keywords: ['postavk', 'lozink', 'šifr', 'sifr', 'opomen'] },
   { path: '/account/znacke', title: 'Značke', where: 'Moj nalog → „Značke“.', keywords: ['značk', 'znack', 'bedž', 'badge'] },
   { path: '/account/ploca', title: 'Ploča izvođača', where: 'Moj nalog → „Ploča izvođača“ (samo izvođači): nivo, naknada i zarada.', keywords: ['nivo', 'naknad', 'zarad', 'provizij'] },
   { path: '/account/vjestine', title: 'Vještine', where: 'Moj nalog → „Vještine“ (samo izvođači): struke i licence.', keywords: ['vješt', 'vjest', 'struk', 'licenc', 'zanat'] },

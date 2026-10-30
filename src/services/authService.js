@@ -236,21 +236,31 @@ export const authService = {
     return data
   },
 
-  async deleteAccount() {
+  /**
+   * Closing an account (supabase/functions/delete-account): 'send_code' mails a code to the account's email,
+   * 'delete' / 'deactivate' need that code and a reason, 'reactivate' brings a deactivated account back.
+   * Returns the function's answer; a refusal throws with the function's own words (and `wait` / `expired`).
+   */
+  async closeAccount(action, payload = {}) {
     const { data: sessionData } = await supabase.auth.getSession()
     const token = sessionData.session?.access_token
     if (!token) throw publicError()
 
-    const { error } = await supabase.functions.invoke('delete-account', {
+    const { data, error } = await supabase.functions.invoke('delete-account', {
       headers: { Authorization: `Bearer ${token}` },
+      body: { action, ...payload },
     })
     if (error) {
-      // the function explains refusals (e.g. money still in escrow), show that instead of a generic error
-      let detail = ''
-      try { detail = (await error.context?.json?.())?.error || '' } catch { /* not json */ }
-      console.error('delete-account failed', error.message)
-      throw new Error(detail || 'Brisanje naloga nije uspjelo. Pokušaj ponovo ili piši podršci.')
+      // the function explains refusals (e.g. money still in escrow, a wrong code), show that instead of a generic error
+      let detail = {}
+      try { detail = (await error.context?.json?.()) || {} } catch { /* not json */ }
+      console.error('delete-account failed', action, error.message)
+      const failure = new Error(detail.error || 'Nije uspjelo. Pokušaj ponovo ili piši podršci.')
+      failure.wait = detail.wait
+      failure.expired = Boolean(detail.expired)
+      throw failure
     }
-    await supabase.auth.signOut()
+    if (action === 'delete') await supabase.auth.signOut()
+    return data
   },
 }

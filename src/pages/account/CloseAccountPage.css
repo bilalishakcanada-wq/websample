@@ -1,0 +1,75 @@
+/* Postavke > Zatvori nalog (CloseAccountPage.jsx): three numbered steps, then one confirm button */
+.ca { max-width: 720px; }
+.ca-intro { margin: 0 0 16px; color: var(--text-soft); line-height: 1.5; }
+.ca-form { display: grid; gap: 14px; }
+
+.ca-step {
+  display: grid; gap: 10px; min-width: 0; margin: 0; padding: 16px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--stroke); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+.ca-step:disabled { opacity: 0.55; }
+.ca-step legend { float: left; width: 100%; display: flex; align-items: center; gap: 10px; padding: 0; font-weight: 800; font-size: 1.05rem; color: var(--text); }
+.ca-step legend + * { clear: both; }
+.ca-num {
+  display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface-alt); color: var(--primary); font-size: 0.9rem;
+}
+.ca-hint { margin: 0; color: var(--text-soft); font-size: 0.9rem; line-height: 1.45; overflow-wrap: anywhere; }
+.ca-hint strong { color: var(--text); }
+.ca-hint svg { vertical-align: -2px; margin-right: 4px; }
+
+.ca-modes { display: grid; gap: 10px; }
+.ca-mode, .ca-reason {
+  position: relative; display: flex; gap: 12px; padding: 14px; border-radius: var(--r-md); border: 1.5px solid var(--stroke);
+  background: var(--surface); cursor: pointer; transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+.ca-mode input, .ca-reason input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.ca-mode.is-on, .ca-reason.is-on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.ca-mode-delete.is-on { border-color: var(--danger); background: var(--danger-soft); }
+.ca-mode:has(input:focus-visible), .ca-reason:has(input:focus-visible) { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+.ca-mode-icon {
+  display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r-sm);
+  background: var(--surface-alt); color: var(--primary);
+}
+.ca-mode-delete .ca-mode-icon { background: var(--danger-soft); color: var(--red-600); }
+.ca-mode-delete.is-on .ca-mode-icon { background: var(--surface); }
+.ca-mode-text { display: grid; gap: 3px; min-width: 0; }
+.ca-mode-text strong { font-size: 1rem; color: var(--text); }
+.ca-mode-text span { color: var(--text-soft); font-size: 0.88rem; line-height: 1.4; }
+
+.ca-reasons { display: grid; gap: 8px; }
+.ca-reason { align-items: center; min-height: 48px; padding: 10px 14px 10px 44px; font-weight: 600; color: var(--text); }
+/* the radio dot, drawn so it can be big enough to see */
+.ca-reason::before {
+  content: ''; position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%;
+  border: 2px solid var(--gray-300); background: var(--surface); box-sizing: border-box;
+}
+.ca-reason.is-on::before { border: 6px solid var(--accent); }
+
+.ca-detail, .ca-code { display: grid; gap: 6px; font-weight: 700; font-size: 0.92rem; color: var(--text); }
+.ca-detail textarea, .ca-code input {
+  width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--stroke);
+  background: var(--bg); color: var(--text); font: inherit; font-size: 16px; font-weight: 500;
+}
+.ca-detail textarea { resize: vertical; min-height: 76px; }
+.ca-code input { max-width: 220px; min-height: 52px; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
+.ca-send { width: 100%; min-height: var(--btn-md); }
+.ca-link {
+  justify-self: start; min-height: 40px; padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer;
+}
+.ca-link:disabled { color: var(--muted); cursor: default; }
+
+.ca-actions { display: grid; gap: 10px; }
+.ca-confirm { width: 100%; background: var(--primary); color: var(--surface); }
+.ca-confirm-delete { background: var(--red-600); }
+.ca-confirm:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+.ca-cancel { width: 100%; text-decoration: none; }
+
+@media (min-width: 769px) {
+  .ca-modes { grid-template-columns: 1fr 1fr; }
+  .ca-reasons { grid-template-columns: 1fr 1fr; }
+  .ca-actions { grid-template-columns: auto auto; justify-content: start; }
+  .ca-confirm, .ca-cancel, .ca-send { width: auto; }
+  .ca-send { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) { .ca-mode, .ca-reason { transition: none; } }

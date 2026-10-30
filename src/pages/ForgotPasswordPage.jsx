@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authService, EMAIL_DOWN } from '../services/authService'
 import AuthLayout from '../components/AuthLayout'
+import { useCaptcha } from '../hooks/useCaptcha'
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const captcha = useCaptcha()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -15,12 +17,13 @@ function ForgotPasswordPage() {
     setError('')
     setMessage('')
     try {
-      await authService.resetPassword(email)
+      await authService.resetPassword(email, captcha.token)
       setMessage('Ako račun postoji, link za reset lozinke je poslan na email.')
     } catch (requestError) {
       setError(requestError.message)
     } finally {
       setLoading(false)
+      captcha.reset()
     }
   }
 
@@ -31,6 +34,7 @@ function ForgotPasswordPage() {
           <input id="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder=" " value={email} onChange={(event) => setEmail(event.target.value)} required />
           <label htmlFor="email">Email adresa</label>
         </div>
+        {captcha.widget}
         {error && <div className="form-error">{error}{error === EMAIL_DOWN && <> <Link to="/kontakt?tema=account">Otvori Kontakt</Link></>}</div>}
         {message && <div className="form-success">{message}</div>}
         <button type="submit" className="primary-button auth-submit" disabled={loading}>{loading ? 'Šaljem...' : 'Pošalji link'}</button>

@@ -29,6 +29,6 @@ Ostalo u PR-u: `npm audit fix` (express, multer, body-parser, proxy-addr, qs), `
 ## Nađeno, nije popravljeno (čeka odluku sd)
 
 - Stari beta Android ključ (`android/app/beta.keystore`, lozinka "android") je u git historiji (27.09.). Više se ne koristi (trenutni beta ključ je drugi, Play ključ je drugi). Brisanje iz historije prepisuje historiju; preporuka: ne treba.
-- Supabase panel: uključiti "Prevent use of leaked passwords"; Turnstile CAPTCHA nije uključen (treba Cloudflare site i secret key, koraci u `docs/SIGURNOST.md`).
+- CAPTCHA (Cloudflare Turnstile): Site Key je u buildu sajta i aplikacije (30.10.); prijava, registracija, zaboravljena lozinka i ponovno slanje maila šalju token. Secret Key je samo u Supabase > Attack Protection. Kad je CAPTCHA uključena, test prijave na živu bazu (E2E u pages.yml) ne može raditi.
 - `zod` ima propust (popravka tek u verziji 4). Koristi ga samo Express server u `server/`, koji ne radi na produkciji; sajt ga nema u buildu.
 - IBAN u `payout_accounts` nije posebno šifrovan (baza je šifrovana na disku, RLS: samo vlasnik).

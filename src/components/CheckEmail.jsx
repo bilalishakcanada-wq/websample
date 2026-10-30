@@ -3,6 +3,7 @@ import { MailCheck } from 'lucide-react'
 import AuthLayout from './AuthLayout'
 import { authService } from '../services/authService'
 import { isNativeApp } from '../utils/native'
+import { CAPTCHA_ON, useCaptcha } from '../hooks/useCaptcha'
 import './CheckEmail.css'
 
 const POLL_MS = 15 * 1000          // Supabase allows ~30 sign-ins per 5 min per IP: well under it
@@ -15,17 +16,21 @@ const RESEND_WAIT_S = 60
  * computer, another browser), this screen quietly tries the sign-in again every few seconds and whenever the
  * app comes back to the front, so the person lands in profile setup without typing anything again.
  * The password stays only in this screen's memory.
+ * With the captcha on, every sign-in needs a fresh token from the widget, so there is no quiet retry: the link
+ * in the mail signs the person in, or "Potvrdio sam, nastavi" does.
  */
 function CheckEmail({ email, password, onSignedIn, onChangeEmail, signIn }) {
   const [resend, setResend] = useState({ busy: false, note: '', error: '', wait: 0 })
   const [gaveUp, setGaveUp] = useState(false)
   const trying = useRef(false)
+  const captcha = useCaptcha()
   const started = useRef(0)
   // the parent's callbacks change every render; the timer must not restart for that
   const latest = useRef({ signIn, onSignedIn })
   useEffect(() => { latest.current = { signIn, onSignedIn } })
 
   useEffect(() => {
+    if (CAPTCHA_ON) return undefined
     let alive = true
     started.current = Date.now()
     const attempt = async () => {
@@ -60,11 +65,12 @@ function CheckEmail({ email, password, onSignedIn, onChangeEmail, signIn }) {
   const sendAgain = async () => {
     setResend({ busy: true, note: '', error: '', wait: 0 })
     try {
-      await authService.resendConfirmation(email)
+      await authService.resendConfirmation(email, captcha.token)
       setResend({ busy: false, note: 'Poslali smo novi mail. Link vrijedi 24 sata.', error: '', wait: RESEND_WAIT_S })
     } catch (err) {
       setResend({ busy: false, note: '', error: err.message, wait: 0 })
     }
+    captcha.reset()
   }
 
   return (
@@ -80,11 +86,12 @@ function CheckEmail({ email, password, onSignedIn, onChangeEmail, signIn }) {
           <li>Dodirni <strong>Potvrdi email</strong>.</li>
           <li>{isNativeApp() ? 'Vraćamo te u aplikaciju i prijavljujemo te sami.' : 'Prijavljujemo te sami, i na ovoj stranici.'}</li>
         </ol>
-        {!gaveUp
+        {!gaveUp && !CAPTCHA_ON
           ? <p className="check-email-wait" role="status"><span className="check-email-dot" aria-hidden="true" /> Čekamo potvrdu…</p>
           : <p className="check-email-wait" role="status">Kad potvrdiš email, dodirni dugme ispod.</p>}
+        {captcha.widget}
         <button type="button" className="primary-button auth-submit" onClick={async () => {
-          try { await signIn({ email, password }); onSignedIn() } catch (err) { setResend((current) => ({ ...current, note: '', error: err.code === 'email_not_confirmed' ? 'Email još nije potvrđen. Dodirni link u mailu.' : err.message })) }
+          try { await signIn({ email, password, captchaToken: captcha.token }); onSignedIn() } catch (err) { captcha.reset(); setResend((current) => ({ ...current, note: '', error: err.code === 'email_not_confirmed' ? 'Email još nije potvrđen. Dodirni link u mailu.' : err.message })) }
         }}>Potvrdio sam, nastavi</button>
         <button type="button" className="link-button" onClick={sendAgain} disabled={resend.busy || resend.wait > 0}>
           {resend.busy ? 'Šaljem…' : resend.wait > 0 ? `Pošalji ponovo za ${resend.wait} s` : 'Nije stigao mail? Pošalji ponovo'}

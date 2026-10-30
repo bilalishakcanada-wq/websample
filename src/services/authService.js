@@ -173,15 +173,17 @@ export const authService = {
   },
 
   /** Sends the signup confirmation mail again (the link in it expires after a day). */
-  async resendConfirmation(email) {
+  async resendConfirmation(email, captchaToken) {
     const cleanedEmail = sanitizeText(email).toLowerCase()
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) throw new Error('Potvrdite sigurnosnu provjeru.')
     assertAllowed('resend', cleanedEmail)
 
-    const { error } = await supabase.auth.resend({ type: 'signup', email: cleanedEmail, options: { emailRedirectTo: confirmRedirect() } })
+    const { error } = await supabase.auth.resend({ type: 'signup', email: cleanedEmail, options: { emailRedirectTo: confirmRedirect(), ...(captchaToken ? { captchaToken } : {}) } })
     if (error) {
       console.error('Supabase resend failed', { message: error.message, code: error.code, status: error.status })
       if (isRateLimited(error)) throw new Error(RATE_LIMITED)
+      if (error.code === 'captcha_failed') throw new Error('Sigurnosna provjera nije prošla. Osvježite stranicu i pokušajte ponovo.')
       if (isEmailDown(error)) throw new Error(EMAIL_DOWN)
       throw publicError()
     }
@@ -209,17 +211,20 @@ export const authService = {
     return data === true
   },
 
-  async resetPassword(email) {
+  async resetPassword(email, captchaToken) {
     const cleanedEmail = sanitizeText(email).toLowerCase()
     if (!isValidEmail(cleanedEmail)) throw new Error('Unesite validan email.')
+    if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !captchaToken) throw new Error('Potvrdite sigurnosnu provjeru.')
     assertAllowed('reset', cleanedEmail)
 
     const { data, error } = await supabase.auth.resetPasswordForEmail(cleanedEmail, {
       redirectTo: `${window.location.origin}${withBase('/reset-password')}`,
+      ...(captchaToken ? { captchaToken } : {}),
     })
 
     if (error) {
       if (isRateLimited(error)) throw new Error(RATE_LIMITED)
+      if (error.code === 'captcha_failed') throw new Error('Sigurnosna provjera nije prošla. Osvježite stranicu i pokušajte ponovo.')
       if (isEmailDown(error)) throw new Error(EMAIL_DOWN)
       throw publicError()
     }

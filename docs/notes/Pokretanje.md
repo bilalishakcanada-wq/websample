@@ -28,7 +28,7 @@ Povezano: [[../OBJAVA]] (računi i plaćanja koje radi vlasnik), [[../MAILOVI]].
 | Prekidač za rizične funkcije | Već uredu: Admin → Prekidači (uplata karticom, objava posla, slike u porukama, AI asistent, najmanja verzija aplikacije). |
 | Uptime alarmi i status stranica | Čeka vlasnika: UptimeRobot (besplatno), vidi ispod. |
 | Test od registracije do plaćanja | Robot na svakom PR-u prolazi cijeli tok na lokalnoj bazi (registracija, objava, ponuda, plaćanje balansom, poruke, predaja, odobrenje, recenzija). Test protiv žive baze prije objave nije uključen jer nema tajni `E2E_*`. Plaćanje karticom se ne može testirati bez Monri ugovora. |
-| Nova lozinka | Vlasnik potvrdio 30.10. da mail stiže. |
+| Nova lozinka i info@zadatak.ba | Vlasnik javio 30.10. "došao je mail" (nije rekao koji od ta dva testa). |
 
 ## Popravljeno 30.10.
 

@@ -2,6 +2,7 @@
 
 Najnovije gore. Svaka odluka ima datum i izvor (PR ili razgovor). Nazad: [[README]]
 
+- **30.10.2026.** Sigurnost: korisnik ne piše sam u uloge, plaćanja, pretplate i razgovore, ne potvrđuje sam telefon niti zatvara svoju prijavu; profilne slike samo JPG/PNG/WEBP do 5 MB. sd pokrenuo `security/13` na živoj bazi, napadi ponovljeni i odbijeni, tragova zloupotrebe nema (PR #105, [[sigurnost]]).
 - **30.10.2026.** Balans bez ilustracije. Gore bijeli panel: Dostupno, Ukupno na Zadatku i jedna traka (Dostupno, Rezervisano, Stiže); sd izabrao opciju C od tri dizajna. Ispod: Rezervisano za poslove, Stiže na balans, Može se isplatiti, pa Na putu i 5 posljednjih transakcija (PR #103).
 - **30.10.2026.** Baner za kolačiće s izborom (Postavke, Samo neophodno, Prihvati sve) i stranica `/kolacici`; Sentry radi samo uz pristanak. Bez izmišljenih izvođača i recenzija, bez dugih crta, emojija i pilula; svaki email obavijesti ima link "Isključi email obavijesti" (PR #101, funkcije objavljene).
 - **30.10.2026.** Pravila dizajna i uslovi za pokretanje, vidi [[pravila]].

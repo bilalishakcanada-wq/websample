@@ -6,6 +6,7 @@ Otvara se u Obsidianu: File > Open folder as vault > `docs/notes`.
 - [[pravila]]: kako radimo, dizajn i uslovi za pokretanje
 - [[odluke]]: šta je odlučeno i kada
 - [[otvoreno]]: šta čeka na sd, šta čeka na Claudea
+- [[sigurnost]]: zadnja sigurnosna provjera
 
 ## Projekat ukratko
 

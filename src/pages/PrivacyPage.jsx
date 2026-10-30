@@ -91,7 +91,9 @@ function PrivacyPage() {
         <section className="info-section reveal" id="brisanje-naloga">
           <h2>6. Brisanje naloga</h2>
           <ul className="rules-list">
-            <li>Prijavi se na sajtu ili u aplikaciji, otvori <Link to="/account/postavke#brisanje">Moj nalog → Postavke</Link> i u dijelu „Račun“ klikni „Obriši nalog“.</li>
+            <li>Prijavi se na sajtu ili u aplikaciji, otvori <Link to="/account/postavke#brisanje">Moj nalog → Postavke</Link> i u dijelu „Račun“ klikni „Deaktiviraj ili obriši nalog“. Izabereš razlog i upišeš kod koji šaljemo na email naloga.</li>
+            <li>Umjesto brisanja možeš nalog privremeno deaktivirati: profil i oglasi se ne vide, podaci ostaju, a nalog vraćaš kad se ponovo prijaviš.</li>
+            <li>Razlog koji izabereš (i tekst ako ga napišeš) čuvamo i poslije brisanja, ali bez veze s tvojim nalogom, imenom ili emailom.</li>
             <li>Ako imaš posao s osiguranom uplatom u toku, prvo ga završi ili otkaži, da niko ne ostane bez novca.</li>
             <li>Ako se ne možeš prijaviti ili si već obrisao/la aplikaciju, piši nam preko stranice <Link to="/kontakt">Kontakt</Link> (tema „Nalog“) s emailom naloga i obrisat ćemo ga u roku od 30 dana.</li>
           </ul>

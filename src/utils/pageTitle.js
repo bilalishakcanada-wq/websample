@@ -28,6 +28,7 @@ const STATIC = {
   '/account/postavke': 'Postavke',
   '/account/alarmi': 'Alarmi za poslove',
   '/account/postavke-obavijesti': 'Postavke obavijesti',
+  '/account/zatvori-nalog': 'Zatvori nalog',
   '/nivoi': 'Nivoi i naknade',
   '/admin': 'Admin',
   '/mod': 'Moderacija',

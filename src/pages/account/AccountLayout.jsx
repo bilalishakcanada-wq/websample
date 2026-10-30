@@ -32,6 +32,7 @@ export const ACCOUNT_NAV = [
   { to: '/account/jednostavan-nacin', label: 'Jednostavan način', icon: MousePointerClick, group: 'Postavke' },
   { to: '/account/postavke', label: 'Postavke', icon: Settings, chevron: true, group: 'Postavke' },
   { to: '/account/postavke-obavijesti', label: 'Postavke obavijesti', icon: Bell, hidden: true },
+  { to: '/account/zatvori-nalog', label: 'Zatvori nalog', icon: Settings, hidden: true },
 ]
 
 const SETUP_LATER = 'zadatak-setup-later'

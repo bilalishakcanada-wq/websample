@@ -9,6 +9,8 @@ import { queryClient } from '../lib/queryClient'
 const AuthContext = createContext(null)
 const BAN_KEY = 'zadatak-suspension'
 const NO_BAN = { id: null, until: null, reason: '' }
+const OFF_KEY = 'zadatak-deactivated'
+const NOT_OFF = { id: null, since: null }
 
 const hasStoredSession = () => {
   try { return Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')) } catch { return true }
@@ -38,6 +40,16 @@ export function AuthProvider({ children }) {
     try { return JSON.parse(localStorage.getItem(BAN_KEY)) || NO_BAN } catch { return NO_BAN }
   })
   const suspension = useMemo(() => (ban.id && ban.id === userId ? ban : null), [ban, userId])
+  // the person deactivated the account themselves (Postavke > Zatvori nalog): { id, since (ms) }; same lockout as a ban,
+  // but the way back is theirs, one button on the screen the app shows instead (DeactivatedScreen)
+  const [off, setOff] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(OFF_KEY)) || NOT_OFF } catch { return NOT_OFF }
+  })
+  const deactivation = useMemo(() => (off.id && off.id === userId ? off : null), [off, userId])
+  const saveOff = useCallback((next) => {
+    try { if (next.id) localStorage.setItem(OFF_KEY, JSON.stringify(next)); else localStorage.removeItem(OFF_KEY) } catch { /* ignore */ }
+    setOff((prev) => (prev.id === next.id && prev.since === next.since ? prev : next))
+  }, [])
 
   const refreshAdminStatus = async (currentUser) => {
     if (!currentUser) {
@@ -115,14 +127,15 @@ export function AuthProvider({ children }) {
 
   const refreshSuspension = useCallback(async () => {
     if (!userId) return
-    const { data, error: rpcError } = await supabase.rpc('my_suspension')
+    const [{ data, error: rpcError }, closed] = await Promise.all([supabase.rpc('my_suspension'), supabase.rpc('my_deactivation')])
+    if (!closed.error) saveOff(closed.data ? { id: userId, since: closed.data.since ? new Date(closed.data.since).getTime() : null } : NOT_OFF)
     if (rpcError) return
     const until = data?.until ? new Date(data.until).getTime() : null
     const reason = data?.reason || ''
     const next = data ? { id: userId, until, reason } : NO_BAN
     try { if (data) localStorage.setItem(BAN_KEY, JSON.stringify(next)); else localStorage.removeItem(BAN_KEY) } catch { /* ignore */ }
     setBan((prev) => (prev.id === next.id && prev.until === next.until && prev.reason === next.reason ? prev : next))
-  }, [userId])
+  }, [userId, saveOff])
 
   // checked on sign-in, on every return to the app and every few minutes, so a new ban shows up without a reload
   useEffect(() => {
@@ -182,16 +195,29 @@ export function AuthProvider({ children }) {
     setUser((current) => ({ ...current, ...changes }))
   }
 
-  const deleteAccount = async () => {
-    await authService.deleteAccount()
-    setUser(null)
-  }
+  /** Postavke > Zatvori nalog: send_code, deactivate, delete (both need the code) and reactivate. */
+  const closeAccount = useCallback(async (action, payload) => {
+    const result = await authService.closeAccount(action, payload)
+    if (action === 'delete') {
+      setUser(null)
+      queryClient.clear()
+      try { localStorage.removeItem('zadatak-query-cache') } catch { /* ignore */ }
+    }
+    // the server drops this account's push devices on deactivation; coming back attaches this one again
+    if (action === 'deactivate') saveOff({ id: userId, since: Date.now() })
+    if (action === 'reactivate') {
+      saveOff(NOT_OFF)
+      queryClient.invalidateQueries()
+      syncPush()
+    }
+    return result
+  }, [userId, saveOff])
 
   const isAdmin = staffRole === 'admin'
   const isModerator = staffRole === 'moderator'
   const value = useMemo(
-    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension, login, loginWithProvider, register, logout, refreshSession, updateProfile, deleteAccount }),
-    [user, isAdmin, isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension],
+    () => ({ user, isAdmin, isModerator, isStaff: isAdmin || isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension, deactivation, login, loginWithProvider, register, logout, refreshSession, updateProfile, closeAccount }),
+    [user, isAdmin, isModerator, staffRole, staffReady, loading, error, emailCheck, refreshEmailCheck, suspension, refreshSuspension, deactivation, closeAccount],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

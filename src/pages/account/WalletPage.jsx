@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronRight, CreditCard, Info, Landmark, Lock, ArrowLeftRight } from 'lucide-react'
+import { ChevronRight, CreditCard, Info, Landmark, Lock, ArrowLeftRight, Clock } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
 import CountUp from '../../components/CountUp'
@@ -99,16 +99,17 @@ function WalletPage() {
       <section className="bal-card" aria-label="Stanje računa">
         <span className="bal-label">Dostupno</span>
         <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
-        <dl className="bal-split">
-          <div><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>
-          <div><dt>Stiže na balans</dt><dd>{money(totals.incoming)}</dd></div>
-          <div><dt>Može se isplatiti</dt><dd>{payout ? money(payout.withdrawable) : '-'}</dd></div>
-        </dl>
         <div className="bal-actions">
           <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
           <button type="button" className={`bal-btn${panel === 'payout' ? ' is-open' : ''}`} onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)} aria-expanded={panel === 'payout'}><Landmark size={17} /> {payout?.open ? 'Isplata je u toku' : 'Isplati na račun'}</button>
         </div>
       </section>
+
+      <dl className="bal-stats">
+        <div><span className="bal-stat-icon is-held"><Lock size={18} /></span><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>
+        <div><span className="bal-stat-icon is-coming"><Clock size={18} /></span><dt>Stiže na balans</dt><dd>{money(totals.incoming)}</dd></div>
+        <div><span className="bal-stat-icon is-out"><Landmark size={18} /></span><dt>Može se isplatiti</dt><dd>{payout ? money(payout.withdrawable) : '-'}</dd></div>
+      </dl>
 
       {notice && <div className="form-success">{notice}</div>}
 

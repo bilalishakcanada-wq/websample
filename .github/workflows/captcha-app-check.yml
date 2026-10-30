@@ -25,30 +25,25 @@ jobs:
           // raw DevTools protocol: the app's WebView does not support Playwright's browser-level commands
           const list = await (await fetch('http://127.0.0.1:9222/json')).json()
           console.log(list.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))
-          let target, ws
-          for (const t of list.filter((t) => t.type === 'page')) {
-            const probe = new WebSocket(t.webSocketDebuggerUrl)
-            await new Promise((r) => probe.addEventListener('open', r))
-            const vis = await new Promise((r) => { probe.addEventListener('message', (e) => r(JSON.parse(e.data).result?.result?.value)); probe.send(JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: 'document.visibilityState', returnByValue: true } })) })
-            console.log('target', t.id, vis)
-            probe.close()
-            if (vis === 'visible' || !target) target = t
+          // one short connection per question: the page target can be replaced when it navigates
+          const ask = async (method, params) => {
+            const t = (await (await fetch('http://127.0.0.1:9222/json')).json()).find((t) => t.type === 'page')
+            const ws = new WebSocket(t.webSocketDebuggerUrl)
+            await new Promise((r) => ws.addEventListener('open', r))
+            const out = await new Promise((r) => { ws.addEventListener('message', (e) => r(JSON.parse(e.data))); ws.send(JSON.stringify({ id: 1, method, params })) })
+            ws.close()
+            return out
           }
-          ws = new WebSocket(target.webSocketDebuggerUrl)
-          await new Promise((r) => ws.addEventListener('open', r))
-          let id = 0
-          const pending = new Map()
-          ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id) } })
-          const send = (method, params = {}) => new Promise((r) => { pending.set(++id, r); ws.send(JSON.stringify({ id, method, params })) })
-          const run = async (expression) => (await send('Runtime.evaluate', { expression, returnByValue: true })).result?.result?.value
+          const run = async (expression) => (await ask('Runtime.evaluate', { expression, returnByValue: true })).result?.result?.value
           console.log('app page:', await run('location.href'))
-          console.log('navigate:', JSON.stringify((await send('Page.navigate', { url: 'https://bilalishakcanada-wq.github.io/websample/login' })).result))
-          await new Promise((r) => setTimeout(r, 30000))
-          console.log('now at:', await run('location.href'))
+          console.log('navigate:', JSON.stringify(await ask('Page.navigate', { url: 'https://bilalishakcanada-wq.github.io/websample/login' })))
+          for (let i = 0; i < 8; i++) {
+            await new Promise((r) => setTimeout(r, 5000))
+            console.log(i, 'at:', await run('location.href').catch((e) => 'err ' + e.message), 'token:', await run("document.querySelector('[name=\"cf-turnstile-response\"]')?.value?.length ?? -1").catch(() => 'err'))
+          }
           console.log('iframes:', await run("[...document.querySelectorAll('iframe')].map((f) => f.src.slice(0, 80)).join(' | ')"))
-          console.log('turnstile token length:', await run("document.querySelector('[name=\"cf-turnstile-response\"]')?.value?.length ?? -1"))
-          console.log('page text:', (await run('document.body.innerText'))?.replace(/\s+/g, ' ').slice(0, 300))
-          console.log('login button disabled:', await run("[...document.querySelectorAll('button[type=submit]')].map((b) => b.disabled).join(',')"))
+          console.log('page text:', (await run('document.body.innerText'))?.replace(/\s+/g, ' ').slice(0, 400))
+          console.log('submit disabled:', await run("[...document.querySelectorAll('button[type=submit]')].map((b) => b.disabled).join(',')"))
           const after = await (await fetch('http://127.0.0.1:9222/json')).json()
           console.log(after.map((t) => `${t.type} ${t.url.slice(0, 100)}`).join('\n'))
           process.exit(0)

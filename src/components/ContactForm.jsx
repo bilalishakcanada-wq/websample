@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { contactService } from '../services/contactService'
-
-const CONTACT_TOPICS = [
-  { value: 'account', label: 'Nalog i prijava' },
-  { value: 'listing', label: 'Oglas ili ponuda' },
-  { value: 'payment', label: 'Plaćanje i pretplata' },
-  { value: 'report', label: 'Prijava zloupotrebe' },
-  { value: 'business', label: 'Saradnja / firme' },
-  { value: 'other', label: 'Nešto drugo' },
-]
+import { CONTACT_TOPICS } from '../data/contactTopics'
 
 function ContactForm({ initialTopic = 'other' }) {
   const { user } = useAuth()

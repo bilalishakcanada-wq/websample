@@ -8,6 +8,7 @@ import { formatBosnianDate } from '../../utils/dateFormat'
 import { ACTION_LABEL, KIND_LABEL, QUEUE_LABEL, useStaff, verificationTitle } from './shared'
 import { withBase } from '../../utils/paths'
 import { SkeletonRows } from '../../components/Skeleton'
+import ContactInbox from './ContactInbox'
 
 export function RegistryTab() {
   const { openUser } = useStaff()
@@ -162,7 +163,7 @@ export function ModerationTab() {
 }
 
 export function SupportTab() {
-  const { openUser } = useStaff()
+  const { openUser, isAdmin } = useStaff()
   const [threads, setThreads] = useState([])
   const [activeUser, setActiveUser] = useState('')
   const [messages, setMessages] = useState([])
@@ -218,6 +219,7 @@ export function SupportTab() {
   const active = threads.find((thread) => thread.userId === activeUser)
 
   return (
+    <>
     <div className="admin-support-layout">
       <div className="admin-thread-list">
         {threads.length === 0 && <p className="muted-text">Još nema poruka podrške.</p>}
@@ -251,6 +253,9 @@ export function SupportTab() {
         {error && <div className="form-error">{error}</div>}
       </div>
     </div>
+    {/* contact_messages can be read by admins only (moderators share this tab) */}
+    {isAdmin && <ContactInbox />}
+    </>
   )
 }
 

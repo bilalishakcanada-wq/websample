@@ -10,6 +10,7 @@ export function renderTransactionalEmail(type: EventType, data: Data, siteUrl: s
   const site = new URL(siteUrl)
   if (site.protocol !== 'https:' || site.username || site.password) throw new Error('SITE_URL_INVALID')
   site.search = ''; site.hash = ''
+  const settingsUrl = site.href.replace(/\/$/, '') + '/account/postavke-obavijesti'
   if (type === 'EMAIL_CONFIRM') {
     // the link opens /potvrdi-email, which hands the token to public.confirm_email
     if (!/^[a-f0-9]{64}$/.test(data.token || '')) throw new Error('TOKEN_INVALID')
@@ -20,11 +21,11 @@ export function renderTransactionalEmail(type: EventType, data: Data, siteUrl: s
     if (!link.startsWith('/') || link.startsWith('//') || link.includes('\\') || Array.from(link).some(char => char.charCodeAt(0) <= 32)) throw new Error('NOTIFICATION_LINK_INVALID')
     const target = new URL(site.href.replace(/\/$/, '') + link)
     if (target.origin !== site.origin) throw new Error('NOTIFICATION_LINK_INVALID')
-    return renderBrandedEmail(type, { actionUrl: target.href, notificationTitle: data.title, notificationBody: data.message })
+    return renderBrandedEmail(type, { actionUrl: target.href, settingsUrl, notificationTitle: data.title, notificationBody: data.message })
   }
   if (!/^[a-f0-9-]{36}$/i.test(data.listing_id || '')) throw new Error('LISTING_ID_INVALID')
   return renderBrandedEmail(type, { jobTitle: data.title, price: data.amount, userName: data.user_name,
-    providerName: data.provider_name, actionUrl: site.href.replace(/\/$/, '') + '/listings/' + data.listing_id })
+    providerName: data.provider_name, actionUrl: site.href.replace(/\/$/, '') + '/listings/' + data.listing_id, settingsUrl })
 }
 
 type Repository = {

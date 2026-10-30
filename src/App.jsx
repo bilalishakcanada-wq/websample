@@ -24,6 +24,7 @@ const RulesPage = lazy(lazyImport(() => import('./pages/RulesPage')))
 const PublicProfilePage = lazy(lazyImport(() => import('./pages/PublicProfilePage')))
 const AboutPage = lazy(lazyImport(() => import('./pages/AboutPage')))
 const PrivacyPage = lazy(lazyImport(() => import('./pages/PrivacyPage')))
+const CookiePolicyPage = lazy(lazyImport(() => import('./pages/CookiePolicyPage')))
 const PostTaskPage = lazy(lazyImport(() => import('./pages/PostTaskPage')))
 const EarnMoneyPage = lazy(lazyImport(() => import('./pages/EarnMoneyPage')))
 const HowItWorksPage = lazy(lazyImport(() => import('./pages/HowItWorksPage')))
@@ -70,6 +71,7 @@ function LegacyProfileRedirect() {
 }
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
+import CookieConsent from './components/CookieConsent'
 import InstallPrompt from './components/InstallPrompt'
 import ScrollToTop from './components/ScrollToTop'
 import SmoothScroll from './components/SmoothScroll'
@@ -218,6 +220,7 @@ function App() {
         <Route path="/pravila-zajednice" element={<CommunityGuidelinesPage />} />
         <Route path="/principi-izvodjaca" element={<ProviderPrinciplesPage />} />
         <Route path="/privatnost" element={<PrivacyPage />} />
+        <Route path="/kolacici" element={<CookiePolicyPage />} />
         <Route path="/aplikacija" element={<AppDownloadPage />} />
         <Route path="/403" element={<ForbiddenPage />} />
         <Route path="/404" element={<NotFoundPage />} />
@@ -229,6 +232,7 @@ function App() {
       <SiteFooter />
       <NavigationBar />
       <Toaster />
+      <CookieConsent />
       <DialogHost />
       </SuspensionGate>
       </UpdateGate>

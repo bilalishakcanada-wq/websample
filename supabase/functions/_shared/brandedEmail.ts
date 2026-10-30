@@ -8,9 +8,11 @@ export type BrandedEmailEvent = typeof brandedEmailEvents[number]
 export type EmailData = {
   userName?: string; jobTitle?: string; providerName?: string; price?: number | string
   actionUrl: string; notificationTitle?: string; notificationBody?: string
+  // where email notifications are switched off; shown as the unsubscribe link
+  settingsUrl?: string
 }
 export type EmailVariant = 'A' | 'B' | 'C'
-type Content = { subject: string; heading: string; paragraphs: string[]; action: string; actionUrl: string; detail?: string; footer?: string; kicker?: string }
+type Content = { subject: string; heading: string; paragraphs: string[]; action: string; actionUrl: string; detail?: string; footer?: string; kicker?: string; settingsUrl?: string }
 export const escapeEmailHtml = (value: unknown): string => escapeHtml(value)
 const clean = (value: unknown, limit = 160) => String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, limit)
 export function emailSiteUrl(value: string): URL {
@@ -30,7 +32,11 @@ function layout(content: Content, authTemplate = false, variant: EmailVariant = 
   // Go template tokens are permitted only by the static Auth template generator.
   if (!(authTemplate && content.actionUrl === '{{ .ConfirmationURL }}')) emailSiteUrl(content.actionUrl)
   const e = escapeEmailHtml
-  const footer = content.footer || 'Ovu poruku ste dobili zbog aktivnosti svog računa. Email obavijesti možete podesiti u aplikaciji.'
+  const footer = content.footer || (content.settingsUrl
+    ? 'Ovu poruku ste dobili zbog aktivnosti svog računa.'
+    : 'Ovu poruku ste dobili zbog aktivnosti svog računa. Email obavijesti možete podesiti u aplikaciji.')
+  const settingsUrl = !content.footer && content.settingsUrl ? emailSiteUrl(content.settingsUrl).href : ''
+  const unsubscribe = 'Isključi email obavijesti'
   const html = renderEmail(variant, {
     subject: clean(content.subject, 180),
     preheader: e(content.heading),
@@ -41,10 +47,10 @@ function layout(content: Content, authTemplate = false, variant: EmailVariant = 
     button: e(content.action),
     url: e(content.actionUrl),
     note: SECURITY,
-    footerNote: e(footer),
+    footerNote: e(footer) + (settingsUrl ? ` <a href="${e(settingsUrl)}" style="color:inherit;text-decoration:underline">${unsubscribe}</a>` : ''),
   })
   return { subject: clean(content.subject, 180), html,
-    text: [content.heading, content.detail, ...content.paragraphs, `${content.action}: ${content.actionUrl}`, footer, 'Trebate pomoć? Pišite na info@zadatak.ba. Nikada ne šaljite lozinku niti sigurnosni link.', 'Zadatak.ba'].filter(Boolean).join('\n\n') }
+    text: [content.heading, content.detail, ...content.paragraphs, `${content.action}: ${content.actionUrl}`, footer, settingsUrl ? `${unsubscribe}: ${settingsUrl}` : '', 'Trebate pomoć? Pišite na info@zadatak.ba. Nikada ne šaljite lozinku niti sigurnosni link.', 'Zadatak.ba'].filter(Boolean).join('\n\n') }
 }
 
 function contentFor(type: BrandedEmailEvent, data: EmailData): Content {
@@ -91,7 +97,7 @@ function contentFor(type: BrandedEmailEvent, data: EmailData): Content {
     default: throw new Error('EVENT_TYPE_INVALID')
   }
   const auth = type === 'WELCOME_CONFIRM' || type === 'PASSWORD_RESET'
-  return { subject, heading, action, actionUrl: data.actionUrl, kicker: KICKERS[type],
+  return { subject, heading, action, actionUrl: data.actionUrl, settingsUrl: data.settingsUrl, kicker: KICKERS[type],
     detail: auth || type === 'NOTIFICATION' || type === 'NEW_MESSAGE' ? undefined : title,
     paragraphs: [...(hello ? [`Poštovani/a ${hello},`] : []), body], footer }
 }

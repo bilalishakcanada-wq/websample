@@ -18,7 +18,8 @@ export const SITE_PAGES = [
   { path: '/pravila-zajednice', title: 'Pravila zajednice', short: 'Kako se ponašamo jedni prema drugima.', group: 'kompanija', related: ['/principi-izvodjaca', '/pravila', '/pomoc'] },
   { path: '/principi-izvodjaca', title: 'Principi izvođača', short: 'Šta klijenti mogu očekivati od svakog majstora.', group: 'kompanija', related: ['/zaradi', '/pravila-zajednice', '/kako-radi'] },
   { path: '/pravila', title: 'Uslovi korištenja', short: 'Pravila i uslovi korištenja platforme.', group: 'kompanija', related: ['/privatnost', '/pravila-zajednice', '/pomoc'] },
-  { path: '/privatnost', title: 'Politika privatnosti', short: 'Koje podatke čuvamo i zašto.', group: 'kompanija', related: ['/pravila', '/kontakt', '/pomoc'] },
+  { path: '/privatnost', title: 'Politika privatnosti', short: 'Koje podatke čuvamo i zašto.', group: 'kompanija', related: ['/pravila', '/kolacici', '/kontakt'] },
+  { path: '/kolacici', title: 'Politika kolačića', short: 'Šta Zadatak čuva u pregledniku i kako to mijenjaš.', group: 'kompanija', related: ['/privatnost', '/pravila', '/kontakt'] },
   { path: '/kontakt', title: 'Kontakt', short: 'Piši nam — odgovaramo u roku 24 sata.', group: 'kompanija', related: ['/pomoc', '/o-nama', '/za-biznis'] },
 
   // ---- Postojeći korisnici (app pages, no "related" block needed)

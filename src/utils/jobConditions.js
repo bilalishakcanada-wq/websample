@@ -32,7 +32,7 @@ export const requirementLabel = (code) => REQ_BY_CODE[code]?.label || code
 export const perkLabel = (code) => PERK_BY_CODE[code]?.label || code
 export const perkShown = (code) => PERK_BY_CODE[code]?.shown || perkLabel(code)
 
-/** Licenca koju kategorija posla obično traži — samo prijedlog u formi, klijent odlučuje. */
+/** Licenca koju kategorija posla obično traži, samo prijedlog u formi, klijent odlučuje. */
 const SUGGESTED_FOR_CATEGORY = {
   'Električar': 'licence_electrician',
   'Vodoinstalater': 'licence_plumber',

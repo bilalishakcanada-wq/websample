@@ -84,7 +84,7 @@ function BadgesPage() {
     if (!file || !uploadFor) return
     try {
       await accountService.requestVerification({ userId: user.id, kind: uploadFor.kind, licenceType: uploadFor.licenceType, file })
-      setMessage('Dokument je poslan. Tim ga pregleda — značka se dodaje čim bude odobren.')
+      setMessage('Dokument je poslan. Tim ga pregleda, značka se dodaje čim bude odobren.')
       await refresh()
     } catch (requestError) {
       setError(requestError.message)
@@ -102,7 +102,7 @@ function BadgesPage() {
       </div>
       {backToJob && <p className="form-success">Ovaj posao traži značku označenu ispod. Kad je tim odobri, <Link to={backToJob}>vrati se na posao</Link> i pošalji ponudu.</p>}
       <p>Značke pomažu drugima da budu sigurni ko si i šta znaš. Što ih više skupiš, to će ti klijenti i izvođači više vjerovati.</p>
-      <p className="muted-text">Značka se dodjeljuje automatski kad je uslov ispunjen — zelena kvačica znači da je verifikacija trenutno aktivna. <Link to="/pravila-zajednice">Saznaj više</Link></p>
+      <p className="muted-text">Značka se dodjeljuje automatski kad je uslov ispunjen, zelena kvačica znači da je verifikacija trenutno aktivna. <Link to="/pravila-zajednice">Saznaj više</Link></p>
 
       {verifyPhone && <PhoneVerify initialPhone={profile.phone || ''} onClose={() => setVerifyPhone(false)} onVerified={async () => { await reload(); await refresh() }} />}
       <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onChange={onFile} />
@@ -114,10 +114,10 @@ function BadgesPage() {
 
       <h3 className="account-sub">Značke identiteta</h3>
       <div className="badge-grid">
-        <BadgeRow icon={ShieldCheck} title="Uvjerenje o nekažnjavanju" text="Umiri druge članove — priloži važeće uvjerenje o nekažnjavanju (MUP / sud)." id="police_check" state={stateFor('police_check', 'police_check')} onAdd={() => startUpload('police_check')} />
+        <BadgeRow icon={ShieldCheck} title="Uvjerenje o nekažnjavanju" text="Umiri druge članove, priloži važeće uvjerenje o nekažnjavanju (MUP / sud)." id="police_check" state={stateFor('police_check', 'police_check')} onAdd={() => startUpload('police_check')} />
         <BadgeRow icon={CreditCard} title="Način plaćanja verifikovan" text="Dodaj podatke za primanje uplata (IBAN) u Plaćanje → Račun za isplatu." id="payment_verified" state={stateFor('payment_verified', '__none__')} onAdd={() => { window.location.assign(withBase('/account/nacini-placanja')) }} addLabel="Dodaj" />
-        <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom — dobijaš trenutne obavijesti o poslovima." id="mobile_verified" state={stateFor('mobile_verified', '__none__')} onAdd={() => setVerifyPhone(true)} />
-        <BadgeRow icon={IdCard} title="Lična karta verifikovana" text="Slikaj ličnu kartu ili pasoš — tim provjerava da li se podaci slažu sa profilom." id="id_verified" state={stateFor('id_verified', 'identity')} onAdd={() => startUpload('identity')} />
+        <BadgeRow icon={Phone} title="Telefon verifikovan" text="Potvrdi broj SMS kodom, dobijaš trenutne obavijesti o poslovima." id="mobile_verified" state={stateFor('mobile_verified', '__none__')} onAdd={() => setVerifyPhone(true)} />
+        <BadgeRow icon={IdCard} title="Lična karta verifikovana" text="Slikaj ličnu kartu ili pasoš, tim provjerava da li se podaci slažu sa profilom." id="id_verified" state={stateFor('id_verified', 'identity')} onAdd={() => startUpload('identity')} />
       </div>
 
       <h3 className="account-sub">Značke licenci</h3>
@@ -128,13 +128,13 @@ function BadgesPage() {
       </div>
 
       <h3 className="account-sub">Značke aktivnosti</h3>
-      <p className="muted-text">Ove se dobijaju kroz rad na platformi — recenzije, završeni poslovi, brzina odgovora. Dodjeljuju se automatski.</p>
+      <p className="muted-text">Ove se dobijaju kroz rad na platformi: recenzije, završeni poslovi, brzina odgovora. Dodjeljuju se automatski.</p>
       <div className="badge-grid">
         {(bundle?.badges || []).filter((badge) => !['mobile_verified', 'id_verified', 'police_check', 'payment_verified'].includes(badge.code) && !badge.code.startsWith('licence_')).map((badge) => (
           <BadgeRow key={badge.code} icon={CheckCircle2} title={badge.label} text={badge.description} state="done" />
         ))}
         {(bundle?.badges || []).filter((badge) => !['mobile_verified', 'id_verified', 'police_check', 'payment_verified'].includes(badge.code) && !badge.code.startsWith('licence_')).length === 0 && (
-          <p className="muted-text">Još nema značaka aktivnosti — prva stiže sa prvim završenim poslom.</p>
+          <p className="muted-text">Još nema značaka aktivnosti, prva stiže sa prvim završenim poslom.</p>
         )}
       </div>
     </div>

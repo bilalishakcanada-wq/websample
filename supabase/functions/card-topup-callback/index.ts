@@ -1,4 +1,4 @@
-// Zadatak — Monri callback: the only place a card payment becomes balance.
+// Zadatak: Monri callback: the only place a card payment becomes balance.
 //
 // Monri POSTs the transaction as JSON and signs it with
 //   Authorization: WP3-callback sha512(MONRI_KEY + raw body)
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
   })
   if (error) {
     console.error('card_payment_complete failed', { orderNumber, message: error.message })
-    // unknown order is permanent — answer 200 so Monri stops retrying; anything else retries
+    // unknown order is permanent, answer 200 so Monri stops retrying; anything else retries
     if (error.message.includes('NEPOZNATA_NARUDZBA')) return json({ ok: false, reason: 'unknown order' })
     return json({ error: 'DB' }, 500)
   }

@@ -92,12 +92,6 @@ export const mockTasks = [
   },
 ]
 
-export const mockProfessionals = [
-  { id: 1, name: 'Amra H.', role: 'Kućni majstor', rate: '45 KM/h', badge: 'Najviši rejting', rating: 4.9, jobs: 156, photo: withBase('/images/providers/amra.webp') },
-  { id: 2, name: 'Nedim K.', role: 'Web developer', rate: '60 KM/h', badge: 'Na mreži 4h', rating: 4.8, jobs: 98, photo: withBase('/images/providers/nedim.webp') },
-  { id: 3, name: 'Lejla S.', role: 'Grafički dizajner', rate: '55 KM/h', badge: 'Verified', rating: 5.0, jobs: 64, photo: withBase('/images/providers/lejla.webp') },
-]
-
 export const mockPlans = [
   {
     id: 'free',

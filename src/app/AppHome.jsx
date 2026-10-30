@@ -60,7 +60,7 @@ function AppHome() {
 
 const STATE = { published: ['Čekaš ponude', 'open'], assigned: ['Dodijeljen', 'assigned'] }
 
-/** The poster's open jobs, right under the hero — one tap to the offers (like "Your tasks" in the apps people know). */
+/** The poster's open jobs, right under the hero, one tap to the offers (like "Your tasks" in the apps people know). */
 function MyOpenJobs({ userId }) {
   const { data } = useMyListings(userId)
   const jobs = (data || []).filter((job) => job.status === 'published' || job.status === 'assigned').slice(0, 3)
@@ -129,7 +129,7 @@ function PosterHome({ firstName }) {
               <div>
                 <span className="ap-promo-eyebrow">Zadatak za izvođače</span>
                 <strong>Zaradi uz poslove u svom gradu</strong>
-                <p>Pošalji ponudu za minutu — klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
+                <p>Pošalji ponudu za minutu, klijent plaća unaprijed, tebi zarada sjeda na balans.</p>
                 <em>Postani izvođač →</em>
               </div>
               <CropArt crop={PROMO_ART[artIndex % PROMO_ART.length]} className="ap-promo-art" />
@@ -191,7 +191,7 @@ function TaskerHome({ user, firstName }) {
           <p className="ap-p">{personalised ? 'Prema tvojim vještinama, gradu i onome što pregledaš' : 'Svježe i s malo ponuda na vrhu'}</p>
           {loading && feed.length === 0 && <div className="ap-list">{[1, 2, 3].map((i) => <SkeletonApJob key={i} />)}</div>}
           {!loading && failed && <LoadFailed title="Poslovi se nisu učitali" onRetry={retry} />}
-          {!loading && !failed && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti — javit ćemo ti čim se pojavi novi.</span></div>}
+          {!loading && !failed && feed.length === 0 && <div className="ap-empty"><strong>Trenutno nema otvorenih poslova</strong><span>Uključi obavijesti, javit ćemo ti čim se pojavi novi.</span></div>}
           <div className="ap-list">
             {feed.map((job) => {
               const card = (

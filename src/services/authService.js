@@ -245,7 +245,7 @@ export const authService = {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (error) {
-      // the function explains refusals (e.g. money still in escrow) — show that instead of a generic error
+      // the function explains refusals (e.g. money still in escrow), show that instead of a generic error
       let detail = ''
       try { detail = (await error.context?.json?.())?.error || '' } catch { /* not json */ }
       console.error('delete-account failed', error.message)

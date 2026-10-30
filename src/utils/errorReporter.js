@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { onConsentChange, readConsent } from './consent'
 
 const seen = new Set()
 const IGNORE = /ResizeObserver loop|Script error\.?$|Failed to fetch dynamically imported module|Load failed|NetworkError|AbortError/i
@@ -8,12 +9,15 @@ const swRefused = (error) => /serviceWorker\.register|ServiceWorkerContainer\.re
 
 const ignored = (error, message) => IGNORE.test(message) || swRefused(error)
 
-// Sentry loads only when the build has a DSN (VITE_SENTRY_DSN), in its own chunk after the page is up
+// Sentry loads only when the build has a DSN (VITE_SENTRY_DSN) and the visitor allowed error reports
+// in the cookie banner, in its own chunk after the page is up
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 let sentry = null
+let sentryStarting = false
 
 function startSentry() {
-  if (!SENTRY_DSN) return
+  if (!SENTRY_DSN || sentry || sentryStarting) return
+  sentryStarting = true
   import('@sentry/react').then((Sentry) => {
     Sentry.init({
       dsn: SENTRY_DSN,
@@ -27,7 +31,15 @@ function startSentry() {
       },
     })
     sentry = Sentry
-  }).catch(() => {})
+    // the choice can be withdrawn while the chunk was loading
+    if (!readConsent()?.errors) stopSentry()
+  }).catch(() => {}).finally(() => { sentryStarting = false })
+}
+
+function stopSentry() {
+  if (!sentry) return
+  sentry.close().catch(() => {})
+  sentry = null
 }
 
 /** Sends one copy of each distinct client error to `client_errors` (and Sentry when set up) so the team sees crashes. */
@@ -53,5 +65,6 @@ export function installErrorReporter() {
   if (typeof window === 'undefined' || !import.meta.env.PROD) return
   window.addEventListener('error', (event) => reportClientError(event.error || new Error(event.message), 'window'))
   window.addEventListener('unhandledrejection', (event) => reportClientError(event.reason instanceof Error ? event.reason : new Error(String(event.reason)), 'promise'))
-  startSentry()
+  if (readConsent()?.errors) startSentry()
+  onConsentChange((choice) => (choice?.errors ? startSentry() : stopSentry()))
 }

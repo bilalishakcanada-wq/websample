@@ -15,7 +15,7 @@ export const formatBosnianMonthYear = (value) => {
   return `${BOSNIAN_MONTHS[date.getMonth()]} ${date.getFullYear()}.`
 }
 
-/** "upravo", "prije 5 min", "prije 3 h", "jučer", "prije 4 dana", else the short date — how apps talk about time. */
+/** "upravo", "prije 5 min", "prije 3 h", "jučer", "prije 4 dana", else the short date, how apps talk about time. */
 export const timeAgo = (value) => {
   if (!value) return ''
   const diff = Date.now() - new Date(value).getTime()

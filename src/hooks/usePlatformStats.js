@@ -4,7 +4,7 @@ import { statsService } from '../services/statsService'
 import { serviceCategories } from '../data/categories'
 import { cityCoordinates } from '../data/cityCoordinates'
 
-// "1.2k+" / "150+" / "8" — rounds down so the number is never overstated.
+// "1.2k+" / "150+" / "8", rounds down so the number is never overstated.
 export const formatCount = (value) => {
   const n = Number(value) || 0
   if (n >= 1000) {

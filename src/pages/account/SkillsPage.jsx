@@ -123,7 +123,7 @@ function SkillsPage() {
   return (
     <div className="account-section skills-page">
       <div className="account-section-head"><h1>Vještine</h1></div>
-      <p className="muted-text">Ovo su tvoje vještine. Drži ih ažurnim — klijenti ih vide na tvom javnom profilu i po njima te platforma predlaže za poslove.</p>
+      <p className="muted-text">Ovo su tvoje vještine. Drži ih ažurnim, klijenti ih vide na tvom javnom profilu i po njima te platforma predlaže za poslove.</p>
 
       <form className="sk-form" onSubmit={submit}>
         <SkillsCard icon={Sparkles} title="U čemu si dobar/dobra?" hint="Označi sve usluge koje nudiš." count={trades.length > 0 ? `${trades.length} odabrano` : null}>
@@ -159,7 +159,7 @@ function SkillsPage() {
         </div>
 
         <ListEditor icon={GraduationCap} title="Koje kvalifikacije imaš?" hint="Škole, kursevi, certifikati." empty="Još nema kvalifikacija. Dodaj školu, kurs ili certifikat." items={education} onChange={setEducation} {...draftProps('education')} placeholder="npr. Elektrotehnička škola Sarajevo, 2014" />
-        <ListEditor icon={BriefcaseBusiness} title="Radno iskustvo" hint="Gdje si radio/la i koliko dugo." empty="Još nema radnog iskustva. Dodaj posao i koliko si ga radio/la." items={work} onChange={setWork} {...draftProps('work')} placeholder="npr. Električar — Elektroprivreda BiH, 6 godina" />
+        <ListEditor icon={BriefcaseBusiness} title="Radno iskustvo" hint="Gdje si radio/la i koliko dugo." empty="Još nema radnog iskustva. Dodaj posao i koliko si ga radio/la." items={work} onChange={setWork} {...draftProps('work')} placeholder="npr. Električar. Elektroprivreda BiH, 6 godina" />
         <ListEditor icon={Award} title="Specijalnosti" hint="Ono po čemu si poseban/posebna." empty="Još nema specijalnosti. Npr. rasvjeta ili solarni sistemi." items={specialties} onChange={setSpecialties} {...draftProps('specialties')} placeholder="npr. Rasvjeta, Solarni sistemi" max={15} />
 
         {!scan.clean && <div className="form-error">{contactInfoMessage(scan, 'vještine')}</div>}

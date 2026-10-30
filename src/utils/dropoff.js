@@ -11,8 +11,8 @@ const withStreet = (place, exact) => (exact?.address ? `${place} · ${exact.addr
 /** What the review step shows under "Gdje". */
 export const formWhereLabel = (form) => {
   if (form?.mode === 'remote') return 'Online / na daljinu'
-  const from = withStreet(form?.location || '—', form?.exact)
-  return isMovingForm(form) ? `Odakle: ${from} → Dokle: ${withStreet(form.dropoff || '—', form.dropoffExact)}` : from
+  const from = withStreet(form?.location || '-', form?.exact)
+  return isMovingForm(form) ? `Odakle: ${from} → Dokle: ${withStreet(form.dropoff || '-', form.dropoffExact)}` : from
 }
 
 /** "Sarajevo → Mostar" for a job with two places, else null. */

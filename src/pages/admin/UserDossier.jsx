@@ -18,14 +18,14 @@ const KIND_ICON = { message: '💬', listing: '📋', bid: '💰', review: '★'
 const formatKM = (value) => `${Math.round(Number(value) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} KM`
 
 function Stat({ label, value, hint }) {
-  return <div className="dossier-stat"><strong>{value ?? '—'}</strong><span>{label}</span>{hint && <small>{hint}</small>}</div>
+  return <div className="dossier-stat"><strong>{value ?? '-'}</strong><span>{label}</span>{hint && <small>{hint}</small>}</div>
 }
 
 function Row({ label, children }) {
-  return <div className="dossier-kv"><span>{label}</span><div>{children ?? '—'}</div></div>
+  return <div className="dossier-kv"><span>{label}</span><div>{children ?? '-'}</div></div>
 }
 
-/** Badge checklist for one user — admin only. */
+/** Badge checklist for one user, admin only. */
 function BadgeManager({ userId, held, onClose, onChanged }) {
   const [catalog, setCatalog] = useState([])
   const [note, setNote] = useState('')
@@ -111,7 +111,7 @@ function Sessions({ dossier }) {
     <div className="dossier-grid">
       <section className="dossier-card dossier-card-wide">
         <h3><Globe size={16} /> IP adrese ({ipSummary.length})</h3>
-        {ipSummary.length === 0 && <p className="muted-text">Nema zabilježenih prijava — bilježe se od uvođenja dnevnika sesija.</p>}
+        {ipSummary.length === 0 && <p className="muted-text">Nema zabilježenih prijava, bilježe se od uvođenja dnevnika sesija.</p>}
         <div className="dossier-ips">
           {ipSummary.map((entry) => (
             <div key={entry.ip} className="dossier-ip">
@@ -127,7 +127,7 @@ function Sessions({ dossier }) {
       {(dossier.shared_ips || []).length > 0 && (
         <section className="dossier-card dossier-card-wide dossier-card-warn">
           <h3><ShieldBan size={16} /> Iste IP adrese koriste i drugi nalozi</h3>
-          <p className="muted-text">Može značiti isti uređaj, porodicu ili zaobilaženje suspenzije — provjeri prije odluke.</p>
+          <p className="muted-text">Može značiti isti uređaj, porodicu ili zaobilaženje suspenzije, provjeri prije odluke.</p>
           {(dossier.shared_ips || []).map((row) => (
             <div key={`${row.ip}-${row.user_id}`} className="admin-mini-row">
               <span><code>{row.ip}</code> → <SharedUser row={row} /></span>
@@ -152,7 +152,7 @@ function Sessions({ dossier }) {
         <h3>Historija prijava ({sessions.length})</h3>
         {sessions.slice(0, 30).map((session) => (
           <div key={session.id} className="admin-mini-row">
-            <span>{formatBosnianDate(session.created_at)} · <code>{session.ip || '—'}</code></span>
+            <span>{formatBosnianDate(session.created_at)} · <code>{session.ip || '-'}</code></span>
             <small>{deviceLabel(session.user_agent)}</small>
           </div>
         ))}
@@ -248,7 +248,7 @@ function Activity({ userId, dossier }) {
       <section className="dossier-card">
         <h3>Ponude ({dossier.stats?.bids})</h3>
         {(dossier.bids || []).length === 0 && <p className="muted-text">Nema ponuda.</p>}
-        {(dossier.bids || []).map((item) => <div key={item.id} className="admin-mini-row"><span>{item.amount} KM — {item.listing_title || item.message}</span><span className={`tag tag-${item.status}`}>{item.status}</span></div>)}
+        {(dossier.bids || []).map((item) => <div key={item.id} className="admin-mini-row"><span>{item.amount} KM, {item.listing_title || item.message}</span><span className={`tag tag-${item.status}`}>{item.status}</span></div>)}
       </section>
       <section className="dossier-card">
         <h3>Recenzije dobio ({dossier.stats?.reviews_received})</h3>
@@ -274,10 +274,10 @@ function Safety({ dossier }) {
     <div className="dossier-grid">
       <section className="dossier-card dossier-card-wide">
         <h3><ShieldCheck size={16} /> Pravilo #1 i moderacija ({dossier.stats?.strikes_total} kršenja ukupno, {dossier.stats?.strikes_30d} u 30 dana)</h3>
-        {(dossier.moderation || []).length === 0 && <p className="muted-text">Čist dosije — nema kršenja.</p>}
+        {(dossier.moderation || []).length === 0 && <p className="muted-text">Čist dosije, nema kršenja.</p>}
         {(dossier.moderation || []).map((event) => (
           <div key={event.id} className={`admin-mini-row ${event.dismissed ? 'is-dismissed' : ''}`}>
-            <span><span className={`tag tag-${event.action}`}>{ACTION_LABEL[event.action] || event.action}</span> {event.source_table}{event.kinds?.length ? ` · ${event.kinds.map((kind) => KIND_LABEL[kind] || kind).join(', ')}` : ''}{event.snippet ? ` — ${event.snippet}` : ''}</span>
+            <span><span className={`tag tag-${event.action}`}>{ACTION_LABEL[event.action] || event.action}</span> {event.source_table}{event.kinds?.length ? ` · ${event.kinds.map((kind) => KIND_LABEL[kind] || kind).join(', ')}` : ''}{event.snippet ? `, ${event.snippet}` : ''}</span>
             <small>{formatBosnianDate(event.created_at)}</small>
           </div>
         ))}
@@ -385,7 +385,7 @@ function Notes({ dossier, reload }) {
       <section className="dossier-card dossier-card-wide">
         <h3><NotebookPen size={16} /> Bilješke tima</h3>
         <form className="dossier-note-form" onSubmit={add}>
-          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={2} maxLength={2000} placeholder="Interna bilješka — korisnik je nikad ne vidi" aria-label="Interna bilješka" />
+          <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={2} maxLength={2000} placeholder="Interna bilješka, korisnik je nikad ne vidi" aria-label="Interna bilješka" />
           <button type="submit" className="primary-button" disabled={busy || !body.trim()}>{busy ? 'Čuvam…' : 'Dodaj bilješku'}</button>
         </form>
         {error && <div className="form-error">{error}</div>}
@@ -403,7 +403,7 @@ function Notes({ dossier, reload }) {
         {(dossier.staff_actions || []).length === 0 && <p className="muted-text">Tim još nije djelovao na ovaj nalog.</p>}
         {(dossier.staff_actions || []).map((action) => (
           <div key={action.id} className="admin-mini-row">
-            <span><strong>{STAFF_ACTION_LABEL[action.action] || action.action}</strong> — {action.actor_name || 'tim'}{action.details?.reason ? ` · ${action.details.reason}` : ''}{action.details?.code ? ` · ${action.details.code}` : ''}{action.details?.hours != null ? ` · ${action.details.hours} h` : action.action === 'suspend' ? ' · trajno' : ''}</span>
+            <span><strong>{STAFF_ACTION_LABEL[action.action] || action.action}</strong>, {action.actor_name || 'tim'}{action.details?.reason ? ` · ${action.details.reason}` : ''}{action.details?.code ? ` · ${action.details.code}` : ''}{action.details?.hours != null ? ` · ${action.details.hours} h` : action.action === 'suspend' ? ' · trajno' : ''}</span>
             <small>{formatBosnianDate(action.created_at)}</small>
           </div>
         ))}
@@ -423,7 +423,7 @@ function Overview({ dossier, onRunAgent, agentBusy }) {
         <Stat label="Završeni poslovi" value={stats.jobs_completed} hint={trust?.success_rate != null ? `${trust.success_rate}% uspješnost` : 'kao izvođač'} />
         <Stat label="Zarada 30 dana" value={formatKM(stats.earnings_30d)} />
         <Stat label="Poruke" value={stats.messages_sent} hint={`${stats.conversations} razgovora`} />
-        <Stat label="Ocjena" value={stats.avg_rating ?? '—'} hint={`${stats.reviews_received} recenzija · dao ${stats.reviews_given}`} />
+        <Stat label="Ocjena" value={stats.avg_rating ?? '-'} hint={`${stats.reviews_received} recenzija · dao ${stats.reviews_given}`} />
         <Stat label="Kršenja" value={stats.strikes_total} hint={`${stats.strikes_30d} u 30 dana · ${stats.suspensions} suspenzija`} />
         <Stat label="Prijave" value={stats.reports_against} hint={`protiv njega · poslao ${stats.reports_made}`} />
         <Stat label="Prijave na nalog" value={stats.logins} hint={`${stats.distinct_ips} IP adresa`} />
@@ -437,15 +437,15 @@ function Overview({ dossier, onRunAgent, agentBusy }) {
           <Row label="Puno ime">{profile.full_name} <span className="muted-text">(javno: {profile.display_name})</span></Row>
           <Row label="Privatni ID"><code>{profile.member_id}</code></Row>
           {isAdmin && <Row label="Email">{profile.email} {auth?.email_confirmed_at ? <span className="pill pill-ok">potvrđen</span> : <span className="pill">nepotvrđen</span>}</Row>}
-          {isAdmin && <Row label="Telefon">{profile.phone || '—'} {profile.phone_verified_at ? <span className="pill pill-ok">verifikovan</span> : null}</Row>}
+          {isAdmin && <Row label="Telefon">{profile.phone || '-'} {profile.phone_verified_at ? <span className="pill pill-ok">verifikovan</span> : null}</Row>}
           {!isAdmin && <Row label="Telefon">{profile.phone_verified_at ? <span className="pill pill-ok">verifikovan</span> : <span className="pill">nije verifikovan</span>}</Row>}
-          {isAdmin && <Row label="Datum rođenja">{profile.birth_date ? formatBosnianDate(profile.birth_date) : '—'}</Row>}
-          {isAdmin && <Row label="JMBG / JIB">{profile.tax_id_masked ? <code>{profile.tax_id_masked}</code> : '—'}</Row>}
-          <Row label="Grad">{profile.city || '—'}</Row>
+          {isAdmin && <Row label="Datum rođenja">{profile.birth_date ? formatBosnianDate(profile.birth_date) : '-'}</Row>}
+          {isAdmin && <Row label="JMBG / JIB">{profile.tax_id_masked ? <code>{profile.tax_id_masked}</code> : '-'}</Row>}
+          <Row label="Grad">{profile.city || '-'}</Row>
           <Row label="Tip naloga">{ACCOUNT_TYPE[profile.account_type] || profile.account_type}</Row>
           <Row label="Prijava putem">{(auth?.providers || []).join(', ') || 'email'}</Row>
           <Row label="Registrovan">{formatBosnianDate(profile.created_at)}</Row>
-          <Row label="Zadnja prijava">{auth?.last_sign_in_at ? `${formatBosnianDate(auth.last_sign_in_at)} (${relativeTime(auth.last_sign_in_at)})` : '—'}</Row>
+          <Row label="Zadnja prijava">{auth?.last_sign_in_at ? `${formatBosnianDate(auth.last_sign_in_at)} (${relativeTime(auth.last_sign_in_at)})` : '-'}</Row>
           <Row label="Zadnji put aktivan">{relativeTime(profile.last_seen_at)}</Row>
           <Row label="Profil popunjen">{profile.onboarding_completed ? 'da' : 'ne'}</Row>
           {isAdmin && <Row label="Račun za isplate">{payout ? `${payout.iban_masked} · ${payout.bank_name || ''} (${payout.holder_name})` : 'nije dodan'}</Row>}
@@ -467,7 +467,7 @@ function Overview({ dossier, onRunAgent, agentBusy }) {
                 <p><strong>{trust.label}</strong> · {trust.score}/100</p>
                 <ul className="dossier-reasons">{(trust.reasons || []).map((reason) => <li key={reason}>{reason}</li>)}</ul>
               </>
-            ) : <p className="muted-text">—</p>}
+            ) : <p className="muted-text">-</p>}
           </section>
           <section className="dossier-card">
             <h3>Značke ({(dossier.badges || []).length})</h3>
@@ -544,7 +544,7 @@ function UserDossier({ userId, onBack }) {
     return (
       <div className="dossier">
         <button type="button" className="ghost-button" onClick={onBack}><ArrowLeft size={15} /> Nazad</button>
-        <div className="empty-state"><h2>Nalog ne postoji</h2><p>{dossier.registry ? `Obrisan ${formatBosnianDate(dossier.registry.deleted_at)} — ${dossier.registry.full_name || ''} (${dossier.registry.email || 'email skriven'}).` : 'Nema profila za ovaj ID.'}</p></div>
+        <div className="empty-state"><h2>Nalog ne postoji</h2><p>{dossier.registry ? `Obrisan ${formatBosnianDate(dossier.registry.deleted_at)}, ${dossier.registry.full_name || ''} (${dossier.registry.email || 'email skriven'}).` : 'Nema profila za ovaj ID.'}</p></div>
       </div>
     )
   }

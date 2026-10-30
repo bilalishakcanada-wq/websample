@@ -55,7 +55,7 @@ export function ConfirmEmailScreen() {
   )
 }
 
-/** /potvrdi-email?t=… — the link from the confirmation mail. */
+/** /potvrdi-email?t=…, the link from the confirmation mail. */
 function ConfirmEmailPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()

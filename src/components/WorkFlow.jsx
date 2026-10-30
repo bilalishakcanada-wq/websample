@@ -12,7 +12,7 @@ import { confirmPaymentIdentity } from '../utils/biometric'
 import { toast } from './Toaster'
 import { confirmDialog, promptDialog } from '../utils/dialog'
 
-/** Koliko je ostalo do automatskog odobrenja — klijent mora vidjeti da rok teče. */
+/** Koliko je ostalo do automatskog odobrenja, klijent mora vidjeti da rok teče. */
 function Countdown({ until }) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -20,7 +20,7 @@ function Countdown({ until }) {
     return () => window.clearInterval(timer)
   }, [])
   const left = new Date(until).getTime() - now
-  if (left <= 0) return <span className="wf-clock late" data-testid="workflow-clock"><Clock size={14} /> Rok je istekao — uplata se oslobađa automatski</span>
+  if (left <= 0) return <span className="wf-clock late" data-testid="workflow-clock"><Clock size={14} /> Rok je istekao, uplata se oslobađa automatski</span>
   const hours = Math.floor(left / 3_600_000)
   const minutes = Math.floor((left % 3_600_000) / 60_000)
   return (
@@ -49,7 +49,7 @@ function ProofItem({ row }) {
   )
 }
 
-/** Slike prije/poslije sa pečatom — vide ih obje strane i tim. */
+/** Slike prije/poslije sa pečatom, vide ih obje strane i tim. */
 function ProofGallery({ rows }) {
   if (!rows.length) return null
   return (
@@ -78,7 +78,7 @@ const RAZLOZI_SPORA = [
 
 /**
  * Tok posla od osigurane uplate do isplate: predaja rada sa dokazom, 72-satni rok,
- * ispravke, sporazumni prekid i spor. Pravila su u bazi (supabase/booking) — ovdje
+ * ispravke, sporazumni prekid i spor. Pravila su u bazi (supabase/booking), ovdje
  * su samo dugmad koja odgovaraju trenutnom stanju i ulozi.
  */
 function WorkFlow({ payment, role, user, onChanged, title = '' }) {
@@ -142,7 +142,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
     const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.submitWork(payment.listing_id, report.trim(), urls)
     setForm(null); setReport(''); setFiles([])
-  }, 'Rad je predat — klijent ima 72 sata da pregleda.')
+  }, 'Rad je predat, klijent ima 72 sata da pregleda.')
 
   const odobri = async () => {
     const ok = await confirmDialog({
@@ -151,7 +151,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       confirmLabel: 'Odobri i isplati',
     })
     if (!ok || !(await confirmPaymentIdentity(`Isplata za posao: ${km(payment.amount)}`))) return
-    run('approve', () => paymentService.approveWork(payment.listing_id), 'Odobreno — izvođač je dobio uplatu.')
+    run('approve', () => paymentService.approveWork(payment.listing_id), 'Odobreno, izvođač je dobio uplatu.')
   }
 
   const traziIspravku = async () => {
@@ -210,13 +210,13 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
 
   const odgovoriNaPrekid = (prihvati) => run('cancelresp',
     () => paymentService.respondCancellation(payment.listing_id, prihvati),
-    prihvati ? 'Prekid je prihvaćen — novac je vraćen klijentu.' : 'Prekid nije prihvaćen; posao se nastavlja.')
+    prihvati ? 'Prekid je prihvaćen, novac je vraćen klijentu.' : 'Prekid nije prihvaćen; posao se nastavlja.')
 
   const posaljiSpor = () => run('dispute', async () => {
     const urls = files.length ? await paymentService.uploadEvidence(user.id, payment.listing_id, files) : []
     await paymentService.openWorkDispute(payment.listing_id, reasonCode, claim.trim(), urls)
     setForm(null); setClaim(''); setFiles([])
-  }, 'Problem je prijavljen — uplata je zamrznuta dok tim ne odluči.')
+  }, 'Problem je prijavljen, uplata je zamrznuta dok tim ne odluči.')
 
   const sacuvajSliku = async (shot) => {
     const kind = camera
@@ -229,10 +229,10 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
 
   const naslov = useMemo(() => ({
     in_progress: isClient ? 'Izvođač radi posao' : 'Posao je u toku',
-    submitted: isClient ? 'Rad je predat — pregledaj ga' : 'Čeka se da klijent pregleda',
+    submitted: isClient ? 'Rad je predat, pregledaj ga' : 'Čeka se da klijent pregleda',
     revision: isClient ? 'Tražio/la si ispravku' : 'Klijent traži ispravku',
     cancel_requested: 'Zatražen je prekid posla',
-    disputed: 'Spor — tim pregleda',
+    disputed: 'Spor, tim pregleda',
     completed: 'Posao je završen',
     cancelled: 'Posao je prekinut',
   }[state]), [state, isClient])
@@ -294,7 +294,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
       {state === 'cancel_requested' && (
         <p className="wf-note">
           {mojZahtjevZaPrekid
-            ? 'Poslao/la si zahtjev za prekid. Čeka se odgovor druge strane — novac je i dalje osiguran.'
+            ? 'Poslao/la si zahtjev za prekid. Čeka se odgovor druge strane, novac je i dalje osiguran.'
             : 'Druga strana traži prekid posla. Ako prihvatiš, novac se vraća klijentu. Ako odbiješ, posao se nastavlja.'}
           {cancelReq?.detail && <em> „{cancelReq.detail}"</em>}
           {odgovornaStrana && (
@@ -425,7 +425,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
           </select>
           <label htmlFor="wf-claim">Šta se desilo?</label>
           <textarea id="wf-claim" value={claim} onChange={(event) => setClaim(event.target.value)} rows={3} maxLength={4000}
-            placeholder="Budi konkretan — tim gleda i prepisku i priložene dokaze." />
+            placeholder="Budi konkretan, tim gleda i prepisku i priložene dokaze." />
           <input ref={fileRef} type="file" accept="image/*" multiple hidden
             onChange={(event) => setFiles([...event.target.files].slice(0, 5))} />
           <button type="button" className="ghost-button" onClick={() => fileRef.current?.click()}>
@@ -475,7 +475,7 @@ function WorkFlow({ payment, role, user, onChanged, title = '' }) {
         {/* rjeđe radnje: tiho ispod glavnog dugmeta, da se ne takmiče s njim */}
         <div className="wf-more">
           {isClient && state === 'in_progress' && (
-            // klijent smije platiti i prije predaje rada — svoj novac, svoja odluka
+            // klijent smije platiti i prije predaje rada, svoj novac, svoja odluka
             <button data-testid="workflow-release" type="button" className="wf-link" onClick={oslobodiOdmah} disabled={Boolean(busy)}>
               <CheckCircle2 size={15} /> Isplati odmah
             </button>

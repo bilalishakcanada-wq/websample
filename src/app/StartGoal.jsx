@@ -13,7 +13,7 @@ const GOALS = [
   { id: 'tasker', Art: EarnMascot, title: 'Zaradi novac', sub: 'Postani izvođač' },
 ]
 
-/** "Šta ti je glavni cilj?" — picks the app face (poster / tasker); changeable later in the account. */
+/** "Šta ti je glavni cilj?", picks the app face (poster / tasker); changeable later in the account. */
 function StartGoal() {
   useFullscreen()
   const navigate = useNavigate()

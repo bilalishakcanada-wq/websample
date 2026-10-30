@@ -58,7 +58,7 @@ function ScrollToTop() {
     if (samePage && !target) return undefined
     if (!target) { scrollToTop(); return undefined }
 
-    // Back: the list or page may still be loading — keep trying until it is tall enough (max ~2 s)
+    // Back: the list or page may still be loading, keep trying until it is tall enough (max ~2 s)
     let frame = 0
     let cancelled = false
     const started = performance.now()

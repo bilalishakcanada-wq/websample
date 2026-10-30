@@ -407,6 +407,8 @@ async function crawl(browser, profileName, roleName, state) {
   if (VITALS) await context.addInitScript(vitalsRecorder)
   if (profileName === 'app') await context.addInitScript(appShellStub)
   if (profile.textScale) await context.addInitScript(textScaleStub, profile.textScale)
+  // like a person who already answered the cookie banner on an earlier visit (the banner has its own e2e test)
+  await context.addInitScript(() => { try { if (!localStorage.getItem('zadatak-consent')) localStorage.setItem('zadatak-consent', JSON.stringify({ v: 1, errors: false, at: '2026-10-30T00:00:00.000Z' })) } catch { /* private mode */ } })
   if (role.mode) await context.addInitScript((m) => { try { localStorage.setItem('zadatak-mode', m) } catch { /* private mode */ } }, role.mode)
   // grant clipboard so "copy link" buttons work like on a real device
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: ORIGIN }).catch(() => {})

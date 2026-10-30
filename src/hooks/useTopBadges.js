@@ -4,7 +4,7 @@ import { badgeService } from '../services/badgeService'
 import { keys } from './queryKeys'
 import { sortByWeight } from '../utils/badgeRanking'
 
-/** Katalog svih znački (nivo, težina, uputa). Mijenja se rijetko — keš od sat vremena. */
+/** Katalog svih znački (nivo, težina, uputa). Mijenja se rijetko, keš od sat vremena. */
 export const useBadgeCatalog = () => {
   const query = useQuery({
     queryKey: keys.badgeCatalog,

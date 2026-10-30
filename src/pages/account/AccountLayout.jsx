@@ -49,7 +49,7 @@ function SetupReminder({ onProfilePage }) {
       <IdCard size={18} />
       <div>
         <strong>Dobrodošao/la na Zadatak!</strong>
-        <span>Dopuni osnovne podatke — traje minutu.</span>
+        <span>Dopuni osnovne podatke, traje minutu.</span>
         {!onProfilePage && (
           <span className="profile-setup-actions">
             <Link to="/account/profil?setup=1">Dopuni profil</Link>
@@ -230,7 +230,7 @@ function AccountLayout() {
                 <ShieldBan size={20} />
                 <div>
                   <strong>Nalog je suspendovan</strong>
-                  <span>{profile.suspension_reason || 'Prekršeno je Pravilo #1.'} {profile.suspended_until ? `Ponovo aktivan od ${formatBosnianDate(profile.suspended_until)}` : 'Suspenzija je trajna — javi se podršci ako misliš da je greška.'}</span>
+                  <span>{profile.suspension_reason || 'Prekršeno je Pravilo #1.'} {profile.suspended_until ? `Ponovo aktivan od ${formatBosnianDate(profile.suspended_until)}` : 'Suspenzija je trajna, javi se podršci ako misliš da je greška.'}</span>
                 </div>
               </div>
             )}

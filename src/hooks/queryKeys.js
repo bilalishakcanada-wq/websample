@@ -1,4 +1,4 @@
-/** Query keys only (no service imports) — safe to import from the entry bundle (tab bar badges). */
+/** Query keys only (no service imports), safe to import from the entry bundle (tab bar badges). */
 export const keys = {
   search: (params) => ['search', params],
   listing: (id) => ['listing', id],

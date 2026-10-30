@@ -41,7 +41,7 @@ export function clientStep({ listing, payment = null, pending = 0, hasWorker = f
   if (hasWorker) return { tone: 'act', title: 'Izvođač je odabran', text: 'Kad je posao gotov, označi ga kao završen.', action: 'outcome', cta: 'Posao je završen', short: 'Izvođač odabran' }
   if (pending > 0) return { tone: 'act', title: `Imaš ${ponude(pending)}`, text: 'Pogledaj ih i izaberi izvođača.', action: 'offers', cta: 'Pogledaj ponude', short: `Izaberi izvođača (${ponude(pending)})` }
   if (listing.invited_provider) return { tone: 'wait', title: 'Čekaš ponudu', text: 'Zahtjev je poslan samo odabranom izvođaču.', short: 'Čeka ponudu' }
-  return { tone: 'wait', title: 'Čekaš ponude', text: 'Izvođači u blizini su obaviješteni. Prve ponude obično stignu u roku sat vremena.', short: 'Čeka ponude' }
+  return { tone: 'wait', title: 'Čekaš ponude', text: 'Izvođači u blizini su obaviješteni.', short: 'Čeka ponude' }
 }
 
 /** Izvođačeva strana kad je njegova ponuda prihvaćena (postoji uplata za njega ili je posao dodijeljen njemu). */

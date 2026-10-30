@@ -9,7 +9,7 @@ const KIND_HINT = {
   identity: 'Dodjeljuju se automatski: telefon (SMS), lična karta i uvjerenje (odobrenje u Verifikaciji), IBAN.',
   licence: 'Dodjeljuju se kad odobriš dokument licence u Verifikaciji.',
   activity: 'Računaju se svaku noć iz recenzija, završenih poslova i brzine odgovora.',
-  custom: 'Tvoje značke — dodjeljuješ ih ručno iz dosijea korisnika.',
+  custom: 'Tvoje značke, dodjeljuješ ih ručno iz dosijea korisnika.',
 }
 const slugify = (value) => value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40)
 
@@ -126,7 +126,7 @@ function QuickGrant({ catalog, onDone }) {
         <div className="badge-grant-row">
           <span><strong>{picked.full_name}</strong> <span className="uid-chip">{picked.member_id}</span> <button type="button" className="icon-button" onClick={() => setPicked(null)} aria-label="Promijeni"><X size={14} /></button></span>
           <select value={code} onChange={(event) => setCode(event.target.value)}>
-            <option value="">— odaberi značku —</option>
+            <option value="">Odaberi značku</option>
             {catalog.map((badge) => <option key={badge.code} value={badge.code}>{badge.label}</option>)}
           </select>
           <button type="button" className="primary-button" onClick={grant} disabled={busy || !code}>{busy ? '…' : 'Dodijeli'}</button>

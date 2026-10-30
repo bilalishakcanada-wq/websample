@@ -25,7 +25,7 @@ const nativeGeo = () => {
 
 const mapState = (state) => (state === 'granted' ? 'granted' : state === 'denied' ? 'denied' : 'prompt')
 
-/** 'granted' | 'denied' | 'prompt' | 'unsupported' — never shows a system dialog. */
+/** 'granted' | 'denied' | 'prompt' | 'unsupported', never shows a system dialog. */
 export async function locationPermission() {
   if (!locationSupported()) return 'unsupported'
   const geo = nativeGeo()
@@ -39,7 +39,7 @@ export async function locationPermission() {
   return read(GEO_OK) ? 'granted' : 'prompt'
 }
 
-/** 'granted' | 'denied' | 'prompt' | 'unsupported' — never shows a system dialog. */
+/** 'granted' | 'denied' | 'prompt' | 'unsupported', never shows a system dialog. */
 export async function notificationPermission() {
   await nativePushChecked()
   if (!pushSupported()) return 'unsupported'

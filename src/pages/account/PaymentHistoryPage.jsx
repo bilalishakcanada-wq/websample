@@ -10,11 +10,11 @@ import PaymentTabs from './PaymentTabs'
 const formatKM = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} KM`
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 const KIND = {
-  admin_credit: ['Uplata — Zadatak tim', Gift],
+  admin_credit: ['Uplata od Zadatak tima', Gift],
   bonus: ['Bonus', Sparkles],
   promo: ['Promocija', Sparkles],
   refund: ['Povrat', RefreshCcw],
-  admin_debit: ['Skidanje — Zadatak tim', Receipt],
+  admin_debit: ['Skidanje od Zadatak tima', Receipt],
   fee: ['Naknada za posao', Receipt],
   purchase: ['Uplata', Receipt],
   payout: ['Isplata', ArrowUpRight],

@@ -37,7 +37,7 @@ function TaskAlertsPage() {
       const created = await alertService.create({ userId: user.id, ...form })
       setAlerts((current) => [created, ...(current || [])])
       setForm(EMPTY)
-      toast('Alarm je uključen — javit ćemo ti čim se pojavi takav posao.', { kind: 'success' })
+      toast('Alarm je uključen, javit ćemo ti čim se pojavi takav posao.', { kind: 'success' })
     } catch (requestError) { setError(requestError.message) } finally { setBusy(false) }
   }
 

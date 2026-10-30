@@ -53,7 +53,7 @@ export function RouteFallback() {
   return (
     <>
       <div className="route-loading" aria-busy="true"><span /></div>
-      {/* a full-height placeholder keeps the footer below the fold — no layout jump when the page lands */}
+      {/* a full-height placeholder keeps the footer below the fold, no layout jump when the page lands */}
       <div className="route-placeholder">
         {slow ? <RetryCard title="Učitavanje traje duže nego obično" text="Provjeri internet ili osvježi stranicu." /> : <RouteSkeleton pathname={pathname} isPhone={isPhone} />}
       </div>
@@ -69,7 +69,7 @@ class RouteErrorBoundary extends Component {
   componentDidCatch(error) { reportClientError(error, 'route') }
 
   render() {
-    if (this.state.failed) return <RetryCard title="Ova stranica se nije mogla učitati" text="Najčešće je to stara verzija u pregledniku — osvježi i pokušaj ponovo." />
+    if (this.state.failed) return <RetryCard title="Ova stranica se nije mogla učitati" text="Najčešće je to stara verzija u pregledniku, osvježi i pokušaj ponovo." />
     return this.props.children
   }
 }

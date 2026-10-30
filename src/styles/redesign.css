@@ -334,7 +334,7 @@ button.promo-buy {
     margin-left: 6px;
     padding: 0 5px;
     border-radius: var(--r-pill);
-    background: var(--danger);
+    background: var(--danger-strong);
     color: var(--surface);
     font-size: 0.7rem;
     font-weight: 800;

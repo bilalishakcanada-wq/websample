@@ -83,7 +83,7 @@ test.describe('Tok posla: predaja, ispravka, odobrenje', () => {
     await expect(provider.getByTestId('workflow-state')).toHaveText('Čeka se da klijent pregleda', { timeout: 20_000 })
 
     await client.goto(listingUrl)
-    await expect(client.getByTestId('workflow-state')).toHaveText('Rad je predat — pregledaj ga')
+    await expect(client.getByTestId('workflow-state')).toHaveText('Rad je predat, pregledaj ga')
     await expect(client.getByTestId('workflow-clock')).toContainText('Automatsko odobrenje')
     await expect(client.getByTestId('workflow-submission')).toContainText('police poravnate')
   })

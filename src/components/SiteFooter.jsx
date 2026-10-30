@@ -5,6 +5,7 @@ import { ChevronDown, Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { FOOTER_GROUPS, POPULAR_CATEGORIES, POPULAR_CITIES, SITE_PAGES } from '../data/siteMap'
 import { appConfig } from '../config/appConfig'
 import { FooterCities } from './FooterCities'
+import { openConsentSettings } from '../utils/consent'
 
 const HIDDEN_ON = ['/login', '/register', '/forgot-password', '/reset-password', '/admin', '/mod', '/objavi', '/messages']
 
@@ -83,6 +84,7 @@ function SiteFooter() {
             <span><ShieldCheck size={14} /> Moderirani oglasi</span>
             <span><MessageCircle size={14} /> Zaštićena komunikacija</span>
             <Link to="/kontakt"><Mail size={14} /> Piši podršci</Link>
+            <button type="button" className="site-footer-consent" onClick={openConsentSettings}>Postavke kolačića</button>
           </div>
           <span className="site-footer-copy">© {new Date().getFullYear()} Zadatak. Sva prava zadržana. Naselja: <a href="https://www.geonames.org" target="_blank" rel="noopener noreferrer">GeoNames</a> i <a href="https://whosonfirst.org" target="_blank" rel="noopener noreferrer">Who's On First</a> (CC BY 4.0).</span>
         </div>

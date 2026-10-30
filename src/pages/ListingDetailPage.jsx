@@ -99,7 +99,7 @@ function ListingDetailPage() {
   const justPublished = ['1', 'quote'].includes(searchParams.get('published'))
   const splash = searchParams.get('published') === 'quote'
     ? { title: 'Zahtjev je poslan!', text: 'Posao vidi samo izvođač kojem si ga poslao/la. Javićemo ti čim pošalje ponudu.' }
-    : { title: 'Posao je objavljen!', text: 'Izvođači u blizini dobijaju obavijest. Prve ponude obično stignu u roku sat vremena.' }
+    : { title: 'Posao je objavljen!', text: 'Izvođači u blizini dobijaju obavijest.' }
   const closeSplash = useCallback(() => setSearchParams((params) => { params.delete('published'); return params }, { replace: true }), [setSearchParams])
   const { user } = useAuth()
   const [listing, setListing] = useState(null)
@@ -155,7 +155,7 @@ function ListingDetailPage() {
   const share = async () => {
     const url = window.location.href
     try {
-      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} — Zadatak`, url })
+      const shared = await shareLink({ title: listing?.title, text: `${listing?.title} · Zadatak`, url })
       if (!shared) { await navigator.clipboard.writeText(url); setMessage('Link je kopiran.'); toast('Link kopiran.') }
     } catch { /* user cancelled */ }
   }
@@ -251,7 +251,7 @@ function ListingDetailPage() {
       return
     }
     if (gate === 'pending') {
-      toast('Identitet se još provjerava — obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
+      toast('Identitet se još provjerava, obično do 24 sata. Javićemo ti čim možeš slati ponude.', { kind: 'info' })
       return
     }
     setBidError('')
@@ -406,7 +406,7 @@ function ListingDetailPage() {
       queryClient.invalidateQueries({ queryKey: keys.listing(id) })
       queryClient.invalidateQueries({ queryKey: ['search'] })
       queryClient.invalidateQueries({ queryKey: ['me'] })
-      setMessage(status === 'completed' ? 'Posao je označen kao završen. Hvala — ovo se računa u uspješnost izvođača.' : 'Posao je otkazan.')
+      setMessage(status === 'completed' ? 'Posao je označen kao završen. Hvala, ovo se računa u uspješnost izvođača.' : 'Posao je otkazan.')
     } catch (requestError) {
       setMessage(requestError.message)
     } finally {
@@ -522,7 +522,7 @@ function ListingDetailPage() {
             ) : (<>
             <h2 id="offer-title">{editingBid ? 'Izmijeni ponudu' : canRebid ? 'Pošalji novu cijenu' : 'Pošalji ponudu'}</h2>
             {canRebid && !editingBid && <p className="rebid-note" data-testid="rebid-sheet-note"><strong>Klijent je odbio {formatPrice(myBid.amount)}.</strong><span>Predloži drugu cijenu ili objasni šta je uključeno.</span></p>}
-            <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet — predloži cijenu i objasni šta je uključeno.'}</p>
+            <p className="muted-text">{listing.price != null ? <>Klijent je naveo okvirni budžet od <strong>{formatPrice(listing.price, listing.currency)}</strong>. Možeš ponuditi manje ili više uz obrazloženje.</> : 'Klijent nije naveo budžet, predloži cijenu i objasni šta je uključeno.'}</p>
             <form className="auth-form" onSubmit={submitBid}>
               <label>Tvoja ponuda (KM)<input data-testid="offer-amount" type="number" min="0" step="0.01" inputMode="decimal" value={bidForm.amount} onChange={(event) => setBidForm({ ...bidForm, amount: event.target.value })} required /></label>
               {Number(bidForm.amount) > 0 && feePercent != null && (
@@ -640,7 +640,7 @@ function ListingDetailPage() {
                 <h2><History size={18} /> Rok za ovaj posao je prošao</h2>
                 {isOwner
                   ? <>
-                    <p className="muted-text">Posao više ne prima ponude i ne vidi se u pretrazi. Izaberi novi datum i objavi ga ponovo — postojeće ponude ostaju.</p>
+                    <p className="muted-text">Posao više ne prima ponude i ne vidi se u pretrazi. Izaberi novi datum i objavi ga ponovo, postojeće ponude ostaju.</p>
                     <Link to={`/objavi?edit=${id}&step=time`} className="primary-button"><CalendarDays size={16} /> Izaberi novi datum</Link>
                   </>
                   : <p className="muted-text">Ovaj posao više ne prima ponude. Pogledaj slične poslove ispod.</p>}
@@ -707,7 +707,7 @@ function ListingDetailPage() {
             {/* na mom dodijeljenom ili gotovom poslu bez pitanja nema šta pitati ni odgovarati */}
             {(questions.length > 0 || (listing.status === 'published' && !acceptedBid)) && <section className="job-card" id="pitanja">
               <div className="section-heading"><h2>Pitanja</h2><span className="muted-text">{questions.length}</span></div>
-              {questions.length === 0 && <p className="muted-text">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno — odgovor vide svi.')}</p>}
+              {questions.length === 0 && <p className="muted-text">{isOwner ? 'Niko još nije postavio pitanje.' : (isPrivate ? 'Nešto te zanima prije ponude? Pitanje i odgovor vidite samo ti i klijent.' : 'Nešto te zanima prije ponude? Pitaj javno, odgovor vide svi.')}</p>}
               {questions.length > 0 && (
                 <div className="qa-list">
                   {questions.map((item) => {
@@ -770,7 +770,7 @@ function ListingDetailPage() {
             )}
 
             {user && listing.status === 'completed' && myReview && (
-              <section className="job-card review-done"><CheckCircle2 size={18} /> Hvala — tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</section>
+              <section className="job-card review-done"><CheckCircle2 size={18} /> Hvala, tvoja recenzija ({'★'.repeat(Math.round(myReview.rating))}) je objavljena.</section>
             )}
             {user && listing.status === 'completed' && !myReview && (isOwner ? Boolean(acceptedBid) : acceptedBid?.bidder_id === user.id) && (
               <section className="job-card" id="recenzija">
@@ -819,7 +819,7 @@ function ListingDetailPage() {
                 <div className={`my-bid-status status-${myBid.status}`}>
                   {payment?.bid_id === myBid.id && Number(payment.amount) !== Number(myBid.amount)
                     ? <>Dogovorena cijena: <strong>{formatPrice(payment.amount)}</strong> (ponuda {formatPrice(myBid.amount)} + odobreno povećanje)</>
-                    : <>Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong></>} — {BID_STATUS_LABEL[myBid.status]}
+                    : <>Tvoja ponuda: <strong>{formatPrice(myBid.amount)}</strong></>}, {BID_STATUS_LABEL[myBid.status]}
                 </div>
               )}
               {!isOwner && myBid?.status === 'pending' && (

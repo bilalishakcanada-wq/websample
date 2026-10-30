@@ -39,7 +39,7 @@ function PaymentMethodsPage() {
       setAccount(row)
       setEditing(false)
       await reload()
-      setMessage('Podaci za isplatu su sačuvani — značka "Način plaćanja verifikovan" je dodana.')
+      setMessage('Podaci za isplatu su sačuvani, značka "Način plaćanja verifikovan" je dodana.')
     } catch (requestError) {
       setError(requestError.message)
     } finally {

@@ -10,7 +10,7 @@ const countUnread = async (userId) => {
   return count || 0
 }
 
-/** Number of unread messages for the signed-in user — cached, live (new message in, or a thread marked read). */
+/** Number of unread messages for the signed-in user, cached, live (new message in, or a thread marked read). */
 export function useUnreadMessages(userId) {
   const queryClient = useQueryClient()
   const { data } = useQuery({

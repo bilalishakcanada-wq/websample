@@ -44,7 +44,7 @@ Deno.serve(withCors(async (req) => {
   const userId = userData.user.id
 
   const admin = createClient(supabaseUrl, serviceRoleKey)
-  // money in escrow must be settled first — deleting now would erase the payment record
+  // money in escrow must be settled first, deleting now would erase the payment record
   const { count: openPayments } = await admin.from('job_payments').select('id', { count: 'exact', head: true })
     .or(`client_id.eq.${userId},provider_id.eq.${userId}`).in('status', ['funded', 'requested', 'disputed'])
   if ((openPayments || 0) > 0) return json({ error: 'Imaš posao sa osiguranom uplatom u toku. Završi ga ili otkaži, pa obriši nalog.' }, 409)

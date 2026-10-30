@@ -1,6 +1,6 @@
 /* eslint-env serviceworker */
 // Zadatak service worker: offline shell (workbox precache) + Web Push.
-// Built by vite-plugin-pwa (injectManifest) — self.__WB_MANIFEST is filled at build time.
+// Built by vite-plugin-pwa (injectManifest), self.__WB_MANIFEST is filled at build time.
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching'
 import { appConfig } from './config/appConfig'
 import { NavigationRoute, registerRoute } from 'workbox-routing'

@@ -12,7 +12,7 @@ const TIERS = {
 function TrustBadge({ tier, label, trade, size = 'md' }) {
   const config = TIERS[tier] || TIERS.unverified
   const Icon = config.icon
-  const text = trade && (tier === 'verified' || tier === 'trusted' || tier === 'top') ? `${label} — ${trade}` : label
+  const text = trade && (tier === 'verified' || tier === 'trusted' || tier === 'top') ? `${label}, ${trade}` : label
   return (
     <span className={`trust-badge ${config.className} trust-badge-${size}`} title={text}>
       <Icon size={size === 'lg' ? 16 : 14} strokeWidth={2} />

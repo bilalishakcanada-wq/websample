@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Map as MapLibreMap, Marker, NavigationControl, LngLatBounds, Popup, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { latinLabels, MAP_STYLE_URL } from '../utils/mapStyle'
-// MapLibre 6 finds its worker next to its own module URL — after bundling that file no
+// MapLibre 6 finds its worker next to its own module URL: after bundling that file no
 // longer exists (blank map, no tiles). Let Vite bundle the worker and hand MapLibre the URL.
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 
@@ -342,7 +342,7 @@ function TaskMap({ listings, activeId, onSelect, focus, origin = null, originLab
     // A WebGL canvas can lose its last frame when an ancestor finishes a CSS animation
     // (page fade-in) or the tab comes back to the foreground; MapLibre is idle then and
     // would stay blank, so ask for a fresh frame in those moments.
-    // resize() (not just triggerRepaint) — it re-applies the canvas size, which makes the
+    // resize() (not just triggerRepaint), it re-applies the canvas size, which makes the
     // browser take a fresh frame from WebGL even when it had dropped the previous one
     const repaint = () => { if (mapRef.current === map) { map.resize(); map.triggerRepaint() } }
     const timers = [400, 1200, 2500].map((ms) => window.setTimeout(repaint, ms))

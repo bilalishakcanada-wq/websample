@@ -30,8 +30,8 @@ function PricingPage() {
     <InfoLayout
       eyebrow="Cijene"
       title="Za klijente besplatno. Izvođač plaća samo kad je posao plaćen."
-      lead="Zadatak ne naplaćuje objavu posla, slanje ponuda ni komunikaciju. Jedina naknada je postotak koji platforma zadrži od plaćenog posla — i ona pada kako izvođač radi više."
-      cta={{ eyebrow: 'Spreman?', text: 'Objavi posao ili napravi profil — bez kartice.', to: '/register', label: 'Napravi nalog' }}
+      lead="Zadatak ne naplaćuje objavu posla, slanje ponuda ni komunikaciju. Jedina naknada je postotak koji platforma zadrži od plaćenog posla, i ona pada kako izvođač radi više."
+      cta={{ eyebrow: 'Spreman?', text: 'Objavi posao ili napravi profil, bez kartice.', to: '/register', label: 'Napravi nalog' }}
     >
       <section className="info-section reveal">
         <h2>Šta je uvijek besplatno</h2>
@@ -41,7 +41,7 @@ function PricingPage() {
       </section>
 
       <section className="info-section reveal">
-        <h2>Naknada za izvođače — po nivou</h2>
+        <h2>Naknada za izvođače, po nivou</h2>
         <p>Naknada se obračunava samo kad klijent oslobodi uplatu za završen posao. Nivo se računa iz prometa u zadnjih 30 dana i raste automatski.</p>
         <div className="tier-table">
           {tiers.map((tier, index) => (
@@ -55,15 +55,15 @@ function PricingPage() {
             </div>
           ))}
         </div>
-        <p className="muted-text">Primjer: posao od 200 KM na nivou Bronza — klijent plaća 200 KM, izvođaču na Balans sjeda 170 KM. <Link to="/nivoi">Detalji o nivoima →</Link></p>
+        <p className="muted-text">Primjer: posao od 200 KM na nivou Bronza: klijent plaća 200 KM, izvođaču na Balans sjeda 170 KM. <Link to="/nivoi">Detalji o nivoima →</Link></p>
       </section>
 
       <section className="info-section reveal">
         <h2>Kako ide plaćanje</h2>
         <ol className="steps-list">
-          <li><strong>Klijent prihvati ponudu</strong> — iznos se rezerviše sa njegovog Balansa i čuva na Zadatku.</li>
-          <li><strong>Posao se uradi</strong> — izvođač zatraži isplatu, klijent potvrdi.</li>
-          <li><strong>Novac se oslobađa</strong> — zarada bez naknade sjeda izvođaču na Balans; historija je vidljiva obojici.</li>
+          <li><strong>Klijent prihvati ponudu</strong>: iznos se rezerviše sa njegovog Balansa i čuva na Zadatku.</li>
+          <li><strong>Posao se uradi</strong>: izvođač zatraži isplatu, klijent potvrdi.</li>
+          <li><strong>Novac se oslobađa</strong>: zarada bez naknade sjeda izvođaču na Balans; historija je vidljiva obojici.</li>
         </ol>
         <div className="info-note"><Info size={16} /> Uplata karticom na Balans i isplata na bankovni račun stižu s procesorom plaćanja; do tada se uplata i isplata dogovaraju s timom.</div>
       </section>
@@ -71,7 +71,7 @@ function PricingPage() {
       <section className="info-section reveal">
         <h2>Česta pitanja o cijenama</h2>
         <dl className="qa-list">
-          <div><dt>Da li klijent plaća proviziju?</dt><dd>Ne. Klijent plaća tačno iznos ponude koju je prihvatio — ništa više.</dd></div>
+          <div><dt>Da li klijent plaća proviziju?</dt><dd>Ne. Klijent plaća tačno iznos ponude koju je prihvatio, ništa više.</dd></div>
           <div><dt>Da li izvođač plaća da bi slao ponude?</dt><dd>Ne. Slanje ponuda je besplatno i neograničeno. Naknada postoji samo na plaćenom poslu.</dd></div>
           <div><dt>Šta ako se posao otkaže?</dt><dd>Ako se otkaže prije početka, rezervisani iznos se vraća klijentu na Balans u cijelosti.</dd></div>
           <div><dt>Hoće li biti pretplata ili istaknutih oglasa?</dt><dd>Planiramo istaknute oglase i profile kao opciju. Ništa od osnovnih funkcija neće biti zaključano.</dd></div>

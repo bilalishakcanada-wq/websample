@@ -9,19 +9,19 @@ const friendly = (error) => {
   if (text.includes('POVECANJE_IZNOS')) return 'Dodatni iznos mora biti između 1 i 2.000 KM.'
   if (text.includes('POVECANJE_VEC_CEKA')) return 'Već postoji zahtjev za povećanje koji čeka odgovor klijenta.'
   if (text.includes('POVECANJE_LIMIT')) return 'Za jedan posao možeš tražiti povećanje najviše 3 puta.'
-  if (text.includes('NEMA_ZAHTJEVA')) return 'Zahtjev više nije aktivan — osvježi stranicu.'
+  if (text.includes('NEMA_ZAHTJEVA')) return 'Zahtjev više nije aktivan, osvježi stranicu.'
   if (text.includes('BID_NOT_PENDING')) return 'Ova ponuda više nije aktivna.'
   if (text.includes('PONUDA_PROMIJENJENA')) return 'Izvođač je u međuvremenu promijenio iznos ponude. Osvježi stranicu i provjeri novi iznos prije plaćanja.'
   if (text.includes('PONUDA_NA_SVOJ_OGLAS')) return 'Ne možeš prihvatiti ponudu na vlastiti posao.'
   if (text.includes('JEDNOSTRANO_OTKAZIVANJE')) return 'Posao je u toku, pa ga ne možeš sam otkazati. Zatraži sporazumni prekid ili otvori spor.'
   if (text.includes('LISTING_NOT_OPEN')) return 'Posao više nije otvoren za ponude.'
   if (text.includes('ALREADY_FUNDED')) return 'Za ovaj posao je već osigurana uplata.'
-  if (text.includes('BAD_STATUS')) return 'Ova radnja trenutno nije moguća — osvježi stranicu.'
+  if (text.includes('BAD_STATUS')) return 'Ova radnja trenutno nije moguća, osvježi stranicu.'
   if (text.includes('REASON_REQUIRED')) return 'Opiši problem u bar par riječi.'
   // foto dokaz i zaključan tok posla (supabase/booking/04): baza već piše razumljivu poruku iza koda
   const human = text.match(/^(FOTO_PRIJE_OBAVEZAN|FOTO_POSLIJE_OBAVEZAN|PRVO_SLIKA_PRIJE|DOKAZ_ZASTARIO|DOKAZ_VEC_KORISTEN|DOKAZ_NEISPRAVAN|DOKAZ_NIJE_MOGUC|GPS_OBAVEZAN|GPS_PRESLAB|STATUS_ZAKLJUCAN|ESCROW_NIJE_OSIGURAN|ESCROW_ZAKLJUCAN): (.+)$/)
   if (human) return human[2].charAt(0).toUpperCase() + human[2].slice(1)
-  if (text.includes('NEDOZVOLJEN_PRELAZ')) return 'Ova radnja nije moguća u ovom koraku posla — osvježi stranicu.'
+  if (text.includes('NEDOZVOLJEN_PRELAZ')) return 'Ova radnja nije moguća u ovom koraku posla, osvježi stranicu.'
   if (text.includes('SUSPENDED')) return 'Nalog je suspendovan.'
   if (text.includes('FORBIDDEN')) return 'Nemaš ovlaštenje za ovu radnju.'
   return 'Radnja nije uspjela. Pokušaj ponovo.'
@@ -49,7 +49,7 @@ export const paymentService = {
     return data
   },
 
-  /** Provider's current fee percent — shown to the client before accepting. */
+  /** Provider's current fee percent, shown to the client before accepting. */
   async feePercentFor(userId) {
     const { data } = await supabase.rpc('fee_percent_for', { p_user_id: userId })
     return Number(data ?? 15)
@@ -59,7 +59,7 @@ export const paymentService = {
   acceptAndFund: (bidId, expectedAmount) => call('accept_offer_and_fund', { p_bid_id: bidId, p_expected_amount: expectedAmount }),
 
   // --- tok posla (state machine u bazi: supabase/booking) ---------------------
-  /** Izvođač predaje rad. Dokaz je obavezan — baza odbija poruku bez njega. */
+  /** Izvođač predaje rad. Dokaz je obavezan, baza odbija poruku bez njega. */
   submitWork: (listingId, report, evidence = []) =>
     call('submit_work', { p_listing: listingId, p_report: report, p_evidence: evidence }),
   /** Klijent odobrava: prelaz u 'completed' + isplata, u jednoj transakciji. */
@@ -81,7 +81,7 @@ export const paymentService = {
   openWorkDispute: (listingId, reasonCode, claim, evidence = []) =>
     call('open_dispute', { p_listing: listingId, p_reason_code: reasonCode, p_claim: claim, p_evidence: evidence }),
 
-  /** Predani rad (izvještaj + slike) — obje strane ga vide na stranici posla. */
+  /** Predani rad (izvještaj + slike), obje strane ga vide na stranici posla. */
   async workSubmissions(paymentId) {
     const { data, error } = await supabase
       .from('work_submissions')

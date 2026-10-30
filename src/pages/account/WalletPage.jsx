@@ -1,29 +1,24 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, ChevronRight, CreditCard, Info, Landmark, Lock, ShieldCheck, Wallet } from 'lucide-react'
+import { ArrowLeftRight, ChevronRight, Clock, Info, Landmark, Lock } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { accountService, CARD_OFF } from '../../services/accountService'
-import CountUp from '../../components/CountUp'
 import { SkeletonRows } from '../../components/Skeleton'
 import { confirmPaymentIdentity } from '../../utils/biometric'
 import PaymentTabs from './PaymentTabs'
-import MoneyOnTheWay from './MoneyOnTheWay'
+import MoneyOnTheWay, { pendingItems, pendingTotals } from './MoneyOnTheWay'
+import LedgerRow from './LedgerRow'
+import BalanceHero from './BalanceHero'
 import { useSwitch } from '../../hooks/useSwitches'
-import BalanceArt from './BalanceArt'
 
-// the big balance: whole KM large, cents small, like a banking app
-const bigAmount = (value) => {
-  const [whole, cents] = Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(',')
-  return <>{whole}<span className="bal-cents">,{cents}</span></>
-}
 const money = (value) => `${Number(value || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KM`
 
-/** "Plaćanje → Balans": the balance, money on the way, and topping up or paying out. Every transaction is in Historija. */
+/** "Plaćanje → Balans": what is available, what is held or on the way, the latest transactions, and topping up or paying out. */
 function WalletPage() {
   const [wallet, setWallet] = useState(null)
   const [error, setError] = useState('')
   const { user } = useAuth()
-  const [otwKey, setOtwKey] = useState(0)
+  const [pending, setPending] = useState(null)
   const [params, setParams] = useSearchParams()
   const [panel, setPanel] = useState(null) // 'topup' | 'payout' | null
   const [amount, setAmount] = useState('')
@@ -35,7 +30,8 @@ function WalletPage() {
   const load = () => Promise.all([
     accountService.myWallet().then(setWallet),
     accountService.payoutState().then(setPayout),
-  ]).then(() => setOtwKey((key) => key + 1)).catch((requestError) => setError(requestError.message))
+    accountService.moneyOnTheWay(user.id).then((result) => setPending({ ...result, now: Date.now() })),
+  ]).catch((requestError) => setError(requestError.message))
   useEffect(() => { load() }, [])
 
   // Povratak sa Monri stranice. Novac upisuje samo Monri callback, pa ovdje
@@ -88,28 +84,20 @@ function WalletPage() {
 
   if (error) return <div className="account-section"><div className="form-error">{error}</div></div>
   if (!wallet) return <div className="account-section"><SkeletonRows n={4} /></div>
+  const totals = pendingTotals(pending, user.id)
+  const recent = (wallet.transactions || []).slice(0, 5)
 
   return (
     <div className="account-section">
       <PaymentTabs />
 
-      <section className="bal-card has-ill" aria-label="Stanje računa">
-        <BalanceArt />
-        <div className="bal-top">
-          <span className="bal-label"><Wallet size={15} /> Stanje na Zadatku</span>
-          <span className="bal-chip"><ShieldCheck size={13} /> Zaštićeno</span>
-        </div>
-        <strong className="bal-amount"><CountUp value={wallet.balance} format={bigAmount} duration={900} /><span className="bal-cur">KM</span></strong>
-        <div className="bal-split">
-          <div><small>Za isplatu na račun</small><strong>{payout ? money(payout.withdrawable) : '-'}</strong></div>
-          <div><small><ArrowDownLeft size={13} /> Ušlo · 30 dana</small><strong>{Number(wallet.credited_30d) > 0 ? '+' : ''}{money(wallet.credited_30d)}</strong></div>
-          <div><small><ArrowUpRight size={13} /> Izašlo · 30 dana</small><strong>{Number(wallet.spent_30d) !== 0 ? '−' : ''}{money(Math.abs(Number(wallet.spent_30d || 0)))}</strong></div>
-        </div>
-        <div className="bal-actions">
-          <button type="button" className={`bal-btn is-main${panel === 'topup' ? ' is-open' : ''}`} onClick={() => openPanel('topup')} aria-expanded={panel === 'topup'}><CreditCard size={17} /> Uplati karticom</button>
-          <button type="button" className={`bal-btn${panel === 'payout' ? ' is-open' : ''}`} onClick={() => openPanel('payout')} disabled={Boolean(payout?.open)} aria-expanded={panel === 'payout'}><Landmark size={17} /> {payout?.open ? 'Isplata je u toku' : 'Isplati na račun'}</button>
-        </div>
-      </section>
+      <BalanceHero wallet={wallet} totals={totals} payout={payout} panel={panel} openPanel={openPanel} />
+
+      <dl className="bal-stats">
+        <div><span className="bal-stat-icon is-held"><Lock size={18} /></span><dt>Rezervisano za poslove</dt><dd>{money(totals.reserved)}</dd></div>
+        <div><span className="bal-stat-icon is-coming"><Clock size={18} /></span><dt>Stiže na balans</dt><dd className={totals.incoming > 0 ? 'is-plus' : ''}>{totals.incoming > 0 ? '+' : ''}{money(totals.incoming)}</dd></div>
+        <div><span className="bal-stat-icon is-out"><Landmark size={18} /></span><dt>Može se isplatiti</dt><dd>{payout ? money(payout.withdrawable) : '-'}</dd></div>
+      </dl>
 
       {notice && <div className="form-success">{notice}</div>}
 
@@ -152,9 +140,23 @@ function WalletPage() {
         </form>
       )}
 
-      <MoneyOnTheWay key={otwKey} userId={user.id} onChanged={(text) => { setNotice(text); load() }} />
+      <MoneyOnTheWay items={pendingItems(pending, user.id)} onCancelled={(text) => { setNotice(text); load() }} />
 
-      <Link to="/account/placanja" className="pay-more-link">Sve transakcije i plaćeni poslovi <ChevronRight size={16} /></Link>
+      <section className="bal-recent" aria-label="Posljednje transakcije">
+        <div className="wallet-list-head">
+          <h2 className="account-sub">Posljednje transakcije</h2>
+          {recent.length > 0 && <Link to="/account/placanja" className="bal-all">Sve transakcije <ChevronRight size={16} /></Link>}
+        </div>
+        {recent.length === 0
+          ? (
+            <div className="bal-none">
+              <span className="bal-none-icon"><ArrowLeftRight size={20} /></span>
+              <strong>Još nema transakcija</strong>
+              <span>Uplate, rezervacije, zarade i isplate pojaviće se ovdje.</span>
+            </div>
+          )
+          : <div className="wallet-list">{recent.map((row) => <LedgerRow key={row.id} row={row} short />)}</div>}
+      </section>
 
       <div className="wallet-info">
         <Info size={16} />

@@ -3,16 +3,8 @@ import { publicError, sanitizeText } from '../utils/validation'
 
 export const reviewService = {
   async listForUser(userId) {
-    const { data, error } = await supabase
-      .from('reviews')
-      .select('id, rating, comment, created_at, listing_id, reviewer_id, reviewer:public_profiles!reviews_reviewer_id_fkey(display_name, avatar_url)')
-      .eq('reviewee_id', userId)
-      .order('created_at', { ascending: false })
-
-    if (!error) return data || []
-
-    // Fallback if the FK-based embed isn't available (e.g. before a schema cache refresh):
-    // fetch reviews and reviewer names separately instead of failing the whole page.
+    // public_profiles is a view over public_profile_cards, so PostgREST can't join it by the reviews FK:
+    // fetch the reviews, then the reviewers' names in a second query
     const { data: reviews, error: plainError } = await supabase
       .from('reviews')
       .select('id, rating, comment, created_at, listing_id, reviewer_id')

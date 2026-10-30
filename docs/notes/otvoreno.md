@@ -15,6 +15,10 @@ Stanje na 30.10.2026. Briši stavku kad je gotova. Nazad: [[README]]
 - **Sentry DSN**, ako sd želi hvatanje padova (kod je spreman, PR #98).
 - **Testni nalozi u GitHub tajnama**, da testovi prije objave ne budu preskočeni. (Traženo 28.10.)
 - **Plaćanje karticom (Monri)**: sd radi kasnije.
+- **Podaci o firmi** (ime, adresa, ID broj) za Uslove, Privatnost i podnožje. Ne izmišljati, pitati sd.
+- **Pravila povrata novca** (Balans i plaćanja): sd radi kasnije.
+- **Supabase Auth email šabloni** (potvrda, lozinka, link za prijavu): u `supabase/email-templates/` su novi
+  (bez emojija i pilula), ali ih treba zalijepiti u Supabase > Authentication > Email Templates.
 - **AI krediti na Anthropic računu** (`docs/OBJAVA.md` tačka 4). Nije provjereno da li je još potrebno.
 
 ## Uslovi za pokretanje (iz [[pravila]])
@@ -24,4 +28,4 @@ Stanje na 30.10.2026. Briši stavku kad je gotova. Nazad: [[README]]
 - [ ] Oznaka "made with AI": u kodu nije nađena (30.10.), treba još provjeriti živi sajt i aplikaciju.
 - [x] Politika privatnosti: `/privatnost`. Pravni pregled preporučen.
 - [x] Uslovi korištenja: `/pravila`. Pravni pregled preporučen.
-- [ ] Naslov stranice u `index.html` ima dugu crtu (em dash), protivno pravilima.
+- [x] Duge crte (—) uklonjene iz sajta, aplikacije, emailova i obavijesti (PR #101).

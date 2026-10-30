@@ -1,4 +1,4 @@
-// Zadatak. AI support assistant ("Zadatak asistent").
+// Zadatak: AI support assistant ("Zadatak asistent").
 //
 // The signed-in user sends a message (already stored in support_messages with
 // needs_human=false). The assistant answers from the help articles the client
@@ -23,6 +23,8 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_API_KEY') || ''
 const MODEL = Deno.env.get('SUPPORT_MODEL') || 'claude-haiku-5-5'
 const IDLE_MS = 25 * 60 * 1000
+const MAX_PER_HOUR = 20
+const MAX_PER_DAY = 60
 
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
@@ -72,6 +74,15 @@ Deno.serve(withCors(async (req) => {
   const since = typeof body.since === 'string' && !Number.isNaN(Date.parse(body.since)) ? new Date(body.since).toISOString() : null
   if (!message) return json({ error: 'empty' }, 400)
   if (!ANTHROPIC_KEY) return json({ configured: false })
+
+  // spending cap: past MAX_PER_HOUR / MAX_PER_DAY AI replies the chat falls back to the local
+  // assistant (same as without a key), so one account can't run up the Anthropic bill
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const used = (since: string) => admin.from('support_messages').select('id', { count: 'exact', head: true })
+    .eq('user_id', userId).eq('sender', 'assistant').gte('created_at', since)
+  const [{ count: lastHour }, { count: lastDay }] = await Promise.all([used(hourAgo), used(dayAgo)])
+  if ((lastHour || 0) >= MAX_PER_HOUR || (lastDay || 0) >= MAX_PER_DAY) return json({ configured: false, limited: true })
 
   let historyQuery = admin.from('support_messages').select('sender, message, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
   if (since) historyQuery = historyQuery.gte('created_at', since)

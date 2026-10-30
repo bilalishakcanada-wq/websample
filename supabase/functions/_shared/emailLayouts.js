@@ -51,7 +51,7 @@ function logoRow(site, color) {
 function button(m, bg, center = false) {
   if (!m.url || !m.button) return ''
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0"${center ? ' align="center"' : ''} style="margin:26px ${center ? 'auto' : '0'} 8px"><tr>
-      <td style="background:${bg};border-radius:999px"><a href="${m.url}" style="display:inline-block;padding:16px 34px;font:700 16px ${FONT};color:#FFFFFF;text-decoration:none;border-radius:999px">${m.button} &rarr;</a></td>
+      <td style="background:${bg};border-radius:12px"><a href="${m.url}" style="display:inline-block;padding:16px 34px;font:700 16px ${FONT};color:#FFFFFF;text-decoration:none;border-radius:12px">${m.button} &rarr;</a></td>
     </tr></table>`
 }
 
@@ -142,7 +142,7 @@ function layoutB(site, m) {
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr><td style="line-height:0">${art(site, 'B', ';border-radius:24px 24px 0 0')}</td></tr>
   <tr><td style="padding:30px 32px 34px">
-    ${m.kicker ? `<div style="display:inline-block;background:${LIGHT};color:${BLUE};font:700 12px ${FONT};letter-spacing:0.6px;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin:0 0 14px">${m.kicker}</div>` : ''}
+    ${m.kicker ? `<div style="display:inline-block;background:${LIGHT};color:${BLUE};font:700 12px ${FONT};letter-spacing:0.6px;text-transform:uppercase;padding:6px 12px;border-radius:12px;margin:0 0 14px">${m.kicker}</div>` : ''}
     ${h1(m.title)}
     ${body(m)}
   </td></tr></table>

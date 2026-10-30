@@ -1,4 +1,4 @@
-// Zadatak. AI trust agent.
+// Zadatak: AI trust agent.
 //
 // Reads everything the platform knows about an account (profile, listings,
 // bids, messages, reviews, Rule #1 events, reports) and writes a trust

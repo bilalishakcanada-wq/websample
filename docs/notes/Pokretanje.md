@@ -16,14 +16,14 @@ Povezano: [[../OBJAVA]] (računi i plaćanja koje radi vlasnik), [[../MAILOVI]].
 | Stavka | Status |
 |---|---|
 | Praćenje grešaka | Već uredu: Sentry je u živoj verziji (DSN u GitHub tajni `SENTRY_DSN`). |
-| Plaćanje | Nema Stripea. Kartice idu preko Monri (`card-topup-start`), bez ugovora i ključeva je isključeno (`CARD_PAYMENTS_OFF`). Sav novac na balansima je admin uplata (test). Čeka vlasnika: Monri ugovor, pa tajne `MONRI_KEY`, `MONRI_AUTHENTICITY_TOKEN`, `MONRI_ENV=live`. |
+| Plaćanje | Nema Stripea. Kartice idu preko Monri (`card-topup-start`), bez ugovora i ključeva je isključeno (`CARD_PAYMENTS_OFF`). Sav novac na balansima je admin uplata (test). Čeka vlasnika: Monri ugovor, pa tajne `MONRI_KEY`, `MONRI_AUTHENTICITY_TOKEN`, `MONRI_ENV=live` (30.10. rekao: poslije starta). |
 | Test podaci | Vlasnik odlučio 30.10.: ne brisati ništa. |
 | localhost, lorem ipsum, console.log | Već uredu: u izgrađenom sajtu nema localhost adresa (osim unutar biblioteka), nema lorem ipsum, nema console.log. console.error ostaje namjerno (greške). |
 | Favicon, slika za dijeljenje, metapodaci | Već uredu: vlastiti favicon, og-image.png, naslov, opis i og oznake na svih 15 javnih stranica. |
 | Mailovi s vlastite domene | Već uredu u kodu: info@zadatak.ba (Supabase SMTP i Resend). Domena zadatak.ba je na čekanju dok se ne plati. |
 | Kontakt stranica | Gotovo u kodu: poruke su do sada stajale u bazi i niko ih nije vidio. Sada: Admin → Podrška → "Kontakt stranica" i mail adminu s odgovorom direktno pošiljaocu. Čeka primjenu u bazi (`supabase/communication/05_contact_notify.sql`) i objavu funkcije `notify-admin`. |
 | Registracije i aktivacija | Gotovo u kodu: Admin → Rast (aktiviran = posao ili ponuda u prvih 7 dana). Čeka primjenu `supabase/analytics/01_signups_activation.sql`. |
-| Limit AI troška | U kodu: asistent podrške najviše 20 odgovora na sat i 60 na dan po korisniku, poslije toga lokalni asistent. Čeka objavu funkcije `support-assistant`. Vlasnik: mjesečni limit u Anthropic i OpenAI konzoli. |
+| Limit AI troška | U kodu: asistent podrške najviše 20 odgovora na sat i 60 na dan po korisniku, poslije toga lokalni asistent. Čeka objavu funkcije `support-assistant`. Vlasnik: mjesečni limit u Anthropic i OpenAI konzoli (30.10. rekao: radi poslije starta). |
 | Connection pooling | Već uredu: aplikacija ide samo preko Supabase API-ja (PostgREST ima svoj pool), nema direktnih veza na bazu. |
 | Prekidač za rizične funkcije | Već uredu: Admin → Prekidači (uplata karticom, objava posla, slike u porukama, AI asistent, najmanja verzija aplikacije). |
 | Uptime alarmi i status stranica | Čeka vlasnika: UptimeRobot (besplatno), vidi ispod. |

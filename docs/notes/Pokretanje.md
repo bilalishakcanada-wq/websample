@@ -21,14 +21,14 @@ Povezano: [[../OBJAVA]] (računi i plaćanja koje radi vlasnik), [[../MAILOVI]].
 | localhost, lorem ipsum, console.log | Već uredu: u izgrađenom sajtu nema localhost adresa (osim unutar biblioteka), nema lorem ipsum, nema console.log. console.error ostaje namjerno (greške). |
 | Favicon, slika za dijeljenje, metapodaci | Već uredu: vlastiti favicon, og-image.png, naslov, opis i og oznake na svih 15 javnih stranica. |
 | Mailovi s vlastite domene | Već uredu u kodu: info@zadatak.ba (Supabase SMTP i Resend). Domena zadatak.ba je na čekanju dok se ne plati. |
-| Kontakt stranica | Gotovo u kodu: poruke su do sada stajale u bazi i niko ih nije vidio. Sada: Admin → Podrška → "Kontakt stranica" i mail adminu s odgovorom direktno pošiljaocu. Čeka primjenu u bazi (`supabase/communication/05_contact_notify.sql`) i objavu funkcije `notify-admin`. |
-| Registracije i aktivacija | Gotovo u kodu: Admin → Rast (aktiviran = posao ili ponuda u prvih 7 dana). Čeka primjenu `supabase/analytics/01_signups_activation.sql`. |
-| Limit AI troška | U kodu: asistent podrške najviše 20 odgovora na sat i 60 na dan po korisniku, poslije toga lokalni asistent. Čeka objavu funkcije `support-assistant`. Vlasnik: mjesečni limit u Anthropic i OpenAI konzoli (30.10. rekao: radi poslije starta). |
+| Kontakt stranica | Gotovo u kodu: poruke su do sada stajale u bazi i niko ih nije vidio. Sada: Admin → Podrška → "Kontakt stranica" i mail adminu s odgovorom direktno pošiljaocu. Primijenjeno u bazi i funkcija `notify-admin` objavljena 30.10. |
+| Registracije i aktivacija | Gotovo u kodu: Admin → Rast (aktiviran = posao ili ponuda u prvih 7 dana). Primijenjeno u bazi 30.10. |
+| Limit AI troška | U kodu: asistent podrške najviše 20 odgovora na sat i 60 na dan po korisniku, poslije toga lokalni asistent. Funkcija `support-assistant` objavljena 30.10. Vlasnik: mjesečni limit u Anthropic i OpenAI konzoli (30.10. rekao: radi poslije starta). |
 | Connection pooling | Već uredu: aplikacija ide samo preko Supabase API-ja (PostgREST ima svoj pool), nema direktnih veza na bazu. |
 | Prekidač za rizične funkcije | Već uredu: Admin → Prekidači (uplata karticom, objava posla, slike u porukama, AI asistent, najmanja verzija aplikacije). |
 | Uptime alarmi i status stranica | Čeka vlasnika: UptimeRobot (besplatno), vidi ispod. |
-| Test od registracije do plaćanja | Čeka vlasnika: E2E test u GitHubu nije uključen jer nema tajni `E2E_*`. Plaćanje karticom se ne može testirati bez Monri ugovora. |
-| Nova lozinka | Supabase je zadnji mail za novu lozinku poslao 27.10. Dostavu treba jednom provjeriti ručno. |
+| Test od registracije do plaćanja | Robot na svakom PR-u prolazi cijeli tok na lokalnoj bazi (registracija, objava, ponuda, plaćanje balansom, poruke, predaja, odobrenje, recenzija). Test protiv žive baze prije objave nije uključen jer nema tajni `E2E_*`. Plaćanje karticom se ne može testirati bez Monri ugovora. |
+| Nova lozinka | Vlasnik potvrdio 30.10. da mail stiže. |
 
 ## Popravljeno 30.10.
 

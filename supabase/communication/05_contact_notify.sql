@@ -30,6 +30,5 @@ begin
 end;
 $$;
 
-drop trigger if exists contact_message_notify on public.contact_messages;
-create trigger contact_message_notify after insert on public.contact_messages
+create or replace trigger contact_message_notify after insert on public.contact_messages
   for each row execute function public.on_contact_message_notify();
